@@ -1,17 +1,21 @@
-PAIVA BIKE FIT STUDIO — V5.23 PWA
+PAIVA BIKE FIT STUDIO — V5.23 PWA · EDIÇÃO PIN
 
-O que é: versão instalável baseada na V5.22, com cache offline.
+O que é: versão instalável baseada na V5.22, com cache offline e tela de bloqueio por PIN de 6 dígitos.
 
-IMPORTANTE: para instalar em outros aparelhos, publique TODOS os arquivos desta pasta em um site HTTPS, mantendo a estrutura de pastas. Abrir index.html diretamente como arquivo (file://) NÃO instala a PWA nem ativa o cache offline.
+PIN: o código temporário foi informado ao proprietário junto com a entrega desta versão.
+Ao abrir o app ou atualizar a página, digite os 6 números. O botão "Bloquear" fecha a interface novamente.
+Não use o PIN de banco ou de outras contas. O PIN desta versão NÃO protege o código nem criptografa os dados.
+
+IMPORTANTE: para instalar em outros aparelhos, publique TODOS os arquivos desta pasta na raiz do repositório HTTPS (inclusive pin-lock.js, pin-lock.css, icon-192.png e icon-512.png). Abrir index.html diretamente como arquivo (file://) NÃO instala a PWA nem ativa o cache offline.
 
 1. Publique o conteúdo desta pasta em uma hospedagem estática HTTPS (por exemplo, GitHub Pages ou Cloudflare Pages), preferencialmente com acesso restrito se houver dados ou lógica que você não queira divulgar. Atenção: a hospedagem estática pública expõe o código HTML; não é uma solução de proteção intelectual ou autenticação.
 2. Abra o endereço HTTPS em cada aparelho com internet, aguarde o carregamento e instale:
    - iPad/iPhone: Safari > Compartilhar > Adicionar à Tela de Início > Abrir como app (se disponível).
    - Android: Chrome > menu > Instalar aplicativo / Adicionar à tela inicial.
    - Computador: Chrome/Edge > ícone Instalar na barra de endereços ou menu > Instalar.
-3. Abra uma vez com internet e teste o modo avião. Os dados e PDFs não sincronizam entre aparelhos.
+3. Abra uma vez com internet e teste o modo avião. Os dados e PDFs não sincronizam entre aparelhos. No GitHub, recarregue o app online após enviar os arquivos para atualizar o cache da PWA.
 4. QR CODE: só depois de ter o endereço HTTPS definitivo, gere um QR Code com essa URL. No computador, abra a URL digitando ou clicando; QR não é necessário. A página gerar_qr.html permite gerar um QR localmente apenas se o navegador já suportar BarcodeDetector? NÃO: esta versão inclui instruções, não um gerador offline. Pode pedir o QR ao assistente fornecendo o endereço HTTPS.
 
-SEGURANÇA: a PWA não implementa senha, criptografia nem autenticação. Não publique dados reais de clientes na pasta hospedada. Não considere um link não divulgado como proteção. Para acesso privado de verdade é preciso controle de acesso no servidor e política de cache apropriada.
+SEGURANÇA: esta edição mostra uma tela de PIN para impedir o uso casual por outras pessoas. NÃO É AUTENTICAÇÃO REAL: qualquer pessoa pode abrir o site público, consultar/copiar o código e contornar a tela de PIN. O hash de um PIN com apenas 6 dígitos também pode ser descoberto por tentativas automatizadas. A PWA não criptografa dados nem oferece login privado. Não publique dados reais de clientes na pasta hospedada. Para acesso privado de verdade é preciso controle de acesso no servidor e política de cache apropriada.
 
 PDF: confira o relatório e as fotos no navegador de cada aparelho; imprimir/salvar PDF varia por sistema.
