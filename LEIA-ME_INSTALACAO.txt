@@ -1,0 +1,17 @@
+PAIVA BIKE FIT STUDIO — V5.23 PWA
+
+O que é: versão instalável baseada na V5.22, com cache offline.
+
+IMPORTANTE: para instalar em outros aparelhos, publique TODOS os arquivos desta pasta em um site HTTPS, mantendo a estrutura de pastas. Abrir index.html diretamente como arquivo (file://) NÃO instala a PWA nem ativa o cache offline.
+
+1. Publique o conteúdo desta pasta em uma hospedagem estática HTTPS (por exemplo, GitHub Pages ou Cloudflare Pages), preferencialmente com acesso restrito se houver dados ou lógica que você não queira divulgar. Atenção: a hospedagem estática pública expõe o código HTML; não é uma solução de proteção intelectual ou autenticação.
+2. Abra o endereço HTTPS em cada aparelho com internet, aguarde o carregamento e instale:
+   - iPad/iPhone: Safari > Compartilhar > Adicionar à Tela de Início > Abrir como app (se disponível).
+   - Android: Chrome > menu > Instalar aplicativo / Adicionar à tela inicial.
+   - Computador: Chrome/Edge > ícone Instalar na barra de endereços ou menu > Instalar.
+3. Abra uma vez com internet e teste o modo avião. Os dados e PDFs não sincronizam entre aparelhos.
+4. QR CODE: só depois de ter o endereço HTTPS definitivo, gere um QR Code com essa URL. No computador, abra a URL digitando ou clicando; QR não é necessário. A página gerar_qr.html permite gerar um QR localmente apenas se o navegador já suportar BarcodeDetector? NÃO: esta versão inclui instruções, não um gerador offline. Pode pedir o QR ao assistente fornecendo o endereço HTTPS.
+
+SEGURANÇA: a PWA não implementa senha, criptografia nem autenticação. Não publique dados reais de clientes na pasta hospedada. Não considere um link não divulgado como proteção. Para acesso privado de verdade é preciso controle de acesso no servidor e política de cache apropriada.
+
+PDF: confira o relatório e as fotos no navegador de cada aparelho; imprimir/salvar PDF varia por sistema.
