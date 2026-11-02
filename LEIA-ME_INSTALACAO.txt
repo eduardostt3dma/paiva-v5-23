@@ -2,6 +2,10 @@ PAIVA BIKE FIT STUDIO — V5.23 PWA · EDIÇÃO PIN
 
 O que é: versão instalável baseada na V5.22, com cache offline e tela de bloqueio por PIN de 6 dígitos.
 
+ANTROPOMETRIA: a altura do ponto esternal ao solo e a entrepernas (cavalo) são informadas separadamente.
+O campo "Tronco líquido" é calculado automaticamente: Esterno ao solo - Entrepernas = Tronco líquido (cm).
+Exemplo: 145 cm - 82 cm = 63 cm. A fórmula corresponde ao protocolo de medição utilizado pelo profissional; outros sistemas podem definir a medida do tronco de maneira diferente.
+
 PIN: o código temporário foi informado ao proprietário junto com a entrega desta versão.
 Ao abrir o app ou atualizar a página, digite os 6 números. O botão "Bloquear" fecha a interface novamente.
 Não use o PIN de banco ou de outras contas. O PIN desta versão NÃO protege o código nem criptografa os dados.
@@ -18,4 +22,10 @@ IMPORTANTE: para instalar em outros aparelhos, publique TODOS os arquivos desta 
 
 SEGURANÇA: esta edição mostra uma tela de PIN para impedir o uso casual por outras pessoas. NÃO É AUTENTICAÇÃO REAL: qualquer pessoa pode abrir o site público, consultar/copiar o código e contornar a tela de PIN. O hash de um PIN com apenas 6 dígitos também pode ser descoberto por tentativas automatizadas. A PWA não criptografa dados nem oferece login privado. Não publique dados reais de clientes na pasta hospedada. Para acesso privado de verdade é preciso controle de acesso no servidor e política de cache apropriada.
 
-PDF: confira o relatório e as fotos no navegador de cada aparelho; imprimir/salvar PDF varia por sistema.
+RELATÓRIO DIGITAL EM PDF:
+- Preencha a ficha e confira os resultados.
+- Toque em "Gerar PDF" para criar e baixar um documento PDF real, sem abrir a caixa de impressão.
+- Toque em "Compartilhar PDF" para abrir o compartilhamento nativo (WhatsApp, e-mail etc.) em aparelhos/navegadores compatíveis; se o compartilhamento não for suportado, o arquivo PDF será baixado para envio manual.
+- A geração do PDF acontece no próprio aparelho e não transmite os dados dos clientes para servidores.
+- A biblioteca pdf-lib.min.js e o arquivo pdf-export.js precisam ficar na raiz do repositório para o relatório funcionar, inclusive sem internet depois de carregado e atualizado o cache.
+- Antes de usar com clientes, teste PDF e compartilhamento no iPad e no Android. Alguns navegadores limitam a partilha de arquivos; o download é a alternativa.

@@ -123,3 +123,68 @@ html.paiva-pin-unlocked #paiva-pin-relock { display: block; }
 @media print {
   #paiva-pin-lock, #paiva-pin-relock { display: none !important; }
 }
+
+/* PAIVA V5.23 — correção responsiva da antropometria para iPad/tablets.
+   A imagem e os resultados deixam de disputar a mesma largura na barra lateral. */
+@media screen and (min-width: 701px) {
+  .layout > .card:first-child .body-report {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .layout > .card:first-child .body-silhouette {
+    width: 100%;
+    min-width: 0;
+    max-height: none;
+  }
+
+  .layout > .card:first-child .body-silhouette img {
+    width: 100%;
+    height: auto;
+    max-height: 350px;
+    object-fit: contain;
+  }
+
+  .layout > .card:first-child .body-stats {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .layout > .card:first-child .body-stats > div {
+    min-width: 0;
+    padding: 11px 9px;
+  }
+
+  .layout > .card:first-child .body-stats span {
+    font-size: 9px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .layout > .card:first-child .body-stats strong {
+    font-size: 17px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+}
+
+/* No iPad em retrato e em tablets médios, cada cartão recebe a largura toda. */
+@media screen and (min-width: 701px) and (max-width: 1100px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layout > .card:first-child .body-report {
+    grid-template-columns: minmax(0, 43%) minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+  }
+
+  .layout > .card:first-child .body-stats {
+    align-content: center;
+  }
+}
