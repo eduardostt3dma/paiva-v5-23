@@ -1,23 +1,30 @@
 /* PAIVA — registro final de posição, opcional e sem estimativas automáticas. */
 .paiva-final-measures-card.hidden { display: block !important; }
-.paiva-final-note {
-  color: #c6d2db; line-height: 1.55; font-size: 12px;
-  background: rgba(95, 131, 154, .11); border: 1px solid rgba(153, 184, 203, .24);
-  padding: 11px 13px; border-radius: 12px; margin: 0 0 14px;
-}
+.paiva-final-intro {display:flex;align-items:center;justify-content:space-between;gap:8px;
+  flex-wrap:wrap;margin:0 0 12px;}
+.paiva-final-note {color:#b9ccd7;line-height:1.5;font-size:11px;margin:0;}
+.paiva-final-help {width:26px;height:26px;flex:none;border-radius:50%;
+  border:1px solid #7e98a8;background:#223441;color:#ecf3f7;
+  cursor:pointer;font-size:12px;font-weight:800;padding:0;}
+.paiva-final-help-box {flex:1 1 100%;background:#101c25;border:1px solid #506574;
+  color:#cfdae2;border-radius:10px;padding:10px 12px;font-size:11px;line-height:1.6;}
+.paiva-final-help-box[hidden],.paiva-final-field-explain[hidden] {display:none!important;}
 .paiva-final-group { border-top: 1px solid rgba(177, 196, 208, .17); padding: 14px 0 2px; }
 .paiva-final-group:first-child { border-top: 0; padding-top: 0; }
 .paiva-final-group h3 { color: #d9e6ee; margin: 0 0 11px; font-size: 12px; letter-spacing: .045em; }
 .paiva-final-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
 .paiva-final-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.paiva-final-field label { color: #d9e2ea; font-size: 11px; line-height: 1.4; min-height: 30px; }
+.paiva-final-field-head {display:flex;align-items:flex-start;justify-content:space-between;gap:6px;min-height:30px;}
+.paiva-final-field label { color: #d9e2ea; font-size: 11px; line-height: 1.4; }
+.paiva-final-field .paiva-final-help {width:23px;height:23px;font-size:11px;}
 .paiva-final-field input {
   width: 100%; min-width: 0; box-sizing: border-box; border-radius: 9px;
   padding: 11px; border: 1px solid #465663; color: #f6f8fb; background: #111921;
   font: inherit; font-size: 14px;
 }
 .paiva-final-field input:focus { outline: 2px solid #82b8d5; outline-offset: 1px; }
-.paiva-final-field small { color: #93a7b7; font-size: 10px; line-height: 1.4; }
+.paiva-final-field small { color: #c1d1db; font-size: 10px; line-height: 1.5;
+  background:#1b2a35;border:1px solid #485e6c;padding:8px;border-radius:7px; }
 .paiva-final-field.paiva-field-hidden { display: none !important; }
 .paiva-final-unit { color: #b6c8d5; font-size: 10px; font-weight: 700; }
 .paiva-final-controls { display: flex; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }

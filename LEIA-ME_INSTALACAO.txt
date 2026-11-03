@@ -110,12 +110,12 @@ MEDIDAS FINAIS DA BICICLETA — OPCIONAL:
 - O novo quadro "Medidas reais da bicicleta" serve para registrar manualmente a posição FINAL, após o fit. A instrumentação Retül e STT já fornece diversas medidas; use esta ficha somente se fizer sentido na avaliação.
 - Inclui altura e recuo do selim, inclinação, referências bico do selim até direção/mesa/manopla/STI/apoio TT, manete até eixo dianteiro, desnível selim-guidão, stack e reach reais, quantidade e altura de espaçadores, comprimento da mesa e largura do guidão.
 - A distância até a manopla aparece no modo MTB, a distância até o STI aparece no modo Road; TT usa o centro do apoio de antebraço.
-- O comprimento do pedivela continua no campo existente "Dados da bicicleta". NÃO foi criado outro campo duplicado.
+- O comprimento do pedivela continua sendo um único dado em "Dados da bicicleta"; o campo da ferramenta 2D é sincronizado automaticamente com ele.
 - Os campos vazios não aparecem na seção de medidas finais do PDF. Não existem números automáticos falsamente identificados como medidas finais.
 
 CALIBRAÇÃO POR FOTO — RECURSO EXPERIMENTAL:
 - Expanda "Medição assistida pela foto · experimental" dentro de "Medidas reais da bicicleta".
-- Selecione uma fotografia LATERAL da bicicleta. Informe o comprimento correto do pedivela no campo existente (ex.: 175 mm).
+- Selecione uma fotografia LATERAL da bicicleta. Informe o comprimento correto do pedivela no campo próprio da calibração (ex.: 170 mm), sincronizado com os dados gerais da bicicleta.
 - Toque em "Calibrar pedivela" e marque o centro do movimento central seguido pelo centro do eixo do pedal.
 - Escolha uma distância, toque em "Medir" e marque os dois pontos da medida desejada. A escala da imagem será calculada a partir do pedivela.
 - Medidas de reach e recuo usam a diferença HORIZONTAL na foto; stack e desnível usam a VERTICAL. Outras distâncias usam a distância projetada entre os dois pontos.
@@ -123,15 +123,20 @@ CALIBRAÇÃO POR FOTO — RECURSO EXPERIMENTAL:
 - ATENÇÃO: esta ferramenta NÃO reconhece automaticamente os pontos; NÃO corrige distorção de lente, perspectiva nem profundidade dos componentes. Não substitui Retül, STT, fita ou medição calibrada profissional. Fotografias oblíquas ou com bicicleta fora do plano perpendicular à câmera podem apresentar erro grande.
 - Publique final-measures.css, final-measures.js, photo-calibrator.css e photo-calibrator.js junto aos demais arquivos, inclusive para funcionamento offline.
 
-SIMULADOR GEOMÉTRICO DE BICICLETA PRESENTE — PRÉ-FIT (UPGRADE):
-- Na leitura por "Antropometria completa", abra "Projeto inicial da bicicleta" e expanda "Bicicleta presente · Simular 3 montagens".
-- A leitura tradicional por ESTATURA foi preservada, sem mudança nas suas referências anteriores.
-- Para Road e MTB, informe stack e reach reais do quadro, mesa, ângulo da direção, elevação axial da mesa, deslocamento horizontal/vertical do STI/manopla em relação ao centro do guidão, altura VERTICAL do selim e recuo horizontal do bico. Leia o botão ? para conhecer as referências precisas.
-- Para TT, o simulador usa diretamente pad stack e pad reach reais dos apoios em relação ao movimento central. Stack e reach do quadro não substituem essas dimensões.
-- A posição "Intermediário" mostra as coordenadas da montagem informada. "Agressivo" e "Confortável" são cenários hipotéticos de alterações mecânicas de 5 a 20 mm, sujeitos aos limites reais de ajuste; não são prescrições de fit.
-- Saídas em milímetros: distância HORIZONTAL do bico do selim até o STI/manopla/pad e desnível VERTICAL da superfície do selim ao contato. Desnível positivo indica selim mais alto que o contato.
-- Tronco relativo à horizontal e ângulo interno do cotovelo são campos opcionais de observação. NÃO alteram automaticamente as distâncias e deverão ser confirmados na análise dinâmica 2D/3D.
-- O relatório PDF registra os três cenários somente quando todos os parâmetros necessários estiverem informados. Sem dados completos, nenhuma distância fictícia é produzida.
-- As proporções antropométricas continuam disponíveis na ficha para interpretação profissional, sem fórmula universal inventada de stack/reach ideal ou comprimento de pedivela.
-- Envie o bike-project.js atualizado, o sw.js e os demais arquivos do ZIP para substituir a instalação anterior. O cache do aplicativo recebe nova versão.
-- Indicador de marcas/modelos pela categoria geométrica (curto/alto, longo/baixo etc.) permanece reservado para um futuro upgrade. Não faz parte deste simulador.
+PRÉ-FIT SIMPLES POR ANTROPOMETRIA — NOVA VERSÃO:
+- Na seção "Leitura do pré-fit", escolha "02 · Antropometria completa". Preencha estatura, entreperna, tronco líquido, braço líquido, ombros e comprimento do pé nos campos que já existiam.
+- Em "Pré-fit · geometria individual", escolha uma intenção (agressivo, intermediário ou confortável). O app mostra um stack e um reach exploratórios em mm, sem acrescentar muitas novas medidas da bicicleta.
+- Se desejar, preencha APENAS stack e reach do quadro do cliente e veja a diferença geométrica frente à referência escolhida. Esses campos são sincronizados com o registro de stack e reach em "Medidas reais da bicicleta".
+- O pedivela para teste é opcional e informado manualmente. Não há cálculo automático de comprimento ideal.
+- O guia tradicional por estatura permanece sem alterações. A referência antropométrica adiciona correções experimentais de até 18 mm em cada eixo com base nas proporções de entreperna, tronco e braço; as três posições variam em passos demonstrativos de 8 mm.
+- ATENÇÃO: o modelo é uma heurística de TRIAGEM, não foi validado clinicamente. Valores de 47%/34%/34% são âncoras internas de exploração, não dados normativos. Não apresente os números como encaixe perfeito ou compatibilidade garantida. Verifique comprimento de mesa, espaçadores, selim, contato das mãos e postura dinâmica; em TT, confirme pad stack e pad reach.
+- As explicações detalhadas ficam no botão ? do projeto. O relatório PDF indica explicitamente que se trata de referência experimental.
+
+FOTO 2D — PEDIVELA NO LUGAR CERTO:
+- Na seção "Medição assistida pela foto · experimental", há um campo direto para o comprimento real do pedivela (mm), acima do botão "Calibrar pedivela".
+- Esse campo compartilha o valor de "Dados da bicicleta". Se o comprimento for alterado após a calibração, a escala anterior é invalidada para evitar medidas erradas.
+- A ferramenta pode ser usada em celular/iPad: toque primeiro no centro do movimento central e depois no eixo do pedal. Confira a escala antes de medir os demais pontos.
+
+MEDIDAS REAIS — INTERFACE ENXUTA:
+- A explicação geral aparece no botão ? do cabeçalho opcional.
+- Cada campo de medida ganhou seu próprio botão ?, com definição e referência anatômica/mecânica. O texto longo não ocupa mais a tela até o avaliador solicitar.

@@ -21,11 +21,20 @@
     buttons.className = 'paiva-calibrator-controls';
     const calibrate = document.createElement('button');
     calibrate.type = 'button'; calibrate.className = 'btn'; calibrate.textContent = '1 · Calibrar pedivela';
+    const crankLabel = document.createElement('label');
+    crankLabel.className = 'paiva-calibrator-crank';
+    crankLabel.textContent = 'Comprimento real do pedivela (mm)';
+    const crankInput = document.createElement('input');
+    crankInput.type = 'number'; crankInput.inputMode = 'decimal';
+    crankInput.id = 'paiva-calibrator-crank';
+    crankInput.min = '140'; crankInput.max = '190'; crankInput.step = '0.5';
+    crankInput.placeholder = 'Ex.: 170';
+    crankLabel.append(crankInput);
     const select = document.createElement('select');
     select.setAttribute('aria-label', 'Escolher medida a extrair da foto');
     const measure = document.createElement('button');
     measure.type = 'button'; measure.className = 'btn'; measure.textContent = '2 · Medir';
-    buttons.append(calibrate, select, measure);
+    buttons.append(crankLabel, calibrate, select, measure);
     const frame = document.createElement('div');
     frame.className = 'paiva-calibrator-canvas-wrap';
     const canvas = document.createElement('canvas');
@@ -48,6 +57,37 @@
     let ratio = null;
     let lastDistance = '';
     const excluded = new Set(['finalHandlebarWidth']); // fora do plano da foto lateral
+    const originalCrank = document.getElementById('crankLength');
+
+    function invalidateCalibration() {
+      if (ratio === null && !reference.length) return;
+      ratio = null; reference=[];measurement=[];draft=[];stage='idle';
+      draw();
+      setMessage('Pedivela alterado. Calibre novamente antes de medir, para evitar usar uma escala antiga.');
+    }
+    if (originalCrank) {
+      originalCrank.step = '0.5';
+      crankInput.value = originalCrank.value;
+      originalCrank.addEventListener('input', () => {
+        if (crankInput.value !== originalCrank.value) {
+          crankInput.value = originalCrank.value;
+          invalidateCalibration();
+        }
+      });
+      originalCrank.addEventListener('change', () => {
+        if (crankInput.value !== originalCrank.value) {
+          crankInput.value = originalCrank.value;
+          invalidateCalibration();
+        }
+      });
+    }
+    crankInput.addEventListener('input', () => {
+      invalidateCalibration();
+      if (originalCrank && originalCrank.value !== crankInput.value) {
+        originalCrank.value = crankInput.value;
+        originalCrank.dispatchEvent(new Event('input', { bubbles:true }));
+      }
+    });
 
     function refreshFields() {
       const previous = select.value;
@@ -110,7 +150,7 @@
         URL.revokeObjectURL(uri);
         file.value = '';
         ratio = null;reference=[];measurement=[];draft=[];stage='idle';
-        draw();setMessage('Foto carregada. Informe o pedivela em Dados da bicicleta e toque em “1 · Calibrar pedivela”.');
+        draw();setMessage('Foto carregada. Confira o pedivela logo acima e toque em “1 · Calibrar pedivela”.');
       };
       next.onerror = () => { URL.revokeObjectURL(uri); setMessage('Não foi possível abrir a fotografia. Tente JPG ou PNG.'); };
       next.src = uri;
@@ -118,9 +158,9 @@
 
     calibrate.addEventListener('click', () => {
       if (!image) { setMessage('Primeiro carregue uma foto lateral da bicicleta.'); return; }
-      const crank = Number(document.getElementById('crankLength')?.value);
+      const crank = Number(crankInput.value);
       if (!Number.isFinite(crank) || crank < 140 || crank > 190) {
-        setMessage('Informe antes o comprimento real do pedivela (140–190 mm) na seção Dados da bicicleta.'); return;
+        setMessage('Informe acima o comprimento real do pedivela (140–190 mm) para calibrar.'); return;
       }
       stage='calibrate';draft=[];reference=[];measurement=[];ratio=null;
       draw();setMessage(`Calibração ${crank} mm: toque no CENTRO DO MOVIMENTO CENTRAL e depois no CENTRO DO EIXO DO PEDAL.`);
@@ -147,7 +187,7 @@
       const pixels = Math.hypot(dx, dy);
       if (pixels < 10) {draft=[];draw();setMessage('Pontos próximos demais. Repita a marcação.');return;}
       if (stage === 'calibrate') {
-        const crank = Number(document.getElementById('crankLength').value);
+        const crank = Number(crankInput.value);
         ratio = crank/pixels;reference = [a,b];
         stage='idle';draft=[];draw();
         setMessage(`Calibrado: ${pixels.toFixed(1).replace('.',',')} pixels representam ${crank} mm. Selecione uma medida e toque em “2 · Medir”.`);

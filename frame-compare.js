@@ -120,7 +120,7 @@
       </div>
       <div id="paiva-sizing-explain" class="paiva-sizing-explain" hidden>
         <p><strong>Por estatura:</strong> consulta o guia empírico inicial de stack e reach para MTB, Road ou TT. Não define tamanho ideal de quadro.</p>
-        <p><strong>Antropometria completa:</strong> considera as proporções medidas de entreperna, tronco líquido, braço líquido, ombros e pé em relação à estatura. São relações corporais, não dimensões da bicicleta. Não existe fórmula universal validada para convertê-las diretamente em stack/reach de quadro.</p>
+        <p><strong>Antropometria completa:</strong> considera as proporções de entreperna, tronco líquido, braço líquido, ombros e pé. O quadro "Pré-fit · geometria individual" oferece uma hipótese exploratória de stack/reach a partir dessas medidas e do guia por estatura, sem equivaler a uma fórmula clínica validada.</p>
         <p><strong>Para escolher o quadro:</strong> use as medidas reais de cada bicicleta no comparador e uma posição de referência verificada no bike fit. Na TT, compare também as coordenadas dos apoios de antebraço.</p>
       </div>
       <p id="paiva-sizing-status" class="paiva-sizing-status" aria-live="polite"></p>
@@ -230,7 +230,7 @@
           value: ratio === null ? value : `${value} · ${ratio.toLocaleString('pt-BR', {maximumFractionDigits:1})}%` });
       }
       lastRows.push({ label: 'Stack e reach por antropometria',
-        value: 'Não prescritos: sem equação validada. Comparar geometrias reais e referência profissional.' });
+        value: 'Hipóteses exploratórias no projeto individual; não são prescrição nem prova de compatibilidade do quadro.' });
     }
 
     document.querySelectorAll('#paiva-sizing-method [data-sizing]').forEach(btn => {

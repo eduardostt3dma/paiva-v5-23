@@ -45,8 +45,24 @@
 
     const note = document.createElement('p');
     note.className = 'paiva-final-note';
-    note.textContent = 'OPCIONAL · Registre aqui as medidas finais conferidas no bike fit. Os sistemas Retül e STT Systems já oferecem suas próprias medições; este espaço é para transcrever resultados ou registrar medidas feitas manualmente. Campos vazios não entram no PDF. O pedivela já é registrado em “Dados da bicicleta”.';
-    host.before(note);
+    note.textContent = 'OPCIONAL · Medidas finais conferidas pelo profissional.';
+    const generalHelp = document.createElement('button');
+    generalHelp.className = 'paiva-final-help';
+    generalHelp.type = 'button'; generalHelp.textContent = '?';
+    generalHelp.setAttribute('aria-label','Como registrar medidas reais da bicicleta');
+    generalHelp.setAttribute('aria-expanded','false');
+    const generalBox = document.createElement('div');
+    generalBox.className = 'paiva-final-help-box';generalBox.hidden = true;
+    generalBox.textContent = 'Os sistemas Retül e STT Systems já fornecem muitas destas medidas. Esta ficha é opcional para transcrever dados ou registrar valores aferidos manualmente. Só campos preenchidos entram no PDF. O comprimento do pedivela fica em Dados da bicicleta e, agora, também pode ser informado na calibração fotográfica 2D. As estimativas por foto devem ser conferidas com instrumento antes de serem usadas como medida final.';
+    const intro = document.createElement('div');
+    intro.className = 'paiva-final-intro';
+    intro.append(note,generalHelp,generalBox);
+    host.before(intro);
+    generalHelp.addEventListener('click', () => {
+      const open = generalBox.hidden;
+      generalBox.hidden = !open;
+      generalHelp.setAttribute('aria-expanded',String(open));
+    });
     host.classList.add('paiva-final-form');
 
     for (const [title, entries] of GROUPS) {
@@ -63,6 +79,14 @@
         const name = document.createElement('label');
         name.htmlFor = id;
         name.textContent = `${label} (${unit})`;
+        const head = document.createElement('div');
+        head.className = 'paiva-final-field-head';
+        const fieldHelp = document.createElement('button');
+        fieldHelp.type = 'button';fieldHelp.className = 'paiva-final-help';
+        fieldHelp.textContent = '?';
+        fieldHelp.setAttribute('aria-label',`Como medir ${label}`);
+        fieldHelp.setAttribute('aria-expanded','false');
+        head.append(name,fieldHelp);
         const input = document.createElement('input');
         input.type = 'number';
         input.inputMode = 'decimal';
@@ -72,8 +96,14 @@
         input.title = help;
         input.setAttribute('aria-label', `${label} em ${unit}`);
         const helpNote = document.createElement('small');
-        helpNote.textContent = help;
-        field.append(name, input, helpNote);
+        helpNote.textContent = help;helpNote.hidden = true;
+        helpNote.className = 'paiva-final-field-explain';
+        fieldHelp.addEventListener('click', () => {
+          const open = helpNote.hidden;
+          helpNote.hidden = !open;
+          fieldHelp.setAttribute('aria-expanded',String(open));
+        });
+        field.append(head, input, helpNote);
         grid.append(field);
       }
       group.append(heading, grid);
@@ -164,6 +194,16 @@
         input.value = String(Math.round(value * 10) / 10);
         photoEstimates.add(id);
         input.dispatchEvent(new Event('input', { bubbles: true }));
+        return true;
+      },
+      setManual: (id, value) => {
+        const def = DEFINITIONS.find(item => item.id === id);
+        const input = document.getElementById(id);
+        const raw = String(value ?? '').trim();
+        if (!def || !input || (raw !== '' && !Number.isFinite(Number(raw)))) return false;
+        input.value = raw;
+        photoEstimates.delete(id);
+        sync();
         return true;
       },
       getMode,
