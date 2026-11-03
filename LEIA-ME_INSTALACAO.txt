@@ -29,6 +29,9 @@ AJUDA ANTROPOMÉTRICA:
 - A imagem anatômica principal e seus cartões aparecem em sequência vertical, responsivos, para evitar cortes no iPad e no Android.
 - A ilustração foi atualizada com o rótulo "Estatura 180 cm" completo, sem cortes na borda direita. As medidas escritas no desenho são apenas exemplos visuais.
 - O arquivo antropometria-paiva.png precisa ser enviado para a raiz do GitHub junto com o index.html; ele também é armazenado para uso offline.
+- A imagem anatômica agora NÃO contém valores fictícios. Seis etiquetas dinâmicas acompanham os campos preenchidos: estatura, entrepernas, braço líquido, tronco líquido, ombros e pé. Sem valor informado, aparece só o nome da medida.
+- Braço e tronco mostram automaticamente os resultados dos respectivos cálculos Shimano/esterno, sem necessidade de digitar uma segunda vez.
+- Envie também anthro-live.css e anthro-live.js à raiz do GitHub; esses dois arquivos fazem os números mudarem em tempo real sobre o esqueleto.
 - Os arquivos help-text.js e frame-compare.js precisam ser enviados para a raiz do GitHub junto dos demais.
 
 PIN: o código temporário foi informado ao proprietário junto com a entrega desta versão.

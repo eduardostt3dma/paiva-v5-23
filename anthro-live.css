@@ -1,0 +1,74 @@
+/* PAIVA V5.23 — etiquetas antropométricas dinâmicas sobre imagem sem números. */
+@media screen {
+  .layout > .card:first-child .body-silhouette {
+    overflow: visible !important;
+    background: #080b0d;
+  }
+}
+
+.layout > .card:first-child .body-silhouette .paiva-anthro-figure {
+  position: relative;
+  display: block;
+  width: min(100%, 382px);
+  aspect-ratio: 1063 / 1480;
+  margin-inline: auto;
+  flex: 0 1 382px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #050709;
+}
+
+.layout > .card:first-child .body-silhouette .paiva-anthro-figure > img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  filter: none !important;
+}
+
+.paiva-anthro-spot {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  padding: 3px 6px;
+  border: 1px solid #e4bc2b;
+  border-radius: 9px;
+  background: rgba(5, 8, 12, .95);
+  color: #fff;
+  text-align: center;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: clamp(8px, 1.5vw, 12px);
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 0 8px rgba(240, 190, 30, .24);
+  pointer-events: none;
+}
+
+.paiva-anthro-spot__name { display: block; font-weight: 730; }
+.paiva-anthro-spot__value { display: block; color: #ffe25d; font-weight: 820; font-variant-numeric: tabular-nums; padding-top: 2px; }
+.paiva-anthro-spot__value[hidden] { display: none !important; }
+
+.paiva-anthro-spot--shoulder { left: 29.3%; top: 20.0%; }
+.paiva-anthro-spot--arm { left: 9.6%; top: 35%; }
+.paiva-anthro-spot--torso { left: 72%; top: 32.5%; }
+.paiva-anthro-spot--inseam { left: 29.3%; top: 71%; }
+.paiva-anthro-spot--height { left: 88%; top: 43.3%; }
+.paiva-anthro-spot--foot { left: 71%; top: 87.8%; }
+
+@media screen and (max-width: 700px) {
+  .layout > .card:first-child .body-silhouette .paiva-anthro-figure {
+    width: min(100%, 265px);
+    flex-basis: 265px;
+  }
+  .paiva-anthro-spot { font-size: 8px; padding: 2px 4px; border-radius: 6px; }
+  .paiva-anthro-spot__value { padding-top: 1px; }
+}
+
+@media print {
+  .layout > .card:first-child .body-silhouette .paiva-anthro-figure {
+    max-height: 140mm;
+  }
+}
