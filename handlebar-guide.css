@@ -1,0 +1,9 @@
+/* PAIVA · Largura inicial do guidão: números visíveis, justificativa no ?. */
+#results .paiva-hbar-result .head {gap:10px;}
+#results .paiva-hbar-result .head strong {margin-left:auto;white-space:nowrap;}
+#results .paiva-hbar-help {flex:0 0 auto;width:27px;height:27px;border-radius:50%;
+  border:1px solid #8296a6;background:#223844;color:#edf6f9;
+  font-size:13px;font-weight:850;cursor:pointer;}
+#results .paiva-hbar-detail {display:block;line-height:1.5;margin-top:8px;}
+.paiva-hbar-detail[hidden] {display:none!important;}
+@media print {.paiva-hbar-help {display:none!important;}}

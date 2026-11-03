@@ -174,3 +174,10 @@ UM OU DOIS VISORES DE VÍDEO · SEIS WEBCAMS SELECIONÁVEIS:
 - Em cada visor, "Abrir vídeo do computador/pendrive" carrega arquivo local, independentemente de ter webcam. Use "Reproduzir vídeo"/"Pausar" e velocidades de 0,1/0,25/0,5/1 vez. "Analisar no 2D" envia a gravação para o painel de ângulos. Para importar diretamente, há também um campo de vídeo na Análise Angular 2D.
 - São aceitos arquivos de vídeo que o navegador consiga decodificar. MP4/H.264 e WebM são preferíveis. MOV e AVI podem aparecer no seletor, mas alguns codecs antigos não são reproduzíveis no navegador; nesse caso, será preciso convertê-los antes. O aplicativo NÃO envia vídeos ao GitHub nem faz transcodificação automática.
 - Publique também multicam.js e multicam.css na raiz do repositório; os dois estão incluídos no novo cache offline.
+
+GUIA DE LARGURA DO GUIDÃO · ROAD E MTB:
+- Ao preencher a largura biacromial dos ombros, o aplicativo apresenta referências iniciais DIFERENTES conforme a modalidade ativa. ROAD aparece em milímetros CENTRO A CENTRO: ombros de 440 mm sugerem comparar 420 ou 440 mm. MTB aparece como largura total de ponta a ponta: ombros de 440 mm sugerem experimentar 720 a 740 mm.
+- A faixa MTB é estreita por escolha prática do profissional, voltada à triagem da MTB comum/XC (não orientação genérica para DH, enduro, bicicletas elétricas ou todas as anatomias). Tem teto de 740 mm neste guia, mas a largura ideal precisa ser comprovada pelo profissional na bicicleta.
+- Não existe fórmula validada que converta largura dos ombros diretamente para o guidão MTB ideal. Na ROAD, a comparação próxima à largura dos ombros ou uma medida comercial menor também é hipótese de triagem. Verifique alavancas, centro a centro versus externo a externo, flare, controle da bicicleta e conforto.
+- Em TT/triathlon, a indicação genérica de largura do guidão foi REMOVIDA. O app informa que apoios aerodinâmicos exigem ajuste específico. As explicações extensas de cada modalidade ficam no botão "?" da linha do guidão, preservando o visual limpo.
+- Publique também handlebar-guide.js e handlebar-guide.css na raiz do repositório. Estão incluídos no cache offline atualizado.
