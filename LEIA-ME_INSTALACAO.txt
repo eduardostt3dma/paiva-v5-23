@@ -122,3 +122,16 @@ CALIBRAÇÃO POR FOTO — RECURSO EXPERIMENTAL:
 - A estimativa preenche o campo opcional, identificada como "estimativa por foto 2D" na ficha e no relatório. Edite manualmente após conferir para registrar o valor medido.
 - ATENÇÃO: esta ferramenta NÃO reconhece automaticamente os pontos; NÃO corrige distorção de lente, perspectiva nem profundidade dos componentes. Não substitui Retül, STT, fita ou medição calibrada profissional. Fotografias oblíquas ou com bicicleta fora do plano perpendicular à câmera podem apresentar erro grande.
 - Publique final-measures.css, final-measures.js, photo-calibrator.css e photo-calibrator.js junto aos demais arquivos, inclusive para funcionamento offline.
+
+SIMULADOR GEOMÉTRICO DE BICICLETA PRESENTE — PRÉ-FIT (UPGRADE):
+- Na leitura por "Antropometria completa", abra "Projeto inicial da bicicleta" e expanda "Bicicleta presente · Simular 3 montagens".
+- A leitura tradicional por ESTATURA foi preservada, sem mudança nas suas referências anteriores.
+- Para Road e MTB, informe stack e reach reais do quadro, mesa, ângulo da direção, elevação axial da mesa, deslocamento horizontal/vertical do STI/manopla em relação ao centro do guidão, altura VERTICAL do selim e recuo horizontal do bico. Leia o botão ? para conhecer as referências precisas.
+- Para TT, o simulador usa diretamente pad stack e pad reach reais dos apoios em relação ao movimento central. Stack e reach do quadro não substituem essas dimensões.
+- A posição "Intermediário" mostra as coordenadas da montagem informada. "Agressivo" e "Confortável" são cenários hipotéticos de alterações mecânicas de 5 a 20 mm, sujeitos aos limites reais de ajuste; não são prescrições de fit.
+- Saídas em milímetros: distância HORIZONTAL do bico do selim até o STI/manopla/pad e desnível VERTICAL da superfície do selim ao contato. Desnível positivo indica selim mais alto que o contato.
+- Tronco relativo à horizontal e ângulo interno do cotovelo são campos opcionais de observação. NÃO alteram automaticamente as distâncias e deverão ser confirmados na análise dinâmica 2D/3D.
+- O relatório PDF registra os três cenários somente quando todos os parâmetros necessários estiverem informados. Sem dados completos, nenhuma distância fictícia é produzida.
+- As proporções antropométricas continuam disponíveis na ficha para interpretação profissional, sem fórmula universal inventada de stack/reach ideal ou comprimento de pedivela.
+- Envie o bike-project.js atualizado, o sw.js e os demais arquivos do ZIP para substituir a instalação anterior. O cache do aplicativo recebe nova versão.
+- Indicador de marcas/modelos pela categoria geométrica (curto/alto, longo/baixo etc.) permanece reservado para um futuro upgrade. Não faz parte deste simulador.
