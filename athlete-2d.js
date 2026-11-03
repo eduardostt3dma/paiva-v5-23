@@ -31,7 +31,8 @@
         <p><strong>Alinhamento:</strong> selecione uma linha tocando nela e use Horizontal / Vertical; mantenha Shift pressionado ao desenhar para limitar a inclinação a passos de 45°.</p>
         <p><strong>Zoom:</strong> aproxime até 400% pelo controle lateral ou com Ctrl + roda do mouse sobre a foto. Role dentro da foto ampliada para localizar os pontos.</p>
         <p><strong>Espessura:</strong> ajuste as linhas de 1 a 8 px no painel lateral. A mudança aparece imediatamente nas linhas existentes e nas novas marcações.</p>
-        <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Você pode gravar até 2 minutos, salvar o vídeo no aparelho, pausá-lo e usar “Capturar quadro” para medir os ângulos de um instante. Os pontos iniciais são sempre marcados manualmente.</p>
+        <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Você pode gravar até 3 minutos, salvar o vídeo no aparelho, pausá-lo e usar “Capturar quadro” para medir os ângulos de um instante. Os pontos iniciais são sempre marcados manualmente.</p>
+        <p><strong>Vídeos antigos:</strong> use “Abrir vídeo do computador ou pendrive” para carregar MP4, WebM, MOV e outros formatos que seu navegador consiga decodificar. Pause num quadro, capture e analise com as mesmas ferramentas; nenhum arquivo é enviado à internet.</p>
         <p><strong>Rastreio beta:</strong> depois de congelar um quadro do vídeo gravado, desenhe e alinhe as marcações. Clique em “Rastrear marcações” para tentar acompanhá-las no vídeo. Essa função experimental acompanha pequenas regiões contrastantes da imagem e interrompe se perder a referência; não reconhece automaticamente as articulações e pode sofrer desvios. Use fitas contrastantes nos pontos, câmera fixa e valide cada ângulo importante antes de usar no bike fit.</p>
         <p><strong>Biomecânica:</strong> no joelho, uma referência possível é trocânter maior → côndilo femoral lateral → maléolo lateral. Escolha sempre a mesma convenção de pontos e o mesmo plano da câmera. A foto mostra uma projeção 2D, não captura rotação, profundidade nem movimento.</p>
         <p>O processamento ocorre neste aparelho. Imagens e vídeos não são transmitidos ao site ou ao GitHub. Salve a imagem marcada e o vídeo antes de fechar ou atualizar o aplicativo. Webcam exige permissão do navegador e conexão segura (HTTPS ou localhost).</p>
@@ -74,7 +75,20 @@
             <button type="button" id="paiva-2d-save" class="paiva-2d-save">Salvar imagem marcada</button>
           </div>
           <div class="paiva-2d-webcam">
-            <div class="paiva-2d-sidebar-heading">VÍDEO · WEBCAM</div>
+            <div class="paiva-2d-sidebar-heading">VÍDEO · ARQUIVO OU WEBCAM</div>
+            <label class="paiva-2d-file">Abrir vídeo do computador ou pendrive
+              <input type="file" id="paiva-2d-video-file" accept="video/*,.mp4,.mov,.webm,.m4v,.avi" aria-label="Importar vídeo local para análise quadro a quadro" />
+            </label>
+            <div class="paiva-2d-playback">
+              <label>Velocidade do vídeo
+                <select id="paiva-2d-speed" aria-label="Velocidade de reprodução">
+                  <option value="0.25">0,25×</option><option value="0.5">0,5×</option>
+                  <option value="1" selected>1×</option><option value="1.5">1,5×</option>
+                </select>
+              </label>
+              <div><button type="button" id="paiva-2d-prev-frame" disabled>◀ Quadro</button>
+                <button type="button" id="paiva-2d-next-frame" disabled>Quadro ▶</button></div>
+            </div>
             <button type="button" id="paiva-2d-camera-start">Ligar webcam</button>
             <button type="button" id="paiva-2d-record" disabled>Iniciar gravação</button>
             <button type="button" id="paiva-2d-stop-record" disabled>Parar gravação</button>
@@ -322,7 +336,7 @@
     let trackingActive = false;
     const trackOverlay=byId('track-overlay');
     const trackCtx=trackOverlay.getContext('2d');
-    const maxRecordingMs = 120000;
+    const maxRecordingMs = 180000;
 
     function showVideo(enabled) {
       video.hidden = !enabled;
@@ -342,6 +356,9 @@
       byId('capture').disabled = recording || (!live && !hasPlayback);
       byId('track-start').disabled = !hasPlayback || !lastFrameFromVideo || !annotations.length || trackingActive || recording;
       byId('track-stop').disabled = !trackingActive;
+      byId('prev-frame').disabled = !hasPlayback || recording || trackingActive;
+      byId('next-frame').disabled = !hasPlayback || recording || trackingActive;
+      byId('speed').disabled = !hasPlayback || recording;
     }
 
     function stopTracking(clear=true) {
@@ -414,6 +431,53 @@
         cameraStream = null;
       }
     }
+
+    function loadVideoFile(file,label='Vídeo local') {
+      if (!file || recorder?.state==='recording') {
+        message('Pare a gravação atual antes de importar outro vídeo.');return false;
+      }
+      const filename=String(label || file.name || 'Vídeo');
+      const allowed=/\.(mp4|mov|webm|m4v|avi)$/i.test(filename) ||
+        String(file.type||'').startsWith('video/');
+      if (!allowed) {message('Selecione um vídeo, por exemplo MP4, WebM ou MOV.');return false;}
+      stopTracking();stopStream();video.pause();
+      if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+      recordedUrl=URL.createObjectURL(file);
+      video.srcObject=null;video.src=recordedUrl;video.controls=true;
+      video.muted=true;video.autoplay=false;video.load();
+      video.playbackRate=Number(byId('speed').value)||1;
+      lastFrameFromVideo=false;
+      byId('back-video').hidden=true;
+      const download=byId('video-download');download.hidden=true;download.removeAttribute('href');
+      showVideo(true);
+      byId('camera-info').textContent=`Arquivo: ${filename}. Reprodução local, sem upload.`;
+      message('Vídeo aberto. Use a barra de reprodução para pausar no instante desejado, depois clique “Capturar quadro”.');
+      updateCameraControls();
+      return true;
+    }
+    byId('video-file').addEventListener('change',() => {
+      const input=byId('video-file');
+      const file=input.files?.[0];if(!file)return;
+      loadVideoFile(file,file.name);
+      input.value='';
+    });
+    byId('speed').addEventListener('change',()=>{
+      video.playbackRate=Number(byId('speed').value)||1;
+      if(recordedUrl)message(`Reprodução configurada para ${byId('speed').selectedOptions[0].textContent}.`);
+    });
+    function stepFrame(direction) {
+      if(!recordedUrl || video.getAttribute('src')!==recordedUrl)return;
+      video.pause();
+      const duration=Number.isFinite(video.duration)?video.duration:Math.max(video.currentTime,0);
+      video.currentTime=Math.max(0,Math.min(duration,video.currentTime+direction/30));
+      message('Avanço aproximado de 1/30 s (a precisão depende da taxa de quadros do arquivo). Aguarde a imagem atualizar antes de capturar.');
+    }
+    byId('prev-frame').addEventListener('click',()=>stepFrame(-1));
+    byId('next-frame').addEventListener('click',()=>stepFrame(1));
+    video.addEventListener('error',() => {
+      if (!cameraStream && video.getAttribute('src'))
+        message('O navegador não conseguiu reproduzir esse arquivo. Tente MP4 com vídeo H.264 ou WebM; alguns AVI/MOV precisam ser convertidos.');
+    });
 
     function setFrame(source, naturalWidth, naturalHeight) {
       if (!naturalWidth || !naturalHeight) return false;
@@ -507,10 +571,10 @@
       recordingTimer=setTimeout(() => {
         if (thisRecorder.state==='recording') {
           thisRecorder.stop();
-          message('Limite de 2 minutos atingido. Finalizando o vídeo...');
+          message('Limite de 3 minutos atingido. Finalizando o vídeo...');
         }
       },maxRecordingMs);
-      byId('camera-info').textContent='Gravando vídeo local · máximo de 2 minutos. Sem áudio.';
+      byId('camera-info').textContent='Gravando vídeo local · máximo de 3 minutos. Sem áudio.';
       message('Gravação iniciada. Pedale normalmente e depois toque em “Parar gravação”.');
       updateCameraControls();
     }
@@ -684,7 +748,12 @@
     globalThis.PAIVA_ATHLETE_2D = {
       getAngles:() => annotations.filter(item => item.kind==='angle')
         .map(item => angleDegrees(item.points[0],item.points[1],item.points[2])),
-      hasImage:() => photoLoaded
+      hasImage:() => photoLoaded,
+      openVideo:(file,label) => {
+        const loaded=loadVideoFile(file,label);
+        if(loaded)section.scrollIntoView({behavior:'smooth',block:'start'});
+        return loaded;
+      }
     };
     render();
   }

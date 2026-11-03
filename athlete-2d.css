@@ -83,6 +83,14 @@
 #paiva-athlete-2d .paiva-2d-actions button:disabled {opacity:.45;cursor:not-allowed;}
 #paiva-athlete-2d .paiva-2d-webcam {display:flex;flex-direction:column;gap:7px;
   padding-top:14px;border-top:1px solid #536978;}
+#paiva-athlete-2d .paiva-2d-playback {padding:9px 0;border-bottom:1px solid #536978;}
+#paiva-athlete-2d .paiva-2d-playback label {font-size:11px;color:#d4e2ea;
+  font-weight:750;display:block;}
+#paiva-athlete-2d .paiva-2d-playback select {display:block;width:100%;
+  border:1px solid #617887;border-radius:8px;background:#13232e;color:#eef5f8;
+  font-size:12px;padding:9px;margin-top:6px;}
+#paiva-athlete-2d .paiva-2d-playback div {display:flex;gap:7px;margin-top:8px;}
+#paiva-athlete-2d .paiva-2d-playback button {flex:1;}
 #paiva-athlete-2d .paiva-2d-webcam button,#paiva-athlete-2d .paiva-2d-webcam a {
   display:block;text-align:center;width:100%;border:1px solid #6b7f8b;border-radius:9px;
   background:#1e303d;color:#e0ebf0;font:750 11px system-ui,sans-serif;

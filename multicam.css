@@ -1,0 +1,71 @@
+/* PAIVA · Captação 2D com dois visores independentes e até seis fontes selecionáveis. */
+#paiva-multi-camera {margin:18px 0;padding:17px;
+  background:linear-gradient(155deg,#253440,#101b24);border:1px solid #556e7e;}
+#paiva-multi-camera [hidden] {display:none!important;}
+#paiva-multi-camera .paiva-multi-heading {display:flex;align-items:center;
+  justify-content:space-between;gap:12px;margin-bottom:12px;}
+#paiva-multi-camera .paiva-multi-heading span {color:#b4c9d5;font-size:10px;
+  font-weight:800;letter-spacing:.11em;}
+#paiva-multi-camera .paiva-multi-heading h2 {margin:5px 0 0;font-size:18px;
+  color:#eaf2f6;letter-spacing:.02em;}
+#paiva-multi-help {width:32px;height:32px;flex:none;border-radius:50%;
+  border:1px solid #8fa6b6;background:#263a47;color:#f4f9fb;
+  font-weight:850;cursor:pointer;}
+#paiva-multi-explain {padding:12px 14px;margin:0 0 14px;
+  background:#111e28;border:1px solid #516777;border-radius:11px;
+  color:#d5e0e7;font-size:12px;line-height:1.65;}
+#paiva-multi-explain p {margin:0 0 9px;}
+#paiva-multi-explain p:last-child {margin-bottom:0;}
+#paiva-multi-camera .paiva-multi-discovery {display:flex;align-items:center;
+  gap:12px;flex-wrap:wrap;margin:12px 0 15px;padding:11px;
+  border-radius:10px;border:1px solid #526877;background:#15232c;}
+#paiva-multi-detect {background:#dce9ef;color:#162936;font-weight:800;
+  border:1px solid #dce9ef;border-radius:9px;padding:11px 14px;cursor:pointer;}
+#paiva-multi-detect:disabled {opacity:.5;cursor:not-allowed;}
+#paiva-multi-discovery-status {font-size:11px;color:#bcd0dc;line-height:1.5;
+  flex:1 1 260px;}
+#paiva-multi-camera .paiva-multi-grid {display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;}
+#paiva-multi-camera .paiva-multi-pane {min-width:0;border:1px solid #5d7281;
+  border-radius:12px;padding:13px;background:linear-gradient(150deg,#1b2a34,#101c26);}
+#paiva-multi-camera .paiva-multi-pane-heading {display:flex;gap:9px;align-items:center;
+  justify-content:space-between;margin-bottom:12px;}
+#paiva-multi-camera .paiva-multi-pane-heading strong {color:#f1f7f9;
+  font-size:12px;letter-spacing:.12em;}
+#paiva-multi-camera .paiva-multi-pane-heading span {color:#a4bfce;
+  font-size:10px;font-weight:750;}
+#paiva-multi-camera .paiva-multi-pane[data-state="recording"] .paiva-multi-pane-heading span {
+  color:#ffabac;}
+#paiva-multi-camera .paiva-multi-pane label {display:block;font-size:11px;
+  color:#c9dce6;font-weight:700;margin:9px 0;}
+#paiva-multi-camera .paiva-multi-pane select,
+#paiva-multi-camera .paiva-multi-pane input[type="file"] {display:block;width:100%;
+  min-width:0;margin-top:6px;padding:9px;border:1px solid #637988;
+  border-radius:8px;background:#101d27;color:#e6f0f5;font-size:12px;}
+#paiva-multi-camera .paiva-multi-pane video {display:block;width:100%;
+  aspect-ratio:16/9;max-height:340px;object-fit:contain;margin-top:12px;
+  border:1px solid #415767;background:#080e15;border-radius:9px;}
+#paiva-multi-camera .paiva-multi-controls {display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0;}
+#paiva-multi-camera .paiva-multi-controls button,
+#paiva-multi-camera .paiva-multi-finish button,
+#paiva-multi-camera .paiva-multi-finish a {display:block;width:100%;border:1px solid #697e8b;
+  background:#243845;color:#e3edf3;border-radius:8px;
+  padding:10px 7px;font:750 11px system-ui,sans-serif;
+  cursor:pointer;text-align:center;text-decoration:none;}
+#paiva-multi-camera .paiva-multi-controls button:disabled,
+#paiva-multi-camera .paiva-multi-finish button:disabled {opacity:.39;cursor:not-allowed;}
+#paiva-multi-camera .paiva-multi-finish {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;margin-top:10px;}
+#paiva-multi-camera .paiva-multi-finish button,
+#paiva-multi-camera .paiva-multi-finish a {background:#d6e5ed;
+  border-color:#d6e5ed;color:#182934;}
+#paiva-multi-camera .paiva-multi-pane p {margin:9px 0 0;min-height:24px;
+  font-size:11px;line-height:1.5;color:#adc7d5;}
+#paiva-multi-camera .paiva-multi-disclaimer {font-size:10px;line-height:1.5;
+  color:#a8becb;margin:13px 0 0;}
+@media(max-width:740px){
+  #paiva-multi-camera .paiva-multi-grid {grid-template-columns:1fr;}
+  #paiva-multi-camera .paiva-multi-pane video {max-height:none;}
+}
+@media print {#paiva-multi-camera {display:none!important;}}
