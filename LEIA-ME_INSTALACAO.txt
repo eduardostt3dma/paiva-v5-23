@@ -21,17 +21,21 @@ BRAÇO LÍQUIDO (RÉGUA ANTROPOMÉTRICA SHIMANO):
 - Use sempre os mesmos pontos anatômicos e protocolo de medição na reavaliação. Este cálculo segue o protocolo informado pelo profissional, que pode diferir de outros protocolos antropométricos.
 - O arquivo arm-calc.js deve ser publicado junto com os demais arquivos do aplicativo.
 
-COMPARADOR DE QUADROS (Speed/Road, MTB e comparação geométrica TT):
-- Depois da antropometria, preencha marca/modelo, stack (mm) e reach (mm) da bicicleta A e B.
+COMPARADOR DE QUADROS (três modalidades independentes: MTB / Road-Speed / TT-Triatlo):
+- Selecione MTB, ROAD / SPEED ou TT / TRIATLO no próprio comparador. A seleção também muda a modalidade principal do aplicativo.
+- Cada modalidade mantém seus próprios campos: os valores de duas MTB nunca reaparecem automaticamente na análise de Road ou TT. Alterne entre elas sem misturar as geometrias.
+- Depois da antropometria, preencha marca/modelo, stack (mm) e reach (mm) da bicicleta A e B, sempre do mesmo tipo.
 - A tela principal exibe somente os ANTIGOS LIMITES INFERIORES de stack/reach como pontos empíricos iniciais de triagem, sem faixas máximas. Esses números NÃO são valores ideais validados nem limites clínicos, e não devem ser usados isoladamente para comprar uma bicicleta.
 - Foram retiradas estimativas nominais de top tube, comprimento de mesa, top tube + mesa e seat tube ±3 cm. Nenhuma dessas somas era capaz de representar adequadamente um cockpit individual.
 - Sem referência profissional informada, o comparador apresenta SOMENTE as diferenças reais de stack e reach dos dois quadros; não atribui um vencedor.
-- Opcionalmente informe stack e reach de quadro de uma referência definida pelo avaliador (por exemplo, um quadro já ajustado e com montagem comparável).
+- Em Road e MTB, opcionalmente informe stack e reach de quadro de uma referência definida pelo avaliador (por exemplo, um quadro já ajustado e com montagem comparável na mesma modalidade).
 - O comparador destaca diferenças geométricas e só sugere uma preferência preliminar quando um quadro é pelo menos tão próximo nas duas medidas. Se houver trocas ou empate, declara que não há preferência clara.
 - A decisão final deve considerar possibilidade de montagem, mesa, espaçadores, guidão, posição do selim, mobilidade, conforto e avaliação dinâmica. Reach de quadro NÃO é distância de apoio das mãos.
-- Na TT, conferir pad stack, pad reach e posicionamento aerodinâmico. A comparação isolada do quadro não define qual TT é melhor.
+- Em TT, aparecem campos extras PAD STACK e PAD REACH para ambas as montagens. Se desejar a avaliação de proximidade, informe também a referência profissional dos apoios. Pad stack mede do centro do movimento central ao topo do apoio, e pad reach é a distância horizontal até a borda posterior do apoio: use a mesma convenção em todas as bicicletas.
+- Na TT, uma preferência só é mostrada quando as coordenadas de ambos os apoios e os dois alvos de referência estão completos. Stack/reach do quadro isolados nunca determinam uma TT vencedora. Verifique as faixas reais de ajuste de pads, selim e cockpit informadas pelo fabricante.
 - Após preencher ambos os quadros, a análise comparativa é incluída no relatório PDF.
 - Base científica: Holliday et al. (2021), Sports Medicine and Health Science, DOI: 10.1016/j.smhs.2021.02.007; Priego-Quesada et al. (2024), Sports Medicine, DOI: 10.1007/s40279-024-02100-6. A literatura não valida um intervalo universal de stack/reach por estatura, razão pela qual o teto foi removido.
+- Fontes técnicas sobre TT: Trek Speed Concept Fit & Travel (pad stack/reach) e Cervélo P-Series Fit Calculator (coordenadas dos apoios e ajustes reais de montagem).
 
 AJUDA ANTROPOMÉTRICA:
 - Os botões ? agora abrem explicações de texto em lugar dos desenhos esquemáticos antigos.

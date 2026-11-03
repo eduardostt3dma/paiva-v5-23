@@ -4,6 +4,11 @@
   'use strict';
 
   const MODALITIES = { road: 'Speed / Road', mtb: 'MTB', tt: 'Triatlo / TT' };
+  const MODE_NOTES = {
+    road: 'Road / Speed: compare geometrias de quadros da mesma modalidade. Mesa, espaçadores, guidão e posição das mãos precisam ser avaliados na montagem.',
+    mtb: 'MTB: compare geometrias de MTB. Curso e SAG da suspensão, mesa, rise, backsweep e altura do guidão alteram a posição real do ciclista.',
+    tt: 'TT / Triatlo: o stack e o reach do quadro não definem sozinhos o encaixe. Para indicar proximidade, use PAD STACK e PAD REACH dos apoios, com a mesma convenção de medida em ambas as bicicletas.'
+  };
 
   function numberFrom(value) {
     const raw = String(value ?? '').trim().replace(',', '.');
@@ -40,45 +45,57 @@
   // Retorna apenas uma preferência de proximidade geométrica: nunca um "fit ideal".
   function compare(a, b, reference, mode = 'road') {
     const rawDelta = { stack: b.stack - a.stack, reach: b.reach - a.reach };
+    const tt = mode === 'tt';
+    const padDelta = tt && a.padStack && a.padReach && b.padStack && b.padReach
+      ? { padStack: b.padStack - a.padStack, padReach: b.padReach - a.padReach } : null;
     const output = {
-      delta: rawDelta,
+      delta: rawDelta, padDelta,
       distanceA: null, distanceB: null,
       winner: null, status: 'comparison',
-      conclusion: 'Comparação geométrica disponível. Para indicar proximidade de ajuste, informe stack e reach de uma referência profissional validada na avaliação.'
+      conclusion: tt
+        ? 'Quadros TT comparados. Para avaliar proximidade de posição, informe pad stack e pad reach das duas montagens e uma referência profissional dos apoios. Só a geometria do quadro não permite indicar vencedora.'
+        : 'Comparação geométrica disponível. Para indicar proximidade de ajuste, informe stack e reach de uma referência profissional validada na avaliação.'
     };
     if (!reference) return output;
 
+    const axisX = tt ? 'padStack' : 'stack';
+    const axisY = tt ? 'padReach' : 'reach';
+    if (tt && (!padDelta || !reference.padStack || !reference.padReach)) return output;
+    if (!reference[axisX] || !reference[axisY]) return output;
+
     const da = {
-      stack: deviation(a.stack, reference.stack),
-      reach: deviation(a.reach, reference.reach),
+      [axisX]: deviation(a[axisX], reference[axisX]),
+      [axisY]: deviation(a[axisY], reference[axisY]),
     };
     const db = {
-      stack: deviation(b.stack, reference.stack),
-      reach: deviation(b.reach, reference.reach),
+      [axisX]: deviation(b[axisX], reference[axisX]),
+      [axisY]: deviation(b[axisY], reference[axisY]),
     };
     output.distanceA = da;
     output.distanceB = db;
 
-    const bothInside = da.stack === 0 && da.reach === 0 && db.stack === 0 && db.reach === 0;
-    const aDominates = da.stack <= db.stack && da.reach <= db.reach &&
-      (da.stack < db.stack || da.reach < db.reach);
-    const bDominates = db.stack <= da.stack && db.reach <= da.reach &&
-      (db.stack < da.stack || db.reach < da.reach);
+    const bothInside = da[axisX] === 0 && da[axisY] === 0 && db[axisX] === 0 && db[axisY] === 0;
+    const aDominates = da[axisX] <= db[axisX] && da[axisY] <= db[axisY] &&
+      (da[axisX] < db[axisX] || da[axisY] < db[axisY]);
+    const bDominates = db[axisX] <= da[axisX] && db[axisY] <= da[axisY] &&
+      (db[axisX] < da[axisX] || db[axisY] < da[axisY]);
 
     if (bothInside) {
       output.status = 'tie';
-      output.conclusion = 'Os dois quadros estão dentro da faixa de referência. Não há preferência geométrica clara: compare montagem, ajustes e posicionamento dinâmico.';
+      output.conclusion = tt
+        ? 'As duas montagens atingem a referência informada para os apoios. Sem preferência clara: confira limites de regulagem, posição do selim e avaliação dinâmica.'
+        : 'Os dois quadros estão dentro da faixa de referência. Não há preferência geométrica clara: compare montagem, ajustes e posicionamento dinâmico.';
     } else if (aDominates || bDominates) {
       output.winner = aDominates ? 'A' : 'B';
       output.status = 'preliminary';
-      output.conclusion = `O quadro ${output.winner} apresenta desvios menores ou iguais em stack e reach em relação à referência escolhida. É uma preferência geométrica preliminar, não uma indicação definitiva de bike fit.`;
+      output.conclusion = tt
+        ? `A montagem TT ${output.winner} está mais próxima (ou igual) nos dois eixos dos apoios em relação à referência profissional. Confirme que a regulagem é atingível no modelo real, com a posição dinâmica e de selim desejada.`
+        : `O quadro ${output.winner} apresenta desvios menores ou iguais em stack e reach em relação à referência escolhida. É uma preferência geométrica preliminar, não uma indicação definitiva de bike fit.`;
     } else {
       output.status = 'mixed';
-      output.conclusion = 'Não há superioridade geométrica clara: um quadro se aproxima mais em stack e o outro em reach. A decisão depende da posição de contato desejada, da montagem e do teste dinâmico.';
-    }
-
-    if (mode === 'tt') {
-      output.conclusion += ' Na TT, é indispensável conferir pad stack e pad reach e a posição funcional dos apoios antes de escolher.';
+      output.conclusion = tt
+        ? 'Não há preferência clara nos apoios: uma montagem se aproxima mais em pad stack e a outra em pad reach. Verifique a faixa de ajuste real e o teste dinâmico.'
+        : 'Não há superioridade geométrica clara: um quadro se aproxima mais em stack e o outro em reach. A decisão depende da posição de contato desejada, da montagem e do teste dinâmico.';
     }
     return output;
   }
@@ -95,10 +112,16 @@
         <div>
           <span class="paiva-cmp-eyebrow">ANÁLISE COMPARATIVA · NOVO RECURSO</span>
           <h2>Comparador de quadros</h2>
-          <p>Compare o stack e o reach reais de dois quadros. A preferência só aparece com referência profissional informada.</p>
+          <p>Compare duas bicicletas da mesma modalidade, com medidas reais. Não existe um stack/reach universal para MTB, Road e TT.</p>
         </div>
         <span id="paiva-cmp-mode" class="paiva-cmp-mode">Speed / Road</span>
       </div>
+      <div class="paiva-cmp-select" role="group" aria-label="Modalidade dos quadros comparados">
+        <button type="button" data-cmp-select="mtb" aria-pressed="false">MTB</button>
+        <button type="button" data-cmp-select="road" aria-pressed="true">ROAD / SPEED</button>
+        <button type="button" data-cmp-select="tt" aria-pressed="false">TT / TRIATLO</button>
+      </div>
+      <p class="paiva-cmp-mode-note" id="paiva-cmp-mode-note"></p>
       <div class="paiva-cmp-grid">
         <fieldset class="paiva-cmp-frame">
           <legend>01 · Bicicleta A</legend>
@@ -106,6 +129,12 @@
           <div class="paiva-cmp-dimensions">
             <label>Stack do quadro <small>mm</small><input id="paiva-cmp-a-stack" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 565" /></label>
             <label>Reach do quadro <small>mm</small><input id="paiva-cmp-a-reach" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 390" /></label>
+          </div>
+          <div class="paiva-cmp-pad-fields" data-pad-only hidden>
+            <div class="paiva-cmp-dimensions">
+              <label>Pad stack <small>mm</small><input id="paiva-cmp-a-pad-stack" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 640" /></label>
+              <label>Pad reach <small>mm</small><input id="paiva-cmp-a-pad-reach" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 470" /></label>
+            </div>
           </div>
         </fieldset>
         <fieldset class="paiva-cmp-frame">
@@ -115,14 +144,24 @@
             <label>Stack do quadro <small>mm</small><input id="paiva-cmp-b-stack" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 585" /></label>
             <label>Reach do quadro <small>mm</small><input id="paiva-cmp-b-reach" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 398" /></label>
           </div>
+          <div class="paiva-cmp-pad-fields" data-pad-only hidden>
+            <div class="paiva-cmp-dimensions">
+              <label>Pad stack <small>mm</small><input id="paiva-cmp-b-pad-stack" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 660" /></label>
+              <label>Pad reach <small>mm</small><input id="paiva-cmp-b-pad-reach" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 480" /></label>
+            </div>
+          </div>
         </fieldset>
       </div>
       <details class="paiva-cmp-reference">
         <summary>Usar referência profissional personalizada (opcional)</summary>
-        <p>Informe o stack e o reach de quadro usados como referência na sua avaliação ou de uma bicicleta já ajustada. Não confunda estas dimensões com coordenadas do guidão.</p>
-        <div class="paiva-cmp-target">
+        <p id="paiva-cmp-target-note">Informe o stack e o reach de quadro usados como referência na sua avaliação ou de uma bicicleta já ajustada. Não confunda estas dimensões com coordenadas do guidão.</p>
+        <div class="paiva-cmp-target" data-frame-reference>
           <label>Stack de referência (mm)<input id="paiva-cmp-target-stack" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 575" /></label>
           <label>Reach de referência (mm)<input id="paiva-cmp-target-reach" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 395" /></label>
+        </div>
+        <div class="paiva-cmp-target" data-pad-only hidden>
+          <label>Pad stack de referência (mm)<input id="paiva-cmp-target-pad-stack" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 650" /></label>
+          <label>Pad reach de referência (mm)<input id="paiva-cmp-target-pad-reach" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 475" /></label>
         </div>
       </details>
       <div class="paiva-cmp-actions">
@@ -132,7 +171,7 @@
       <div class="paiva-cmp-output" id="paiva-cmp-output" aria-live="polite">
         <p id="paiva-cmp-message">Preencha o stack e o reach dos dois quadros para começar.</p>
       </div>
-      <p class="paiva-cmp-disclaimer">Sem referência profissional, o PAIVA compara diferenças reais, mas não indica vencedor. Stack/reach do quadro não equivalem à posição das mãos. Considere montagem, mobilidade, conforto e avaliação dinâmica; em TT, confira pad stack e pad reach.</p>`;
+      <p class="paiva-cmp-disclaimer">Cada modalidade guarda sua própria comparação. Nenhuma estimativa antropométrica é transferida entre MTB, Road e TT. Os valores devem vir da ficha geométrica do fabricante ou de medição profissional. A decisão final depende da montagem e do bike fit dinâmico.</p>`;
     footer.before(section);
 
     const style = document.createElement('style');
@@ -149,6 +188,17 @@
         font-size:12px; line-height:1.6; color:#aab9c5; }
       #paiva-compare .paiva-cmp-mode { display:inline-flex; border:1px solid #687784;
         color:#e2eaf0; border-radius:999px; padding:9px 13px; font-size:11px; font-weight:750; }
+      #paiva-compare .paiva-cmp-select { display:flex; flex-wrap:wrap; gap:7px; margin-top:17px; }
+      #paiva-compare .paiva-cmp-select button { border:1px solid #667681; background:#101820;
+        color:#cbd9e1; border-radius:9px; font:750 11px system-ui,sans-serif;
+        letter-spacing:.03em; padding:11px 15px; cursor:pointer; }
+      #paiva-compare .paiva-cmp-select button[aria-pressed="true"] { background:#d8e3e9;
+        border-color:#d8e3e9; color:#16212b; }
+      #paiva-compare .paiva-cmp-mode-note { margin:11px 0 0; padding:11px 13px;
+        border-left:2px solid #94aab8; background:#1a252f; color:#c4d2db;
+        font-size:11px; line-height:1.65; border-radius:0 7px 7px 0; }
+      #paiva-compare [hidden] { display:none!important; }
+      #paiva-compare .paiva-cmp-pad-fields { border-top:1px solid #364551; padding-top:10px; }
       #paiva-compare .paiva-cmp-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
         gap:14px; margin-top:22px; }
       #paiva-compare .paiva-cmp-frame { min-width:0; margin:0; padding:15px;
@@ -194,25 +244,69 @@
 
     const id = name => document.getElementById('paiva-cmp-' + name);
     const currentMode = () => document.querySelector('[data-mode].active')?.dataset.mode || 'road';
-    const fields = ['a-name','a-stack','a-reach','b-name','b-stack','b-reach','target-stack','target-reach'];
+    const fields = ['a-name','a-stack','a-reach','a-pad-stack','a-pad-reach',
+      'b-name','b-stack','b-reach','b-pad-stack','b-pad-reach',
+      'target-stack','target-reach','target-pad-stack','target-pad-reach'];
+    const drafts = { mtb: {}, road: {}, tt: {} };
+    let selectedMode = currentMode();
     let lastData = null;
+
+    function saveDraft(mode) {
+      drafts[mode] = Object.fromEntries(fields.map(field => [field, id(field).value]));
+    }
+
+    function restoreDraft(mode) {
+      fields.forEach(field => { id(field).value = drafts[mode][field] || ''; });
+    }
+
+    function switchMode(next, synchronize = true) {
+      if (!MODALITIES[next]) return;
+      if (next !== selectedMode) {
+        saveDraft(selectedMode);
+        selectedMode = next;
+        restoreDraft(next);
+      }
+      document.querySelectorAll('#paiva-compare [data-cmp-select]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.cmpSelect === next));
+      });
+      id('mode-note').textContent = MODE_NOTES[next];
+      document.querySelectorAll('#paiva-compare [data-pad-only]').forEach(group => {
+        group.hidden = next !== 'tt';
+      });
+      document.querySelectorAll('#paiva-compare [data-frame-reference]').forEach(group => {
+        group.hidden = next === 'tt';
+      });
+      id('target-note').textContent = next === 'tt'
+        ? 'Para TT, a referência precisa ser do centro do movimento central ao topo e à borda posterior do apoio de antebraço (pad). Compare montagens usando exatamente os mesmos pontos anatômicos e convenções.'
+        : 'Informe stack e reach de quadro de referência da MESMA modalidade, aferidos na ficha do fabricante ou em bicicleta ajustada. Esses pontos não são a posição do guidão.';
+      if (synchronize && currentMode() !== next) {
+        document.querySelector(`[data-mode="${next}"]`)?.click();
+      }
+      render();
+    }
 
     function read() {
       const a = { name: id('a-name').value.trim() || 'Bicicleta A',
-        stack: numberFrom(id('a-stack').value), reach: numberFrom(id('a-reach').value) };
+        stack: numberFrom(id('a-stack').value), reach: numberFrom(id('a-reach').value),
+        padStack: numberFrom(id('a-pad-stack').value), padReach: numberFrom(id('a-pad-reach').value) };
       const b = { name: id('b-name').value.trim() || 'Bicicleta B',
-        stack: numberFrom(id('b-stack').value), reach: numberFrom(id('b-reach').value) };
-      const stackTarget = numberFrom(id('target-stack').value);
-      const reachTarget = numberFrom(id('target-reach').value);
+        stack: numberFrom(id('b-stack').value), reach: numberFrom(id('b-reach').value),
+        padStack: numberFrom(id('b-pad-stack').value), padReach: numberFrom(id('b-pad-reach').value) };
+      const mode = selectedMode;
+      const stackTarget = numberFrom(id(mode === 'tt' ? 'target-pad-stack' : 'target-stack').value);
+      const reachTarget = numberFrom(id(mode === 'tt' ? 'target-pad-reach' : 'target-reach').value);
       const oneTarget = (stackTarget !== null) !== (reachTarget !== null);
-      const mode = currentMode();
       const valid = a.stack !== null && a.reach !== null &&
         b.stack !== null && b.reach !== null;
       let reference = null;
       let referenceLabel = '';
       if (!oneTarget && stackTarget !== null && reachTarget !== null) {
-        reference = { stack: stackTarget, reach: reachTarget };
-        referenceLabel = `Referência profissional: Stack ${display(stackTarget)} mm / Reach ${display(reachTarget)} mm.`;
+        reference = mode === 'tt'
+          ? { padStack: stackTarget, padReach: reachTarget }
+          : { stack: stackTarget, reach: reachTarget };
+        referenceLabel = mode === 'tt'
+          ? `Referência profissional TT: Pad stack ${display(stackTarget)} mm / Pad reach ${display(reachTarget)} mm.`
+          : `Referência profissional ${MODALITIES[mode]}: Stack ${display(stackTarget)} mm / Reach ${display(reachTarget)} mm.`;
       }
       return { a, b, reference, referenceLabel, oneTarget, valid, mode };
     }
@@ -230,14 +324,23 @@
         output.append(p);
       }
       if (!d.valid) {
-        paragraph('Preencha o stack e o reach dos dois quadros para iniciar a comparação.');
+        paragraph(`Preencha o stack e o reach dos dois quadros de ${MODALITIES[d.mode]} para iniciar a comparação. Não utilize medidas de outra modalidade.`);
         return;
       }
       const comparison = compare(d.a, d.b, d.oneTarget ? null : d.reference, d.mode);
       const delta = comparison.delta;
       paragraph(`Diferenças da bicicleta B em relação à A: Stack ${signed(delta.stack)} mm; Reach ${signed(delta.reach)} mm.`, true);
+      if (d.mode === 'tt') {
+        if (comparison.padDelta) {
+          paragraph(`Diferenças entre os apoios (B − A): Pad stack ${signed(comparison.padDelta.padStack)} mm; Pad reach ${signed(comparison.padDelta.padReach)} mm.`, true);
+        } else {
+          paragraph('Na TT, preencha pad stack e pad reach das duas montagens para comparar a posição dos apoios. Sem isso, o resultado é apenas descritivo.');
+        }
+      }
       if (d.oneTarget) {
-        paragraph('Para usar a referência profissional, preencha os dois campos: stack e reach.');
+        paragraph(d.mode === 'tt'
+          ? 'Para usar a referência TT, preencha os dois campos: pad stack e pad reach.'
+          : 'Para usar a referência profissional, preencha os dois campos: stack e reach.');
         return;
       }
       paragraph(d.referenceLabel || 'Sem referência profissional: comparação descritiva, sem indicação automática de tamanho ou vencedor.');
@@ -250,8 +353,10 @@
         title.textContent = `Quadro ${letter} · ${bike.name}`;
         const value = document.createElement('strong');
         value.textContent = distance
-          ? `Desvio Stack ${display(distance.stack)} mm · Reach ${display(distance.reach)} mm`
-          : `Stack ${display(bike.stack)} mm · Reach ${display(bike.reach)} mm`;
+          ? d.mode === 'tt'
+            ? `Desvio Pad stack ${display(distance.padStack)} mm · Pad reach ${display(distance.padReach)} mm`
+            : `Desvio Stack ${display(distance.stack)} mm · Reach ${display(distance.reach)} mm`
+          : `Quadro: Stack ${display(bike.stack)} mm · Reach ${display(bike.reach)} mm`;
         box.append(title, value);
         grid.append(box);
       }
@@ -269,8 +374,11 @@
       fields.forEach(field => { id(field).value = ''; });
       render();
     });
+    document.querySelectorAll('#paiva-compare [data-cmp-select]').forEach(button => {
+      button.addEventListener('click', () => switchMode(button.dataset.cmpSelect));
+    });
     document.querySelectorAll('[data-mode]').forEach(button => {
-      button.addEventListener('click', () => setTimeout(render, 0));
+      button.addEventListener('click', () => setTimeout(() => switchMode(currentMode(), false), 0));
     });
     document.querySelectorAll('#fields input').forEach(input => {
       input.addEventListener('input', () => setTimeout(render, 0));
@@ -282,20 +390,34 @@
         render();
         if (!lastData) return null;
         const { a, b, mode, referenceLabel, comparison } = lastData;
+        const rows = [
+          { label: 'Modalidade da comparação', value: MODALITIES[mode] },
+          { label: 'Bicicleta A', value: `${a.name} · Stack ${display(a.stack)} mm · Reach ${display(a.reach)} mm` },
+          { label: 'Bicicleta B', value: `${b.name} · Stack ${display(b.stack)} mm · Reach ${display(b.reach)} mm` },
+          { label: 'Diferença de stack do quadro (B - A)', value: `${signed(comparison.delta.stack)} mm` },
+          { label: 'Diferença de reach do quadro (B - A)', value: `${signed(comparison.delta.reach)} mm` },
+        ];
+        if (mode === 'tt') {
+          for (const [label, bike] of [['A', a], ['B', b]]) {
+            rows.push({ label: `Apoios TT ${label}`, value: bike.padStack && bike.padReach
+              ? `Pad stack ${display(bike.padStack)} mm · Pad reach ${display(bike.padReach)} mm`
+              : 'Não informados' });
+          }
+          if (comparison.padDelta) {
+            rows.push({ label: 'Diferenças dos apoios (B - A)', value:
+              `Pad stack ${signed(comparison.padDelta.padStack)} mm · Pad reach ${signed(comparison.padDelta.padReach)} mm` });
+          }
+        }
+        rows.push(
+          { label: 'Referência', value: referenceLabel || 'Não informada' },
+          { label: 'Conclusão preliminar', value: comparison.conclusion }
+        );
         return {
-          rows: [
-            { label: 'Modalidade', value: MODALITIES[mode] },
-            { label: 'Bicicleta A', value: `${a.name} · Stack ${display(a.stack)} mm · Reach ${display(a.reach)} mm` },
-            { label: 'Bicicleta B', value: `${b.name} · Stack ${display(b.stack)} mm · Reach ${display(b.reach)} mm` },
-            { label: 'Diferença de stack (B - A)', value: `${signed(comparison.delta.stack)} mm` },
-            { label: 'Diferença de reach (B - A)', value: `${signed(comparison.delta.reach)} mm` },
-            { label: 'Referência', value: referenceLabel || 'Não informada' },
-            { label: 'Conclusão preliminar', value: comparison.conclusion },
-          ]
+          rows
         };
       }
     };
-    render();
+    switchMode(selectedMode, false);
   }
 
   // Permite testar a lógica sem abrir a interface.
