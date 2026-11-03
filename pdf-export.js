@@ -89,11 +89,12 @@
     })).filter(item => item.label);
 
     const clientName = document.getElementById('clientName')?.value?.trim() || 'Cliente';
+    const clientBikeImage = globalThis.PAIVA_BIKE_PHOTOS?.getActiveImage?.();
     return {
       clientName,
       generatedAt: new Date().toLocaleDateString('pt-BR'),
       logo: document.getElementById('logo')?.src || '',
-      bikeImage: document.getElementById('reportBikePhoto')?.src || '',
+      bikeImage: clientBikeImage || document.getElementById('reportBikePhoto')?.src || '',
       client: readPairs('reportClient'),
       bike: readPairs('reportBike'),
       body: readPairs('reportBody'),

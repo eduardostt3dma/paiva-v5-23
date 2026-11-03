@@ -6,6 +6,15 @@ ANTROPOMETRIA: a altura do ponto esternal ao solo e a entrepernas (cavalo) são 
 O campo "Tronco líquido" é calculado automaticamente: Esterno ao solo - Entrepernas = Tronco líquido (cm).
 Exemplo: 145 cm - 82 cm = 63 cm. A fórmula corresponde ao protocolo de medição utilizado pelo profissional; outros sistemas podem definir a medida do tronco de maneira diferente.
 
+BRAÇO LÍQUIDO (RÉGUA ANTROPOMÉTRICA SHIMANO):
+- Informe a leitura superior da régua na referência do acrômio, em centímetros.
+- Informe a leitura inferior da MESMA régua na referência da palma da mão, em centímetros.
+- O aplicativo calcula automaticamente: Braço líquido = leitura superior - leitura inferior.
+- Exemplo didático: 145 cm - 45 cm = 100 cm.
+- As duas leituras e o resultado calculado ficam registrados no relatório PDF.
+- Use sempre os mesmos pontos anatômicos e protocolo de medição na reavaliação. Este cálculo segue o protocolo informado pelo profissional, que pode diferir de outros protocolos antropométricos.
+- O arquivo arm-calc.js deve ser publicado junto com os demais arquivos do aplicativo.
+
 PIN: o código temporário foi informado ao proprietário junto com a entrega desta versão.
 Ao abrir o app ou atualizar a página, digite os 6 números. O botão "Bloquear" fecha a interface novamente.
 Não use o PIN de banco ou de outras contas. O PIN desta versão NÃO protege o código nem criptografa os dados.
@@ -29,3 +38,14 @@ RELATÓRIO DIGITAL EM PDF:
 - A geração do PDF acontece no próprio aparelho e não transmite os dados dos clientes para servidores.
 - A biblioteca pdf-lib.min.js e o arquivo pdf-export.js precisam ficar na raiz do repositório para o relatório funcionar, inclusive sem internet depois de carregado e atualizado o cache.
 - Antes de usar com clientes, teste PDF e compartilhamento no iPad e no Android. Alguns navegadores limitam a partilha de arquivos; o download é a alternativa.
+
+FOTO REAL DA BICICLETA DO CLIENTE:
+- Primeiro escolha a modalidade: Speed/Road, MTB ou TT.
+- Na seção Referências na bicicleta, use "Escolher foto" (galeria) ou "Tirar foto" (câmera).
+- A fotografia substitui a imagem ilustrativa apenas na modalidade escolhida e aparece também no PDF final.
+- Sem foto escolhida, a imagem ilustrativa original da modalidade é usada normalmente.
+- "Restaurar imagem" remove a foto personalizada daquela modalidade.
+- As fotos são processadas localmente e mantidas apenas durante a sessão do aplicativo, não são salvas automaticamente no site, no GitHub nem sincronizadas entre aparelhos.
+- Salve e compartilhe o PDF ANTES de fechar ou atualizar o aplicativo. Em uma nova avaliação, restaure a imagem anterior se ainda estiver na tela.
+- A fotografia é convertida em JPG adequado ao PDF; fotos em formatos não suportados pelo aparelho podem exigir conversão para JPG ou PNG.
+- O arquivo bike-photo-upload.js também deve ser enviado na raiz do repositório para o recurso funcionar, inclusive offline após atualização.
