@@ -1,0 +1,40 @@
+/* PAIVA · Conversor opcional de vídeo, com estilo discreto e seguro para celular. */
+#paiva-video-converter {background:linear-gradient(145deg,#1f303d,#111c25);
+  border:1px solid #586f7e;padding:16px;margin:18px 0;color:#e4eef4;}
+#paiva-video-converter [hidden] {display:none!important;}
+#paiva-video-converter .paiva-converter-heading {display:flex;gap:14px;
+  justify-content:space-between;align-items:center;}
+#paiva-video-converter .paiva-converter-heading span {font-weight:800;
+  color:#b8d0dd;letter-spacing:.11em;font-size:10px;}
+#paiva-video-converter h2 {font-size:17px;letter-spacing:.02em;margin:5px 0 9px;}
+#paiva-converter-help {border-radius:50%;height:32px;width:32px;
+  color:#eff7fa;background:#263d4c;border:1px solid #95abb9;
+  font-weight:850;cursor:pointer;flex:none;}
+#paiva-converter-explain {background:#111f2a;padding:12px;border-radius:10px;
+  border:1px solid #526c7b;line-height:1.6;font-size:12px;margin:10px 0;}
+#paiva-converter-explain p {margin:0 0 10px;}
+#paiva-converter-explain p:last-child {margin:0;}
+#paiva-video-converter .paiva-converter-body {border:1px solid #526a79;
+  padding:12px;border-radius:11px;background:#14242e;}
+#paiva-video-converter .paiva-converter-body label {display:block;font-size:11px;
+  font-weight:750;color:#d5e4ed;}
+#paiva-converter-file {display:block;width:100%;margin-top:8px;
+  padding:10px;background:#0f1d27;color:#f0f5f8;
+  border:1px solid #637b89;border-radius:9px;}
+#paiva-video-converter .paiva-converter-actions,
+#paiva-video-converter .paiva-converter-finish {display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:11px 0;}
+#paiva-video-converter .paiva-converter-actions button,
+#paiva-video-converter .paiva-converter-finish button,
+#paiva-video-converter .paiva-converter-finish a {border-radius:9px;
+  padding:11px 7px;text-align:center;text-decoration:none;
+  font:750 12px system-ui,sans-serif;cursor:pointer;
+  background:#d8e7ee;color:#162935;border:1px solid #b4ccd8;}
+#paiva-video-converter button:disabled {opacity:.44;cursor:not-allowed;}
+#paiva-converter-status {color:#c7dce8;font-size:11px;line-height:1.5;
+  margin:10px 0 6px;}
+#paiva-converter-progress {display:block;width:100%;height:12px;
+  accent-color:#a6d5e9;}
+@media(max-width:520px){#paiva-video-converter .paiva-converter-actions,
+  #paiva-video-converter .paiva-converter-finish {grid-template-columns:1fr;}}
+@media print {#paiva-video-converter {display:none!important;}}
