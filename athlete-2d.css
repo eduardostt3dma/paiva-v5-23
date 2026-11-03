@@ -129,6 +129,9 @@
 #paiva-athlete-2d .paiva-2d-follow input {accent-color:#a5dfef;}
 #paiva-athlete-2d .paiva-2d-playback select {padding:6px 7px;margin-top:3px;}
 #paiva-athlete-2d .paiva-2d-playback div:not(.paiva-2d-timeline) {align-items:end;margin:0;}
+#paiva-athlete-2d .paiva-2d-wheel-hint {grid-column:1/-1;
+  display:block;color:#9ec4d2;font:650 10px system-ui,sans-serif;
+  padding:1px 0 0;text-align:center;}
 #paiva-athlete-2d .paiva-2d-playback button {padding:9px 5px;background:#253a49;
   color:#edf4f8;border:1px solid #536f80;border-radius:8px;font:750 11px system-ui;}
 #paiva-athlete-2d .paiva-2d-playback button:disabled {opacity:.42;cursor:not-allowed;}
@@ -138,6 +141,9 @@
   flex-direction:row;margin:0;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools button {width:auto;
   min-width:0;flex:1;padding:8px 5px;}
+#paiva-athlete-2d .paiva-2d-marking-dock [data-2d-tool="point"][aria-pressed="true"] {
+  background:#d2f1df;color:#173327;border-color:#bcdfc9;}
+#paiva-athlete-2d .paiva-2d-canvas-wrap video:not([hidden]) {cursor:ns-resize;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align {grid-column:1/2;
   margin:0;align-items:center;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align button {padding:7px 3px;}

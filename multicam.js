@@ -33,7 +33,7 @@
       <div id="paiva-multi-explain" hidden>
         <p>Você pode ligar até seis webcams USB ao Windows e escolher uma para cada visor. Selecione <strong>1 câmera</strong> para ampliar o visor ou <strong>2 câmeras</strong> para captar dois ângulos lado a lado, inclusive com gravação dupla. Os dois arquivos são separados e começam com pequena diferença de tempo; não há sincronização profissional quadro a quadro.</p>
         <p>O reconhecimento das webcams depende da permissão do navegador, das portas USB, da capacidade do computador e dos drivers. Uma câmera não cobre todo o entorno; as cinco vistas são captações independentes, não uma imagem esférica 360°.</p>
-        <p>Escolha resolução, taxa de quadros e qualidade de gravação por câmera. Os valores são solicitações: a webcam pode negociar valores menores. Duas câmeras HD/60 fps exigem mais memória e banda USB. Cada gravação termina automaticamente em até 3 minutos, sem áudio. Salve ambos os arquivos antes de sair. Vídeos antigos também podem ser abertos do pendrive; alguns codecs AVI/MOV não são reproduzidos no navegador.</p>
+        <p>Escolha resolução, taxa de quadros e qualidade de gravação por câmera. Os valores são solicitações: a webcam pode negociar valores menores. Duas câmeras HD/60 fps exigem mais memória e banda USB. Cada gravação termina automaticamente em até 3 minutos, sem áudio. Salve ambos os arquivos antes de sair. Vídeos antigos também podem ser abertos do pendrive; alguns codecs AVI/MOV não são reproduzidos no navegador. Sobre cada visor de vídeo gravado, a rodinha do mouse avança ou recua o quadro, sem rolar a página.</p>
       </div>
       <div class="paiva-multi-mode">
         <label>Modo de captação
@@ -74,6 +74,7 @@
               <button type="button" id="paiva-multi-play-${key}" disabled>▶ Reproduzir vídeo</button>
               <button type="button" id="paiva-multi-pause-${key}" disabled>⏸ Pausar</button>
             </div>
+            <small class="paiva-multi-wheel-hint">🖱 Rodinha sobre o vídeo: avançar / voltar quadro</small>
             <label class="paiva-multi-loop"><input type="checkbox" id="paiva-multi-loop-${key}" checked /> ↔ Vai e volta contínuo</label>
             <label class="paiva-multi-speed">Velocidade de reprodução
               <select id="paiva-multi-speed-${key}"><option value="0.1">0,1×</option><option value="0.25">0,25×</option><option value="0.5">0,5×</option><option value="1" selected>1×</option></select>
@@ -412,6 +413,19 @@
       byId('record',key).addEventListener('click',()=>startRecording(key));
       byId('end',key).addEventListener('click',()=>finishRecording(key));
       byId('play',key).addEventListener('click',()=>playVideo(key));
+      let wheelAccumulator=0;
+      byId('video',key).addEventListener('wheel',event=>{
+        const state=states[key],player=byId('video',key);
+        if(!state.source || state.stream || state.recording || !Number.isFinite(player.duration) || player.duration<=0)return;
+        event.preventDefault();
+        wheelAccumulator+=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?100:1);
+        if(Math.abs(wheelAccumulator)<30)return;
+        const direction=Math.sign(wheelAccumulator);wheelAccumulator=0;
+        haltReverse(state);player.pause();
+        const fps=Number(byId('fps',key).value)||30;
+        player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+direction/fps));
+        message(key,`Quadro ${direction>0?'seguinte':'anterior'} · 1/${fps} s (aproximado). Gire a rodinha sobre a imagem para continuar.`);
+      },{passive:false});
       byId('speed',key).addEventListener('change',()=>{
         const player=byId('video',key);
         player.playbackRate=Number(byId('speed',key).value)||1;
