@@ -116,6 +116,7 @@
       bike: readPairs('reportBike'),
       body: readPairs('reportBody'),
       sizing,
+      bikeProject: globalThis.PAIVA_BIKE_PROJECT?.getReport?.() || null,
       results,
       bikeMetrics,
       finalMeasurements: globalThis.PAIVA_FINAL_MEASURES?.getReport?.() || [],
@@ -252,6 +253,9 @@
     y -= 14;
     if (data.sizing?.rows?.length) {
       pairsSection('04A · Método de leitura antropométrica', data.sizing.rows);
+    }
+    if (data.bikeProject?.rows?.length) {
+      pairsSection('04B · Projeto inicial da bicicleta', data.bikeProject.rows);
     }
 
     if (bike) {

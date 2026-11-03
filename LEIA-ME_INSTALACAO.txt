@@ -47,6 +47,15 @@ DOIS MÉTODOS DE LEITURA NO PRÉ-FIT:
 - Para recomendar uma bicicleta, informe valores reais de quadro e uma referência profissional no comparador. Na TT, informe as coordenadas dos apoios.
 - Fundamentação: Holliday & Swart (2021), DOI: 10.1016/j.smhs.2021.02.007; Scataglini et al. (2026), DOI: 10.1007/s12283-026-00574-3. Não existe equação validada universal para converter todas as medidas corporais diretamente em stack/reach do quadro.
 
+PROJETO INICIAL DA BICICLETA (MODO ANTROPOMETRIA COMPLETA):
+- Selecione "02 · ANTROPOMETRIA COMPLETA". Aparece o quadro de projeto, com três intenções de posicionamento: Agressivo / Intermediário / Confortável.
+- Escolha manualmente um comprimento de PEDIVELA PARA TESTAR (145, 150, 155, 160, 165, 170, 172,5 ou 175 mm) ou mantenha "A definir". A escolha é provisória e precisa de avaliação dinâmica.
+- A regra antiga 2,05 × entreperna foi REMOVIDA. Um ciclista com entreperna de 86 cm deixa de receber automaticamente a referência 175 mm. O aplicativo não afirma que 165 ou 170 mm é universalmente ideal.
+- Mesa proposta (mm), stack real e reach real do quadro considerado são CAMPOS OPCIONAIS MANUAIS. NÃO são calculados pela proporção corporal. São diferentes das medidas FINAIS após o fit, que permanecem no formulário de medições reais.
+- O botão ? contém a interpretação técnica para manter o aplicativo enxuto. O projeto é incluído no PDF quando o método completo estiver selecionado.
+- As três intenções de posicionamento não se convertem automaticamente em ângulo do tronco, drop, stack, reach ou tamanho de mesa. Confirme mobilidade, postura, modalidade e pontos de contato.
+- Evidência para avaliar pedivelas menores: McLeod et al. (2025), PMID: 40464620; pesquisa de 2025 sobre eficiência/fadiga com 165/170/175 mm, PMID: 40342376. Nenhuma fornece fórmula universal de comprimento por entreperna.
+
 AJUDA ANTROPOMÉTRICA:
 - Os botões ? agora abrem explicações de texto em lugar dos desenhos esquemáticos antigos.
 - A imagem anatômica principal e seus cartões aparecem em sequência vertical, responsivos, para evitar cortes no iPad e no Android.
