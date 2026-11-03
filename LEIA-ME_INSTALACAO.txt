@@ -15,6 +15,20 @@ BRAÇO LÍQUIDO (RÉGUA ANTROPOMÉTRICA SHIMANO):
 - Use sempre os mesmos pontos anatômicos e protocolo de medição na reavaliação. Este cálculo segue o protocolo informado pelo profissional, que pode diferir de outros protocolos antropométricos.
 - O arquivo arm-calc.js deve ser publicado junto com os demais arquivos do aplicativo.
 
+COMPARADOR DE QUADROS (Speed/Road, MTB e comparação geométrica TT):
+- Depois da antropometria, preencha marca/modelo, stack (mm) e reach (mm) da bicicleta A e B.
+- Sem referência profissional, o aplicativo compara cada quadro com faixas EXPLORATÓRIAS do pré-fit, baseadas em estatura; NÃO constituem previsão validada de stack/reach ideais.
+- Opcionalmente informe stack e reach de quadro de uma referência definida pelo avaliador (por exemplo, um quadro já ajustado e com montagem comparável).
+- O comparador destaca diferenças geométricas e só sugere uma preferência preliminar quando um quadro é pelo menos tão próximo nas duas medidas. Se houver trocas ou empate, declara que não há preferência clara.
+- A decisão final deve considerar possibilidade de montagem, mesa, espaçadores, guidão, posição do selim, mobilidade, conforto e avaliação dinâmica. Reach de quadro NÃO é distância de apoio das mãos.
+- Na TT, conferir pad stack, pad reach e posicionamento aerodinâmico. A comparação isolada do quadro não define qual TT é melhor.
+- Após preencher ambos os quadros, a análise comparativa é incluída no relatório PDF.
+
+AJUDA ANTROPOMÉTRICA:
+- Os botões ? agora abrem explicações de texto em lugar dos desenhos esquemáticos antigos.
+- A imagem anatômica principal e seus cartões aparecem em sequência vertical, responsivos, para evitar cortes no iPad e no Android.
+- Os arquivos help-text.js e frame-compare.js precisam ser enviados para a raiz do GitHub junto dos demais.
+
 PIN: o código temporário foi informado ao proprietário junto com a entrega desta versão.
 Ao abrir o app ou atualizar a página, digite os 6 números. O botão "Bloquear" fecha a interface novamente.
 Não use o PIN de banco ou de outras contas. O PIN desta versão NÃO protege o código nem criptografa os dados.

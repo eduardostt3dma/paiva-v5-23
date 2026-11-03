@@ -100,6 +100,7 @@
       body: readPairs('reportBody'),
       results,
       bikeMetrics,
+      comparison: globalThis.PAIVA_FRAME_COMPARE?.getReport?.() || null,
       note: document.querySelector('#clientReport .report-warning p')?.textContent?.trim() ||
         'Medidas e estimativas iniciais. A avaliação dinâmica e a geometria real da bicicleta devem orientar o ajuste final.',
     };
@@ -227,6 +228,10 @@
       y -= boxHeight + 14;
       (data.bikeMetrics || []).forEach((item, index) => pairRow(item.label, item.value, index));
       y -= 12;
+    }
+
+    if (data.comparison?.rows?.length) {
+      pairsSection('06 · Comparação de quadros', data.comparison.rows);
     }
 
     const notes = wrapText(data.note || '', font, 8.7, CONTENT_W - 20);
