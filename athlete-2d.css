@@ -103,6 +103,62 @@
   font-size:10px;}
 #paiva-athlete-2d .paiva-2d-disclaimer {font-size:10px;line-height:1.5;
   color:#9fb3c0;margin:12px 0 0;}
+/* Bancada compacta de análise — imagem fixa e comandos imediatamente abaixo. */
+@media(min-width:721px){
+  #paiva-athlete-2d .paiva-2d-view {position:sticky;top:8px;align-self:start;}
+  #paiva-athlete-2d .paiva-2d-canvas-wrap {max-height:45vh;}
+  #paiva-athlete-2d .paiva-2d-canvas-wrap video {max-height:45vh;}
+}
+#paiva-athlete-2d .paiva-2d-player-dock,
+#paiva-athlete-2d .paiva-2d-marking-dock,
+#paiva-athlete-2d .paiva-2d-quick-actions {background:#16232d;border:1px solid #3c5363;
+  border-radius:10px;margin-top:6px;padding:7px 9px;box-sizing:border-box;}
+#paiva-athlete-2d .paiva-2d-player-dock .paiva-2d-playback {display:grid;
+  grid-template-columns:1fr 1fr;gap:5px 9px;padding:0;border:0;}
+#paiva-athlete-2d .paiva-2d-player-dock .paiva-2d-playback > div,
+#paiva-athlete-2d .paiva-2d-player-dock .paiva-2d-playback > label {margin:0;min-width:0;}
+#paiva-athlete-2d .paiva-2d-timeline {grid-column:1/-1;display:grid!important;
+  grid-template-columns:auto 1fr auto;align-items:center;gap:7px;margin:0!important;}
+#paiva-athlete-2d .paiva-2d-timeline output {font:700 11px ui-monospace,monospace;
+  color:#d9ecf4;min-width:51px;text-align:center;}
+#paiva-athlete-2d .paiva-2d-timeline input {width:100%;min-width:0;
+  accent-color:#bfe5f7;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-playback .paiva-2d-pingpong {grid-column:1/-1;
+  color:#edf5f9;font-size:11px;display:flex;align-items:center;gap:7px;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-pingpong input,
+#paiva-athlete-2d .paiva-2d-follow input {accent-color:#a5dfef;}
+#paiva-athlete-2d .paiva-2d-playback select {padding:6px 7px;margin-top:3px;}
+#paiva-athlete-2d .paiva-2d-playback div:not(.paiva-2d-timeline) {align-items:end;margin:0;}
+#paiva-athlete-2d .paiva-2d-playback button {padding:9px 5px;background:#253a49;
+  color:#edf4f8;border:1px solid #536f80;border-radius:8px;font:750 11px system-ui;}
+#paiva-athlete-2d .paiva-2d-playback button:disabled {opacity:.42;cursor:not-allowed;}
+#paiva-athlete-2d .paiva-2d-marking-dock {display:grid;
+  grid-template-columns:1fr 1fr;gap:5px 9px;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools {grid-column:1/-1;
+  flex-direction:row;margin:0;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools button {width:auto;
+  min-width:0;flex:1;padding:8px 5px;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align {grid-column:1/2;
+  margin:0;align-items:center;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align button {padding:7px 3px;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-width {grid-column:2/3;
+  padding:0;border:0;font-size:10px;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-width input {margin:6px 0 0;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom {grid-column:1/-1;
+  grid-template-columns:90px 1fr 38px 48px 38px;align-items:center;
+  padding:5px 0 0;gap:5px;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom label,
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom input {grid-column:auto;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom button {padding:6px 2px;}
+#paiva-athlete-2d .paiva-2d-quick-actions {display:flex;align-items:center;
+  gap:6px;flex-wrap:wrap;}
+#paiva-athlete-2d .paiva-2d-quick-actions button {border:1px solid #577283;
+  border-radius:8px;background:#243845;color:#e1eef5;padding:9px 7px;
+  font:750 10px system-ui;cursor:pointer;flex:1 1 108px;}
+#paiva-athlete-2d .paiva-2d-quick-actions button:disabled {opacity:.42;cursor:not-allowed;}
+#paiva-athlete-2d .paiva-2d-follow {flex:1 1 100%;font-size:10px;color:#bcd5e1;
+  display:flex;align-items:center;gap:6px;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-follow span {color:#8dabb9;}
 @media(max-width:720px){
   #paiva-athlete-2d .paiva-2d-workspace {grid-template-columns:1fr;}
   #paiva-athlete-2d .paiva-2d-sidebar {position:static;max-height:none;
@@ -111,5 +167,6 @@
   #paiva-athlete-2d .paiva-2d-tools button {width:auto;flex:1 1 130px;}
   #paiva-athlete-2d .paiva-2d-actions {flex-direction:row;flex-wrap:wrap;}
   #paiva-athlete-2d .paiva-2d-actions button {width:auto;flex:1 1 135px;}
+  #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom {grid-template-columns:70px 1fr 30px 48px 30px;}
 }
 @media print {#paiva-athlete-2d {display:none!important;}}

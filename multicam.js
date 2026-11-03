@@ -74,6 +74,7 @@
               <button type="button" id="paiva-multi-play-${key}" disabled>▶ Reproduzir vídeo</button>
               <button type="button" id="paiva-multi-pause-${key}" disabled>⏸ Pausar</button>
             </div>
+            <label class="paiva-multi-loop"><input type="checkbox" id="paiva-multi-loop-${key}" checked /> ↔ Vai e volta contínuo</label>
             <label class="paiva-multi-speed">Velocidade de reprodução
               <select id="paiva-multi-speed-${key}"><option value="0.1">0,1×</option><option value="0.25">0,25×</option><option value="0.5">0,5×</option><option value="1" selected>1×</option></select>
             </label>
@@ -98,7 +99,7 @@
 
     const byId=(kind,key)=>document.getElementById(`paiva-multi-${kind}${key?'-'+key:''}`);
     const states=Object.fromEntries(['a','b'].map(key=>[key,{
-      key,stream:null,recorder:null,chunks:[],timer:null,source:null,url:null,filename:'',recording:false,pending:false,loadTimer:null,sessionId:''
+      key,stream:null,recorder:null,chunks:[],timer:null,source:null,url:null,filename:'',recording:false,pending:false,loadTimer:null,sessionId:'',backward:false,reverseFrame:null,lastReverseTick:0
     }]));
     const message=(key,text)=>byId('message',key).textContent=text;
     const status=text=>byId('discovery-status').textContent=text;
@@ -106,6 +107,41 @@
     let detecting=false;
 
     function dualMode(){return byId('mode').value==='2';}
+
+    function haltReverse(state,resetDirection=true){
+      if(state.reverseFrame!==null)cancelAnimationFrame(state.reverseFrame);
+      state.reverseFrame=null;state.lastReverseTick=0;
+      if(resetDirection)state.backward=false;
+    }
+    function reverseTick(state,timestamp){
+      state.reverseFrame=null;
+      const video=byId('video',state.key);
+      if(!state.backward||!state.source||state.stream||!byId('loop',state.key).checked)return;
+      const fps=Number(byId('fps',state.key).value)||30;
+      const rate=Number(byId('speed',state.key).value)||1;
+      const interval=1000/(fps*rate);
+      if(!state.lastReverseTick)state.lastReverseTick=timestamp-interval;
+      if(timestamp-state.lastReverseTick>=interval&&!video.seeking){
+        state.lastReverseTick=timestamp;
+        const next=Math.max(0,video.currentTime-1/fps);
+        video.currentTime=next;
+        if(next<=.001){
+          haltReverse(state);
+          video.currentTime=0;
+          Promise.resolve(video.play()).catch(()=>message(state.key,'Clique em Reproduzir para continuar.'));
+          return;
+        }
+      }
+      state.reverseFrame=requestAnimationFrame(time=>reverseTick(state,time));
+    }
+    function startReverse(state){
+      const video=byId('video',state.key);
+      if(!state.source||state.stream||!byId('loop',state.key).checked||!Number.isFinite(video.duration)||video.duration<=0)return;
+      haltReverse(state);video.pause();state.backward=true;
+      video.currentTime=Math.max(0,video.duration-1/(Number(byId('fps',state.key).value)||30));
+      state.reverseFrame=requestAnimationFrame(time=>reverseTick(state,time));
+      message(state.key,'Retornando automaticamente. Pause quando quiser examinar um quadro.');
+    }
 
     function update(key) {
       const state=states[key];
@@ -118,6 +154,7 @@
       byId('analyze',key).disabled = !state.source || live || recording || state.pending;
       byId('play',key).disabled = !state.source || live || recording || state.pending;
       byId('pause',key).disabled = !state.source || live || recording || state.pending;
+      byId('loop',key).disabled = !state.source || live || recording || state.pending;
       for(const setting of ['resolution','fps','bitrate'])byId(setting,key).disabled=live || state.pending || recording;
       byId('state',key).textContent=recording?'GRAVANDO':live?'AO VIVO':state.source?'VÍDEO CARREGADO':'DISPONÍVEL';
       byId('pane',key).dataset.state=recording?'recording':live?'live':'idle';
@@ -137,11 +174,13 @@
       }
     }
     function detachVideo(state) {
+      haltReverse(state);
       const video=byId('video',state.key);
       video.pause();video.srcObject=null;video.removeAttribute('src');
       video.controls=false;
     }
     function setPlayback(state,blob,filename,download) {
+      haltReverse(state);
       if(state.loadTimer) {clearTimeout(state.loadTimer);state.loadTimer=null;}
       if (state.url) URL.revokeObjectURL(state.url);
       state.source=blob;state.filename=filename;
@@ -166,6 +205,11 @@
     function playVideo(key) {
       const state=states[key],player=byId('video',key);
       if(!state.source || state.stream || state.recording)return;
+      if(state.backward){
+        if(state.reverseFrame===null)state.reverseFrame=requestAnimationFrame(time=>reverseTick(state,time));
+        message(key,'Vídeo retornando.');return;
+      }
+      if(player.ended)player.currentTime=0;
       message(key,'Tentando reproduzir o arquivo…');
       let attempt;
       try {attempt=player.play();}
@@ -232,6 +276,7 @@
           video:{deviceId:{exact:selected},width:{ideal:width},height:{ideal:height},frameRate:{ideal:frameRate}},audio:false
         });
         stopStream(state);
+        haltReverse(state);
         state.stream=stream;
         const video=byId('video',key);
         video.pause();video.removeAttribute('src');video.srcObject=stream;
@@ -373,8 +418,14 @@
         if(states[key].source && !states[key].stream)message(key,`Velocidade do vídeo: ${byId('speed',key).selectedOptions[0].textContent}.`);
       });
       byId('pause',key).addEventListener('click',()=>{
-        const player=byId('video',key);player.pause();
+        const player=byId('video',key);haltReverse(states[key],false);player.pause();
         if(states[key].source)message(key,'Vídeo pausado. Clique em “Analisar no 2D” para medir ângulos e linhas.');
+      });
+      byId('loop',key).addEventListener('change',()=>{
+        if(!byId('loop',key).checked && states[key].backward){
+          haltReverse(states[key]);byId('video',key).pause();
+        }
+        if(states[key].source)message(key,byId('loop',key).checked?'Vai e volta contínuo ativado.':'Vai e volta desativado.');
       });
       byId('device',key).addEventListener('change',updateAll);
       byId('file',key).addEventListener('change',event=>{
@@ -392,9 +443,13 @@
         if(state.loadTimer){clearTimeout(state.loadTimer);state.loadTimer=null;}
         if(player.paused)message(key,`Vídeo reconhecido (${Number.isFinite(player.duration)?formatTime(player.duration*1000):'duração indefinida'}). Clique em “▶ Reproduzir vídeo”.`);
       });
+      byId('video',key).addEventListener('ended',()=>{
+        if(states[key].source&&!states[key].stream&&byId('loop',key).checked)startReverse(states[key]);
+      });
     }
     window.addEventListener('pagehide',()=>{
       for(const state of Object.values(states)){
+        haltReverse(state);
         if(state.recorder?.state==='recording')state.recorder.stop();
         if(state.timer)clearTimeout(state.timer);
         if(state.loadTimer)clearTimeout(state.loadTimer);

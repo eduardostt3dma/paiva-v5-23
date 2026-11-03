@@ -2,9 +2,9 @@
    Para vídeo gravado e câmera fixa. Não substitui rastreio cinemático validado. */
 (() => {
   'use strict';
-  const WIDTH=480;
+  const WIDTH=640;
   const PATCH=5;
-  const SEARCH=15;
+  const SEARCH=20;
 
   function grayscale(data) {
     const pixels=data.data;
@@ -55,7 +55,7 @@
     return forward;
   }
 
-  function create({video,annotations,sourceWidth,sourceHeight,onPoints,onLost,onDone}) {
+  function create({video,annotations,sourceWidth,sourceHeight,isReversePlaying,isPingPongEnabled,onPoints,onLost,onDone}) {
     if (!video || !video.videoWidth || !video.videoHeight || !annotations?.length)
       return {start:async()=>false,stop:()=>{}};
     const w=WIDTH,h=Math.max(1,Math.round(WIDTH*video.videoHeight/video.videoWidth));
@@ -72,22 +72,25 @@
     };
     function stop() {
       running=false;
-      if(frameId!==null && video.cancelVideoFrameCallback) video.cancelVideoFrameCallback(frameId);
+      if(frameId!==null)cancelAnimationFrame(frameId);
       frameId=null;
     }
     function schedule() {
       if(!running)return;
-      if(video.requestVideoFrameCallback) frameId=video.requestVideoFrameCallback(tick);
-      else frameId=requestAnimationFrame(tick);
+      frameId=requestAnimationFrame(tick);
     }
     function tick() {
       if(!running)return;
-      if(video.ended) {stop();onDone?.();return;}
+      if(video.ended) {
+        if(isPingPongEnabled?.()) {schedule();return;}
+        stop();onDone?.();return;
+      }
       const time=video.currentTime;
-      if (video.paused || time===lastVideoTime || (lastSampleTime>=0 && time-lastSampleTime<.018)) {
+      if ((video.paused&&!isReversePlaying?.()) || time===lastVideoTime ||
+          (lastSampleTime>=0 && Math.abs(time-lastSampleTime)<.018)) {
         schedule();return;
       }
-      if(lastVideoTime>=0 && time-lastVideoTime>.22) {
+      if(lastVideoTime>=0 && Math.abs(time-lastVideoTime)>.22) {
         stop();video.pause();onLost?.('Houve salto de quadros. Reduza a velocidade de reprodução e marque os pontos novamente.');return;
       }
       lastVideoTime=time;lastSampleTime=time;

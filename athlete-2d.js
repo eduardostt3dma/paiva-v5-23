@@ -33,7 +33,9 @@
         <p><strong>Espessura:</strong> ajuste as linhas de 1 a 8 px no painel lateral. A mudança aparece imediatamente nas linhas existentes e nas novas marcações.</p>
         <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Você pode gravar até 3 minutos, salvar o vídeo no aparelho, pausá-lo e usar “Capturar quadro” para medir os ângulos de um instante. Os pontos iniciais são sempre marcados manualmente.</p>
         <p><strong>Vídeos antigos:</strong> use “Abrir vídeo do computador ou pendrive” para carregar MP4, WebM, MOV e outros formatos que seu navegador consiga decodificar. Pause num quadro, capture e analise com as mesmas ferramentas; nenhum arquivo é enviado à internet.</p>
+        <p><strong>Vai e volta contínuo:</strong> os comandos ficam logo abaixo da imagem. Com essa opção marcada, o vídeo segue até o fim, retorna por buscas sucessivas de quadros e volta a avançar sem parar até você clicar em Pausar. A fluidez do retorno depende dos quadros-chave, do arquivo e do computador; a reprodução reversa em navegador pode ser menos suave do que em programas nativos. Use a régua de tempo para escolher o instante exato.</p>
         <p><strong>Rastreio beta:</strong> depois de congelar um quadro do vídeo gravado, desenhe e alinhe as marcações. Clique em “Rastrear marcações” para tentar acompanhá-las no vídeo. Essa função experimental acompanha pequenas regiões contrastantes da imagem e interrompe se perder a referência; não reconhece automaticamente as articulações e pode sofrer desvios. Use fitas contrastantes nos pontos, câmera fixa e valide cada ângulo importante antes de usar no bike fit.</p>
+        <p><strong>Seguir pontos ao reproduzir:</strong> após capturar e marcar o quadro, escolha Voltar ao vídeo e Reproduzir. Com essa opção ativa, o rastreio assistido tenta acompanhar os pontos já desenhados, inclusive no retorno. Se perder algum marcador, a análise é interrompida para evitar um ângulo enganoso. Reposicione os pontos e recomece do quadro correto.</p>
         <p><strong>Biomecânica:</strong> no joelho, uma referência possível é trocânter maior → côndilo femoral lateral → maléolo lateral. Escolha sempre a mesma convenção de pontos e o mesmo plano da câmera. A foto mostra uma projeção 2D, não captura rotação, profundidade nem movimento.</p>
         <p>O processamento ocorre neste aparelho. Imagens e vídeos não são transmitidos ao site ou ao GitHub. Salve a imagem marcada e o vídeo antes de fechar ou atualizar o aplicativo. Webcam exige permissão do navegador e conexão segura (HTTPS ou localhost).</p>
       </div>
@@ -42,6 +44,9 @@
           <div class="paiva-2d-canvas-wrap"><canvas id="paiva-2d-canvas" width="960" height="540" aria-label="Foto ou quadro do vídeo com ângulos e linhas desenhados manualmente"></canvas>
             <video id="paiva-2d-video" playsinline muted hidden aria-label="Webcam ou vídeo gravado para análise 2D"></video>
             <canvas id="paiva-2d-track-overlay" width="480" height="270" hidden aria-label="Visualização do rastreamento experimental sobre o vídeo"></canvas></div>
+          <div class="paiva-2d-player-dock" aria-label="Controles do vídeo sob a imagem"></div>
+          <div class="paiva-2d-marking-dock" aria-label="Ferramentas de medição sob a imagem"></div>
+          <div class="paiva-2d-quick-actions" aria-label="Capturar quadro e seguir marcações"></div>
           <p class="paiva-2d-status" id="paiva-2d-status" role="status" aria-live="polite">Carregue uma foto lateral do atleta ou ligue a webcam.</p>
           <div class="paiva-2d-values" id="paiva-2d-values" aria-live="polite"></div>
         </div>
@@ -80,6 +85,12 @@
               <input type="file" id="paiva-2d-video-file" accept="video/*,.mp4,.mov,.webm,.m4v,.avi" aria-label="Importar vídeo local para análise quadro a quadro" />
             </label>
             <div class="paiva-2d-playback">
+              <div class="paiva-2d-timeline">
+                <output id="paiva-2d-time-current" for="paiva-2d-scrub">00:00,0</output>
+                <input type="range" id="paiva-2d-scrub" aria-label="Posição no vídeo" min="0" max="1" step="0.01" value="0" disabled />
+                <output id="paiva-2d-time-total" for="paiva-2d-scrub">00:00,0</output>
+              </div>
+              <label class="paiva-2d-pingpong"><input type="checkbox" id="paiva-2d-pingpong" checked /> ↔ Vai e volta contínuo</label>
               <label>Velocidade do vídeo
                 <select id="paiva-2d-speed" aria-label="Velocidade de reprodução">
                   <option value="0.1">0,1×</option><option value="0.25">0,25×</option><option value="0.5">0,5×</option>
@@ -109,6 +120,18 @@
       </div>
       <p class="paiva-2d-disclaimer">Medição angular manual sobre fotografia estática, para triagem. Confirme pontos anatômicos, plano da câmera e valores com sua avaliação dinâmica/STT/Retül.</p>`;
     target.before(section);
+
+    // O conjunto que mais se usa na análise fica sempre imediatamente sob o vídeo.
+    // Controles e IDs existentes são movidos (não duplicados), preservando eventos.
+    section.querySelector('.paiva-2d-player-dock').append(section.querySelector('.paiva-2d-playback'));
+    const markingDock=section.querySelector('.paiva-2d-marking-dock');
+    for(const selector of ['.paiva-2d-tools','.paiva-2d-align','.paiva-2d-zoom','.paiva-2d-width'])
+      markingDock.append(section.querySelector(selector));
+    const quickDock=section.querySelector('.paiva-2d-quick-actions');
+    for(const id of ['paiva-2d-capture','paiva-2d-back-video','paiva-2d-track-start','paiva-2d-track-stop'])
+      quickDock.append(document.getElementById(id));
+    quickDock.insertAdjacentHTML('afterbegin','<label class="paiva-2d-follow"><input type="checkbox" id="paiva-2d-auto-track" checked /> Seguir pontos ao reproduzir <span>· experimental</span></label>');
+    section.querySelector('.paiva-2d-player-dock').hidden=true;
 
     const byId = key => document.getElementById('paiva-2d-' + key);
     const canvas = byId('canvas');
@@ -342,10 +365,64 @@
     const trackOverlay=byId('track-overlay');
     const trackCtx=trackOverlay.getContext('2d');
     const maxRecordingMs = 180000;
+    let backwardMode=false,reverseFrame=null,lastReverseTick=0,scrubActive=false;
+
+    const hasFileVideo=()=>!!recordedUrl && video.getAttribute('src')===recordedUrl;
+    const clockTime=value=>{
+      if(!Number.isFinite(value)||value<0)return '00:00,0';
+      const whole=Math.floor(value);
+      return `${String(Math.floor(whole/60)).padStart(2,'0')}:${String(whole%60).padStart(2,'0')},${Math.floor(value*10)%10}`;
+    };
+    function syncTimeline() {
+      const available=hasFileVideo()&&Number.isFinite(video.duration)&&video.duration>0;
+      const slider=byId('scrub');
+      slider.disabled=!available;
+      slider.max=String(available?video.duration:1);
+      if(!scrubActive)slider.value=String(available?Math.max(0,Math.min(video.duration,video.currentTime)):0);
+      byId('time-current').textContent=clockTime(available?video.currentTime:0);
+      byId('time-total').textContent=clockTime(available?video.duration:0);
+    }
+    function haltReverse(resetDirection=true) {
+      if(reverseFrame!==null)cancelAnimationFrame(reverseFrame);
+      reverseFrame=null;lastReverseTick=0;
+      if(resetDirection)backwardMode=false;
+    }
+    function reverseTick(timestamp) {
+      reverseFrame=null;
+      if(!backwardMode||!hasFileVideo()||!byId('pingpong').checked)return;
+      const fps=Number(byId('file-fps').value)||30;
+      const rate=Number(byId('speed').value)||1;
+      const interval=1000/(fps*rate);
+      if(!lastReverseTick)lastReverseTick=timestamp-interval;
+      if(timestamp-lastReverseTick>=interval && !video.seeking){
+        lastReverseTick=timestamp;
+        const next=Math.max(0,video.currentTime-1/fps);
+        video.currentTime=next;
+        syncTimeline();
+        if(next<=.001){
+          haltReverse();
+          video.currentTime=0;
+          Promise.resolve(video.play()).catch(()=>message('Clique em Reproduzir para continuar o vídeo.'));
+          return;
+        }
+      }
+      reverseFrame=requestAnimationFrame(reverseTick);
+    }
+    function startReverse() {
+      if(!hasFileVideo()||!byId('pingpong').checked||!Number.isFinite(video.duration)||video.duration<=0)return;
+      haltReverse();video.pause();
+      backwardMode=true;
+      video.currentTime=Math.max(0,video.duration-1/(Number(byId('file-fps').value)||30));
+      reverseFrame=requestAnimationFrame(reverseTick);
+      message('Retorno automático do vídeo. Clique em Pausar para examinar o quadro.');
+    }
 
     function showVideo(enabled) {
       video.hidden = !enabled;
       canvas.hidden = enabled;
+      section.querySelector('.paiva-2d-player-dock').hidden=!enabled;
+      section.querySelector('.paiva-2d-marking-dock').hidden=enabled;
+      byId('auto-track').disabled=!enabled;
       for (const button of section.querySelectorAll('[data-2d-tool]')) button.disabled=enabled;
       for (const key of ['undo','clear','save','width']) byId(key).disabled=enabled;
     }
@@ -364,8 +441,10 @@
       byId('prev-frame').disabled = !hasPlayback || recording || trackingActive;
       byId('next-frame').disabled = !hasPlayback || recording || trackingActive;
       byId('speed').disabled = !hasPlayback || recording;
-      byId('play-video').disabled = !hasPlayback || recording || trackingActive;
+      byId('pingpong').disabled = !hasPlayback || recording;
+      byId('play-video').disabled = !hasPlayback || recording;
       byId('pause-video').disabled = !hasPlayback || recording;
+      syncTimeline();
     }
 
     function stopTracking(clear=true) {
@@ -411,9 +490,11 @@
       motionTracker=motion.create({video,annotations:annotations.map(item=>({
         kind:item.kind,points:item.points.map(p=>({...p}))})),
         sourceWidth:canvas.width,sourceHeight:canvas.height,
+        isReversePlaying:()=>backwardMode&&reverseFrame!==null,
+        isPingPongEnabled:()=>byId('pingpong').checked,
         onPoints:(points,w,h,t)=>paintTracked(points,w,h,t),
         onLost:reason=>{
-          stopTracking();video.pause();
+          haltReverse();stopTracking();video.pause();
           message(`Rastreio interrompido em ${video.currentTime.toFixed(1).replace('.',',')} s. ${reason} Não use esse ângulo sem conferir os marcadores.`);
         },
         onDone:()=>{stopTracking();message('Fim do vídeo. Rastreio encerrado; confira os ângulos antes de usar.');}
@@ -447,10 +528,10 @@
       const allowed=/\.(mp4|mov|webm|m4v|avi)$/i.test(filename) ||
         String(file.type||'').startsWith('video/');
       if (!allowed) {message('Selecione um vídeo, por exemplo MP4, WebM ou MOV.');return false;}
-      stopTracking();stopStream();video.pause();
+      haltReverse();stopTracking();stopStream();video.pause();
       if (recordedUrl) URL.revokeObjectURL(recordedUrl);
       recordedUrl=URL.createObjectURL(file);
-      video.srcObject=null;video.src=recordedUrl;video.controls=true;
+      video.srcObject=null;video.src=recordedUrl;video.controls=false;
       video.muted=true;video.autoplay=false;video.load();
       video.playbackRate=Number(byId('speed').value)||1;
       lastFrameFromVideo=false;
@@ -459,12 +540,21 @@
       showVideo(true);
       byId('camera-info').textContent=`Arquivo: ${filename}. Reprodução local, sem upload.`;
       message('Vídeo aberto. Use a barra de reprodução para pausar no instante desejado, depois clique “Capturar quadro”.');
-      updateCameraControls();
+      updateCameraControls();syncTimeline();
       attemptPlayback();
       return true;
     }
     function attemptPlayback() {
-      if(!recordedUrl || video.getAttribute('src')!==recordedUrl)return;
+      if(!hasFileVideo())return;
+      if(backwardMode){
+        if(reverseFrame===null)reverseFrame=requestAnimationFrame(reverseTick);
+        message('Vídeo retornando. Clique em Pausar no instante desejado.');
+        return;
+      }
+      if(!trackingActive && lastFrameFromVideo && annotations.length && byId('auto-track').checked){
+        startTracking();return;
+      }
+      if(video.ended)video.currentTime=0;
       let attempt;
       try{attempt=video.play();}catch(error){message(`Não foi possível iniciar o vídeo: ${error?.message||'erro de reprodução'}.`);return;}
       Promise.resolve(attempt).then(()=>{
@@ -477,7 +567,8 @@
     }
     byId('play-video').addEventListener('click',attemptPlayback);
     byId('pause-video').addEventListener('click',()=>{
-      video.pause();message('Vídeo pausado. Clique “Capturar quadro” para marcar os pontos do atleta.');
+      haltReverse(false);video.pause();
+      message('Vídeo pausado. Ajuste a posição na linha do tempo ou clique em “Capturar quadro”.');
     });
     byId('video-file').addEventListener('change',() => {
       const input=byId('video-file');
@@ -489,23 +580,52 @@
       video.playbackRate=Number(byId('speed').value)||1;
       if(recordedUrl)message(`Reprodução configurada para ${byId('speed').selectedOptions[0].textContent}.`);
     });
+    byId('pingpong').addEventListener('change',()=>{
+      if(!byId('pingpong').checked && backwardMode){
+        haltReverse();video.pause();
+      }
+      message(byId('pingpong').checked?'Vai e volta ativado: o vídeo retornará automaticamente no final.':'Vai e volta desativado.');
+    });
+    byId('scrub').addEventListener('pointerdown',()=>{scrubActive=true;});
+    byId('scrub').addEventListener('pointerup',()=>{scrubActive=false;syncTimeline();});
+    byId('scrub').addEventListener('change',()=>{scrubActive=false;syncTimeline();});
+    byId('scrub').addEventListener('input',()=>{
+      if(!hasFileVideo()||!Number.isFinite(video.duration))return;
+      haltReverse();video.pause();
+      if(trackingActive)stopTracking();
+      lastFrameFromVideo=false;
+      video.currentTime=Math.max(0,Math.min(video.duration,Number(byId('scrub').value)||0));
+      syncTimeline();
+      message('Posição ajustada. Capture um novo quadro antes de iniciar um rastreio.');
+    });
     function stepFrame(direction) {
-      if(!recordedUrl || video.getAttribute('src')!==recordedUrl)return;
-      video.pause();
+      if(!hasFileVideo())return;
+      haltReverse();video.pause();
+      if(trackingActive)stopTracking();
+      lastFrameFromVideo=false;
       const duration=Number.isFinite(video.duration)?video.duration:Math.max(video.currentTime,0);
       const fps=Number(byId('file-fps').value)||30;
       video.currentTime=Math.max(0,Math.min(duration,video.currentTime+direction/fps));
+      syncTimeline();
       message(`Avanço aproximado de 1/${fps} s. Ajuste o FPS conforme o vídeo; aguarde atualizar antes de capturar.`);
     }
     byId('prev-frame').addEventListener('click',()=>stepFrame(-1));
     byId('next-frame').addEventListener('click',()=>stepFrame(1));
     video.addEventListener('error',() => {
+      haltReverse();
       if (!cameraStream && video.getAttribute('src'))
         message('O navegador não conseguiu reproduzir esse arquivo. Tente MP4 com vídeo H.264 ou WebM; alguns AVI/MOV precisam ser convertidos.');
     });
     video.addEventListener('loadedmetadata',()=>{
+      syncTimeline();
       if(recordedUrl && video.getAttribute('src')===recordedUrl && video.paused)
         message('Vídeo reconhecido. Clique em “▶ Reproduzir” ou use a barra de reprodução.');
+    });
+    video.addEventListener('timeupdate',syncTimeline);
+    video.addEventListener('durationchange',syncTimeline);
+    video.addEventListener('ended',()=>{
+      syncTimeline();
+      if(hasFileVideo() && byId('pingpong').checked)startReverse();
     });
 
     function setFrame(source, naturalWidth, naturalHeight) {
@@ -534,7 +654,7 @@
       }
       byId('camera-start').disabled = true;
       try {
-        stopTracking();lastFrameFromVideo=false;
+        haltReverse();stopTracking();lastFrameFromVideo=false;
         const stream = await navigator.mediaDevices.getUserMedia({
           video:{width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}}, audio:false
         });
@@ -588,7 +708,7 @@
         download.hidden=false;
         video.pause();video.srcObject=null;video.src=recordedUrl;
         lastFrameFromVideo=false;
-        video.controls=true;video.muted=true;video.autoplay=false;video.load();
+        video.controls=false;video.muted=true;video.autoplay=false;video.load();
         showVideo(true);byId('back-video').hidden=true;
         byId('camera-info').textContent = 'Vídeo gravado somente neste aparelho. Faça o download antes de sair.';
         message('Gravação concluída. Use a barra do vídeo para pausar no instante desejado e clique em “Capturar quadro”. Baixe também o arquivo do vídeo.');
@@ -617,7 +737,7 @@
 
     function stopCamera() {
       if (recorder?.state==='recording') {stopRecording();return;}
-      stopStream();
+      haltReverse();stopStream();
       video.pause();
       if (video.srcObject) video.srcObject=null;
       showVideo(false);byId('back-video').hidden=true;
@@ -630,6 +750,7 @@
       if (recorder?.state==='recording') {
         message('Pare a gravação antes de capturar um quadro para análise.');return;
       }
+      haltReverse();
       if (trackingActive) stopTracking();
       if (!videoCanCapture() || !setFrame(video,video.videoWidth,video.videoHeight)) {
         message('Aguarde o vídeo carregar. Depois pause no quadro desejado e tente novamente.');return;
@@ -641,7 +762,7 @@
         byId('back-video').hidden=true;
       } else byId('back-video').hidden = !recordedUrl;
       updateCameraControls();
-      message('Quadro congelado! Arraste para abrir o ângulo ou traçar a linha; depois ajuste pelas pontas. Salve a imagem marcada ao terminar.');
+      message('Quadro congelado! Posicione o ângulo ou a linha. Depois clique em “Voltar ao vídeo” e Reproduzir para tentar seguir os pontos marcados.');
     }
 
     byId('camera-start').addEventListener('click',startCamera);
@@ -656,7 +777,7 @@
       message('Vídeo disponível. Pause em outro instante e toque em “Capturar quadro”. Salve suas marcações anteriores antes.');
     });
     window.addEventListener('pagehide',() => {
-      stopTracking();
+      haltReverse();stopTracking();
       if (recorder?.state==='recording') recorder.stop();
       stopStream();
       if (recordingTimer) clearTimeout(recordingTimer);
@@ -676,7 +797,7 @@
       const uri=URL.createObjectURL(chosen);
       const photo=new Image();
       photo.onload=() => {
-        stopTracking();lastFrameFromVideo=false;
+        haltReverse();stopTracking();lastFrameFromVideo=false;
         stopStream();video.pause();
         if (video.srcObject) video.srcObject=null;
         byId('back-video').hidden=true;

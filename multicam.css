@@ -72,6 +72,10 @@
   background:#d6e5ed;color:#152a38;border:1px solid #aec7d5;
   border-radius:8px;padding:10px 7px;font:750 11px system-ui,sans-serif;}
 #paiva-multi-camera .paiva-multi-playback button:disabled {opacity:.42;cursor:not-allowed;}
+#paiva-multi-camera .paiva-multi-loop {display:flex!important;gap:7px;
+  align-items:center;justify-content:flex-start;color:#d7e6ed;font-size:11px;
+  margin:2px 0 8px;cursor:pointer;}
+#paiva-multi-camera .paiva-multi-loop input {accent-color:#b8e7ef;}
 #paiva-multi-camera .paiva-multi-controls {display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0;}
 #paiva-multi-camera .paiva-multi-controls button,
