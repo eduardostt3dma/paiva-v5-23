@@ -91,17 +91,19 @@
   function collectReport() {
     if (typeof window.fillClientReport === 'function') window.fillClientReport();
     document.dispatchEvent(new Event('input', { bubbles: true }));
+    const sizing = globalThis.PAIVA_ANTHRO_METHOD?.getReport?.() || null;
+    const isFullProfile = sizing?.mode === 'full';
 
     const results = [...document.querySelectorAll('#results .result')].map(item => ({
       label: item.querySelector('.head span')?.textContent?.trim() || '',
       value: item.querySelector('.head strong')?.textContent?.trim() || '—',
       description: item.querySelector('small')?.textContent?.trim() || '',
-    })).filter(item => item.label);
+    })).filter(item => item.label && !(isFullProfile && /^(stack|reach)\b/i.test(item.label)));
 
     const bikeMetrics = [...document.querySelectorAll('#reportBikeMetrics .report-bike-metric')].map(item => ({
       label: item.querySelector('span')?.textContent?.trim() || '',
       value: item.querySelector('strong')?.textContent?.trim() || '',
-    })).filter(item => item.label);
+    })).filter(item => item.label && !(isFullProfile && /^(stack|reach)\b/i.test(item.label)));
 
     const clientName = document.getElementById('clientName')?.value?.trim() || 'Cliente';
     const clientBikeImage = globalThis.PAIVA_BIKE_PHOTOS?.getActiveImage?.();
@@ -113,6 +115,7 @@
       client: readPairs('reportClient'),
       bike: readPairs('reportBike'),
       body: readPairs('reportBody'),
+      sizing,
       results,
       bikeMetrics,
       finalMeasurements: globalThis.PAIVA_FINAL_MEASURES?.getReport?.() || [],
@@ -247,6 +250,9 @@
     sectionHeading('04 · Resultados do pré-fit');
     (data.results || []).forEach(resultRow);
     y -= 14;
+    if (data.sizing?.rows?.length) {
+      pairsSection('04A · Método de leitura antropométrica', data.sizing.rows);
+    }
 
     if (bike) {
       ensureSpace(330);

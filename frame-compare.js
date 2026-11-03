@@ -100,7 +100,166 @@
     return output;
   }
 
+  // Duas leituras do pré-fit. A antropometria completa descreve proporções
+  // reais; não transforma segmentos corporais em stack/reach "ideais" sem
+  // um modelo validado e uma referência de posição dinâmica.
+  function initSizingMethod() {
+    const anchor = document.getElementById('bikeHeading');
+    if (!anchor || document.getElementById('paiva-sizing-method')) return;
+
+    const panel = document.createElement('div');
+    panel.id = 'paiva-sizing-method';
+    panel.innerHTML = `
+      <div class="paiva-sizing-heading">
+        <span>LEITURA DO PRÉ-FIT</span>
+        <button type="button" id="paiva-sizing-help" aria-label="Entender os dois métodos" aria-expanded="false">?</button>
+      </div>
+      <div class="paiva-sizing-options" role="group" aria-label="Método de leitura da antropometria">
+        <button type="button" data-sizing="height" aria-pressed="true">01 · ESTATURA</button>
+        <button type="button" data-sizing="full" aria-pressed="false">02 · ANTROPOMETRIA COMPLETA</button>
+      </div>
+      <div id="paiva-sizing-explain" class="paiva-sizing-explain" hidden>
+        <p><strong>Por estatura:</strong> consulta o guia empírico inicial de stack e reach para MTB, Road ou TT. Não define tamanho ideal de quadro.</p>
+        <p><strong>Antropometria completa:</strong> considera as proporções medidas de entreperna, tronco líquido, braço líquido, ombros e pé em relação à estatura. São relações corporais, não dimensões da bicicleta. Não existe fórmula universal validada para convertê-las diretamente em stack/reach de quadro.</p>
+        <p><strong>Para escolher o quadro:</strong> use as medidas reais de cada bicicleta no comparador e uma posição de referência verificada no bike fit. Na TT, compare também as coordenadas dos apoios de antebraço.</p>
+      </div>
+      <p id="paiva-sizing-status" class="paiva-sizing-status" aria-live="polite"></p>
+      <div id="paiva-sizing-profile" class="paiva-sizing-profile" hidden></div>
+      <button id="paiva-sizing-go-compare" type="button" class="paiva-sizing-link" hidden>Comparar quadros desta modalidade</button>`;
+    anchor.insertAdjacentElement('afterend', panel);
+
+    const css = document.createElement('style');
+    css.id = 'paiva-sizing-style';
+    css.textContent = `
+      #paiva-sizing-method { margin:14px 0 20px; padding:13px; background:#18212a;
+        border:1px solid #40505d; border-radius:13px; }
+      #paiva-sizing-method .paiva-sizing-heading { display:flex; justify-content:space-between;
+        align-items:center; gap:8px; color:#a3b4c0; font-size:10px; font-weight:800; letter-spacing:.09em; }
+      #paiva-sizing-method #paiva-sizing-help { width:30px; height:30px; border-radius:50%;
+        border:1px solid #8193a0; color:#edf3f5; background:#24313b; font-weight:850;
+        cursor:pointer; }
+      #paiva-sizing-method .paiva-sizing-options { display:flex; flex-wrap:wrap;
+        gap:8px; margin-top:12px; }
+      #paiva-sizing-method .paiva-sizing-options button { flex:1; min-width:140px;
+        padding:11px 12px; border-radius:9px; border:1px solid #637480; background:#0f1921;
+        color:#d1dce3; font:750 11px system-ui,sans-serif; cursor:pointer; }
+      #paiva-sizing-method .paiva-sizing-options button[aria-pressed="true"] {
+        background:#d8e2e9; color:#16212a; border-color:#d8e2e9; }
+      #paiva-sizing-method .paiva-sizing-status { color:#c4d0d8; font-size:11px;
+        line-height:1.55; margin:11px 0 0; }
+      #paiva-sizing-method .paiva-sizing-explain { margin-top:10px; padding:11px 12px;
+        background:#101a22; color:#d0dbe2; border:1px solid #495a66;
+        border-radius:10px; font-size:11px; line-height:1.6; }
+      #paiva-sizing-method .paiva-sizing-explain p { margin:0 0 9px; }
+      #paiva-sizing-method .paiva-sizing-explain p:last-child { margin-bottom:0; }
+      #paiva-sizing-method .paiva-sizing-profile { display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px; }
+      #paiva-sizing-method .paiva-sizing-metric { border:1px solid #445561;
+        border-radius:9px; background:#111b24; min-width:0; padding:9px; }
+      #paiva-sizing-method .paiva-sizing-metric span { display:block; font-size:10px;
+        color:#9cafbb; margin-bottom:5px; }
+      #paiva-sizing-method .paiva-sizing-metric strong { color:#eff5f7;
+        font-size:14px; font-variant-numeric:tabular-nums; }
+      #paiva-sizing-method .paiva-sizing-link { background:none; border:0;
+        border-bottom:1px solid #9fb4c1; padding:7px 1px; margin-top:10px;
+        color:#c4dce7; cursor:pointer; font-size:11px; font-weight:750; }
+      #paiva-sizing-method [hidden] { display:none!important; }
+      body.paiva-full-anthro .paiva-bike-photo .photo-reach,
+      body.paiva-full-anthro .paiva-bike-photo .photo-stack,
+      body.paiva-full-anthro #results .paiva-empirical-ref { display:none!important; }
+      @media(max-width:480px){ #paiva-sizing-method .paiva-sizing-profile {
+        grid-template-columns:repeat(2,minmax(0,1fr)); } }
+      @media print { #paiva-sizing-method { display:none!important; } }`;
+    document.head.append(css);
+
+    const id = key => document.getElementById('paiva-sizing-' + key);
+    const coreIds = [
+      ['height', 'Estatura'], ['inseam', 'Entreperna'], ['torso', 'Tronco líquido'],
+      ['arm', 'Braço líquido'], ['shoulder', 'Ombros'], ['foot', 'Pé']
+    ];
+    let method = 'height';
+    let lastRows = [];
+    const get = key => {
+      const raw = document.getElementById(key)?.value.trim().replace(',', '.') || '';
+      const n = Number(raw);
+      return raw !== '' && Number.isFinite(n) && n > 0 ? n : null;
+    };
+
+    function render() {
+      const mode = document.querySelector('[data-mode].active')?.dataset.mode || 'road';
+      const profile = id('profile');
+      profile.replaceChildren();
+      profile.hidden = method !== 'full';
+      id('go-compare').hidden = method !== 'full';
+      document.body.classList.toggle('paiva-full-anthro', method === 'full');
+      document.querySelectorAll('#paiva-sizing-method [data-sizing]').forEach(btn => {
+        btn.setAttribute('aria-pressed', String(btn.dataset.sizing === method));
+      });
+      document.querySelectorAll('#results .result').forEach(item => {
+        const title = item.querySelector('.head span')?.textContent.trim() || '';
+        item.classList.toggle('paiva-empirical-ref', /^(stack|reach)\b/i.test(title));
+      });
+      if (method === 'height') {
+        id('status').textContent = `Referência inicial por estatura · ${MODALITIES[mode]}.`;
+        lastRows = [{ label: 'Método de leitura', value: 'Estatura · guia empírico (sem prescrição de quadro)' }];
+        return;
+      }
+
+      const height = get('height');
+      const missing = coreIds.filter(([key]) => get(key) === null).map(([, label]) => label);
+      id('status').textContent = missing.length
+        ? `Perfil proporcional · ${MODALITIES[mode]} · complete: ${missing.join(', ')}.`
+        : `Perfil proporcional completo · ${MODALITIES[mode]} · 6 medidas registradas.`;
+      lastRows = [{ label: 'Método de leitura', value: 'Antropometria completa · leitura das proporções' }];
+      for (const [key, label] of coreIds) {
+        const n = get(key);
+        if (n === null) continue;
+        const value = `${n.toLocaleString('pt-BR', {maximumFractionDigits:1})} cm`;
+        let ratio = null;
+        if (height && key !== 'height') ratio = 100 * n / height;
+        const box = document.createElement('div');
+        box.className = 'paiva-sizing-metric';
+        const small = document.createElement('span');
+        small.textContent = label;
+        const strong = document.createElement('strong');
+        strong.textContent = ratio === null ? value : `${ratio.toLocaleString('pt-BR', {maximumFractionDigits:1})}%`;
+        strong.title = ratio === null ? value : `${value} · proporção da estatura`;
+        box.append(small, strong);
+        profile.append(box);
+        lastRows.push({ label: key === 'height' ? 'Estatura' : `${label} / estatura`,
+          value: ratio === null ? value : `${value} · ${ratio.toLocaleString('pt-BR', {maximumFractionDigits:1})}%` });
+      }
+      lastRows.push({ label: 'Stack e reach por antropometria',
+        value: 'Não prescritos: sem equação validada. Comparar geometrias reais e referência profissional.' });
+    }
+
+    document.querySelectorAll('#paiva-sizing-method [data-sizing]').forEach(btn => {
+      btn.addEventListener('click', () => { method = btn.dataset.sizing; render(); });
+    });
+    id('help').addEventListener('click', () => {
+      const open = id('explain').hidden;
+      id('explain').hidden = !open;
+      id('help').setAttribute('aria-expanded', String(open));
+    });
+    id('go-compare').addEventListener('click', () => {
+      document.getElementById('paiva-compare')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+    document.querySelectorAll('#fields input').forEach(input => {
+      input.addEventListener('input', () => setTimeout(render, 0));
+      input.addEventListener('change', () => setTimeout(render, 0));
+    });
+    document.querySelectorAll('[data-mode]').forEach(btn => {
+      btn.addEventListener('click', () => setTimeout(render, 0));
+    });
+    globalThis.PAIVA_ANTHRO_METHOD = {
+      getMode: () => method,
+      getReport() { render(); return { mode: method, rows: [...lastRows] }; }
+    };
+    render();
+  }
+
   function init() {
+    initSizingMethod();
     const footer = document.querySelector('main > footer');
     if (!footer || document.getElementById('paiva-compare')) return;
 
@@ -121,7 +280,11 @@
         <button type="button" data-cmp-select="road" aria-pressed="true">ROAD / SPEED</button>
         <button type="button" data-cmp-select="tt" aria-pressed="false">TT / TRIATLO</button>
       </div>
-      <p class="paiva-cmp-mode-note" id="paiva-cmp-mode-note"></p>
+      <details class="paiva-cmp-explain">
+        <summary aria-label="Ajuda sobre as medidas do quadro">? <span>Entenda a comparação</span></summary>
+        <p class="paiva-cmp-mode-note" id="paiva-cmp-mode-note"></p>
+        <p class="paiva-cmp-disclaimer">Cada modalidade guarda sua própria comparação. Nenhuma estimativa antropométrica é transferida entre MTB, Road e TT. Os valores devem vir da ficha geométrica do fabricante ou de medição profissional. A decisão final depende da montagem e do bike fit dinâmico.</p>
+      </details>
       <div class="paiva-cmp-grid">
         <fieldset class="paiva-cmp-frame">
           <legend>01 · Bicicleta A</legend>
@@ -170,8 +333,7 @@
       </div>
       <div class="paiva-cmp-output" id="paiva-cmp-output" aria-live="polite">
         <p id="paiva-cmp-message">Preencha o stack e o reach dos dois quadros para começar.</p>
-      </div>
-      <p class="paiva-cmp-disclaimer">Cada modalidade guarda sua própria comparação. Nenhuma estimativa antropométrica é transferida entre MTB, Road e TT. Os valores devem vir da ficha geométrica do fabricante ou de medição profissional. A decisão final depende da montagem e do bike fit dinâmico.</p>`;
+      </div>`;
     footer.before(section);
 
     const style = document.createElement('style');
@@ -197,6 +359,14 @@
       #paiva-compare .paiva-cmp-mode-note { margin:11px 0 0; padding:11px 13px;
         border-left:2px solid #94aab8; background:#1a252f; color:#c4d2db;
         font-size:11px; line-height:1.65; border-radius:0 7px 7px 0; }
+      #paiva-compare .paiva-cmp-explain { margin-top:10px; }
+      #paiva-compare .paiva-cmp-explain summary { display:inline-flex; align-items:center;
+        gap:7px; cursor:pointer; border:1px solid #637682; color:#ecf3f6;
+        background:#22303b; border-radius:30px; padding:6px 10px;
+        font-size:12px; font-weight:800; list-style:none; }
+      #paiva-compare .paiva-cmp-explain summary::-webkit-details-marker { display:none; }
+      #paiva-compare .paiva-cmp-explain summary span { font-size:10px;
+        color:#b6c6cf; font-weight:600; }
       #paiva-compare [hidden] { display:none!important; }
       #paiva-compare .paiva-cmp-pad-fields { border-top:1px solid #364551; padding-top:10px; }
       #paiva-compare .paiva-cmp-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));

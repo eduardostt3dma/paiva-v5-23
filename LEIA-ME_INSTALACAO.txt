@@ -37,6 +37,16 @@ COMPARADOR DE QUADROS (três modalidades independentes: MTB / Road-Speed / TT-Tr
 - Base científica: Holliday et al. (2021), Sports Medicine and Health Science, DOI: 10.1016/j.smhs.2021.02.007; Priego-Quesada et al. (2024), Sports Medicine, DOI: 10.1007/s40279-024-02100-6. A literatura não valida um intervalo universal de stack/reach por estatura, razão pela qual o teto foi removido.
 - Fontes técnicas sobre TT: Trek Speed Concept Fit & Travel (pad stack/reach) e Cervélo P-Series Fit Calculator (coordenadas dos apoios e ajustes reais de montagem).
 
+DOIS MÉTODOS DE LEITURA NO PRÉ-FIT:
+- No início de "Referências na bicicleta", selecione "01 · ESTATURA" ou "02 · ANTROPOMETRIA COMPLETA".
+- Método por estatura: preserva os números de referência empírica inicial. São pontos de partida, não stack/reach ideais de quadro.
+- Método antropometria completa: lê automaticamente as medidas já preenchidas de estatura, entreperna, tronco líquido, braço líquido, ombros e pé, exibindo valores e respectivas proporções da estatura. Não inventa coeficientes de stack/reach.
+- Quando a opção completa estiver ativa, as etiquetas automáticas de stack/reach por estatura ficam ocultas na bicicleta e nos resultados do pré-fit, para não aparentarem ser previsões calculadas pela antropometria completa.
+- O ? junto aos dois métodos reúne a explicação técnica. O ? do comparador recolhe a explicação de cada modalidade. Assim a interface permanece limpa.
+- Na geração do PDF, o método utilizado e as proporções calculadas são identificados; resultados de stack/reach puramente derivados de estatura não são misturados à análise completa.
+- Para recomendar uma bicicleta, informe valores reais de quadro e uma referência profissional no comparador. Na TT, informe as coordenadas dos apoios.
+- Fundamentação: Holliday & Swart (2021), DOI: 10.1016/j.smhs.2021.02.007; Scataglini et al. (2026), DOI: 10.1007/s12283-026-00574-3. Não existe equação validada universal para converter todas as medidas corporais diretamente em stack/reach do quadro.
+
 AJUDA ANTROPOMÉTRICA:
 - Os botões ? agora abrem explicações de texto em lugar dos desenhos esquemáticos antigos.
 - A imagem anatômica principal e seus cartões aparecem em sequência vertical, responsivos, para evitar cortes no iPad e no Android.
