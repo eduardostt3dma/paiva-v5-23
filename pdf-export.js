@@ -115,6 +115,7 @@
       body: readPairs('reportBody'),
       results,
       bikeMetrics,
+      finalMeasurements: globalThis.PAIVA_FINAL_MEASURES?.getReport?.() || [],
       comparison: globalThis.PAIVA_FRAME_COMPARE?.getReport?.() || null,
       note: document.querySelector('#clientReport .report-warning p')?.textContent?.trim() ||
         'Medidas e estimativas iniciais. A avaliação dinâmica e a geometria real da bicicleta devem orientar o ajuste final.',
@@ -126,20 +127,23 @@
     if (!lib?.PDFDocument) throw new Error('O gerador de PDF não carregou. Atualize o aplicativo online e tente novamente.');
 
     const pdf = await lib.PDFDocument.create();
-    pdf.setTitle('PAIVA - Pré-Fit Antropométrico - ' + cleanText(data.clientName));
+    pdf.setTitle('PAIVA - Relatório de Bike Fit - ' + cleanText(data.clientName));
     pdf.setAuthor('PAIVA Bike Fit Studio');
-    pdf.setSubject('Relatório digital de avaliação antropométrica');
+    pdf.setSubject('Relatório profissional de pré-fit antropométrico e registro final opcional');
 
     const font = await pdf.embedFont(lib.StandardFonts.Helvetica);
     const bold = await pdf.embedFont(lib.StandardFonts.HelveticaBold);
     const C = {
-      navy: lib.rgb(0.065, 0.090, 0.120),
-      steel: lib.rgb(0.62, 0.70, 0.76),
+      navy: lib.rgb(0.070, 0.115, 0.155),
+      navy2: lib.rgb(0.105, 0.165, 0.205),
+      steel: lib.rgb(0.67, 0.79, 0.85),
+      blue: lib.rgb(0.28, 0.60, 0.74),
       white: lib.rgb(1, 1, 1),
-      text: lib.rgb(0.13, 0.18, 0.22),
-      secondary: lib.rgb(0.37, 0.43, 0.48),
-      line: lib.rgb(0.84, 0.87, 0.89),
-      tint: lib.rgb(0.965, 0.973, 0.98),
+      text: lib.rgb(0.12, 0.20, 0.26),
+      secondary: lib.rgb(0.34, 0.42, 0.49),
+      line: lib.rgb(0.84, 0.88, 0.91),
+      tint: lib.rgb(0.955, 0.968, 0.980),
+      lightBlue: lib.rgb(0.910, 0.951, 0.967),
     };
     const logo = await embedImage(pdf, data.logo);
     const bike = await embedImage(pdf, data.bikeImage);
@@ -148,16 +152,19 @@
 
     function newPage() {
       page = pdf.addPage([PAGE_W, PAGE_H]);
-      page.drawRectangle({ x: 0, y: PAGE_H - 102, width: PAGE_W, height: 102, color: C.navy });
-      page.drawRectangle({ x: 0, y: PAGE_H - 105, width: PAGE_W, height: 3, color: C.steel });
+      page.drawRectangle({ x: 0, y: PAGE_H - 125, width: PAGE_W, height: 125, color: C.navy });
+      page.drawRectangle({ x: 0, y: PAGE_H - 125, width: 5, height: 125, color: C.blue });
+      page.drawRectangle({ x: 0, y: PAGE_H - 128, width: PAGE_W, height: 3, color: C.steel });
+      page.drawLine({ start: { x: 145, y: PAGE_H - 59 }, end: { x: PAGE_W - MARGIN, y: PAGE_H - 59 },
+        thickness: 0.6, color: C.steel, opacity: .40 });
       if (logo) {
-        page.drawImage(logo, { x: MARGIN, y: PAGE_H - 86, width: 64, height: 64 });
+        page.drawImage(logo, { x: MARGIN, y: PAGE_H - 106, width: 86, height: 86 });
       }
-      const titleX = logo ? 118 : MARGIN;
-      page.drawText('PAIVA', { x: titleX, y: PAGE_H - 43, size: 21, font: bold, color: C.white });
-      page.drawText('BIKE FIT STUDIO', { x: titleX, y: PAGE_H - 62, size: 9, font: bold, color: C.steel });
-      page.drawText('RELATÓRIO DIGITAL DE PRÉ-FIT', { x: titleX, y: PAGE_H - 80, size: 9, font, color: C.white });
-      y = PAGE_H - 127;
+      const titleX = logo ? 145 : MARGIN;
+      page.drawText('PAIVA', { x: titleX, y: PAGE_H - 45, size: 26, font: bold, color: C.white });
+      page.drawText('BIKE FIT STUDIO  |  ANÁLISE BIOMECÂNICA', { x: titleX, y: PAGE_H - 75, size: 8.2, font: bold, color: C.steel });
+      page.drawText('RELATÓRIO DIGITAL PROFISSIONAL', { x: titleX, y: PAGE_H - 98, size: 10, font, color: C.white });
+      y = PAGE_H - 153;
     }
 
     function ensureSpace(height) {
@@ -165,17 +172,18 @@
     }
 
     function sectionHeading(title) {
-      ensureSpace(38);
-      y -= 8;
-      page.drawText(cleanText(title).toUpperCase(), { x: MARGIN, y: y - 7, size: 11, font: bold, color: C.text });
-      page.drawLine({ start: { x: MARGIN, y: y - 15 }, end: { x: PAGE_W - MARGIN, y: y - 15 }, thickness: 1, color: C.line });
-      y -= 31;
+      ensureSpace(48);
+      y -= 10;
+      page.drawRectangle({ x: MARGIN, y: y - 11, width: 3, height: 14, color: C.blue });
+      page.drawText(cleanText(title).toUpperCase(), { x: MARGIN + 12, y: y - 8, size: 10.5, font: bold, color: C.text });
+      page.drawLine({ start: { x: MARGIN, y: y - 18 }, end: { x: PAGE_W - MARGIN, y: y - 18 }, thickness: .8, color: C.line });
+      y -= 34;
     }
 
     function pairRow(label, value, index) {
-      const labelWidth = 175;
+      const labelWidth = 210;
       const valueWidth = CONTENT_W - labelWidth - 22;
-      const labels = wrapText(label, font, 9, labelWidth);
+      const labels = wrapText(label, font, 8.8, labelWidth);
       const values = wrapText(value, bold, 9, valueWidth);
       const lines = Math.max(labels.length, values.length);
       const height = Math.max(24, lines * 12 + 10);
@@ -184,17 +192,17 @@
         page.drawRectangle({ x: MARGIN, y: y - height + 3, width: CONTENT_W, height, color: C.tint });
       }
       for (let i = 0; i < labels.length; i++) {
-        page.drawText(labels[i], { x: MARGIN + 8, y: y - 13 - i * 12, font, size: 9, color: C.secondary });
+        page.drawText(labels[i], { x: MARGIN + 10, y: y - 13 - i * 12, font, size: 8.8, color: C.secondary });
       }
       for (let i = 0; i < values.length; i++) {
-        page.drawText(values[i], { x: MARGIN + labelWidth + 12, y: y - 13 - i * 12, font: bold, size: 9, color: C.text });
+        page.drawText(values[i], { x: MARGIN + labelWidth + 14, y: y - 13 - i * 12, font: bold, size: 9, color: C.text });
       }
       y -= height;
     }
 
     function pairsSection(title, rows) {
       sectionHeading(title);
-      if (!rows?.length) { pairRow('Informações', 'Não informado', 0); return; }
+      if (!rows?.length) { pairRow('Informações', 'Não informado', 0); y -= 12; return; }
       rows.forEach((item, index) => pairRow(item.label, item.value, index));
       y -= 12;
     }
@@ -223,6 +231,15 @@
     }
 
     newPage();
+    ensureSpace(49);
+    page.drawRectangle({ x: MARGIN, y: y - 30, width: CONTENT_W, height: 39, color: C.lightBlue });
+    const clientSummary = cleanText(data.clientName || 'Cliente');
+    page.drawText('AVALIAÇÃO INDIVIDUAL', { x: MARGIN + 12, y: y - 7, size: 8, font: bold, color: C.secondary });
+    page.drawText(clientSummary.length > 45 ? clientSummary.slice(0, 45) + '...' : clientSummary,
+      { x: MARGIN + 12, y: y - 23, size: 12.4, font: bold, color: C.text });
+    const dateText = cleanText(data.generatedAt);
+    page.drawText(dateText, { x: PAGE_W - MARGIN - 12 - font.widthOfTextAtSize(dateText, 9), y: y - 15, size: 9, font, color: C.secondary });
+    y -= 59;
     pairsSection('01 · Identificação do cliente', data.client);
     pairsSection('02 · Dados da bicicleta', data.bike);
     pairsSection('03 · Medidas antropométricas', data.body);
@@ -232,34 +249,69 @@
     y -= 14;
 
     if (bike) {
-      ensureSpace(320);
+      ensureSpace(330);
       sectionHeading('05 · Visualização da bicicleta');
-      const boxHeight = 220;
-      page.drawRectangle({ x: MARGIN, y: y - boxHeight, width: CONTENT_W, height: boxHeight, color: C.navy });
+      const boxHeight = 228;
+      page.drawRectangle({ x: MARGIN, y: y - boxHeight, width: CONTENT_W, height: boxHeight,
+        color: C.tint, borderColor: C.line, borderWidth: .8 });
       const scale = Math.min((CONTENT_W - 26) / bike.width, (boxHeight - 22) / bike.height);
       const width = bike.width * scale;
       const height = bike.height * scale;
       page.drawImage(bike, { x: MARGIN + (CONTENT_W - width) / 2, y: y - boxHeight + (boxHeight - height) / 2, width, height });
       y -= boxHeight + 14;
-      (data.bikeMetrics || []).forEach((item, index) => pairRow(item.label, item.value, index));
+      const metrics = data.bikeMetrics || [];
+      if (metrics.length) {
+        const gap = 9;
+        const columns = Math.min(3, metrics.length);
+        const tileWidth = (CONTENT_W - gap * (columns - 1)) / columns;
+        const tileHeight = 49;
+        ensureSpace(tileHeight + 7);
+        metrics.slice(0, columns).forEach((item, index) => {
+          const x = MARGIN + index * (tileWidth + gap);
+          page.drawRectangle({ x, y: y - tileHeight + 3, width: tileWidth, height: tileHeight,
+            color: C.navy2 });
+          const label = wrapText(item.label, font, 8, tileWidth - 16).slice(0, 2);
+          label.forEach((line, i) => page.drawText(line, { x: x + 9, y: y - 9 - i * 9,
+            size: 8, font, color: C.steel }));
+          const value = wrapText(item.value, bold, 10.2, tileWidth - 16).slice(0, 2);
+          value.forEach((line, i) => page.drawText(line, { x: x + 9, y: y - 31 - i * 11,
+            size: 10.2, font: bold, color: C.white }));
+        });
+        y -= tileHeight + 9;
+        metrics.slice(columns).forEach((item, index) => pairRow(item.label, item.value, index));
+      }
       y -= 12;
     }
 
+    if (data.finalMeasurements?.length) {
+      // Nunca deixar a ficha final quebrada com uma única medida órfã
+      // na página seguinte: ela deve ser uma unidade legível para o cliente.
+      const estimatedHeight = data.finalMeasurements.reduce((total, item) => {
+        const label = wrapText(item.label, font, 8.8, 210);
+        const value = wrapText(item.value, bold, 9, CONTENT_W - 232);
+        return total + Math.max(24, Math.max(label.length, value.length) * 12 + 10) + 3;
+      }, 0) + 66;
+      if (estimatedHeight < PAGE_H - 205) ensureSpace(estimatedHeight);
+      pairsSection('06 · Medidas finais registradas pelo avaliador', data.finalMeasurements);
+    }
+
     if (data.comparison?.rows?.length) {
-      pairsSection('06 · Comparação de quadros', data.comparison.rows);
+      pairsSection('07 · Comparação de quadros', data.comparison.rows);
     }
 
     const notes = wrapText(data.note || '', font, 8.7, CONTENT_W - 20);
     const notesHeight = notes.length * 12 + 34;
     ensureSpace(notesHeight + 6);
-    page.drawRectangle({ x: MARGIN, y: y - notesHeight + 5, width: CONTENT_W, height: notesHeight, color: C.tint, borderColor: C.line, borderWidth: 0.6 });
-    page.drawText('INTERPRETAÇÃO PROFISSIONAL', { x: MARGIN + 10, y: y - 12, size: 9, font: bold, color: C.text });
+    page.drawRectangle({ x: MARGIN, y: y - notesHeight + 5, width: CONTENT_W, height: notesHeight, color: C.lightBlue, borderColor: C.line, borderWidth: 0.6 });
+    page.drawRectangle({ x: MARGIN, y: y - notesHeight + 5, width: 3, height: notesHeight, color: C.blue });
+    page.drawText('INTERPRETAÇÃO PROFISSIONAL', { x: MARGIN + 12, y: y - 12, size: 9, font: bold, color: C.text });
     notes.forEach((line, i) => page.drawText(line, { x: MARGIN + 10, y: y - 27 - i * 12, size: 8.7, font, color: C.secondary }));
 
     const pages = pdf.getPages();
     pages.forEach((p, index) => {
+      p.drawRectangle({ x: MARGIN, y: 49, width: 26, height: 2, color: C.blue });
       p.drawLine({ start: { x: MARGIN, y: 46 }, end: { x: PAGE_W - MARGIN, y: 46 }, thickness: 0.7, color: C.line });
-      p.drawText('PAIVA · Documento digital · ' + cleanText(data.generatedAt), { x: MARGIN, y: 31, font, size: 8, color: C.secondary });
+      p.drawText('PAIVA  |  DOCUMENTO DIGITAL  |  ' + cleanText(data.generatedAt), { x: MARGIN, y: 31, font, size: 8, color: C.secondary });
       const number = `Página ${index + 1} de ${pages.length}`;
       p.drawText(number, { x: PAGE_W - MARGIN - font.widthOfTextAtSize(number, 8), y: 31, font, size: 8, color: C.secondary });
     });

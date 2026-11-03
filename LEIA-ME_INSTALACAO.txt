@@ -3,9 +3,9 @@ PAIVA BIKE FIT STUDIO — V5.23 PWA · EDIÇÃO PIN
 O que é: versão instalável baseada na V5.22, com cache offline e tela de bloqueio por PIN de 6 dígitos.
 
 IDENTIDADE VISUAL:
-- Logo circular azul com ciclista em análise biomecânica: aparece no cabeçalho do aplicativo e na tela de acesso por PIN.
-- O fundo preto exterior ao círculo é escondido pela máscara circular aplicada visualmente no navegador, preservando a arte original.
-- Publique paiva-logo-circular.jpg junto aos demais arquivos; a imagem é armazenada no cache offline.
+- Logo circular azul com ciclista em análise biomecânica: aparece no cabeçalho do aplicativo, na tela de acesso por PIN e no relatório PDF.
+- A imagem paiva-logo-round.png possui transparência circular real: elimina o retângulo do fundo no PDF e melhora a circunferência do PIN, sem redesenhar a arte original.
+- Publique paiva-logo-round.png junto aos demais arquivos; a imagem é armazenada no cache offline.
 - Este pacote não muda os ícones de instalação na tela inicial do celular ou computador.
 
 ANTROPOMETRIA: a altura do ponto esternal ao solo e a entrepernas (cavalo) são informadas separadamente.
@@ -65,6 +65,9 @@ RELATÓRIO DIGITAL EM PDF:
 - Toque em "Compartilhar PDF" para abrir o compartilhamento nativo (WhatsApp, e-mail etc.) em aparelhos/navegadores compatíveis; se o compartilhamento não for suportado, o arquivo PDF será baixado para envio manual.
 - A geração do PDF acontece no próprio aparelho e não transmite os dados dos clientes para servidores.
 - A biblioteca pdf-lib.min.js e o arquivo pdf-export.js precisam ficar na raiz do repositório para o relatório funcionar, inclusive sem internet depois de carregado e atualizado o cache.
+- O PDF foi redesenhado com acabamento PAIVA: cabeçalho em azul-cinza aço, logo verdadeiramente circular, cartão de identificação, seções organizadas e visualização da bicicleta sem retângulo preto.
+- O telefone/WhatsApp informado no cadastro aparece na identificação do cliente no PDF.
+- Medidas finais da bicicleta só são incluídas se preenchidas; medidas estimadas pela foto 2D recebem identificação específica.
 - Antes de usar com clientes, teste PDF e compartilhamento no iPad e no Android. Alguns navegadores limitam a partilha de arquivos; o download é a alternativa.
 
 FOTO REAL DA BICICLETA DO CLIENTE:
@@ -79,3 +82,20 @@ FOTO REAL DA BICICLETA DO CLIENTE:
 - Salve e compartilhe o PDF ANTES de fechar ou atualizar o aplicativo. Em uma nova avaliação, restaure a imagem anterior se ainda estiver na tela.
 - A fotografia é convertida em JPG adequado ao PDF; fotos em formatos não suportados pelo aparelho podem exigir conversão para JPG ou PNG.
 - O arquivo bike-photo-upload.js também deve ser enviado na raiz do repositório para o recurso funcionar, inclusive offline após atualização.
+
+MEDIDAS FINAIS DA BICICLETA — OPCIONAL:
+- O novo quadro "Medidas reais da bicicleta" serve para registrar manualmente a posição FINAL, após o fit. A instrumentação Retül e STT já fornece diversas medidas; use esta ficha somente se fizer sentido na avaliação.
+- Inclui altura e recuo do selim, inclinação, referências bico do selim até direção/mesa/manopla/STI/apoio TT, manete até eixo dianteiro, desnível selim-guidão, stack e reach reais, quantidade e altura de espaçadores, comprimento da mesa e largura do guidão.
+- A distância até a manopla aparece no modo MTB, a distância até o STI aparece no modo Road; TT usa o centro do apoio de antebraço.
+- O comprimento do pedivela continua no campo existente "Dados da bicicleta". NÃO foi criado outro campo duplicado.
+- Os campos vazios não aparecem na seção de medidas finais do PDF. Não existem números automáticos falsamente identificados como medidas finais.
+
+CALIBRAÇÃO POR FOTO — RECURSO EXPERIMENTAL:
+- Expanda "Medição assistida pela foto · experimental" dentro de "Medidas reais da bicicleta".
+- Selecione uma fotografia LATERAL da bicicleta. Informe o comprimento correto do pedivela no campo existente (ex.: 175 mm).
+- Toque em "Calibrar pedivela" e marque o centro do movimento central seguido pelo centro do eixo do pedal.
+- Escolha uma distância, toque em "Medir" e marque os dois pontos da medida desejada. A escala da imagem será calculada a partir do pedivela.
+- Medidas de reach e recuo usam a diferença HORIZONTAL na foto; stack e desnível usam a VERTICAL. Outras distâncias usam a distância projetada entre os dois pontos.
+- A estimativa preenche o campo opcional, identificada como "estimativa por foto 2D" na ficha e no relatório. Edite manualmente após conferir para registrar o valor medido.
+- ATENÇÃO: esta ferramenta NÃO reconhece automaticamente os pontos; NÃO corrige distorção de lente, perspectiva nem profundidade dos componentes. Não substitui Retül, STT, fita ou medição calibrada profissional. Fotografias oblíquas ou com bicicleta fora do plano perpendicular à câmera podem apresentar erro grande.
+- Publique final-measures.css, final-measures.js, photo-calibrator.css e photo-calibrator.js junto aos demais arquivos, inclusive para funcionamento offline.

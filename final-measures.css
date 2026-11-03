@@ -1,0 +1,57 @@
+/* PAIVA — registro final de posição, opcional e sem estimativas automáticas. */
+.paiva-final-measures-card.hidden { display: block !important; }
+.paiva-final-note {
+  color: #c6d2db; line-height: 1.55; font-size: 12px;
+  background: rgba(95, 131, 154, .11); border: 1px solid rgba(153, 184, 203, .24);
+  padding: 11px 13px; border-radius: 12px; margin: 0 0 14px;
+}
+.paiva-final-group { border-top: 1px solid rgba(177, 196, 208, .17); padding: 14px 0 2px; }
+.paiva-final-group:first-child { border-top: 0; padding-top: 0; }
+.paiva-final-group h3 { color: #d9e6ee; margin: 0 0 11px; font-size: 12px; letter-spacing: .045em; }
+.paiva-final-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+.paiva-final-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.paiva-final-field label { color: #d9e2ea; font-size: 11px; line-height: 1.4; min-height: 30px; }
+.paiva-final-field input {
+  width: 100%; min-width: 0; box-sizing: border-box; border-radius: 9px;
+  padding: 11px; border: 1px solid #465663; color: #f6f8fb; background: #111921;
+  font: inherit; font-size: 14px;
+}
+.paiva-final-field input:focus { outline: 2px solid #82b8d5; outline-offset: 1px; }
+.paiva-final-field small { color: #93a7b7; font-size: 10px; line-height: 1.4; }
+.paiva-final-field.paiva-field-hidden { display: none !important; }
+.paiva-final-unit { color: #b6c8d5; font-size: 10px; font-weight: 700; }
+.paiva-final-controls { display: flex; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.paiva-final-controls .btn { font-size: 11px; }
+.paiva-final-controls span { color: #aebfc9; font-size: 11px; }
+
+/* Ficha HTML preparada para impressão, alinhada ao PDF nativo. */
+#clientReport .report-final-measures {
+  padding: 16px; margin-top: 17px; border: 1px solid #d7e2e8;
+  border-radius: 12px; background: #f7fafc; color: #20303e;
+}
+#clientReport .report-final-measures h2 { color: #1b303f; margin: 0 0 5px; font-size: 15px; }
+#clientReport .report-final-measures p { color: #647b8b; font-size: 10px; margin: 0 0 12px; }
+#clientReport .report-final-measures dl { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px 12px; margin: 0; }
+#clientReport .report-final-measures dl>div { border-bottom: 1px solid #e2eaf0; padding: 7px 4px; }
+#clientReport .report-final-measures dt { color: #6d7b87; font-size: 10px; }
+#clientReport .report-final-measures dd { margin: 3px 0 0; color: #1d3242; font-size: 12px; font-weight: 700; }
+
+/* A logo real é um círculo transparente, inclusive na tela de PIN. */
+#paiva-pin-lock .paiva-pin-logo, #logo, #clientReport #reportLogo {
+  display: block; aspect-ratio: 1/1; border-radius: 50% !important;
+  object-fit: contain !important; clip-path: circle(49.6% at 50% 50%) !important;
+  -webkit-clip-path: circle(49.6% at 50% 50%) !important;
+  background: transparent !important; border: 0 !important;
+}
+#paiva-pin-lock .paiva-pin-logo { width: min(100%, 220px); height: auto; }
+#clientReport .report-top { border-bottom-color: #879ca9 !important; }
+#clientReport .report-brand { color: #354e61 !important; }
+
+@media (max-width: 650px) {
+  .paiva-final-grid { grid-template-columns: 1fr; }
+  #paiva-pin-lock .paiva-pin-logo { width: min(100%, 210px); }
+}
+@media print {
+  .paiva-final-measures-card { display: none !important; }
+  #clientReport .report-final-measures { break-inside: avoid; page-break-inside: avoid; }
+}
