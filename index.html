@@ -502,4 +502,4 @@ syncReportLogo();
  document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(updateReportBikeVisual,0)));
  updateReportBikeVisual();
 })();
-</script><script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js', {scope:'./'}).catch(err => console.warn('Instalação offline indisponível:', err)); }); }</script></body></html>
+</script><script src="./athlete-motion.js" defer></script><script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js', {scope:'./'}).catch(err => console.warn('Instalação offline indisponível:', err)); }); }</script></body></html>

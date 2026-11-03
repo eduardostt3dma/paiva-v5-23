@@ -38,19 +38,35 @@
   font:800 10px system-ui,sans-serif;}
 #paiva-athlete-2d .paiva-2d-tools button[aria-pressed="true"] {background:#dbe7ef;
   border-color:#dbe7ef;color:#162634;}
+#paiva-athlete-2d .paiva-2d-align {display:flex;gap:6px;margin-bottom:10px;}
+#paiva-athlete-2d .paiva-2d-align button {flex:1;min-width:0;padding:9px 4px;
+  border-radius:8px;border:1px solid #667b89;background:#233542;
+  color:#cde1ec;font:700 10px system-ui;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-zoom {display:grid;grid-template-columns:repeat(3,1fr);
+  gap:6px;padding:10px 0 13px;border-top:1px solid #526978;}
+#paiva-athlete-2d .paiva-2d-zoom label {grid-column:1/-1;color:#dae8ef;
+  font-size:11px;font-weight:800;}
+#paiva-athlete-2d .paiva-2d-zoom output {float:right;font-variant-numeric:tabular-nums;}
+#paiva-athlete-2d .paiva-2d-zoom input {grid-column:1/-1;min-width:0;
+  width:100%;accent-color:#b9e1f4;margin:5px 0;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-zoom button {border:1px solid #667b89;
+  background:#21333f;color:#e4eef4;border-radius:8px;padding:8px;
+  cursor:pointer;font-weight:800;}
 #paiva-athlete-2d .paiva-2d-width {display:block;font-size:11px;font-weight:800;
   color:#d3e4ec;padding:10px 0;border-top:1px solid #536978;}
 #paiva-athlete-2d .paiva-2d-width output {float:right;color:#e7f2f8;
   font-variant-numeric:tabular-nums;}
 #paiva-athlete-2d .paiva-2d-width input {display:block;width:100%;margin:13px 0 4px;
   accent-color:#c4edf9;cursor:pointer;}
-#paiva-athlete-2d .paiva-2d-canvas-wrap {overflow:hidden;
+#paiva-athlete-2d .paiva-2d-canvas-wrap {overflow:auto;position:relative;
   background:#0d1923;border:1px solid #566c7c;border-radius:12px;
-  width:100%;min-height:160px;}
+  width:100%;min-height:160px;max-height:78vh;}
 #paiva-athlete-2d canvas {display:block;width:100%;height:auto;
-  max-width:100%;touch-action:none;cursor:crosshair;}
+  max-width:none;touch-action:none;cursor:crosshair;}
 #paiva-athlete-2d .paiva-2d-canvas-wrap video {display:block;width:100%;max-width:100%;
-  max-height:min(70vh,800px);background:#05080b;object-fit:contain;}
+  background:#05080b;object-fit:contain;}
+#paiva-athlete-2d #paiva-2d-track-overlay {position:absolute;left:0;top:0;
+  width:100%;height:auto;max-width:100%;pointer-events:none;z-index:3;}
 #paiva-athlete-2d .paiva-2d-status {font-size:11px;color:#cbdee8;
   line-height:1.5;margin:11px 0;min-height:18px;}
 #paiva-athlete-2d .paiva-2d-values {color:#edf5f8;font-size:12px;
