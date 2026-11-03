@@ -27,6 +27,8 @@ COMPARADOR DE QUADROS (Speed/Road, MTB e comparação geométrica TT):
 AJUDA ANTROPOMÉTRICA:
 - Os botões ? agora abrem explicações de texto em lugar dos desenhos esquemáticos antigos.
 - A imagem anatômica principal e seus cartões aparecem em sequência vertical, responsivos, para evitar cortes no iPad e no Android.
+- A ilustração foi atualizada com o rótulo "Estatura 180 cm" completo, sem cortes na borda direita. As medidas escritas no desenho são apenas exemplos visuais.
+- O arquivo antropometria-paiva.png precisa ser enviado para a raiz do GitHub junto com o index.html; ele também é armazenado para uso offline.
 - Os arquivos help-text.js e frame-compare.js precisam ser enviados para a raiz do GitHub junto dos demais.
 
 PIN: o código temporário foi informado ao proprietário junto com a entrega desta versão.
