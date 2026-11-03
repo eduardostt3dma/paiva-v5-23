@@ -229,6 +229,10 @@
         lastRows.push({ label: key === 'height' ? 'Estatura' : `${label} / estatura`,
           value: ratio === null ? value : `${value} · ${ratio.toLocaleString('pt-BR', {maximumFractionDigits:1})}%` });
       }
+      if (height && !missing.length) {
+        lastRows.push({ label: 'O que significam as porcentagens?',
+          value: 'Cada porcentagem mostra o comprimento de uma medida em relação à estatura. A entreperna ajuda a observar a proporção dos membros inferiores; tronco e braço ajudam a interpretar o alcance dos segmentos superiores. São medidas distintas e não devem ser somadas para totalizar 100%.' });
+      }
       lastRows.push({ label: 'Stack e reach por antropometria',
         value: 'Hipóteses exploratórias no projeto individual; não são prescrição nem prova de compatibilidade do quadro.' });
     }

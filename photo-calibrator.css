@@ -4,6 +4,13 @@
 .paiva-photo-calibrator p { font-size: 11px; color: #b0c2cf; line-height: 1.55; margin: 10px 0; }
 .paiva-photo-calibrator .paiva-calibrator-controls { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; margin: 10px 0; }
 .paiva-photo-calibrator .paiva-calibrator-controls button { font-size: 11px; padding: 9px 11px; }
+.paiva-photo-calibrator .paiva-calibrator-guide-controls { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+.paiva-photo-calibrator .paiva-calibrator-guide-controls button { cursor:pointer; border-radius:9px;
+  padding:10px 12px; font-size:11px; font-weight:750; }
+.paiva-photo-calibrator .paiva-calibrator-guide-toggle[aria-pressed="true"] {
+  background:#d8f8c2; border-color:#d8f8c2; color:#173324; }
+.paiva-photo-calibrator .paiva-calibrator-guide-clear { background:#1c2d38; color:#d8e8f0;
+  border:1px solid #587080; }
 .paiva-photo-calibrator .paiva-calibrator-crank { display:block; flex:1 1 100%; font-size:11px;
   color:#dcebf4; font-weight:750; }
 .paiva-photo-calibrator .paiva-calibrator-crank input { display:block; box-sizing:border-box;

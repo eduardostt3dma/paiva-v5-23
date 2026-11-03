@@ -58,6 +58,26 @@
     };
   }
 
+  // Leitura descritiva das correções limitadas do simulador, sem valor clínico validado.
+  function geometryTendency(reference, mode) {
+    if (!reference) return 'Indefinida: faltam medidas completas para explorar as proporções.';
+    const s = reference.adjustmentStack, r = reference.adjustmentReach;
+    let description;
+    if (Math.abs(s) < 6 && Math.abs(r) < 6)
+      description = 'Sem predominância clara de quadro mais alto, baixo, longo ou curto';
+    else if (s >= 6 && r <= -6) description = 'Explorar quadros relativamente mais altos e curtos';
+    else if (s <= -6 && r >= 6) description = 'Explorar quadros relativamente mais baixos e longos';
+    else if (s >= 6 && r >= 6) description = 'Explorar quadros relativamente mais altos e longos';
+    else if (s <= -6 && r <= -6) description = 'Explorar quadros relativamente mais baixos e curtos';
+    else if (s >= 6) description = 'Explorar quadros com stack relativamente mais alto';
+    else if (s <= -6) description = 'Explorar quadros com stack relativamente mais baixo';
+    else if (r >= 6) description = 'Explorar quadros com reach relativamente mais longo';
+    else description = 'Explorar quadros com reach relativamente mais curto';
+    return description + (mode === 'tt'
+      ? '. Na TT, conferir sobretudo alcance e altura dos apoios (pad reach e pad stack), não apenas o quadro.'
+      : '. Comparar dentro da modalidade e conferir os ajustes reais de selim, mesa e guidão.');
+  }
+
   function initialize() {
     const anchor = document.getElementById('paiva-sizing-method');
     if (!anchor || document.getElementById('paiva-bike-project')) return;
@@ -197,6 +217,10 @@
           <strong>${mm(value.reach)}</strong><span>Reach · referência exploratória</span>
         </div>`).join('') +
         `<p class="paiva-prj-footnote">Correção antropométrica sobre a referência por estatura: stack ${signed(ref.adjustmentStack)} · reach ${signed(ref.adjustmentReach)}. Não é quadro perfeito nem resultado de fórmula clínica validada.</p>`;
+      const geometry = document.createElement('p');
+      geometry.className = 'paiva-prj-footnote';
+      geometry.textContent = `Perfil de geometria para investigar: ${geometryTendency(ref,mode)} Tendência exploratória, a confirmar em avaliação dinâmica.`;
+      results.append(geometry);
       if (stackActual !== null && reachActual !== null) {
         const comparison = document.createElement('div');
         comparison.className = 'paiva-prj-difference';
@@ -256,6 +280,7 @@
 
     globalThis.PAIVA_BIKE_PROJECT = {
       estimate: estimateReference,
+      geometryTendency,
       getReport() {
         if (globalThis.PAIVA_ANTHRO_METHOD?.getMode?.() !== 'full') return null;
         switchMode();
@@ -267,6 +292,10 @@
             label:`${PROFILES[value.profile].label} · stack / reach estimados`,
             value:`${mm(value.stack)} / ${mm(value.reach)} · referência exploratória, não validada` });
           const chosen = candidates.find(v => v.profile === profile);
+          rows.push({label:'Perfil de geometria para investigar',
+            value: geometryTendency(chosen,mode)});
+          rows.push({label:'Como interpretar esta indicação',
+            value:'As proporções de perna, tronco e braço ajudam a formular uma hipótese de geometria, mas não determinam modelo, marca ou tamanho perfeito. Esta é uma leitura inicial experimental: validar os pontos de contato, limites de regulagem, mobilidade e posição dinâmica antes de recomendar uma bicicleta.'});
           const s = read(id('stack').value,300,800),r = read(id('reach').value,250,650);
           if (s !== null && r !== null) {
             rows.push({label:'Quadro real informado · stack / reach',value:`${mm(s)} / ${mm(r)}`});

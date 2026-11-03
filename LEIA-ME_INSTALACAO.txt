@@ -118,6 +118,7 @@ CALIBRAÇÃO POR FOTO — RECURSO EXPERIMENTAL:
 - Selecione uma fotografia LATERAL da bicicleta. Informe o comprimento correto do pedivela no campo próprio da calibração (ex.: 170 mm), sincronizado com os dados gerais da bicicleta.
 - Toque em "Calibrar pedivela" e marque o centro do movimento central seguido pelo centro do eixo do pedal.
 - Escolha uma distância, toque em "Medir" e marque os dois pontos da medida desejada. A escala da imagem será calculada a partir do pedivela.
+- Para alinhar visualmente dois pontos (por exemplo, centro do pedivela até bico do selim), use a chavinha "— Linha-guia": toque em dois pontos e uma reta VERDE permanece sobre a foto. Ela funciona SEM calibrar e não informa distância em milímetros. A chavinha permite várias retas e "Limpar linhas" remove apenas as linhas-guia, mantendo a calibração e a última medida.
 - Medidas de reach e recuo usam a diferença HORIZONTAL na foto; stack e desnível usam a VERTICAL. Outras distâncias usam a distância projetada entre os dois pontos.
 - A estimativa preenche o campo opcional, identificada como "estimativa por foto 2D" na ficha e no relatório. Edite manualmente após conferir para registrar o valor medido.
 - ATENÇÃO: esta ferramenta NÃO reconhece automaticamente os pontos; NÃO corrige distorção de lente, perspectiva nem profundidade dos componentes. Não substitui Retül, STT, fita ou medição calibrada profissional. Fotografias oblíquas ou com bicicleta fora do plano perpendicular à câmera podem apresentar erro grande.
@@ -131,6 +132,8 @@ PRÉ-FIT SIMPLES POR ANTROPOMETRIA — NOVA VERSÃO:
 - O guia tradicional por estatura permanece sem alterações. A referência antropométrica adiciona correções experimentais de até 18 mm em cada eixo com base nas proporções de entreperna, tronco e braço; as três posições variam em passos demonstrativos de 8 mm.
 - ATENÇÃO: o modelo é uma heurística de TRIAGEM, não foi validado clinicamente. Valores de 47%/34%/34% são âncoras internas de exploração, não dados normativos. Não apresente os números como encaixe perfeito ou compatibilidade garantida. Verifique comprimento de mesa, espaçadores, selim, contato das mãos e postura dinâmica; em TT, confirme pad stack e pad reach.
 - As explicações detalhadas ficam no botão ? do projeto. O relatório PDF indica explicitamente que se trata de referência experimental.
+- O relatório do cliente inclui as porcentagens de cada segmento comparado à estatura e uma explicação curta: são proporções independentes, não partes que devam ser somadas para chegar a 100%.
+- Também traz um perfil de geometria a INVESTIGAR (por exemplo, quadro relativamente mais alto/curto), deduzido somente das pequenas correções exploratórias de stack e reach. NÃO indica automaticamente fabricante, modalidade, tamanho ou bicicleta perfeita. A decisão profissional exige conferência dos pontos de contato, ajustes e posição dinâmica; nas TT, pad stack/pad reach.
 
 FOTO 2D — PEDIVELA NO LUGAR CERTO:
 - Na seção "Medição assistida pela foto · experimental", há um campo direto para o comprimento real do pedivela (mm), acima do botão "Calibrar pedivela".

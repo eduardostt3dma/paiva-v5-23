@@ -35,6 +35,16 @@
     const measure = document.createElement('button');
     measure.type = 'button'; measure.className = 'btn'; measure.textContent = '2 · Medir';
     buttons.append(crankLabel, calibrate, select, measure);
+    const guideControls = document.createElement('div');
+    guideControls.className = 'paiva-calibrator-guide-controls';
+    const guide = document.createElement('button');
+    guide.type = 'button'; guide.className = 'btn paiva-calibrator-guide-toggle';
+    guide.textContent = '— Linha-guia'; guide.setAttribute('aria-pressed', 'false');
+    guide.setAttribute('aria-label', 'Ligar ou desligar régua de linha reta sem calibração');
+    const clearGuides = document.createElement('button');
+    clearGuides.type = 'button'; clearGuides.className = 'btn paiva-calibrator-guide-clear';
+    clearGuides.textContent = 'Limpar linhas';
+    guideControls.append(guide, clearGuides);
     const frame = document.createElement('div');
     frame.className = 'paiva-calibrator-canvas-wrap';
     const canvas = document.createElement('canvas');
@@ -44,7 +54,7 @@
     status.className = 'paiva-calibrator-status'; status.setAttribute('role', 'status');status.setAttribute('aria-live', 'polite');
     const disclaimer = document.createElement('p');
     disclaimer.textContent = 'Aviso: estimativas enviadas à ficha ficam identificadas como “foto 2D” no PDF. Para medições oficiais, utilize o seu protocolo instrumental.';
-    section.append(summary, note, file, buttons, frame, status, disclaimer);
+    section.append(summary, note, file, buttons, guideControls, frame, status, disclaimer);
     host.after(section);
 
     const context = canvas.getContext('2d');
@@ -54,6 +64,7 @@
     let draft = [];
     let reference = [];
     let measurement = [];
+    let guides = [];
     let ratio = null;
     let lastDistance = '';
     const excluded = new Set(['finalHandlebarWidth']); // fora do plano da foto lateral
@@ -111,6 +122,13 @@
       }
     }
 
+    function setGuideMode(enabled) {
+      stage = enabled ? 'guide' : 'idle';
+      draft = [];
+      guide.setAttribute('aria-pressed', String(enabled));
+      draw();
+    }
+
     function draw() {
       context.clearRect(0, 0, canvas.width, canvas.height);
       if (!image) {
@@ -120,12 +138,13 @@
         return;
       }
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      for (const points of guides) line(points[0], points[1], '#c8fb99', 3);
       if (reference.length === 2) line(reference[0], reference[1], '#00d9ec', 4);
       if (measurement.length === 2) line(measurement[0], measurement[1], '#ffe18d', 4);
       if (draft.length === 1) {
         const point = draft[0];context.beginPath();context.arc(point.x,point.y,7,0,Math.PI*2);
         context.fillStyle = '#0e2834';context.fill();context.lineWidth = 3;
-        context.strokeStyle = stage === 'calibrate' ? '#00d9ec' : '#ffe18d';context.stroke();
+        context.strokeStyle = stage === 'calibrate' ? '#00d9ec' : stage === 'guide' ? '#c8fb99' : '#ffe18d';context.stroke();
       }
     }
 
@@ -149,7 +168,8 @@
         image = reduced;
         URL.revokeObjectURL(uri);
         file.value = '';
-        ratio = null;reference=[];measurement=[];draft=[];stage='idle';
+        ratio = null;reference=[];measurement=[];guides=[];draft=[];stage='idle';
+        guide.setAttribute('aria-pressed','false');
         draw();setMessage('Foto carregada. Confira o pedivela logo acima e toque em “1 · Calibrar pedivela”.');
       };
       next.onerror = () => { URL.revokeObjectURL(uri); setMessage('Não foi possível abrir a fotografia. Tente JPG ou PNG.'); };
@@ -162,19 +182,34 @@
       if (!Number.isFinite(crank) || crank < 140 || crank > 190) {
         setMessage('Informe acima o comprimento real do pedivela (140–190 mm) para calibrar.'); return;
       }
+      setGuideMode(false);
       stage='calibrate';draft=[];reference=[];measurement=[];ratio=null;
       draw();setMessage(`Calibração ${crank} mm: toque no CENTRO DO MOVIMENTO CENTRAL e depois no CENTRO DO EIXO DO PEDAL.`);
     });
     measure.addEventListener('click', () => {
       if (!image || !ratio) { setMessage('Primeiro carregue a foto e calibre pelo comprimento do pedivela.'); return; }
+      setGuideMode(false);
       stage='measure';draft=[];measurement=[];draw();
       const name = select.selectedOptions?.[0]?.textContent || 'medida';
       setMessage(`Marque os dois pontos de “${name}” na fotografia. Esta será uma aproximação 2D.`);
     });
     select.addEventListener('change', () => { if (stage==='measure') {stage='idle';draft=[];draw();setMessage('Campo alterado. Toque novamente em “2 · Medir”.');} });
 
+    guide.addEventListener('click', () => {
+      if (!image) {setMessage('Primeiro carregue uma foto lateral da bicicleta.');return;}
+      const enabled = stage !== 'guide';
+      setGuideMode(enabled);
+      setMessage(enabled
+        ? 'LINHA-GUIA ligada: toque em dois pontos da foto para traçar uma reta verde. Pode traçar várias linhas; não precisa calibrar o pedivela e não calcula milímetros.'
+        : 'Linha-guia desligada. As retas já traçadas permanecem na foto.');
+    });
+    clearGuides.addEventListener('click', () => {
+      guides = []; draft = []; draw();
+      setMessage('Linhas-guias removidas. A calibração e a última medição foram preservadas.');
+    });
+
     canvas.addEventListener('pointerdown', event => {
-      if (!image || !['calibrate','measure'].includes(stage)) return;
+      if (!image || !['calibrate','measure','guide'].includes(stage)) return;
       event.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const point = { x: (event.clientX - rect.left) * canvas.width / rect.width,
@@ -186,6 +221,11 @@
       const dx = Math.abs(b.x-a.x), dy = Math.abs(b.y-a.y);
       const pixels = Math.hypot(dx, dy);
       if (pixels < 10) {draft=[];draw();setMessage('Pontos próximos demais. Repita a marcação.');return;}
+      if (stage === 'guide') {
+        guides.push([a,b]);draft=[];draw();
+        setMessage(`${guides.length} linha(s)-guia(s) desenhada(s). Marque mais dois pontos ou desligue “Linha-guia”. Retas visuais, sem calibração.`);
+        return;
+      }
       if (stage === 'calibrate') {
         const crank = Number(crankInput.value);
         ratio = crank/pixels;reference = [a,b];
