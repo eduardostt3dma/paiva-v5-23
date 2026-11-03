@@ -138,5 +138,18 @@ FOTO 2D — PEDIVELA NO LUGAR CERTO:
 - A ferramenta pode ser usada em celular/iPad: toque primeiro no centro do movimento central e depois no eixo do pedal. Confira a escala antes de medir os demais pontos.
 
 MEDIDAS REAIS — INTERFACE ENXUTA:
-- A explicação geral aparece no botão ? do cabeçalho opcional.
-- Cada campo de medida ganhou seu próprio botão ?, com definição e referência anatômica/mecânica. O texto longo não ocupa mais a tela até o avaliador solicitar.
+- A explicação geral aparece em um botão ? ao lado do título "Medidas reais da bicicleta (opcional)".
+- Cada campo de medida tem seu próprio botão ?, com definição e referência anatômica/mecânica. As explicações permanecem ocultas até o avaliador solicitá-las.
+- A antiga coluna "Entenda as medidas", que exibia três explicações permanentes, foi removida. O botão de limpar foi preservado na ficha de medidas.
+
+ANÁLISE ANGULAR 2D — NOVA FERRAMENTA:
+- A seção "Análise angular 2D" fica após a ficha de medidas reais da bicicleta, antes do rodapé.
+- Selecione uma foto LATERAL do atleta, da galeria ou câmera. Máximo: 20 MB; a imagem é reduzida localmente para diminuir o consumo de memória.
+- No modo "Ângulo · 3 pontos", toque em A, depois B (VÉRTICE), depois C. O software calcula o ângulo interno ABC, entre 0° e 180°.
+- No modo "Linha reta", toque duas vezes para traçar um segmento visual. Sem calibração métrica, a linha NÃO informa comprimento em milímetros.
+- No modo "Ajustar pontos", arraste os marcadores para refinar a localização dos pontos anatômicos. O valor do ângulo é recalculado após o ajuste.
+- "Desfazer" remove o último ponto ainda incompleto ou a última anotação; "Limpar linhas" remove as anotações, preservando a fotografia.
+- "Salvar imagem marcada" gera um PNG com a foto e as linhas/ângulos, para guardar com a ficha do cliente. A foto NÃO vai automaticamente para o PDF do pré-fit nesta versão.
+- A foto é mantida apenas em memória nesta sessão: não há upload para o GitHub nem sincronização entre dispositivos. Guarde o PNG antes de sair da página.
+- A medição angular é manual, em uma imagem ESTÁTICA. O app não identifica pontos anatômicos automaticamente nem corrige profundidade, perspectiva, paralaxe ou rotações fora do plano. Confirme no protocolo 2D/3D profissional.
+- Para funcionamento offline, publique também athlete-2d.css e athlete-2d.js na raiz do repositório; ambos constam do cache atualizado.

@@ -54,9 +54,11 @@
     const generalBox = document.createElement('div');
     generalBox.className = 'paiva-final-help-box';generalBox.hidden = true;
     generalBox.textContent = 'Os sistemas Retül e STT Systems já fornecem muitas destas medidas. Esta ficha é opcional para transcrever dados ou registrar valores aferidos manualmente. Só campos preenchidos entram no PDF. O comprimento do pedivela fica em Dados da bicicleta e, agora, também pode ser informado na calibração fotográfica 2D. As estimativas por foto devem ser conferidas com instrumento antes de serem usadas como medida final.';
+    // O ? principal deve ficar no título, onde o usuário o procura.
+    card.querySelector('h2')?.append(' ',generalHelp);
     const intro = document.createElement('div');
     intro.className = 'paiva-final-intro';
-    intro.append(note,generalHelp,generalBox);
+    intro.append(note,generalBox);
     host.before(intro);
     generalHelp.addEventListener('click', () => {
       const open = generalBox.hidden;
@@ -120,6 +122,17 @@
     count.id = 'paiva-final-count';
     controls.append(clear, count);
     host.after(controls);
+
+    // A antiga coluna "Entenda as medidas" deixava explicações permanentes
+    // na tela. Remova-a e conserve o botão Limpar na ficha atual.
+    const legacyGuide = Array.from(card.parentElement?.children || [])
+      .find(node => node !== card && node.matches?.('section.card') && node.querySelector('#reset'));
+    if (legacyGuide) {
+      const oldReset = legacyGuide.querySelector('#reset');
+      if (oldReset) controls.append(oldReset);
+      legacyGuide.remove();
+      card.parentElement?.classList.add('paiva-final-single');
+    }
 
     const report = document.createElement('section');
     report.className = 'report-final-measures';

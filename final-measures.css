@@ -2,6 +2,9 @@
 .paiva-final-measures-card.hidden { display: block !important; }
 .paiva-final-intro {display:flex;align-items:center;justify-content:space-between;gap:8px;
   flex-wrap:wrap;margin:0 0 12px;}
+.paiva-final-single {grid-template-columns:minmax(0,1fr)!important;}
+.paiva-final-measures-card>h2 {display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.paiva-final-measures-card>h2 .paiva-final-help {margin-left:auto;}
 .paiva-final-note {color:#b9ccd7;line-height:1.5;font-size:11px;margin:0;}
 .paiva-final-help {width:26px;height:26px;flex:none;border-radius:50%;
   border:1px solid #7e98a8;background:#223441;color:#ecf3f7;

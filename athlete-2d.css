@@ -1,0 +1,49 @@
+/* PAIVA · Análise angular 2D, visual nobre e controles para toque. */
+#paiva-athlete-2d { margin-top:18px; padding:17px;
+  background:linear-gradient(145deg,#202d37,#121a22);border:1px solid #566b7b; }
+#paiva-athlete-2d .paiva-2d-title {display:flex;align-items:center;
+  justify-content:space-between;gap:10px;margin-bottom:13px;}
+#paiva-athlete-2d .paiva-2d-title span {font-size:10px;color:#b3c7d3;
+  letter-spacing:.1em;font-weight:800;}
+#paiva-athlete-2d .paiva-2d-title h2 {margin:5px 0 0;color:#e5eef3;
+  font-size:17px;letter-spacing:.02em;}
+#paiva-2d-help {width:32px;height:32px;flex:none;border:1px solid #91a9b8;
+  border-radius:50%;background:#2a3c49;color:#f6f9fb;font-weight:800;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-explain {border:1px solid #4e6371;
+  background:#101c26;border-radius:10px;padding:10px 12px;margin-bottom:13px;
+  color:#d6e1e8;font-size:11px;line-height:1.6;}
+#paiva-athlete-2d .paiva-2d-explain p {margin:0 0 10px;}
+#paiva-athlete-2d .paiva-2d-explain p:last-child {margin-bottom:0;}
+#paiva-athlete-2d .paiva-2d-explain[hidden] {display:none!important;}
+#paiva-athlete-2d .paiva-2d-file {display:block;font-size:11px;
+  color:#d3e0e9;font-weight:750;margin:0 0 12px;}
+#paiva-athlete-2d .paiva-2d-file input {display:block;width:100%;margin-top:7px;
+  padding:10px;color:#e4edf2;border-radius:9px;border:1px solid #526775;
+  background:#111d27;font-size:12px;box-sizing:border-box;}
+#paiva-athlete-2d .paiva-2d-tools {display:flex;gap:7px;
+  flex-wrap:wrap;margin-bottom:10px;}
+#paiva-athlete-2d .paiva-2d-tools button {flex:1 1 145px;
+  background:#101b24;color:#c4d5df;border:1px solid #627886;
+  border-radius:9px;padding:11px 9px;cursor:pointer;
+  font:800 10px system-ui,sans-serif;}
+#paiva-athlete-2d .paiva-2d-tools button[aria-pressed="true"] {background:#dbe7ef;
+  border-color:#dbe7ef;color:#162634;}
+#paiva-athlete-2d .paiva-2d-canvas-wrap {overflow:hidden;
+  background:#0d1923;border:1px solid #566c7c;border-radius:12px;
+  width:100%;min-height:160px;}
+#paiva-athlete-2d canvas {display:block;width:100%;height:auto;
+  max-width:100%;touch-action:none;cursor:crosshair;}
+#paiva-athlete-2d .paiva-2d-status {font-size:11px;color:#cbdee8;
+  line-height:1.5;margin:11px 0;min-height:18px;}
+#paiva-athlete-2d .paiva-2d-values {color:#edf5f8;font-size:12px;
+  font-weight:750;line-height:1.7;margin:7px 0;}
+#paiva-athlete-2d .paiva-2d-actions {display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+#paiva-athlete-2d .paiva-2d-actions button {flex:1 1 135px;
+  background:#21313e;color:#dce8f0;border:1px solid #6b7f8b;
+  padding:11px 10px;border-radius:9px;cursor:pointer;
+  font:750 11px system-ui,sans-serif;}
+#paiva-athlete-2d .paiva-2d-actions .paiva-2d-save {background:#d7e5ee;
+  border-color:#d7e5ee;color:#172935;}
+#paiva-athlete-2d .paiva-2d-disclaimer {font-size:10px;line-height:1.5;
+  color:#9fb3c0;margin:12px 0 0;}
+@media print {#paiva-athlete-2d {display:none!important;}}
