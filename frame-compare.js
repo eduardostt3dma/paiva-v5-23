@@ -44,7 +44,7 @@
       delta: rawDelta,
       distanceA: null, distanceB: null,
       winner: null, status: 'comparison',
-      conclusion: 'Comparação disponível. Informe uma referência profissional ou a estatura do ciclista para avaliar a proximidade geométrica.'
+      conclusion: 'Comparação geométrica disponível. Para indicar proximidade de ajuste, informe stack e reach de uma referência profissional validada na avaliação.'
     };
     if (!reference) return output;
 
@@ -95,7 +95,7 @@
         <div>
           <span class="paiva-cmp-eyebrow">ANÁLISE COMPARATIVA · NOVO RECURSO</span>
           <h2>Comparador de quadros</h2>
-          <p>Compare a geometria de dois modelos. O PAIVA informa diferenças e proximidade de referência, sempre com interpretação profissional.</p>
+          <p>Compare o stack e o reach reais de dois quadros. A preferência só aparece com referência profissional informada.</p>
         </div>
         <span id="paiva-cmp-mode" class="paiva-cmp-mode">Speed / Road</span>
       </div>
@@ -132,7 +132,7 @@
       <div class="paiva-cmp-output" id="paiva-cmp-output" aria-live="polite">
         <p id="paiva-cmp-message">Preencha o stack e o reach dos dois quadros para começar.</p>
       </div>
-      <p class="paiva-cmp-disclaimer">Triagem inicial: as faixas automáticas do PAIVA são exploratórias e baseadas em estatura; não definem um bike fit ideal. A decisão depende de mobilidade, posição de selim, mesa, espaçadores, guidão e análise dinâmica. Em TT, conferir também pad stack e pad reach.</p>`;
+      <p class="paiva-cmp-disclaimer">Sem referência profissional, o PAIVA compara diferenças reais, mas não indica vencedor. Stack/reach do quadro não equivalem à posição das mãos. Considere montagem, mobilidade, conforto e avaliação dinâmica; em TT, confira pad stack e pad reach.</p>`;
     footer.before(section);
 
     const style = document.createElement('style');
@@ -213,13 +213,6 @@
       if (!oneTarget && stackTarget !== null && reachTarget !== null) {
         reference = { stack: stackTarget, reach: reachTarget };
         referenceLabel = `Referência profissional: Stack ${display(stackTarget)} mm / Reach ${display(reachTarget)} mm.`;
-      } else if (!oneTarget) {
-        const sr = parseInterval(document.getElementById('bikeStack')?.textContent);
-        const rr = parseInterval(document.getElementById('bikeReach')?.textContent);
-        if (sr && rr) {
-          reference = { stack: sr, reach: rr };
-          referenceLabel = `Faixas exploratórias por estatura: Stack ${display(sr[0])}–${display(sr[1])} mm / Reach ${display(rr[0])}–${display(rr[1])} mm.`;
-        }
       }
       return { a, b, reference, referenceLabel, oneTarget, valid, mode };
     }
@@ -247,7 +240,7 @@
         paragraph('Para usar a referência profissional, preencha os dois campos: stack e reach.');
         return;
       }
-      paragraph(d.referenceLabel || 'Sem faixa disponível: informe a estatura do ciclista ou uma referência profissional.');
+      paragraph(d.referenceLabel || 'Sem referência profissional: comparação descritiva, sem indicação automática de tamanho ou vencedor.');
       const grid = document.createElement('div');
       grid.className = 'paiva-cmp-comparison';
       for (const [letter, bike, distance] of [

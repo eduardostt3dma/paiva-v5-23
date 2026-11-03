@@ -17,12 +17,15 @@ BRAÇO LÍQUIDO (RÉGUA ANTROPOMÉTRICA SHIMANO):
 
 COMPARADOR DE QUADROS (Speed/Road, MTB e comparação geométrica TT):
 - Depois da antropometria, preencha marca/modelo, stack (mm) e reach (mm) da bicicleta A e B.
-- Sem referência profissional, o aplicativo compara cada quadro com faixas EXPLORATÓRIAS do pré-fit, baseadas em estatura; NÃO constituem previsão validada de stack/reach ideais.
+- A tela principal exibe somente os ANTIGOS LIMITES INFERIORES de stack/reach como pontos empíricos iniciais de triagem, sem faixas máximas. Esses números NÃO são valores ideais validados nem limites clínicos, e não devem ser usados isoladamente para comprar uma bicicleta.
+- Foram retiradas estimativas nominais de top tube, comprimento de mesa, top tube + mesa e seat tube ±3 cm. Nenhuma dessas somas era capaz de representar adequadamente um cockpit individual.
+- Sem referência profissional informada, o comparador apresenta SOMENTE as diferenças reais de stack e reach dos dois quadros; não atribui um vencedor.
 - Opcionalmente informe stack e reach de quadro de uma referência definida pelo avaliador (por exemplo, um quadro já ajustado e com montagem comparável).
 - O comparador destaca diferenças geométricas e só sugere uma preferência preliminar quando um quadro é pelo menos tão próximo nas duas medidas. Se houver trocas ou empate, declara que não há preferência clara.
 - A decisão final deve considerar possibilidade de montagem, mesa, espaçadores, guidão, posição do selim, mobilidade, conforto e avaliação dinâmica. Reach de quadro NÃO é distância de apoio das mãos.
 - Na TT, conferir pad stack, pad reach e posicionamento aerodinâmico. A comparação isolada do quadro não define qual TT é melhor.
 - Após preencher ambos os quadros, a análise comparativa é incluída no relatório PDF.
+- Base científica: Holliday et al. (2021), Sports Medicine and Health Science, DOI: 10.1016/j.smhs.2021.02.007; Priego-Quesada et al. (2024), Sports Medicine, DOI: 10.1007/s40279-024-02100-6. A literatura não valida um intervalo universal de stack/reach por estatura, razão pela qual o teto foi removido.
 
 AJUDA ANTROPOMÉTRICA:
 - Os botões ? agora abrem explicações de texto em lugar dos desenhos esquemáticos antigos.
