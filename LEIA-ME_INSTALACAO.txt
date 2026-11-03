@@ -147,6 +147,8 @@ MEDIDAS REAIS — INTERFACE ENXUTA:
 
 ANÁLISE ANGULAR 2D — NOVA FERRAMENTA:
 - A seção "Análise angular 2D" fica após a ficha de medidas reais da bicicleta, antes do rodapé.
+- No Windows (janela larga), as ferramentas ficam em uma barra lateral FIXA ao lado da foto, com rolagem interna, para não precisar subir e descer a página. Em celulares, o painel passa para cima da foto.
+- O controle "Espessura das linhas" regula de 1 a 8 pixels tanto as linhas novas quanto as anteriores; os pontos de marcação também diminuem quando a linha fica fina.
 - Selecione uma foto LATERAL do atleta, da galeria ou câmera. Máximo: 20 MB; a imagem é reduzida localmente para diminuir o consumo de memória.
 - No modo "Ângulo · 3 pontos", toque em A, depois B (VÉRTICE), depois C. O software calcula o ângulo interno ABC, entre 0° e 180°.
 - No modo "Linha reta", toque duas vezes para traçar um segmento visual. Sem calibração métrica, a linha NÃO informa comprimento em milímetros.
@@ -155,4 +157,6 @@ ANÁLISE ANGULAR 2D — NOVA FERRAMENTA:
 - "Salvar imagem marcada" gera um PNG com a foto e as linhas/ângulos, para guardar com a ficha do cliente. A foto NÃO vai automaticamente para o PDF do pré-fit nesta versão.
 - A foto é mantida apenas em memória nesta sessão: não há upload para o GitHub nem sincronização entre dispositivos. Guarde o PNG antes de sair da página.
 - A medição angular é manual, em uma imagem ESTÁTICA. O app não identifica pontos anatômicos automaticamente nem corrige profundidade, perspectiva, paralaxe ou rotações fora do plano. Confirme no protocolo 2D/3D profissional.
+- WEBCAM (versão inicial): clique em "Ligar webcam" e permita câmera no Chrome/Edge do Windows (exige HTTPS). Visualize a pedalada e, se desejar, grave até 2 minutos SEM ÁUDIO. Pare a gravação, baixe o vídeo (.webm ou .mp4, conforme o navegador), use a barra de reprodução para pausar e clique "Capturar quadro". A imagem congelada abre na ferramenta 2D para ângulos/linhas manuais; clique "Voltar ao vídeo" para escolher outro instante. Uma foto também pode ser capturada diretamente da webcam sem gravar (a câmera desliga após capturar).
+- A filmagem fica apenas no navegador enquanto a página está aberta; baixe o arquivo e salve as imagens anotadas antes de fechar o aplicativo. O vídeo não é enviado a servidores e os pontos NÃO acompanham automaticamente o atleta.
 - Para funcionamento offline, publique também athlete-2d.css e athlete-2d.js na raiz do repositório; ambos constam do cache atualizado.
