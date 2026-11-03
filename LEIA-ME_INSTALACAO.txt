@@ -204,3 +204,9 @@ CONTROLE POR RODINHA, ETIQUETAS MENORES E TRAJETÓRIA DE UM PONTO:
 - A etiqueta visível do ângulo ficou menor, com apenas "A" e o valor em graus, sem a numeração A1/A2 sobre a imagem. A lista abaixo do desenho continua oferecendo detalhes.
 - A ferramenta "PONTO · RASTRO" cria um único pontinho verde no local do clique (quadril, pé etc.). Arraste-o no modo "AJUSTAR PONTOS" para refinar. Capture um quadro de vídeo gravado, marque o ponto, volte ao vídeo e reproduza com "Seguir pontos ao reproduzir" ativo. O rastreamento experimental tenta seguir sua textura e desenha o caminho recente do ponto sem calcular graus.
 - O rastro é uma trajetória em PIXELS da projeção da câmera, não um valor em milímetros, nem comprova deslocamento anatômico real. O rastreio pode perder referências e interromper o vídeo; mantenha câmera fixa, pontos de alto contraste, iluminação uniforme e valide antes de fazer qualquer indicação biomecânica.
+
+MOUSE E TECLADO NO VÍDEO — ATALHOS DO ANALISADOR:
+- Com o cursor sobre a imagem da ANÁLISE 2D ou de um dos visores A/B, clique com o botão DIREITO do mouse para PAUSAR a reprodução. Clique novamente com o botão direito para RETOMAR. O menu de contexto fica bloqueado somente nesses vídeos carregados.
+- Passe o mouse sobre o vídeo que deseja controlar. A BARRA DE ESPAÇO alterna reproduzir/pausar, K pausa, L reproduz, SETA ESQUERDA volta um quadro aproximado e SETA DIREITA avança um quadro aproximado. A rodinha já funciona para avanço/retrocesso.
+- Com vídeos A e B carregados, os comandos do teclado atuam apenas no último visor que recebeu o cursor. Atalhos não capturam teclas enquanto você escreve ou altera valores em campos, menus e botões do site.
+- O botão direito e os atalhos controlam somente arquivos gravados/importados; não interrompem a webcam ao vivo nem a gravação em andamento. As diferenças de avanço e fluidez dependem de FPS real, codificação e navegador.

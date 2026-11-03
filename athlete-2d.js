@@ -30,6 +30,7 @@
         <p><strong>Linha:</strong> clique e arraste de uma extremidade até a outra. Depois, “Ajustar pontos” permite puxar as pontas ou mover a reta inteira pelo centro. Sem calibração métrica, não é uma régua em milímetros.</p>
         <p><strong>Alinhamento:</strong> selecione uma linha tocando nela e use Horizontal / Vertical; mantenha Shift pressionado ao desenhar para limitar a inclinação a passos de 45°.</p>
         <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. Os pontos desenhados sobre um quadro parado não são reposicionados automaticamente ao girar a rodinha: reajuste-os antes de interpretar os números.</p>
+        <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
         <p><strong>Zoom:</strong> aproxime até 400% pelo controle inferior ou com Ctrl + roda do mouse sobre a foto.</p>
         <p><strong>Espessura:</strong> ajuste as linhas de 1 a 8 px no painel lateral. A mudança aparece imediatamente nas linhas existentes e nas novas marcações.</p>
         <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Você pode gravar até 3 minutos, salvar o vídeo no aparelho, pausá-lo e usar “Capturar quadro” para medir os ângulos de um instante. Os pontos iniciais são sempre marcados manualmente.</p>
@@ -107,7 +108,7 @@
               </label>
               <div><button type="button" id="paiva-2d-prev-frame" disabled>◀ Quadro</button>
                 <button type="button" id="paiva-2d-next-frame" disabled>Quadro ▶</button></div>
-              <small class="paiva-2d-wheel-hint">🖱 Rodinha sobre a imagem: quadro anterior / próximo</small>
+              <small class="paiva-2d-wheel-hint">🖱 Rodinha: quadros · Direito: play/pause · Espaço: play/pause · ← →: quadros</small>
             </div>
             <button type="button" id="paiva-2d-camera-start">Ligar webcam</button>
             <button type="button" id="paiva-2d-record" disabled>Iniciar gravação</button>
@@ -614,10 +615,19 @@
       });
     }
     byId('play-video').addEventListener('click',attemptPlayback);
-    byId('pause-video').addEventListener('click',()=>{
+    function pausePlayback() {
       haltReverse(false);video.pause();
       message('Vídeo pausado. Ajuste a posição na linha do tempo ou clique em “Capturar quadro”.');
-    });
+    }
+    function togglePlayback() {
+      if(!hasFileVideo())return;
+      if(!video.paused || (backwardMode && reverseFrame!==null))pausePlayback();
+      else {
+        if(video.hidden){showVideo(true);byId('back-video').hidden=true;}
+        attemptPlayback();
+      }
+    }
+    byId('pause-video').addEventListener('click',pausePlayback);
     byId('video-file').addEventListener('change',() => {
       const input=byId('video-file');
       const file=input.files?.[0];if(!file)return;
@@ -689,6 +699,31 @@
       wheelAccumulator=0;
       stepFrame(direction,!canvas.hidden);
     },{passive:false});
+    const playerArea=canvas.parentElement;
+    playerArea.tabIndex=0;
+    playerArea.setAttribute('aria-label','Área de análise 2D. Botão direito pausa ou reproduz; Espaço alterna vídeo; setas mudam os quadros.');
+    playerArea.addEventListener('pointerenter',()=>{globalThis.PAIVA_ACTIVE_VIDEO_PANEL='athlete';});
+    playerArea.addEventListener('pointerdown',()=>playerArea.focus({preventScroll:true}));
+    playerArea.addEventListener('contextmenu',event=>{
+      if(!hasFileVideo())return;
+      event.preventDefault();
+      globalThis.PAIVA_ACTIVE_VIDEO_PANEL='athlete';
+      togglePlayback();
+    });
+    document.addEventListener('keydown',event=>{
+      if(globalThis.PAIVA_ACTIVE_VIDEO_PANEL!=='athlete'||!hasFileVideo()||event.repeat)return;
+      if(event.ctrlKey||event.altKey||event.metaKey)return;
+      if(event.target?.closest?.('input,textarea,select,button,[contenteditable="true"]'))return;
+      const key=event.code||event.key;
+      if(key==='Space'||key===' '){event.preventDefault();togglePlayback();}
+      else if(key==='KeyK'||key==='k'||key==='K'){event.preventDefault();pausePlayback();}
+      else if(key==='KeyL'||key==='l'||key==='L'){event.preventDefault();
+        if(video.hidden){showVideo(true);byId('back-video').hidden=true;}
+        attemptPlayback();}
+      else if(key==='ArrowLeft'||key==='ArrowRight'){
+        event.preventDefault();stepFrame(key==='ArrowRight'?1:-1,!canvas.hidden);
+      }
+    });
     video.addEventListener('error',() => {
       haltReverse();
       if (!cameraStream && video.getAttribute('src'))

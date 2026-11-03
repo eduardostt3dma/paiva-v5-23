@@ -33,7 +33,7 @@
       <div id="paiva-multi-explain" hidden>
         <p>Você pode ligar até seis webcams USB ao Windows e escolher uma para cada visor. Selecione <strong>1 câmera</strong> para ampliar o visor ou <strong>2 câmeras</strong> para captar dois ângulos lado a lado, inclusive com gravação dupla. Os dois arquivos são separados e começam com pequena diferença de tempo; não há sincronização profissional quadro a quadro.</p>
         <p>O reconhecimento das webcams depende da permissão do navegador, das portas USB, da capacidade do computador e dos drivers. Uma câmera não cobre todo o entorno; as cinco vistas são captações independentes, não uma imagem esférica 360°.</p>
-        <p>Escolha resolução, taxa de quadros e qualidade de gravação por câmera. Os valores são solicitações: a webcam pode negociar valores menores. Duas câmeras HD/60 fps exigem mais memória e banda USB. Cada gravação termina automaticamente em até 3 minutos, sem áudio. Salve ambos os arquivos antes de sair. Vídeos antigos também podem ser abertos do pendrive; alguns codecs AVI/MOV não são reproduzidos no navegador. Sobre cada visor de vídeo gravado, a rodinha do mouse avança ou recua o quadro, sem rolar a página.</p>
+        <p>Escolha resolução, taxa de quadros e qualidade de gravação por câmera. Os valores são solicitações: a webcam pode negociar valores menores. Duas câmeras HD/60 fps exigem mais memória e banda USB. Cada gravação termina automaticamente em até 3 minutos, sem áudio. Salve ambos os arquivos antes de sair. Vídeos antigos também podem ser abertos do pendrive; alguns codecs AVI/MOV não são reproduzidos no navegador. Sobre cada visor de vídeo gravado, a rodinha do mouse avança ou recua o quadro; o botão direito alterna reprodução/pausa. Teclado: Espaço alterna, K pausa, L reproduz e ← / → movem os quadros, atuando sobre o último visor apontado pelo mouse.</p>
       </div>
       <div class="paiva-multi-mode">
         <label>Modo de captação
@@ -74,7 +74,7 @@
               <button type="button" id="paiva-multi-play-${key}" disabled>▶ Reproduzir vídeo</button>
               <button type="button" id="paiva-multi-pause-${key}" disabled>⏸ Pausar</button>
             </div>
-            <small class="paiva-multi-wheel-hint">🖱 Rodinha sobre o vídeo: avançar / voltar quadro</small>
+            <small class="paiva-multi-wheel-hint">🖱 Rodinha: quadros · Direito: play/pause · Espaço: play/pause</small>
             <label class="paiva-multi-loop"><input type="checkbox" id="paiva-multi-loop-${key}" checked /> ↔ Vai e volta contínuo</label>
             <label class="paiva-multi-speed">Velocidade de reprodução
               <select id="paiva-multi-speed-${key}"><option value="0.1">0,1×</option><option value="0.25">0,25×</option><option value="0.5">0,5×</option><option value="1" selected>1×</option></select>
@@ -223,6 +223,17 @@
           ? 'O navegador bloqueou a reprodução automática. Clique novamente em “▶ Reproduzir vídeo”.'
           : 'O navegador não conseguiu iniciar o vídeo. Se for AVI, MOV ou outro formato antigo, converta para MP4 com vídeo H.264 (ou WebM).');
       });
+    }
+    function pauseVideo(key){
+      const state=states[key],player=byId('video',key);
+      haltReverse(state,false);player.pause();
+      if(state.source)message(key,'Vídeo pausado. Use a rodinha ou as setas para escolher o quadro.');
+    }
+    function toggleVideo(key){
+      const state=states[key],player=byId('video',key);
+      if(!state.source || state.stream || state.recording)return;
+      if(!player.paused || (state.backward&&state.reverseFrame!==null))pauseVideo(key);
+      else playVideo(key);
     }
 
     async function refreshCameras(requestPermission=false) {
@@ -413,6 +424,37 @@
       byId('record',key).addEventListener('click',()=>startRecording(key));
       byId('end',key).addEventListener('click',()=>finishRecording(key));
       byId('play',key).addEventListener('click',()=>playVideo(key));
+      const player=byId('video',key);
+      player.tabIndex=0;
+      player.setAttribute('aria-label',`Visor ${key.toUpperCase()}: botão direito pausa/reproduz; Espaço alterna; setas avançam quadros.`);
+      player.addEventListener('pointerenter',()=>{globalThis.PAIVA_ACTIVE_VIDEO_PANEL=`multi-${key}`;});
+      player.addEventListener('pointerdown',()=>player.focus({preventScroll:true}));
+      player.addEventListener('contextmenu',event=>{
+        const state=states[key];
+        if(!state.source || state.stream)return;
+        event.preventDefault();
+        globalThis.PAIVA_ACTIVE_VIDEO_PANEL=`multi-${key}`;
+        toggleVideo(key);
+      });
+      document.addEventListener('keydown',event=>{
+        if(globalThis.PAIVA_ACTIVE_VIDEO_PANEL!==`multi-${key}`||event.repeat)return;
+        if(event.ctrlKey||event.altKey||event.metaKey)return;
+        if(event.target?.closest?.('input,textarea,select,button,[contenteditable="true"]'))return;
+        const state=states[key],video=byId('video',key);
+        if(!state.source||state.stream||state.recording)return;
+        const shortcut=event.code||event.key;
+        if(shortcut==='Space'||shortcut===' '){event.preventDefault();toggleVideo(key);}
+        else if(shortcut==='KeyK'||shortcut==='k'||shortcut==='K'){event.preventDefault();pauseVideo(key);}
+        else if(shortcut==='KeyL'||shortcut==='l'||shortcut==='L'){event.preventDefault();playVideo(key);}
+        else if(shortcut==='ArrowLeft'||shortcut==='ArrowRight'){
+          if(!Number.isFinite(video.duration)||video.duration<=0)return;
+          event.preventDefault();haltReverse(state);video.pause();
+          const fps=Number(byId('fps',key).value)||30;
+          const step=shortcut==='ArrowRight'?1:-1;
+          video.currentTime=Math.max(0,Math.min(video.duration,video.currentTime+step/fps));
+          message(key,`Quadro ${step>0?'seguinte':'anterior'} · 1/${fps} s (aproximado).`);
+        }
+      });
       let wheelAccumulator=0;
       byId('video',key).addEventListener('wheel',event=>{
         const state=states[key],player=byId('video',key);
@@ -432,8 +474,7 @@
         if(states[key].source && !states[key].stream)message(key,`Velocidade do vídeo: ${byId('speed',key).selectedOptions[0].textContent}.`);
       });
       byId('pause',key).addEventListener('click',()=>{
-        const player=byId('video',key);haltReverse(states[key],false);player.pause();
-        if(states[key].source)message(key,'Vídeo pausado. Clique em “Analisar no 2D” para medir ângulos e linhas.');
+        pauseVideo(key);
       });
       byId('loop',key).addEventListener('change',()=>{
         if(!byId('loop',key).checked && states[key].backward){
