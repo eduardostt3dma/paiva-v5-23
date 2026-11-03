@@ -33,22 +33,33 @@ html:not(.paiva-pin-unlocked) body > main {
   box-shadow: 0 24px 75px rgba(0, 0, 0, .42);
 }
 
-#paiva-pin-lock .paiva-pin-mark {
-  margin: 0;
-  color: #e8edf0;
-  font-size: 32px;
-  font-weight: 550;
-  letter-spacing: .25em;
-  text-indent: .25em;
+#paiva-pin-lock .paiva-pin-logo {
+  display: block;
+  width: min(100%, 240px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 35px rgba(36, 130, 186, .12);
+  margin: 0 auto 25px;
 }
 
-#paiva-pin-lock .paiva-pin-subbrand {
-  margin: 3px 0 30px;
-  color: #9aa9b5;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .35em;
-  text-indent: .35em;
+/* A arte circular substitui o antigo JPG com fundo quadrado no cabeçalho. */
+#logo {
+  width: 100px !important;
+  height: 100px !important;
+  object-fit: cover !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 650px) {
+  #logo { width: 78px !important; height: 78px !important; }
+  #paiva-pin-lock .paiva-pin-logo { width: min(100%, 210px); }
 }
 
 #paiva-pin-lock .paiva-pin-title {
@@ -278,5 +289,43 @@ html.paiva-pin-unlocked #paiva-pin-relock { display: block; }
 @media screen and (min-width: 800px) {
   .layout > .card:first-child .body-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* PAIVA: bicicletas isoladas do antigo estúdio preto.
+   Mantém apenas a bicicleta sobre o fundo natural da interface. */
+.paiva-fixed-bikes,
+.paiva-fixed-bikes #roadPhotoPanel,
+.paiva-fixed-bikes #mtbPhotoPanel,
+.paiva-fixed-bikes #ttPhotoPanel {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.paiva-fixed-bikes #roadPhotoPanel > img,
+.paiva-fixed-bikes #mtbPhotoPanel > img,
+.paiva-fixed-bikes #ttPhotoPanel > img {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 11px 10px rgba(0, 0, 0, .18));
+}
+
+/* Fotografias reais mantêm o enquadramento normal, sem sombra de recorte. */
+.paiva-fixed-bikes .paiva-bike-photo > img.paiva-client-photo {
+  filter: none !important;
+  border-radius: 10px !important;
+}
+
+/* A bicicleta no PDF também perde o retângulo preto ao redor. */
+#clientReport .report-bike-frame {
+  background: #f4f6f8 !important;
+}
+
+@media print {
+  #clientReport .report-bike-frame {
+    background: #f4f6f8 !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 }

@@ -52,12 +52,27 @@
   }
 
   async function embedImage(pdf, source) {
-    if (typeof source !== 'string' || !source.startsWith('data:image/')) return null;
+    if (typeof source !== 'string' || !source) return null;
     try {
       if (source.startsWith('data:image/jpeg') || source.startsWith('data:image/jpg')) {
         return await pdf.embedJpg(source);
       }
       if (source.startsWith('data:image/png')) return await pdf.embedPng(source);
+
+      // As ilustrações padrão e a logo são arquivos do próprio aplicativo.
+      // Também são lidos do cache quando a instalação PWA está offline.
+      const url = new URL(source, location.href);
+      if (url.origin !== location.origin) return null;
+      const response = await fetch(url.href);
+      if (!response.ok) throw new Error(`Imagem indisponível: ${response.status}`);
+      const bytes = await response.arrayBuffer();
+      const type = response.headers.get('content-type') || '';
+      if (type.includes('png') || /\.png(?:$|\?)/i.test(url.pathname)) {
+        return await pdf.embedPng(bytes);
+      }
+      if (type.includes('jpeg') || type.includes('jpg') || /\.jpe?g(?:$|\?)/i.test(url.pathname)) {
+        return await pdf.embedJpg(bytes);
+      }
     } catch (error) {
       console.warn('Imagem opcional não inserida no PDF:', error);
     }

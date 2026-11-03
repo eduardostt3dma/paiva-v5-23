@@ -2,6 +2,12 @@ PAIVA BIKE FIT STUDIO — V5.23 PWA · EDIÇÃO PIN
 
 O que é: versão instalável baseada na V5.22, com cache offline e tela de bloqueio por PIN de 6 dígitos.
 
+IDENTIDADE VISUAL:
+- Logo circular azul com ciclista em análise biomecânica: aparece no cabeçalho do aplicativo e na tela de acesso por PIN.
+- O fundo preto exterior ao círculo é escondido pela máscara circular aplicada visualmente no navegador, preservando a arte original.
+- Publique paiva-logo-circular.jpg junto aos demais arquivos; a imagem é armazenada no cache offline.
+- Este pacote não muda os ícones de instalação na tela inicial do celular ou computador.
+
 ANTROPOMETRIA: a altura do ponto esternal ao solo e a entrepernas (cavalo) são informadas separadamente.
 O campo "Tronco líquido" é calculado automaticamente: Esterno ao solo - Entrepernas = Tronco líquido (cm).
 Exemplo: 145 cm - 82 cm = 63 cm. A fórmula corresponde ao protocolo de medição utilizado pelo profissional; outros sistemas podem definir a medida do tronco de maneira diferente.
@@ -63,6 +69,8 @@ RELATÓRIO DIGITAL EM PDF:
 
 FOTO REAL DA BICICLETA DO CLIENTE:
 - Primeiro escolha a modalidade: Speed/Road, MTB ou TT.
+- As três imagens ilustrativas PAIVA agora mostram apenas a bicicleta recortada, com fundo transparente, sem o antigo estúdio preto. Isso vale para a tela de referências e para a imagem no relatório PDF.
+- Publique também bike-road-cutout.png, bike-mtb-cutout.png e bike-tt-cutout.png na raiz do GitHub. As três imagens entram no cache para funcionar offline.
 - Na seção Referências na bicicleta, use "Escolher foto" (galeria) ou "Tirar foto" (câmera).
 - A fotografia substitui a imagem ilustrativa apenas na modalidade escolhida e aparece também no PDF final.
 - Sem foto escolhida, a imagem ilustrativa original da modalidade é usada normalmente.

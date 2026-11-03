@@ -26,8 +26,8 @@
     overlay.setAttribute('aria-label', 'Acesso ao PAIVA Bike Fit Studio');
     overlay.innerHTML = `
       <div class="paiva-pin-panel">
-        <h1 class="paiva-pin-mark">PAIVA</h1>
-        <p class="paiva-pin-subbrand">BIKE FIT STUDIO</p>
+        <img class="paiva-pin-logo" src="./paiva-logo-circular.jpg"
+          alt="PAIVA — Análise Biomecânica em Ciclismo" width="240" height="240" />
         <h2 class="paiva-pin-title">Acesso pessoal</h2>
         <p class="paiva-pin-description">Digite seu PIN de 6 dígitos para continuar.</p>
         <form id="paiva-pin-form" autocomplete="off">
