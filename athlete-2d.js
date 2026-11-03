@@ -82,9 +82,14 @@
             <div class="paiva-2d-playback">
               <label>Velocidade do vídeo
                 <select id="paiva-2d-speed" aria-label="Velocidade de reprodução">
-                  <option value="0.25">0,25×</option><option value="0.5">0,5×</option>
+                  <option value="0.1">0,1×</option><option value="0.25">0,25×</option><option value="0.5">0,5×</option>
                   <option value="1" selected>1×</option><option value="1.5">1,5×</option>
                 </select>
+              </label>
+              <div><button type="button" id="paiva-2d-play-video" disabled>▶ Reproduzir</button>
+                <button type="button" id="paiva-2d-pause-video" disabled>⏸ Pausar</button></div>
+              <label>Quadros por segundo do arquivo (para avançar manualmente)
+                <select id="paiva-2d-file-fps"><option value="24">24 fps</option><option value="25">25 fps</option><option value="30" selected>30 fps</option><option value="50">50 fps</option><option value="60">60 fps</option></select>
               </label>
               <div><button type="button" id="paiva-2d-prev-frame" disabled>◀ Quadro</button>
                 <button type="button" id="paiva-2d-next-frame" disabled>Quadro ▶</button></div>
@@ -359,6 +364,8 @@
       byId('prev-frame').disabled = !hasPlayback || recording || trackingActive;
       byId('next-frame').disabled = !hasPlayback || recording || trackingActive;
       byId('speed').disabled = !hasPlayback || recording;
+      byId('play-video').disabled = !hasPlayback || recording || trackingActive;
+      byId('pause-video').disabled = !hasPlayback || recording;
     }
 
     function stopTracking(clear=true) {
@@ -453,8 +460,25 @@
       byId('camera-info').textContent=`Arquivo: ${filename}. Reprodução local, sem upload.`;
       message('Vídeo aberto. Use a barra de reprodução para pausar no instante desejado, depois clique “Capturar quadro”.');
       updateCameraControls();
+      attemptPlayback();
       return true;
     }
+    function attemptPlayback() {
+      if(!recordedUrl || video.getAttribute('src')!==recordedUrl)return;
+      let attempt;
+      try{attempt=video.play();}catch(error){message(`Não foi possível iniciar o vídeo: ${error?.message||'erro de reprodução'}.`);return;}
+      Promise.resolve(attempt).then(()=>{
+        if(!video.paused)message('Vídeo em reprodução. Pause no instante desejado e clique “Capturar quadro”.');
+      }).catch(error=>{
+        message(error?.name==='NotAllowedError'
+          ? 'O navegador bloqueou a reprodução automática. Clique em “▶ Reproduzir”.'
+          : 'O navegador não conseguiu reproduzir este formato. Prefira MP4 (vídeo H.264) ou WebM; alguns AVI/MOV precisam de conversão.');
+      });
+    }
+    byId('play-video').addEventListener('click',attemptPlayback);
+    byId('pause-video').addEventListener('click',()=>{
+      video.pause();message('Vídeo pausado. Clique “Capturar quadro” para marcar os pontos do atleta.');
+    });
     byId('video-file').addEventListener('change',() => {
       const input=byId('video-file');
       const file=input.files?.[0];if(!file)return;
@@ -469,14 +493,19 @@
       if(!recordedUrl || video.getAttribute('src')!==recordedUrl)return;
       video.pause();
       const duration=Number.isFinite(video.duration)?video.duration:Math.max(video.currentTime,0);
-      video.currentTime=Math.max(0,Math.min(duration,video.currentTime+direction/30));
-      message('Avanço aproximado de 1/30 s (a precisão depende da taxa de quadros do arquivo). Aguarde a imagem atualizar antes de capturar.');
+      const fps=Number(byId('file-fps').value)||30;
+      video.currentTime=Math.max(0,Math.min(duration,video.currentTime+direction/fps));
+      message(`Avanço aproximado de 1/${fps} s. Ajuste o FPS conforme o vídeo; aguarde atualizar antes de capturar.`);
     }
     byId('prev-frame').addEventListener('click',()=>stepFrame(-1));
     byId('next-frame').addEventListener('click',()=>stepFrame(1));
     video.addEventListener('error',() => {
       if (!cameraStream && video.getAttribute('src'))
         message('O navegador não conseguiu reproduzir esse arquivo. Tente MP4 com vídeo H.264 ou WebM; alguns AVI/MOV precisam ser convertidos.');
+    });
+    video.addEventListener('loadedmetadata',()=>{
+      if(recordedUrl && video.getAttribute('src')===recordedUrl && video.paused)
+        message('Vídeo reconhecido. Clique em “▶ Reproduzir” ou use a barra de reprodução.');
     });
 
     function setFrame(source, naturalWidth, naturalHeight) {

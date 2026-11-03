@@ -44,6 +44,17 @@
     return {x:bestX,y:bestY,error:averageError};
   }
 
+  // Verificação ida/volta: se a textura encontrada não retornar ao ponto de
+  // origem, há ambiguidade ou o marcador se perdeu. Melhor interromper do
+  // que desenhar um ângulo aparentemente preciso fora da articulação.
+  function trackSafePoint(before,after,w,h,at) {
+    const forward=trackPoint(before,after,w,h,at);
+    if(!forward || forward.error>18)return null;
+    const backward=trackPoint(after,before,w,h,forward);
+    if(!backward || backward.error>18 || Math.hypot(backward.x-at.x,backward.y-at.y)>2)return null;
+    return forward;
+  }
+
   function create({video,annotations,sourceWidth,sourceHeight,onPoints,onLost,onDone}) {
     if (!video || !video.videoWidth || !video.videoHeight || !annotations?.length)
       return {start:async()=>false,stop:()=>{}};
@@ -73,8 +84,11 @@
       if(!running)return;
       if(video.ended) {stop();onDone?.();return;}
       const time=video.currentTime;
-      if (video.paused || time===lastVideoTime || (lastSampleTime>=0 && time-lastSampleTime<.055)) {
+      if (video.paused || time===lastVideoTime || (lastSampleTime>=0 && time-lastSampleTime<.018)) {
         schedule();return;
+      }
+      if(lastVideoTime>=0 && time-lastVideoTime>.22) {
+        stop();video.pause();onLost?.('Houve salto de quadros. Reduza a velocidade de reprodução e marque os pontos novamente.');return;
       }
       lastVideoTime=time;lastSampleTime=time;
       let next;
@@ -83,9 +97,9 @@
       for(const item of scaled) {
         const pts=[];
         for(const point of item.points) {
-          const found=trackPoint(previous,next,w,h,point);
+          const found=trackSafePoint(previous,next,w,h,point);
           if(!found) {
-            stop();video.pause();onLost?.('O rastreio perdeu um marcador. Pause, capture outro quadro e reposicione os pontos.');return;
+            stop();video.pause();onLost?.('Um marcador ficou ambíguo ou se afastou. O rastreio foi interrompido por segurança; capture outro quadro e reposicione os pontos.');return;
           }
           pts.push({x:found.x,y:found.y});
         }
@@ -110,5 +124,5 @@
     }
     return {start,stop};
   }
-  globalThis.PAIVA_MOTION_TRACKER={trackPoint,grayscale,create};
+  globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,grayscale,create};
 })();

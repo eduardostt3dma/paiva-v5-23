@@ -8,6 +8,18 @@
   font-weight:800;letter-spacing:.11em;}
 #paiva-multi-camera .paiva-multi-heading h2 {margin:5px 0 0;font-size:18px;
   color:#eaf2f6;letter-spacing:.02em;}
+#paiva-multi-camera .paiva-multi-mode {display:flex;gap:10px;align-items:end;
+  flex-wrap:wrap;padding:11px;border:1px solid #526877;background:#14232d;
+  border-radius:11px;margin:12px 0;}
+#paiva-multi-camera .paiva-multi-mode label {display:block;font-size:11px;
+  color:#c6dbe6;font-weight:800;flex:1 1 200px;}
+#paiva-multi-camera .paiva-multi-mode select {display:block;width:100%;
+  padding:10px 9px;margin-top:5px;background:#101d27;color:#eaf2f5;
+  border:1px solid #637988;border-radius:8px;}
+#paiva-multi-camera .paiva-multi-mode button {padding:11px 12px;
+  background:#d6e5ed;color:#173040;border:1px solid #bfd3dc;
+  border-radius:9px;font-weight:800;cursor:pointer;}
+#paiva-multi-camera .paiva-multi-mode button:disabled {opacity:.43;cursor:not-allowed;}
 #paiva-multi-help {width:32px;height:32px;flex:none;border-radius:50%;
   border:1px solid #8fa6b6;background:#263a47;color:#f4f9fb;
   font-weight:850;cursor:pointer;}
@@ -26,6 +38,8 @@
   flex:1 1 260px;}
 #paiva-multi-camera .paiva-multi-grid {display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;}
+#paiva-multi-camera[data-mode="single"] .paiva-multi-grid {grid-template-columns:minmax(0,1fr);}
+#paiva-multi-camera[data-mode="single"] #paiva-multi-pane-b {display:none;}
 #paiva-multi-camera .paiva-multi-pane {min-width:0;border:1px solid #5d7281;
   border-radius:12px;padding:13px;background:linear-gradient(150deg,#1b2a34,#101c26);}
 #paiva-multi-camera .paiva-multi-pane-heading {display:flex;gap:9px;align-items:center;
@@ -42,9 +56,22 @@
 #paiva-multi-camera .paiva-multi-pane input[type="file"] {display:block;width:100%;
   min-width:0;margin-top:6px;padding:9px;border:1px solid #637988;
   border-radius:8px;background:#101d27;color:#e6f0f5;font-size:12px;}
+#paiva-multi-camera .paiva-multi-quality {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;padding:8px 0;border-bottom:1px solid #405260;}
+#paiva-multi-camera .paiva-multi-quality label {min-width:0;font-size:10px;}
+#paiva-multi-camera .paiva-multi-quality select {padding:8px 5px;font-size:11px;}
+#paiva-multi-camera .paiva-multi-speed {display:flex!important;align-items:center;
+  gap:10px;justify-content:space-between;}
+#paiva-multi-camera .paiva-multi-speed select {width:auto;min-width:110px;margin:0;}
 #paiva-multi-camera .paiva-multi-pane video {display:block;width:100%;
   aspect-ratio:16/9;max-height:340px;object-fit:contain;margin-top:12px;
   border:1px solid #415767;background:#080e15;border-radius:9px;}
+#paiva-multi-camera .paiva-multi-playback {display:grid;
+  grid-template-columns:1fr 1fr;gap:7px;margin:9px 0 2px;}
+#paiva-multi-camera .paiva-multi-playback button {min-width:0;cursor:pointer;
+  background:#d6e5ed;color:#152a38;border:1px solid #aec7d5;
+  border-radius:8px;padding:10px 7px;font:750 11px system-ui,sans-serif;}
+#paiva-multi-camera .paiva-multi-playback button:disabled {opacity:.42;cursor:not-allowed;}
 #paiva-multi-camera .paiva-multi-controls {display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0;}
 #paiva-multi-camera .paiva-multi-controls button,
@@ -67,5 +94,6 @@
 @media(max-width:740px){
   #paiva-multi-camera .paiva-multi-grid {grid-template-columns:1fr;}
   #paiva-multi-camera .paiva-multi-pane video {max-height:none;}
+  #paiva-multi-camera .paiva-multi-quality {grid-template-columns:1fr 1fr;}
 }
 @media print {#paiva-multi-camera {display:none!important;}}
