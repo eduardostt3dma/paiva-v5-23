@@ -17,7 +17,7 @@
       </div>
       <div id="paiva-converter-explain" hidden>
         <p>MP4 compatível abre diretamente nos visores e na Análise Angular 2D. Se o vídeo antigo não reproduzir, escolha-o aqui e converta para MP4 com H.264. A conversão ocorre no próprio computador, sem upload.</p>
-        <p>O motor de conversão tem cerca de 31 MB e é baixado e armazenado no navegador na primeira utilização com internet; depois poderá funcionar offline se o cache permanecer disponível. A conversão usa processamento intenso e pode demorar. Para arquivos grandes, prefira um conversor instalado no Windows.</p>
+        <p>O motor de conversão é distribuído compactado (cerca de 10 MB) para funcionar com o envio pelo site do GitHub. Na primeira utilização com internet, ele é carregado e descompactado no próprio navegador; depois poderá funcionar offline se o cache permanecer disponível. A conversão usa processamento intenso e pode demorar. Para arquivos grandes, prefira um conversor instalado no Windows.</p>
         <p>O objetivo é preservar resolução e taxa de quadros originais. A reconversão pode produzir alguma perda de qualidade e não corrige problemas do vídeo original. Confira os pontos anatômicos e os instantes da pedalada antes de usar medidas.</p>
       </div>
       <div class="paiva-converter-body">
@@ -38,16 +38,16 @@
     next.before(section);
     const el=id=>document.getElementById('paiva-converter-'+id);
     const status=text=>el('status').textContent=text;
-    let chosen=null,converted=null,downloadUrl=null,engine=null,busy=false,cancelled=false;
+    let chosen=null,converted=null,downloadUrl=null,wasmBlobUrl=null,engine=null,busy=false,cancelled=false;
     let libraryPromise=null,lastLog='';
 
     async function loadLibrary() {
       if(globalThis.FFmpegWASM?.FFmpeg)return globalThis.FFmpegWASM.FFmpeg;
       if(!libraryPromise)libraryPromise=new Promise((resolve,reject)=>{
         const script=document.createElement('script');
-        script.src='./video-codec/ffmpeg.js';script.async=true;
+        script.src='./ffmpeg.js';script.async=true;
         script.onload=()=>globalThis.FFmpegWASM?.FFmpeg?resolve(globalThis.FFmpegWASM.FFmpeg):reject(new Error('Motor de conversão não disponível.'));
-        script.onerror=()=>reject(new Error('Não foi possível carregar o motor. Conecte à internet na primeira utilização.'));
+        script.onerror=()=>reject(new Error('O arquivo ffmpeg.js não está disponível no site. Envie também os arquivos do conversor ao GitHub e atualize a página.'));
         document.head.append(script);
       }).catch(error=>{libraryPromise=null;throw error;});
       return libraryPromise;
@@ -85,7 +85,7 @@
       cancelled=false;busy=true;lastLog='';clearOutput();refresh();
       el('progress').hidden=false;el('progress').value=0;
       try {
-        status('Preparando o conversor local. Na primeira vez, aguarde o download do motor (~31 MB)…');
+        status('Preparando o conversor local. Na primeira vez, aguarde o carregamento (~10 MB)…');
         const FFmpeg=await loadLibrary();
         if(cancelled)return;
         engine=new FFmpeg();
@@ -96,8 +96,15 @@
           el('progress').value=percent;
           status(`Convertendo no computador · ${percent}% (estimativa). Não feche a página.`);
         });
-        const base=new URL('./video-codec/',document.baseURI);
-        await engine.load({coreURL:new URL('ffmpeg-core.js',base).href,wasmURL:new URL('ffmpeg-core.wasm',base).href});
+        const base=new URL('./',document.baseURI);
+        if(!('DecompressionStream' in globalThis))throw new Error('Seu navegador não suporta descompactação local. Atualize o Chrome ou Edge.');
+        status('Descompactando o motor de vídeo no computador. Aguarde…');
+        const compressed=await fetch(new URL('ffmpeg-core.wasm.gz',base));
+        if(!compressed.ok || !compressed.body)throw new Error('Arquivo ffmpeg-core.wasm.gz não encontrado no GitHub (HTTP '+compressed.status+').');
+        const wasmResponse=new Response(compressed.body.pipeThrough(new DecompressionStream('gzip')),{headers:{'Content-Type':'application/wasm'}});
+        wasmBlobUrl=URL.createObjectURL(await wasmResponse.blob());
+        await engine.load({coreURL:new URL('ffmpeg-core.js',base).href,wasmURL:wasmBlobUrl});
+        URL.revokeObjectURL(wasmBlobUrl);wasmBlobUrl=null;
         if(cancelled)return;
         const extension=(original.name.match(/\.([a-z\d]+)$/i)?.[1]||'avi').toLowerCase();
         const inName=`paiva-original.${extension}`,outName='paiva-convertido.mp4';
@@ -120,6 +127,7 @@
         if(!cancelled)status('Não foi possível converter este vídeo: '+(error?.message||'formato não reconhecido')+'. O arquivo original foi preservado.');
       } finally {
         if(engine){try{engine.terminate();}catch(_){}engine=null;}
+        if(wasmBlobUrl){URL.revokeObjectURL(wasmBlobUrl);wasmBlobUrl=null;}
         busy=false;refresh();
         if(cancelled)status('Conversão cancelada. O arquivo original não foi alterado.');
       }
@@ -138,6 +146,7 @@
     });
     window.addEventListener('pagehide',()=>{
       cancelled=true;if(engine)try{engine.terminate();}catch(_){}
+      if(wasmBlobUrl)URL.revokeObjectURL(wasmBlobUrl);
       if(downloadUrl)URL.revokeObjectURL(downloadUrl);
     });
     refresh();

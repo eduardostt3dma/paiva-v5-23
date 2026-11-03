@@ -1,0 +1,29 @@
+COMPONENTES DE CONVERSÃO DE VÍDEO — PAIVA
+
+Arquivos de terceiros distribuídos separadamente do código da aplicação:
+
+ffmpeg.js e 814.ffmpeg.js
+  Biblioteca: @ffmpeg/ffmpeg 0.12.15
+  Autor/projeto: ffmpegwasm
+  Licença: MIT
+  Código fonte e termos: https://github.com/ffmpegwasm/ffmpeg.wasm
+
+ffmpeg-core.js e ffmpeg-core.wasm.gz (arquivo WebAssembly distribuído em gzip)
+  Biblioteca: @ffmpeg/core 0.12.10
+  Autor/projeto: ffmpegwasm / FFmpeg
+  Licença declarada do pacote: GPL-2.0-or-later
+  Código fonte correspondente e termos:
+    https://github.com/ffmpegwasm/ffmpeg.wasm
+    https://github.com/ffmpegwasm/ffmpeg.wasm-core
+    https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+O componente WebAssembly contém software de terceiros, incluindo bibliotecas
+de codificação/decodificação de vídeo. Consulte os repositórios e respectivos
+termos de licença antes de redistribuir uma versão modificada.
+
+O arquivo ffmpeg-core.wasm.gz é somente a forma compactada do arquivo
+ffmpeg-core.wasm original, sem alterações no código executável. O navegador
+o descompacta em memória no momento de utilizar o conversor.
+
+O uso do conversor no PAIVA é local e opcional. O vídeo do cliente não é
+enviado para servidores pelo módulo de conversão.
