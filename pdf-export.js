@@ -116,6 +116,7 @@
       bike: readPairs('reportBike'),
       body: readPairs('reportBody'),
       sizing,
+      proportions: globalThis.PAIVA_PROPORTIONS?.getReport?.() || null,
       bikeProject: globalThis.PAIVA_BIKE_PROJECT?.getReport?.() || null,
       results,
       bikeMetrics,
@@ -247,6 +248,38 @@
     pairsSection('01 · Identificação do cliente', data.client);
     pairsSection('02 · Dados da bicicleta', data.bike);
     pairsSection('03 · Medidas antropométricas', data.body);
+
+    if (data.proportions?.metrics?.length) {
+      ensureSpace(350);
+      sectionHeading('Suas proporções e a posição na bicicleta');
+      const gap = 10, tileWidth = (CONTENT_W - gap * 2) / 3, height = 155;
+      const decimal = n => n.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1});
+      data.proportions.metrics.forEach((metric, index) => {
+        const x = MARGIN + index * (tileWidth + gap);
+        page.drawRectangle({x, y:y-height, width:tileWidth, height, color:C.tint, borderColor:C.line, borderWidth:.7});
+        page.drawText(cleanText(metric.label), {x:x+12,y:y-22,font:bold,size:10,color:C.text});
+        page.drawText(metric.percent === null ? '-' : decimal(metric.percent)+'%', {x:x+12,y:y-57,font:bold,size:26,color:C.text});
+        const caption = metric.length === null ? 'Medida não informada ou inválida' : decimal(metric.length)+' cm / estatura';
+        wrapText(caption,font,8,tileWidth-24).forEach((line,i)=>page.drawText(line,{x:x+12,y:y-76-i*11,font,size:8,color:C.secondary}));
+        wrapText(metric.description,font,8.3,tileWidth-24).forEach((line,i)=>page.drawText(line,{x:x+12,y:y-103-i*11,font,size:8.3,color:C.secondary}));
+      });
+      y -= height + 15;
+      for (const text of [data.proportions.explanation,data.proportions.meaning]) {
+        const lines=wrapText(text,font,9,CONTENT_W-4);
+        ensureSpace(lines.length*13+12);
+        lines.forEach((line,i)=>page.drawText(line,{x:MARGIN,y:y-10-i*13,font,size:9,color:C.secondary}));
+        y-=lines.length*13+12;
+      }
+      if(data.proportions.conclusion) {
+        sectionHeading('Conclusão do avaliador');
+        for (const line of wrapText(data.proportions.conclusion,font,9,CONTENT_W-4)) {
+          ensureSpace(16);
+          page.drawText(line,{x:MARGIN,y:y-10,font,size:9,color:C.text});
+          y-=13;
+        }
+        y-=12;
+      }
+    }
 
     sectionHeading('04 · Resultados do pré-fit');
     (data.results || []).forEach(resultRow);

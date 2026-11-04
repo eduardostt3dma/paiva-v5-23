@@ -1,3 +1,9 @@
+EVOLUÇÃO DO RELATÓRIO DO CLIENTE — 04/11/2026:
+- Nova prévia: “Suas proporções e a posição na bicicleta”, com entreperna, tronco líquido e braço líquido em cm e % da estatura.
+- As porcentagens são independentes; não há classificação corporal nem escolha automática de quadro a partir delas.
+- Campo opcional de conclusão do avaliador. O texto é incluído no PDF e na impressão. Não é armazenado após fechar a página; limpar ao trocar de cliente.
+- Publicar todos os arquivos, incluindo body-proportions.js. A captura e o 2D permanecem na revisão anterior.
+
 PAIVA BIKE FIT STUDIO — V5.23 PWA · EDIÇÃO PIN
 
 REVISÃO PREVENTIVA DA CAPTURA 2D — 04/11/2026:
