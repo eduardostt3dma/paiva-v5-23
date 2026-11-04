@@ -3,10 +3,10 @@ PAIVA BIKE FIT STUDIO — V5.23 PWA · EDIÇÃO PIN
 O que é: versão instalável baseada na V5.22, com cache offline e tela de bloqueio por PIN de 6 dígitos.
 
 IDENTIDADE VISUAL:
-- Logo circular azul com ciclista em análise biomecânica: aparece no cabeçalho do aplicativo, na tela de acesso por PIN e no relatório PDF.
-- A imagem paiva-logo-round.png possui transparência circular real: elimina o retângulo do fundo no PDF e melhora a circunferência do PIN, sem redesenhar a arte original.
-- Publique paiva-logo-round.png junto aos demais arquivos; a imagem é armazenada no cache offline.
-- Este pacote não muda os ícones de instalação na tela inicial do celular ou computador.
+- Nova logo circular Eduardo Paiva Bike Fit (grafite, prata e amarelo), com as inscrições STT SYSTEMS e 3DMA preservadas da arte fornecida.
+- O fundo retangular exterior foi removido e a marca centralizada com margens simétricas. O aro agora usa uma única tonalidade de prata fosca, sem degradê. O arquivo paiva-logo-round.png possui transparência real fora do círculo.
+- A mesma marca aparece no cabeçalho, na tela de PIN, no relatório impresso/PDF e nos ícones de instalação icon-192.png e icon-512.png.
+- Ao atualizar o aplicativo instalado, é necessário publicar TODOS os arquivos e reabrir a PWA para renovar o cache offline. Se outra logo tiver sido carregada manualmente no pré-fit, use "Restaurar logo" para voltar à nova marca padrão.
 
 ANTROPOMETRIA: a altura do ponto esternal ao solo e a entrepernas (cavalo) são informadas separadamente.
 O campo "Tronco líquido" é calculado automaticamente: Esterno ao solo - Entrepernas = Tronco líquido (cm).

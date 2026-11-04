@@ -99,14 +99,15 @@ main>header,main>.client-first,main>.bike-meta,main>.layout,main>.bottom,main>fo
 @media print {
 @page {size:A4;margin:14mm 13mm}
 #clientReport {font-family:Arial,Helvetica,sans-serif!important;font-size:9pt!important;line-height:1.38!important}
-#clientReport .report-top{display:grid!important;grid-template-columns:70px minmax(0,1fr) auto!important;align-items:center!important;gap:15px!important;padding:0 0 14px!important;margin:0 0 15px!important;border-bottom:2px solid #c7a342!important}
-#reportLogo{display:block!important;width:64px!important;height:64px!important;object-fit:contain!important;border-radius:50%!important;grid-column:1!important;grid-row:1!important}
-#clientReport .report-top>div:first-child{grid-column:2!important;grid-row:1!important;min-width:0!important}
+#clientReport .report-top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:15px!important;padding:0 0 14px!important;margin:0 0 15px!important;border-bottom:2px solid #c7a342!important}
+#clientReport .report-top>div:first-child{grid-column:1!important;grid-row:1!important;min-width:0!important;display:grid!important;grid-template-columns:70px minmax(0,1fr)!important;column-gap:15px!important;align-items:center!important}
+#reportLogo{display:block!important;width:64px!important;height:64px!important;object-fit:contain!important;border-radius:50%!important;grid-column:1!important;grid-row:1/4!important;align-self:center!important}
+#clientReport .report-top>div:first-child>.report-brand,#clientReport .report-top>div:first-child>h1,#clientReport .report-top>div:first-child>p{grid-column:2!important;min-width:0!important}
 #clientReport .report-brand{font-size:23pt!important;line-height:1.05!important;letter-spacing:.07em!important}
 #clientReport .report-brand small{font-size:7pt!important;line-height:1.4!important;margin-top:4px!important}
 #clientReport .report-top h1{font-size:13pt!important;margin:8px 0 4px!important;line-height:1.15!important}
 #clientReport .report-top p{font-size:8pt!important;line-height:1.4!important}
-#clientReport .report-date{grid-column:3!important;grid-row:1!important;align-self:start!important;white-space:nowrap!important;font-size:8pt!important}
+#clientReport .report-date{grid-column:2!important;grid-row:1!important;align-self:start!important;white-space:nowrap!important;font-size:8pt!important}
 #clientReport .report-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;align-items:start!important}
 #clientReport .report-grid>section{border:1px solid #d8dde2!important;border-radius:7px!important;padding:11px 12px!important;break-inside:avoid!important;page-break-inside:avoid!important;min-width:0!important;box-shadow:none!important}
 #clientReport .report-grid>section:nth-child(3),#clientReport .report-grid>section:nth-child(4){break-inside:avoid!important;page-break-inside:avoid!important}
