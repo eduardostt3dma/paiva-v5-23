@@ -30,14 +30,14 @@
         </div>
       </div>
       <div id="paiva-2d-explain" class="paiva-2d-explain" hidden>
-        <p><strong>Ângulo:</strong> clique no vértice e arraste o mouse: duas hastes são criadas de uma vez. No modo “Ajustar pontos”, arraste as extremidades para alinhar ao atleta. O aplicativo exibe o ângulo interno, de 0° a 180°.</p>
+        <p><strong>Ângulo direto por três pontos:</strong> com a ferramenta Ângulo selecionada, clique no trocânter maior, depois no côndilo lateral (vértice) e finalmente no maléolo. Os três pontos aparecem no momento do clique e podem ser arrastados diretamente, sem trocar para Ajustar pontos. Esc cancela uma marcação incompleta. Como alternativa, clique e arraste para abrir as duas hastes de uma vez; depois puxe cada extremidade livremente.</p>
         <p><strong>Ângulo suplementar:</strong> clique diretamente na etiqueta “A 35°”, por exemplo, para alternar entre 35° e 145° (180° − 35°). A geometria das hastes não muda, somente a convenção mostrada. Confirme qual convenção está usando no laudo.</p>
         <p><strong>Linha:</strong> clique e arraste de uma extremidade até a outra. Depois, “Ajustar pontos” permite puxar as pontas ou mover a reta inteira pelo centro. Sem calibração métrica, não é uma régua em milímetros.</p>
         <p><strong>Alinhamento:</strong> selecione uma linha tocando nela e use Horizontal / Vertical; mantenha Shift pressionado ao desenhar para limitar a inclinação a passos de 45°.</p>
         <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. Os pontos desenhados sobre um quadro parado não são reposicionados automaticamente ao girar a rodinha: reajuste-os antes de interpretar os números.</p>
         <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
         <p><strong>Congelar com clique:</strong> no vídeo gravado, clique com o botão ESQUERDO sobre a imagem para pausar e capturar automaticamente o quadro atual; as ferramentas compactas ficam logo abaixo. Com o quadro capturado, você pode marcar ou editar os pontos.</p>
-        <p><strong>Zoom:</strong> aproxime até 400% pelo controle inferior ou com Ctrl + roda do mouse sobre a foto.</p>
+        <p><strong>Zoom:</strong> a análise abre centralizada em 175% para facilitar os pontos. O controle varia de 5% em 5%, incluindo 175% e 180%, até 400%. Clique em “Ajustar foto” ou “100%” para ver toda a imagem.</p>
         <p><strong>Enquadramento:</strong> em 100%, a foto inteira se ajusta automaticamente à altura e largura visíveis, sem precisar rolar a imagem. O botão “Ajustar foto” restaura esse enquadramento. “Tela ampla” esconde temporariamente o painel lateral e ocupa a janela para analisar com mais espaço. Saia pela mesma tecla ou Esc. O zoom acima de 100% volta a permitir deslocamento intencional para ver detalhes.</p>
         <p><strong>Marcar sem capturar:</strong> com um vídeo carregado, escolha Ângulo, Linha ou Ponto (as ferramentas ficam sempre visíveis). Clique e arraste diretamente no atleta: o vídeo congela naquele instante automaticamente e a marcação já começa com o mouse pressionado. Um clique simples também congela para você ajustar os pontos em seguida. O tamanho da imagem é mantido ao alternar do vídeo para o quadro congelado.</p>
         <p><strong>Régua de recorte:</strong> abaixo do vídeo, arraste as duas alças da régua — início e fim — até o trecho desejado. O botão “✂ Salvar trecho” gera o novo MP4 local, preservando o original. O ícone 📷 tira uma foto do quadro e salva um PNG com as marcações que estiverem visíveis.</p>
@@ -121,8 +121,8 @@
             <button type="button" id="paiva-2d-align-vertical">↕ Vertical</button>
           </div>
           <div class="paiva-2d-zoom" role="group" aria-label="Zoom da fotografia">
-            <label for="paiva-2d-zoom">Zoom <output id="paiva-2d-zoom-value">100%</output></label>
-            <input id="paiva-2d-zoom" type="range" min="100" max="400" step="25" value="100" />
+            <label for="paiva-2d-zoom">Zoom <output id="paiva-2d-zoom-value">175%</output></label>
+            <input id="paiva-2d-zoom" type="range" min="100" max="400" step="5" value="175" />
             <button type="button" id="paiva-2d-zoom-out">−</button>
             <button type="button" id="paiva-2d-zoom-reset">100%</button>
             <button type="button" id="paiva-2d-zoom-in">+</button>
@@ -250,6 +250,7 @@
     let photoLoaded = false;
     let tool = 'angle';
     let draft = [];
+    let angleSequence = [];
     let annotations = [];
     let activeDrag = null;
     let activeDraw = null;
@@ -448,19 +449,19 @@
     }
 
     function selectTool(next) {
-      tool=next;draft=[];activeDrag=null;activeDraw=null;
+      tool=next;draft=[];angleSequence=[];activeDrag=null;activeDraw=null;
       byId('point-role-field').hidden=next!=='point';
       for (const button of section.querySelectorAll('[data-2d-tool]'))
         button.setAttribute('aria-pressed',String(button.getAttribute('data-2d-tool')===tool));
       render();
       if(!video.hidden && videoCanCapture()){
-        message('Ferramenta pronta. Clique e arraste diretamente no atleta: o vídeo congela sozinho e a marcação começa.');
+        message('Ferramenta pronta. Clique sobre o atleta para congelar. Ângulo: marque os 3 pontos com cliques ou abra as hastes arrastando.');
         return;
       }
       if (!photoLoaded) return;
-      message(tool==='angle' ? 'Ângulo: clique no vértice e ARRASTE para abrir duas hastes; depois ajuste cada ponta.' :
+      message(tool==='angle' ? 'Ângulo: clique em trocânter → côndilo → maléolo (3 cliques), ou arraste para abrir um ângulo. Depois puxe qualquer ponto, sem mudar de ferramenta.' :
         tool==='line' ? 'Linha: clique e ARRASTE do início ao fim. Use Shift para alinhar a cada 45°.' :
-        tool==='point' ? 'Ponto: clique uma vez no quadril ou no pé. Depois arraste o pontinho para ajustar.' :
+        tool==='point' ? 'Ponto: clique no quadril ou no pé. Arraste-o diretamente para corrigir.' :
         'Ajustar: arraste uma ponta ou o corpo da linha/ângulo para reposicionar.');
     }
     function chooseAngleColor(color){
@@ -540,8 +541,7 @@
       return Number.isFinite(viewportLimit)?Math.min(byWindow,Math.max(150,viewportLimit-4)):byWindow;
     }
     function updateZoom(value) {
-      const old=Number(byId('zoom').value);
-      const next=Math.max(100,Math.min(400,Math.round(value/25)*25));
+      const next=Math.max(100,Math.min(400,Math.round(value/5)*5));
       byId('zoom').value=String(next);
       byId('zoom-value').textContent=`${next}%`;
       // O desenho e o vídeo usam exatamente o MESMO enquadramento calculado.
@@ -554,18 +554,16 @@
       canvas.style.maxWidth=next===100?'100%':'none';
       canvas.style.maxHeight=next===100?`${fitHeight}px`:'none';
       canvas.style.height='auto';
-      if (viewport && next===100){viewport.scrollLeft=0;viewport.scrollTop=0;}
-      else if (viewport && next!==old) {
-        const shift=(next-old)/200;
-        viewport.scrollLeft+=viewport.clientWidth*shift;
-        viewport.scrollTop+=viewport.clientHeight*shift;
+      if(!video.hidden)fitVideoImage();
+      // Zoom centrado, inclusive na primeira captura. O conteúdo ampliado pode
+      // ser deslocado manualmente depois, sem encolher a foto nem alterar medidas.
+      if(viewport){
+        viewport.scrollLeft=Math.max(0,(viewport.scrollWidth-viewport.clientWidth)/2);
+        viewport.scrollTop=Math.max(0,(viewport.scrollHeight-viewport.clientHeight)/2);
       }
     }
     byId('fit').addEventListener('click',()=>updateZoom(100));
-    window.addEventListener('resize',()=>{
-      if(Number(byId('zoom').value)===100&&!canvas.hidden)updateZoom(100);
-      if(!video.hidden)fitVideoImage();
-    });
+    window.addEventListener('resize',()=>updateZoom(Number(byId('zoom').value)));
     let previousBodyOverflow='';
     function setWideMode(enable){
       if(section.classList.contains('paiva-2d-expanded')===enable)return;
@@ -574,16 +572,20 @@
       else document.body.style.overflow=previousBodyOverflow;
       byId('wide').textContent=enable?'↙ Sair da tela ampla':'⛶ Tela ampla';
       byId('wide').setAttribute('aria-pressed',String(enable));
-      updateZoom(100);
+      updateZoom(Number(byId('zoom').value));
       if(!video.hidden)fitVideoImage();
     }
     byId('wide').addEventListener('click',()=>setWideMode(!section.classList.contains('paiva-2d-expanded')));
     document.addEventListener('keydown',event=>{
       if(event.key==='Escape'&&section.classList.contains('paiva-2d-expanded'))setWideMode(false);
+      if(event.key==='Escape'&&angleSequence.length){
+        angleSequence=[];draft=[];activeDraw=null;render();
+        message('Marcação de três pontos cancelada. Pode começar novamente.');
+      }
     });
     byId('zoom').addEventListener('input',()=>updateZoom(Number(byId('zoom').value)));
-    byId('zoom-in').addEventListener('click',()=>updateZoom(Number(byId('zoom').value)+25));
-    byId('zoom-out').addEventListener('click',()=>updateZoom(Number(byId('zoom').value)-25));
+    byId('zoom-in').addEventListener('click',()=>updateZoom(Number(byId('zoom').value)+5));
+    byId('zoom-out').addEventListener('click',()=>updateZoom(Number(byId('zoom').value)-5));
     byId('zoom-reset').addEventListener('click',()=>updateZoom(100));
     function alignLine(vertical) {
       let index=selectedIndex;
@@ -704,9 +706,13 @@
       const fitHeight=availableImageHeight();
       const fitWidth=Math.min(Math.max(1,video.parentElement.clientWidth-4),
         fitHeight*video.videoWidth/video.videoHeight);
-      video.style.width=`${Math.round(fitWidth)}px`;
-      video.style.height='auto';video.style.maxWidth='100%';
-      video.style.maxHeight=`${fitHeight}px`;
+      const zoom=Number(byId('zoom').value)||175;
+      video.style.width=`${Math.round(fitWidth*zoom/100)}px`;
+      video.style.height='auto';video.style.maxWidth=zoom===100?'100%':'none';
+      video.style.maxHeight=zoom===100?`${fitHeight}px`:'none';
+      const viewport=video.parentElement;
+      viewport.scrollLeft=Math.max(0,(viewport.scrollWidth-viewport.clientWidth)/2);
+      viewport.scrollTop=Math.max(0,(viewport.scrollHeight-viewport.clientHeight)/2);
     }
 
     function updateCameraControls() {
@@ -752,8 +758,8 @@
       const visibleHeight=visibleWidth/ratio;
       trackOverlay.style.width=`${visibleWidth}px`;
       trackOverlay.style.height=`${visibleHeight}px`;
-      trackOverlay.style.left=`${frame.left-holder.left+(frame.width-visibleWidth)/2}px`;
-      trackOverlay.style.top=`${frame.top-holder.top+(frame.height-visibleHeight)/2}px`;
+      trackOverlay.style.left=`${frame.left-holder.left+video.parentElement.scrollLeft+(frame.width-visibleWidth)/2}px`;
+      trackOverlay.style.top=`${frame.top-holder.top+video.parentElement.scrollTop+(frame.height-visibleHeight)/2}px`;
     }
     window.addEventListener('resize',()=>{if(!trackOverlay.hidden)alignTrackedOverlay();});
 
@@ -859,7 +865,7 @@
         annotations=result.best.shapes.map(item=>({kind:item.kind,color:item.color,role:item.role,supplementary:item.supplementary,
           points:item.points.map(p=>({x:p.x/result.width*canvas.width,y:p.y/result.height*canvas.height}))}));
         lastFrameFromVideo=true;stillFromVideo=true;
-        render();showVideo(false);updateZoom(100);
+        render();showVideo(false);updateZoom(Number(byId('zoom').value));
         newPhotoRecord();schedulePhotoSave();
         byId('back-video').hidden=false;
         message(`Maior leitura encontrada: A ${format(result.best.angle)}° em ${clockTime(result.best.time)} · ${result.tested} quadros próximos. ${result.partial?'Parte do intervalo foi interrompida por falta de referência; ':''}Confira visualmente cada ponto e a convenção angular antes de usar no bike fit.`);
@@ -912,7 +918,7 @@
           points:item.points.map(p=>({x:p.x/result.width*canvas.width,y:p.y/result.height*canvas.height}))}));
         selectedIndex=-1;draft=[];lastFrameFromVideo=true;stillFromVideo=true;
         cycleTrailsVisible=which!=='correct';
-        render();showVideo(false);updateZoom(100);
+        render();showVideo(false);updateZoom(Number(byId('zoom').value));
         newPhotoRecord();schedulePhotoSave();
         byId('back-video').hidden=false;
         byId('cycle-results').hidden=false;
@@ -1008,7 +1014,7 @@
       byId('trim-start').value='00:00';byId('trim-end').value='02:00';
       byId('trim-ruler-status').hidden=true;
       byId('camera-info').textContent=`Arquivo: ${filename}. Reprodução local, sem upload.`;
-      message('Vídeo aberto. Escolha Ângulo/Linha/Ponto e arraste diretamente no atleta: o quadro congela e recebe a marcação automaticamente.');
+      message('Vídeo aberto. Clique no atleta para congelar; com Ângulo, marque 3 pontos consecutivos ou arraste as hastes.');
       updateCameraControls();syncTimeline();
       attemptPlayback();
       return true;
@@ -1249,7 +1255,7 @@
       if(scanningActive){event.preventDefault();return;}
       if(event.ctrlKey && !canvas.hidden){
         event.preventDefault();
-        updateZoom(Number(byId('zoom').value)+(event.deltaY<0?25:-25));
+        updateZoom(Number(byId('zoom').value)+(event.deltaY<0?5:-5));
         return;
       }
       if(event.ctrlKey || !hasFileVideo() || !Number.isFinite(video.duration) || video.duration<=0)return;
@@ -1326,8 +1332,8 @@
       originalCtx.drawImage(source,0,0,width,height);
       photoLoaded = true;
       stillFromVideo=source===video;
-      annotations=[];draft=[];activeDrag=null;activeDraw=null;selectedIndex=-1;
-      render();showVideo(false);updateZoom(100);
+      annotations=[];draft=[];angleSequence=[];activeDrag=null;activeDraw=null;selectedIndex=-1;
+      render();showVideo(false);updateZoom(Number(byId('zoom').value));
       newPhotoRecord();schedulePhotoSave();
       return true;
     }
@@ -1459,7 +1465,7 @@
         byId('back-video').hidden=true;
       } else byId('back-video').hidden = !recordedUrl;
       updateCameraControls();
-      message('Quadro congelado automaticamente. Arraste para concluir o ângulo ou a linha. Para rever o vídeo, use “Voltar ao vídeo”.');
+      message('Quadro congelado. Ângulo: clique no trocânter, côndilo e maléolo; depois arraste qualquer ponto para refinar.');
       return true;
     }
 
@@ -1533,7 +1539,7 @@
         setFrame(photo,photo.naturalWidth,photo.naturalHeight);
         URL.revokeObjectURL(uri);
         byId('file').value='';updateCameraControls();
-        message('Imagem carregada. Escolha Ângulo ou Linha, clique e arraste para desenhar. Ajuste pelas pontas.');
+        message('Imagem carregada. No modo Ângulo, marque três pontos com cliques ou arraste as hastes. Puxe as pontas diretamente.');
       };
       photo.onerror=() => {URL.revokeObjectURL(uri);message('Não foi possível abrir a foto. Tente JPG ou PNG.');};
       photo.src=uri;
@@ -1555,6 +1561,32 @@
         message(`Convenção alterada: A ${format(displayedAngle(angle))}°. Clique novamente no valor para inverter.`);
         return;
       }
+      // No modo Ângulo, três cliques consecutivos definem exatamente os três
+      // marcos anatômicos, sem criar um ramo perpendicular provisório.
+      if(tool==='angle'&&angleSequence.length){
+        activeDraw={pointer:event.pointerId,kind:'angle-sequence',start:point};
+        draft=[...angleSequence,point];
+        if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* gesto transferido */}
+        render();return;
+      }
+      // Manipulação direta: uma ponta já desenhada pode ser puxada mesmo
+      // enquanto a ferramenta Ângulo/Linha/Ponto continua selecionada.
+      const endpoint=findPoint(point,event);
+      const editingKind=endpoint && annotations[endpoint.item]?.kind;
+      if(endpoint&&(tool==='edit'||tool===editingKind)){
+        activeDrag=endpoint;
+        selectedIndex=endpoint.item;
+        if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* gesto transferido */}
+        return;
+      }
+      if(tool==='angle'||tool==='line'){
+        const existingSegment=findSegment(point,event);
+        if(existingSegment&&(tool===annotations[existingSegment.item]?.kind)){
+          activeDrag=existingSegment;selectedIndex=existingSegment.item;
+          if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* gesto transferido */}
+          return;
+        }
+      }
       if(tool==='point'){
         annotations.push({kind:'point',role:byId('point-role').value,points:[point]});
         selectedIndex=annotations.length-1;
@@ -1564,7 +1596,7 @@
         return;
       }
       if (tool==='edit') {
-        activeDrag=findPoint(point,event) || findSegment(point,event);
+        activeDrag=findSegment(point,event);
         if (activeDrag) {
           selectedIndex=activeDrag.item;
           if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* ponteiro transferido do vídeo */}
@@ -1579,10 +1611,12 @@
     canvas.addEventListener('pointerdown',canvasPointerDown);
     function canvasPointerMove(event) {
       const p=pointAt(event);if(!p)return;
-      if(!activeDraw&&!activeDrag)canvas.style.cursor=angleLabelAt(p)>=0?'pointer':'crosshair';
+      if(!activeDraw&&!activeDrag)canvas.style.cursor=angleLabelAt(p)>=0?'pointer':
+        (findPoint(p,event)?'grab':'crosshair');
       if (activeDraw?.pointer===event.pointerId) {
         event.preventDefault();
-        draft=draftFromDrag(activeDraw.kind,activeDraw.start,p,event.shiftKey);
+        draft=activeDraw.kind==='angle-sequence'?[...angleSequence,p]:
+          draftFromDrag(activeDraw.kind,activeDraw.start,p,event.shiftKey);
         render();return;
       }
       if (!activeDrag || event.pointerId!==activeDrag.pointer)return;
@@ -1601,9 +1635,24 @@
       if (activeDraw?.pointer===event.pointerId) {
         const p=pointAt(event) || activeDraw.start;
         const travel=Math.hypot(p.x-activeDraw.start.x,p.y-activeDraw.start.y);
-        if (event.type==='pointercancel' || travel<8) {
+        if(event.type==='pointercancel'){
+          angleSequence=[];draft=[];render();
+          message('Marcação interrompida. Comece novamente.');
+        } else if(activeDraw.kind==='angle-sequence'||(activeDraw.kind==='angle'&&travel<8)){
+          angleSequence.push(p);
+          if(angleSequence.length===3){
+            annotations.push({kind:'angle',points:angleSequence.map(q=>({...q})),color:activeAngleColor});
+            selectedIndex=annotations.length-1;
+            angleSequence=[];draft=[];render();updateCameraControls();schedulePhotoSave();
+            message('Ângulo de três pontos concluído! Puxe cada ponto diretamente com o mouse, sem clicar em “Ajustar pontos”.');
+          }else{
+            draft=[...angleSequence];render();
+            message(angleSequence.length===1?'1º ponto marcado (trocânter). Clique agora no côndilo femoral lateral.':
+              '2º ponto marcado (côndilo). Clique no maléolo lateral para concluir o ângulo. Esc cancela.');
+          }
+        } else if (travel<8) {
           draft=[];render();
-          message('Arraste por pelo menos alguns pixels para desenhar. Clique e mantenha pressionado enquanto puxa.');
+          message('Arraste a reta para desenhar, ou mude para Ângulo e marque três pontos com três cliques.');
         } else {
           const points=draftFromDrag(activeDraw.kind,activeDraw.start,p,event.shiftKey);
           annotations.push({kind:activeDraw.kind,points,
@@ -1612,7 +1661,7 @@
           draft=[];render();
           updateCameraControls();
           schedulePhotoSave();
-          message('Marca concluída. Arraste novamente para criar outra; escolha “Ajustar pontos” para mover uma extremidade.');
+          message('Marca concluída. Agora você pode puxar qualquer uma das pontas diretamente, com a mesma ferramenta selecionada.');
         }
         activeDraw=null;
         if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
@@ -1632,7 +1681,7 @@
       if(forwardedGesture?.pointerId!==event.pointerId)stopDrag(event);
     });
     byId('undo').addEventListener('click',() => {
-      if (draft.length) draft=[];else annotations.pop();
+      if (draft.length){draft=[];angleSequence=[];}else annotations.pop();
       selectedIndex=annotations.length-1;
       updateCameraControls();
       render();message('Último ponto ou anotação removido.');
@@ -1640,7 +1689,7 @@
     });
     byId('clear').addEventListener('click',() => {
       if (annotations.length && !window.confirm('Remover todas as linhas e ângulos desta foto?'))return;
-      annotations=[];draft=[];selectedIndex=-1;render();message('Marcações removidas. A fotografia foi preservada.');
+      annotations=[];draft=[];angleSequence=[];selectedIndex=-1;render();message('Marcações removidas. A fotografia foi preservada.');
       schedulePhotoSave();
       updateCameraControls();
     });

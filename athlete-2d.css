@@ -72,9 +72,9 @@
   max-width:none;touch-action:none;cursor:crosshair;}
 #paiva-athlete-2d #paiva-2d-canvas {margin-inline:auto;object-fit:contain;}
 #paiva-athlete-2d .paiva-2d-canvas-wrap video {display:block;width:100%;max-width:100%;
-  background:#05080b;object-fit:contain;}
+  background:#05080b;object-fit:contain;margin-inline:auto;}
 #paiva-athlete-2d #paiva-2d-track-overlay {position:absolute;left:0;top:0;
-  width:100%;height:auto;max-width:100%;pointer-events:none;z-index:3;}
+  width:100%;height:auto;max-width:none;pointer-events:none;z-index:3;}
 #paiva-athlete-2d .paiva-2d-status {font-size:11px;color:#cbdee8;
   line-height:1.5;margin:11px 0;min-height:18px;}
 #paiva-athlete-2d .paiva-2d-values {color:#edf5f8;font-size:12px;
