@@ -171,6 +171,25 @@
   border-radius:8px;background:#243845;color:#e1eef5;padding:9px 7px;
   font:750 10px system-ui;cursor:pointer;flex:1 1 108px;}
 #paiva-athlete-2d .paiva-2d-quick-actions button:disabled {opacity:.42;cursor:not-allowed;}
+#paiva-athlete-2d .paiva-2d-fine-controls {display:flex;align-items:center;gap:6px;
+  width:100%;min-width:0;flex-wrap:wrap;}
+#paiva-athlete-2d .paiva-2d-fine-controls > label {display:flex;align-items:center;
+  gap:5px;white-space:nowrap;font:650 11px system-ui;color:#e7f7f4;}
+#paiva-athlete-2d .paiva-2d-fine-controls > label input {accent-color:#83d9b5;}
+#paiva-athlete-2d .paiva-2d-fine-controls > button {flex:0 0 40px;
+  padding:5px 4px;background:#234740;border-color:#64a998;color:#effff6;}
+#paiva-athlete-2d .paiva-2d-fine-controls > button#paiva-2d-fine-peak {flex:0 0 58px;}
+#paiva-athlete-2d .paiva-2d-fine-controls > small {flex:1 1 130px;
+  font:550 10px system-ui;color:#b7d4dc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#paiva-athlete-2d .paiva-2d-fine-settings {position:relative;flex:0 0 auto;color:#b7d8e0;
+  font:600 10px system-ui;}
+#paiva-athlete-2d .paiva-2d-fine-settings summary {cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-fine-settings[open] {display:flex;align-items:center;
+  gap:8px;flex-wrap:wrap;flex:1 1 100%;}
+#paiva-athlete-2d .paiva-2d-fine-settings label {display:inline-flex;align-items:center;gap:4px;}
+#paiva-athlete-2d .paiva-2d-fine-settings select {max-width:62px;
+  border-radius:5px;border:1px solid #587989;background:#183440;color:#f0faff;
+  padding:3px 5px;font:600 10px system-ui;}
 #paiva-athlete-2d .paiva-2d-point-role:not([hidden]) {display:flex;grid-column:1/-1;
   gap:6px;align-items:center;justify-content:flex-start;font-size:10px;color:#c3e3e2;}
 #paiva-athlete-2d .paiva-2d-point-role select {width:auto;min-width:110px;max-width:200px;

@@ -75,6 +75,91 @@
     return winner?{x:winner.x,y:winner.y,error:score}:null;
   }
 
+  // Rastreio fino INDEPENDENTE do Kinovea: compara uma pequena janela de
+  // textura com regiões próximas do quadro seguinte, usando correlação
+  // normalizada. O usuário pode corrigir cada ponto e reiniciar pelo quadro
+  // atual. Nenhum cálculo pressupõe uma volta completa da pedalada.
+  function correlatePatch(before,after,w,h,at,patch,search) {
+    const x=Math.round(at.x),y=Math.round(at.y);
+    if(x-patch<0||x+patch>=w||y-patch<0||y+patch>=h)return null;
+    const offsets=[],template=[];
+    let mean=0,square=0;
+    for(let dy=-patch;dy<=patch;dy++)for(let dx=-patch;dx<=patch;dx++){
+      const value=before[(y+dy)*w+x+dx];
+      offsets.push(dy*w+dx);template.push(value);mean+=value;square+=value*value;
+    }
+    const count=template.length,variance=square/count-(mean/count)**2;
+    if(variance<22)return null; // textura insuficiente para distinguir a posição
+    const minX=Math.max(patch,x-search),maxX=Math.min(w-patch-1,x+search);
+    const minY=Math.max(patch,y-search),maxY=Math.min(h-patch-1,y+search);
+    const templateVariance=Math.max(1,square-mean*mean/count);
+    let candidate=null,best=Infinity;
+    for(let cy=minY;cy<=maxY;cy++)for(let cx=minX;cx<=maxX;cx++){
+      let sum=0,sumSq=0,cross=0;
+      const base=cy*w+cx;
+      for(let i=0;i<count;i++){
+        const value=after[base+offsets[i]];
+        sum+=value;sumSq+=value*value;cross+=template[i]*value;
+      }
+      const otherVariance=sumSq-sum*sum/count;
+      if(otherVariance<1)continue;
+      const correlation=(cross-mean*sum/count)/Math.sqrt(templateVariance*otherVariance);
+      const distanceSq=(cx-x)**2+(cy-y)**2;
+      // Penalização leve contra saltos para padrões semelhantes na roupa/bike.
+      const cost=(1-correlation)+distanceSq*.00030;
+      if(cost<best){best=cost;candidate={x:cx,y:cy,confidence:correlation,cost};}
+    }
+    return candidate;
+  }
+
+  function trackFinePoint(before,after,w,h,at,options={}) {
+    const patch=Math.max(3,Math.min(10,Math.round(options.patch||6)));
+    const search=Math.max(6,Math.min(42,Math.round(options.search||22)));
+    let best=null,bestScore=Infinity;
+    for(const size of [...new Set([patch,Math.min(12,patch+3),Math.max(3,patch-2)])]){
+      const forward=correlatePatch(before,after,w,h,at,size,search);
+      if(!forward||forward.confidence<.57)continue;
+      const backward=correlatePatch(after,before,w,h,forward,size,search);
+      if(!backward||backward.confidence<.53)continue;
+      const returnError=Math.hypot(backward.x-at.x,backward.y-at.y);
+      if(returnError>3.5)continue;
+      const score=forward.cost+backward.cost*.3+returnError*.06;
+      if(score<bestScore){bestScore=score;best={x:forward.x,y:forward.y,confidence:forward.confidence,returnError};}
+      if(score<.04)break;
+    }
+    return best;
+  }
+
+  function trackFineShapes(before,after,w,h,annotations,sourceWidth,sourceHeight,options={}) {
+    if(!before||!after||before.length!==w*h||after.length!==w*h)
+      throw new Error('Os dois quadros devem possuir as mesmas dimensões.');
+    const lost=[],moved=[];
+    const shapes=annotations.map((item,i)=>({
+      ...item,points:item.points.map((point,j)=>{
+        if(item.kind!=='point'&&item.kind!=='angle')return {...point};
+        const scaled={x:point.x/sourceWidth*w,y:point.y/sourceHeight*h};
+        const found=trackFinePoint(before,after,w,h,scaled,options);
+        if(!found){lost.push({item:i,point:j});return {...point};}
+        moved.push({item:i,point:j,confidence:found.confidence});
+        return {x:found.x/w*sourceWidth,y:found.y/h*sourceHeight};
+      })
+    }));
+    return {shapes,lost,moved};
+  }
+
+  function createFrameSampler(video,preferredWidth=960){
+    if(!video?.videoWidth||!video.videoHeight)throw new Error('Aguarde o vídeo carregar.');
+    const width=Math.min(preferredWidth,Math.max(1,video.videoWidth));
+    const height=Math.max(1,Math.round(width*video.videoHeight/video.videoWidth));
+    const surface=document.createElement('canvas');surface.width=width;surface.height=height;
+    const context=surface.getContext('2d',{willReadFrequently:true});
+    if(!context)throw new Error('Não foi possível preparar a leitura do quadro.');
+    return {width,height,sample(){
+      context.drawImage(video,0,0,width,height);
+      return grayscale(context.getImageData(0,0,width,height));
+    }};
+  }
+
   function create({video,annotations,sourceWidth,sourceHeight,isReversePlaying,isPingPongEnabled,onPoints,onLost,onDone}) {
     if (!video || !video.videoWidth || !video.videoHeight || !annotations?.length)
       return {start:async()=>false,stop:()=>{}};
@@ -346,5 +431,6 @@
       lastReliable,width:w,height:h,startTime:start,
       supplementary:!!tracked[0].supplementary,hipPath,heelPath};
   }
-  globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,trackCyclePoint,grayscale,create,scanWindow,scanCycle};
+  globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,trackCyclePoint,trackFinePoint,
+    trackFineShapes,createFrameSampler,grayscale,create,scanWindow,scanCycle};
 })();

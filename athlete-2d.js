@@ -1,5 +1,5 @@
 /* PAIVA — análise 2D em fotografia ou quadro de vídeo, 100% local.
-   Marcação MANUAL e rastreio semiautomático finito de uma volta da pedalada.
+   Marcação manual e rastreio fino semiautomático quadro a quadro.
    Não faz reconhecimento anatômico automático nem reconstrução 3D. */
 (() => {
   'use strict';
@@ -34,7 +34,7 @@
         <p><strong>Ângulo suplementar:</strong> clique diretamente na etiqueta “A 35°”, por exemplo, para alternar entre 35° e 145° (180° − 35°). A geometria das hastes não muda, somente a convenção mostrada. Confirme qual convenção está usando no laudo.</p>
         <p><strong>Linha:</strong> clique e arraste de uma extremidade até a outra. Depois, “Ajustar pontos” permite puxar as pontas ou mover a reta inteira pelo centro. Sem calibração métrica, não é uma régua em milímetros.</p>
         <p><strong>Alinhamento:</strong> selecione uma linha tocando nela e use Horizontal / Vertical; mantenha Shift pressionado ao desenhar para limitar a inclinação a passos de 45°.</p>
-        <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. Os pontos desenhados sobre um quadro parado não são reposicionados automaticamente ao girar a rodinha: reajuste-os antes de interpretar os números.</p>
+        <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. No quadro de vídeo capturado, a nova opção “Seguir pontos por quadro” tenta deslocar os marcadores automaticamente; quando um ponto se perder, corrija-o com o mouse. Com essa opção desligada, as marcações permanecem fixas.</p>
         <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
         <p><strong>Congelar com clique:</strong> no vídeo gravado, clique com o botão ESQUERDO sobre a imagem para pausar e capturar automaticamente o quadro atual; as ferramentas compactas ficam logo abaixo. Com o quadro capturado, você pode marcar ou editar os pontos.</p>
         <p><strong>Zoom:</strong> a análise abre centralizada em 175% para facilitar os pontos. O controle varia de 5% em 5%, incluindo 175% e 180%, até 400%. Clique em “Ajustar foto” ou “100%” para ver toda a imagem.</p>
@@ -52,7 +52,8 @@
         <p><strong>Seguir marcações em vídeo:</strong> depois de congelar um quadro do vídeo gravado, desenhe e alinhe as marcações. O comando avançado “Seguir marcações no vídeo” tenta acompanhá-las durante a reprodução. Se perder a referência, interrompe; não reconhece articulações e pode sofrer desvios. Use marcadores contrastantes, câmera fixa e valide cada ângulo antes de usar no bike fit.</p>
         <p><strong>Seguir pontos ao reproduzir:</strong> após capturar e marcar o quadro, escolha Voltar ao vídeo e Reproduzir. Com essa opção ativa, o rastreio assistido tenta acompanhar os pontos já desenhados, inclusive no retorno. Se perder algum marcador, a análise é interrompida para evitar um ângulo enganoso. Reposicione os pontos e recomece do quadro correto.</p>
         <p><strong>Ponto de trajetória:</strong> escolha “PONTO · RASTRO” e clique no quadril, pé ou outra referência visível; use “AJUSTAR PONTOS” para refinar a posição. Depois volte ao vídeo e reproduza com rastreio. O ponto e seu caminho recente ficam destacados sem cálculo angular. A linha do rastro representa deslocamento na imagem (pixels), não milímetros ou movimento tridimensional.</p>
-        <p><strong>Rastrear uma pedalada:</strong> congele um quadro no início de um giro, desenhe o ângulo do joelho (trocânter → côndilo → maléolo) e, se desejar, acrescente um ponto classificado como Calcanhar e outro como Quadril. Escolha a duração aproximada de um giro e clique “⟳ Rastrear 1 giro”. O aplicativo examina os quadros seguintes, mostra a maior e a menor abertura interna do joelho, e permite ver cada instante com as marcações e trajetórias. Se o ponto escapar, a busca para: corrija-o no último quadro confiável e recomece. É necessário conferir visualmente os resultados; o rastreamento não reconhece a anatomia sozinho.</p>
+        <p><strong>Rastreio fino (estilo de trabalho do Kinovea):</strong> congele o quadro próximo ao pedivela em 178°–180° e marque trocânter, côndilo e maléolo; opcionalmente, marque calcanhar e quadril. Com “Seguir pontos por quadro” ativado, gire a rodinha ou use ◀/▶ para mover somente UM quadro e atualizar cada marcador. Se uma referência escapar, ela permanece na posição anterior, sinalizada para corrigir: arraste o ponto diretamente na foto e continue com a rodinha. Não há necessidade de percorrer uma volta inteira. Em “Ajustes do rastreio” escolha o tamanho do alvo e a área de busca em pixels; a visualização das janelas é opcional. Os três marcos do ângulo são rastreados separadamente, mas exigem conferência visual. O método é implementação independente, não código do Kinovea.</p>
+        <p><strong>Rastrear uma pedalada (alternativa avançada):</strong> o antigo comando “⟳ Rastrear 1 giro” continua disponível nas opções avançadas, mas para identificar a extensão máxima perto de 180° do pedivela prefira o rastreio fino quadro a quadro, corrigindo os pontos quando necessário.</p>
         <p><strong>Biomecânica:</strong> no joelho, uma referência possível é trocânter maior → côndilo femoral lateral → maléolo lateral. Escolha sempre a mesma convenção de pontos e o mesmo plano da câmera. A foto mostra uma projeção 2D, não captura rotação, profundidade nem movimento.</p>
         <p>O processamento ocorre neste aparelho. Imagens e vídeos não são transmitidos ao site ou ao GitHub. Salve a imagem marcada e o vídeo antes de fechar ou atualizar o aplicativo. Webcam exige permissão do navegador e conexão segura (HTTPS ou localhost).</p>
       </div>
@@ -222,17 +223,29 @@
     for(const selector of ['.paiva-2d-tools','.paiva-2d-point-role','.paiva-2d-align','.paiva-2d-zoom','.paiva-2d-width'])
       markingDock.append(section.querySelector(selector));
     const quickDock=section.querySelector('.paiva-2d-quick-actions');
-    quickDock.append(document.getElementById('paiva-2d-capture'));
+    playbackAdvanced.append(document.getElementById('paiva-2d-capture'));
     playbackAdvanced.append(document.getElementById('paiva-2d-back-video'));
     // A captura manual fica como recurso de compatibilidade, mas o gesto direto
     // sobre o vídeo passa a congelar o quadro automaticamente.
     document.getElementById('paiva-2d-capture').hidden=true;
-    quickDock.append(section.querySelector('.paiva-2d-cycle-action'));
-    quickDock.append(document.getElementById('paiva-2d-track-stop'));
+    playbackAdvanced.append(section.querySelector('.paiva-2d-cycle-action'));
+    playbackAdvanced.append(document.getElementById('paiva-2d-track-stop'));
     playbackAdvanced.append(section.querySelector('.paiva-2d-short-scan'));
     playbackAdvanced.append(document.getElementById('paiva-2d-track-start'));
     quickDock.insertAdjacentHTML('afterbegin','<label class="paiva-2d-follow"><input type="checkbox" id="paiva-2d-auto-track" /> Seguir pontos ao reproduzir <span>· experimental</span></label>');
     playbackAdvanced.append(quickDock.querySelector('.paiva-2d-follow'));
+    quickDock.innerHTML=`<div class="paiva-2d-fine-controls" aria-label="Rastreio fino por quadro">
+      <label title="Acompanhar cada marcador quando você avança ou volta um quadro"><input id="paiva-2d-fine-mode" type="checkbox" checked /> ↔ Seguir pontos por quadro</label>
+      <button type="button" id="paiva-2d-fine-prev" title="Voltar um quadro seguindo os pontos">◀</button>
+      <button type="button" id="paiva-2d-fine-next" title="Avançar um quadro seguindo os pontos">▶</button>
+      <button type="button" id="paiva-2d-fine-peak" title="Abrir o maior ângulo do joelho observado nos quadros percorridos" disabled>↗ Pico</button>
+      <details class="paiva-2d-fine-settings"><summary>Ajustes do rastreio</summary>
+        <label>Alvo (px) <select id="paiva-2d-fine-patch"><option value="4">4</option><option value="6" selected>6</option><option value="8">8</option><option value="10">10</option></select></label>
+        <label>Busca (px) <select id="paiva-2d-fine-search"><option value="12">12</option><option value="22" selected>22</option><option value="32">32</option><option value="42">42</option></select></label>
+        <label><input type="checkbox" id="paiva-2d-fine-boxes" /> Mostrar janelas</label>
+      </details>
+      <small id="paiva-2d-fine-readout">Marque o ângulo e gire a rodinha.</small>
+    </div>`;
     section.querySelector('.paiva-2d-player-dock').hidden=true;
 
     const byId = key => document.getElementById('paiva-2d-' + key);
@@ -257,6 +270,9 @@
     let selectedIndex = -1;
     let lineWidth = 3;
     let cycleResult=null,cycleTrailsVisible=false;
+    const fineTrails=new Map();
+    let fineUncertain=[];
+    let finePeak=null,finePending=0,fineSequence=Promise.resolve();
     const colors = {angle:'#e7cf86',line:'#8bd6e4',point:'#a8f5c3'};
     const palette=['#f56b6b','#f3f6fb','#57d39a','#b99cff','#64cbff','#ffca73'];
     let activeAngleColor=palette[0];
@@ -443,7 +459,37 @@
           ctx.stroke();ctx.restore();
         }
       }
+      if(stillFromVideo&&byId('fine-mode').checked){
+        for(const [key,path] of fineTrails){
+          if(path.length<2)continue;
+          const item=annotations[Number(key.split(':')[0])];
+          const color=item?.color||(item?.role==='hip'?'#64cbff':'#a8f5c3');
+          ctx.save();ctx.globalAlpha=.52;ctx.strokeStyle=color;
+          ctx.lineWidth=Math.max(1.5,lineWidth*.55);ctx.beginPath();
+          path.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+          ctx.stroke();ctx.restore();
+        }
+      }
       annotations.forEach((item,index) => drawAnnotation(item,index));
+      if(stillFromVideo&&byId('fine-mode').checked){
+        for(const lost of fineUncertain){
+          const p=annotations[lost.item]?.points?.[lost.point];if(!p)continue;
+          ctx.save();ctx.strokeStyle='#ffb45e';ctx.lineWidth=2.5;
+          ctx.beginPath();ctx.arc(p.x,p.y,11,0,Math.PI*2);ctx.stroke();ctx.restore();
+        }
+        if(byId('fine-boxes').checked&&selectedIndex>=0){
+          const marker=annotations[selectedIndex]?.points?.[0];
+          if(marker){
+            const scale=canvas.width/Math.min(960,video.videoWidth||960);
+            const patch=Number(byId('fine-patch').value)*scale;
+            const search=Number(byId('fine-search').value)*scale;
+            ctx.save();ctx.setLineDash([5,5]);ctx.lineWidth=1.5;
+            ctx.strokeStyle='#64cbff';ctx.strokeRect(marker.x-search,marker.y-search,search*2,search*2);
+            ctx.strokeStyle='#fff';ctx.strokeRect(marker.x-patch,marker.y-patch,patch*2,patch*2);
+            ctx.restore();
+          }
+        }
+      }
       if (draft.length) drawAnnotation({kind:tool,points:draft},annotations.length,true);
       updateValues();
     }
@@ -732,6 +778,10 @@
       byId('scan-radius').disabled = scanningActive;
       byId('cycle-duration').disabled = scanningActive;
       byId('track-stop').disabled = !trackingActive && !scanningActive;
+      const canFine=hasPlayback&&!recording&&!scanningActive;
+      byId('fine-prev').disabled=!canFine;
+      byId('fine-next').disabled=!canFine;
+      byId('fine-peak').disabled=!canFine||!finePeak;
       byId('prev-frame').disabled = !hasPlayback || recording || trackingActive || scanningActive;
       byId('next-frame').disabled = !hasPlayback || recording || trackingActive || scanningActive;
       byId('speed').disabled = !hasPlayback || recording;
@@ -1008,6 +1058,7 @@
       video.playbackRate=Number(byId('speed').value)||1;
       lastFrameFromVideo=false;
       stillFromVideo=false;
+      fineTrails.clear();fineUncertain=[];finePeak=null;
       byId('back-video').hidden=true;
       const download=byId('video-download');download.hidden=true;download.removeAttribute('href');
       showVideo(true);
@@ -1223,8 +1274,69 @@
       syncTimeline();
       message('Posição ajustada. Capture um novo quadro antes de iniciar um rastreio.');
     });
+    async function fineStepFrame(direction){
+      const motion=globalThis.PAIVA_MOTION_TRACKER;
+      if(!motion?.createFrameSampler||!motion?.trackFineShapes){
+        message('Rastreio fino indisponível: envie TODOS os arquivos da atualização para o GitHub.');return;
+      }
+      const source=recordedUrl;
+      const fps=Number(byId('file-fps').value)||30;
+      const from=video.currentTime;
+      const duration=Number.isFinite(video.duration)?video.duration:from;
+      const next=Math.max(0,Math.min(Math.max(0,duration-.001),from+direction/fps));
+      if(Math.abs(next-from)<.0005)return;
+      haltReverse();video.pause();
+      const sampler=motion.createFrameSampler(video);
+      const before=sampler.sample();
+      if(!finePeak){
+        const angle=annotations.find(a=>a.kind==='angle'&&a.points.length===3);
+        const degrees=angle?angleDegrees(...angle.points):null;
+        if(degrees!==null)finePeak={time:from,angle:degrees,
+          shapes:annotations.map(a=>({...a,points:a.points.map(p=>({...p}))}))};
+      }
+      await seekCycleFrame(next);
+      if(source!==recordedUrl||!stillFromVideo||canvas.hidden)return;
+      const after=sampler.sample();
+      const result=motion.trackFineShapes(before,after,sampler.width,sampler.height,
+        annotations,canvas.width,canvas.height,{
+          patch:Number(byId('fine-patch').value),search:Number(byId('fine-search').value)
+        });
+      const previous=annotations;
+      annotations=result.shapes;
+      fineUncertain=result.lost;
+      for(const match of result.moved){
+        const key=`${match.item}:${match.point}`;
+        const old=previous[match.item]?.points?.[match.point];
+        const current=annotations[match.item]?.points?.[match.point];
+        if(!old||!current)continue;
+        const path=fineTrails.get(key)||[{...old}];path.push({...current});
+        if(path.length>13)path.shift();fineTrails.set(key,path);
+      }
+      const firstAngle=annotations.find(a=>a.kind==='angle'&&a.points.length===3);
+      const angle=firstAngle?angleDegrees(...firstAngle.points):null;
+      if(angle!==null&&!result.lost.some(p=>annotations[p.item]===firstAngle)&&(!finePeak||angle>finePeak.angle)){
+        finePeak={time:next,angle,shapes:annotations.map(a=>({...a,points:a.points.map(p=>({...p}))}))};
+      }
+      originalCtx.drawImage(video,0,0,original.width,original.height);
+      lastFrameFromVideo=true;stillFromVideo=true;
+      render();syncTimeline();updateCameraControls();schedulePhotoSave();
+      const label=firstAngle?displayedAngle(firstAngle):null;
+      const lost=result.lost.length;
+      byId('fine-readout').textContent=`${clockTime(next)} · ${label===null?'marcadores':`A ${format(label)}°`}${finePeak?` · pico ${format(finePeak.angle)}°`:''}${lost?` · ${lost} ponto(s) corrigir`:''}`;
+      message(lost?`Quadro ${clockTime(next)}: ${lost} marcador(es) em laranja perderam a referência. Arraste cada um para o local correto e continue com a rodinha.`:
+        `Quadro ${clockTime(next)}: pontos acompanhados. Confira o alinhamento anatômico; mova a rodinha novamente para procurar a extensão máxima.`);
+    }
     function stepFrame(direction,preserveCapturedImage=false) {
       if(scanningActive||!hasFileVideo())return;
+      const fine=lastFrameFromVideo&&stillFromVideo&&!canvas.hidden&&annotations.length&&byId('fine-mode').checked;
+      if(fine){
+        if(finePending>=5)return;
+        finePending++;
+        fineSequence=fineSequence.catch(()=>{}).then(()=>fineStepFrame(direction)).catch(error=>{
+          message(`Não foi possível seguir os pontos neste quadro: ${error?.message||'erro no vídeo'}. Corrija o marcador ou altere o FPS.`);
+        }).finally(()=>{finePending--;});
+        return;
+      }
       haltReverse();video.pause();
       if(trackingActive)stopTracking();
       const refreshStill=preserveCapturedImage && stillFromVideo && !canvas.hidden;
@@ -1247,8 +1359,28 @@
         ? `Quadro deslocado em 1/${fps} s. As marcações estão fixas: ajuste os pontos ao atleta antes de interpretar o ângulo; recapture para reativar o rastreio.`
         : `Avanço aproximado de 1/${fps} s. Ajuste o FPS conforme o vídeo; aguarde atualizar antes de capturar.`);
     }
-    byId('prev-frame').addEventListener('click',()=>stepFrame(-1));
-    byId('next-frame').addEventListener('click',()=>stepFrame(1));
+    byId('prev-frame').addEventListener('click',()=>stepFrame(-1,true));
+    byId('next-frame').addEventListener('click',()=>stepFrame(1,true));
+    byId('fine-prev').addEventListener('click',()=>stepFrame(-1,true));
+    byId('fine-next').addEventListener('click',()=>stepFrame(1,true));
+    byId('fine-mode').addEventListener('change',()=>{
+      fineUncertain=[];render();
+      message(byId('fine-mode').checked?'Rastreio fino ligado: gire a rodinha, um quadro por vez. Corrija os pontos diretamente no atleta.':
+        'Rastreio fino desligado: os pontos ficarão parados enquanto você movimenta o vídeo.');
+    });
+    byId('fine-boxes').addEventListener('change',render);
+    byId('fine-peak').addEventListener('click',async()=>{
+      if(!finePeak||!hasFileVideo()||finePending)return;
+      const peak=finePeak;haltReverse();video.pause();
+      try{
+        await seekCycleFrame(peak.time);
+        if(finePeak!==peak)return;
+        annotations=peak.shapes.map(a=>({...a,points:a.points.map(p=>({...p}))}));
+        originalCtx.drawImage(video,0,0,original.width,original.height);
+        fineUncertain=[];render();syncTimeline();updateCameraControls();schedulePhotoSave();
+        message(`Maior extensão observada neste trecho: ${format(peak.angle)}° em ${clockTime(peak.time)}. Confira os três marcos antes de usar a medida.`);
+      }catch(error){message(`Não foi possível abrir o pico: ${error?.message||'erro no arquivo'}.`);}
+    });
     // Sobre o visor da análise, a rodinha move o vídeo de fato: não rola a página.
     // Ctrl + rodinha mantém o zoom da foto; arquivos de webcam ao vivo não sofrem seek.
     canvas.parentElement.addEventListener('wheel',event=>{
@@ -1332,6 +1464,7 @@
       originalCtx.drawImage(source,0,0,width,height);
       photoLoaded = true;
       stillFromVideo=source===video;
+      fineTrails.clear();fineUncertain=[];finePeak=null;
       annotations=[];draft=[];angleSequence=[];activeDrag=null;activeDraw=null;selectedIndex=-1;
       render();showVideo(false);updateZoom(Number(byId('zoom').value));
       newPhotoRecord();schedulePhotoSave();
@@ -1572,8 +1705,9 @@
       // Manipulação direta: uma ponta já desenhada pode ser puxada mesmo
       // enquanto a ferramenta Ângulo/Linha/Ponto continua selecionada.
       const endpoint=findPoint(point,event);
-      const editingKind=endpoint && annotations[endpoint.item]?.kind;
-      if(endpoint&&(tool==='edit'||tool===editingKind)){
+      // No rastreio fino qualquer referência pode ser corrigida com o mouse,
+      // mesmo que a ferramenta atualmente selecionada seja de outro tipo.
+      if(endpoint){
         activeDrag=endpoint;
         selectedIndex=endpoint.item;
         if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* gesto transferido */}
@@ -1668,7 +1802,16 @@
         return;
       }
       if (activeDrag && activeDrag.pointer===event.pointerId) {
+        const changed=activeDrag.item;
+        const changedPoint=activeDrag.index;
         activeDrag=null;
+        fineUncertain=fineUncertain.filter(p=>!(p.item===changed&&(changedPoint<0||p.point===changedPoint)));
+        if(stillFromVideo&&byId('fine-mode').checked){
+          for(const key of fineTrails.keys())if(key.startsWith(`${changed}:`))fineTrails.delete(key);
+          finePeak=null;
+          byId('fine-readout').textContent='Ponto corrigido · continue com a rodinha';
+          updateCameraControls();render();
+        }
         if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
         message('Marcador ajustado. Confira o ângulo atualizado na imagem.');
         schedulePhotoSave();
