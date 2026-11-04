@@ -53,6 +53,8 @@
         <p><strong>Seguir pontos ao reproduzir:</strong> após capturar e marcar o quadro, escolha Voltar ao vídeo e Reproduzir. Com essa opção ativa, o rastreio assistido tenta acompanhar os pontos já desenhados, inclusive no retorno. Se perder algum marcador, a análise é interrompida para evitar um ângulo enganoso. Reposicione os pontos e recomece do quadro correto.</p>
         <p><strong>Ponto de trajetória:</strong> escolha “PONTO · RASTRO” e clique no quadril, pé ou outra referência visível; use “AJUSTAR PONTOS” para refinar a posição. Depois volte ao vídeo e reproduza com rastreio. O ponto e seu caminho recente ficam destacados sem cálculo angular. A linha do rastro representa deslocamento na imagem (pixels), não milímetros ou movimento tridimensional.</p>
         <p><strong>Rastreio fino (estilo de trabalho do Kinovea):</strong> congele o quadro próximo ao pedivela em 178°–180° e marque trocânter, côndilo e maléolo; opcionalmente, marque calcanhar e quadril. Com “Seguir pontos por quadro” ativado, gire a rodinha ou use ◀/▶ para mover somente UM quadro e atualizar cada marcador. Se uma referência escapar, ela permanece na posição anterior, sinalizada para corrigir: arraste o ponto diretamente na foto e continue com a rodinha. Não há necessidade de percorrer uma volta inteira. Em “Ajustes do rastreio” escolha o tamanho do alvo e a área de busca em pixels; a visualização das janelas é opcional. Os três marcos do ângulo são rastreados separadamente, mas exigem conferência visual. O método é implementação independente, não código do Kinovea.</p>
+        <p><strong>Cursor e exclusão:</strong> sobre qualquer ponto, ângulo ou linha, o cursor permanece em cruz para posicionar com precisão. Clique com o botão DIREITO sobre uma marcação para abrir a opção “Excluir”. A exclusão pode ser revertida pelo botão Desfazer. Fora da marcação, o botão direito continua controlando pausa/play do vídeo. A tecla Delete também remove a marca selecionada quando a área do vídeo está em foco.</p>
+        <p><strong>Rastrear um ponto isolado:</strong> escolha “PONTO · RASTRO”, marque um ponto no calcanhar ou no quadril e deixe “Seguir pontos por quadro” ligado. A rodinha do mouse acompanha esse pontinho e desenha o pequeno trajeto, mesmo sem ângulo desenhado. Se ele perder a referência, arraste-o de volta e continue.</p>
         <p><strong>Rastrear uma pedalada (alternativa avançada):</strong> o antigo comando “⟳ Rastrear 1 giro” continua disponível nas opções avançadas, mas para identificar a extensão máxima perto de 180° do pedivela prefira o rastreio fino quadro a quadro, corrigindo os pontos quando necessário.</p>
         <p><strong>Biomecânica:</strong> no joelho, uma referência possível é trocânter maior → côndilo femoral lateral → maléolo lateral. Escolha sempre a mesma convenção de pontos e o mesmo plano da câmera. A foto mostra uma projeção 2D, não captura rotação, profundidade nem movimento.</p>
         <p>O processamento ocorre neste aparelho. Imagens e vídeos não são transmitidos ao site ou ao GitHub. Salve a imagem marcada e o vídeo antes de fechar ou atualizar o aplicativo. Webcam exige permissão do navegador e conexão segura (HTTPS ou localhost).</p>
@@ -273,6 +275,14 @@
     const fineTrails=new Map();
     let fineUncertain=[];
     let finePeak=null,finePending=0,fineSequence=Promise.resolve();
+    let lastDeletedAnnotation=null;
+    const deleteMenu=document.createElement('div');
+    deleteMenu.className='paiva-2d-delete-menu';
+    deleteMenu.hidden=true;
+    deleteMenu.setAttribute('role','menu');
+    deleteMenu.innerHTML='<span id="paiva-2d-delete-label">Marcação selecionada</span><button type="button" id="paiva-2d-delete-confirm" role="menuitem">✕ Excluir marcação</button><button type="button" id="paiva-2d-delete-cancel" role="menuitem">Cancelar</button>';
+    section.append(deleteMenu);
+    let pendingDeleteIndex=-1;
     const colors = {angle:'#e7cf86',line:'#8bd6e4',point:'#a8f5c3'};
     const palette=['#f56b6b','#f3f6fb','#57d39a','#b99cff','#64cbff','#ffca73'];
     let activeAngleColor=palette[0];
@@ -559,6 +569,63 @@
       }
       return null;
     }
+
+    function annotationAt(event){
+      const point=pointAt(event);
+      if(!point)return -1;
+      const endpoint=findPoint(point,event);
+      if(endpoint)return endpoint.item;
+      const label=angleLabelAt(point);
+      if(label>=0)return label;
+      const segment=findSegment(point,event);
+      return segment?segment.item:-1;
+    }
+    function closeDeleteMenu(){
+      deleteMenu.hidden=true;
+      pendingDeleteIndex=-1;
+    }
+    function deleteAnnotation(index){
+      if(index<0||index>=annotations.length)return false;
+      const kind=annotations[index].kind;
+      lastDeletedAnnotation={index,item:annotations[index]};
+      annotations.splice(index,1);
+      selectedIndex=-1;draft=[];angleSequence=[];activeDrag=null;activeDraw=null;
+      fineTrails.clear();fineUncertain=[];finePeak=null;
+      byId('fine-readout').textContent='Marcação excluída · Desfazer restaura';
+      closeDeleteMenu();
+      render();updateCameraControls();schedulePhotoSave();
+      const type=kind==='angle'?'Ângulo':kind==='point'?'Ponto':'Linha';
+      message(`${type} excluído. Clique em “Desfazer” para recuperar se precisar.`);
+      return true;
+    }
+    deleteMenu.querySelector('#paiva-2d-delete-confirm').addEventListener('click',()=>deleteAnnotation(pendingDeleteIndex));
+    deleteMenu.querySelector('#paiva-2d-delete-cancel').addEventListener('click',closeDeleteMenu);
+    document.addEventListener('pointerdown',event=>{
+      if(!deleteMenu.hidden&&!deleteMenu.contains(event.target))closeDeleteMenu();
+    });
+    canvas.addEventListener('contextmenu',event=>{
+      if(!photoLoaded||scanningActive)return;
+      const index=annotationAt(event);
+      if(index<0)return; // botão direito livre continua sendo play/pause
+      event.preventDefault();event.stopPropagation();
+      pendingDeleteIndex=index;selectedIndex=index;
+      const kind=annotations[index].kind;
+      deleteMenu.querySelector('#paiva-2d-delete-label').textContent=
+        kind==='angle'?'Ângulo selecionado':kind==='point'?'Ponto selecionado':'Linha selecionada';
+      const width=170,height=88;
+      deleteMenu.style.left=`${Math.max(4,Math.min(event.clientX,window.innerWidth-width-8))}px`;
+      deleteMenu.style.top=`${Math.max(4,Math.min(event.clientY,window.innerHeight-height-8))}px`;
+      deleteMenu.hidden=false;
+      render();
+    });
+    document.addEventListener('keydown',event=>{
+      if(event.key==='Escape'&&!deleteMenu.hidden){
+        event.preventDefault();event.stopImmediatePropagation();closeDeleteMenu();return;
+      }
+      if(event.key!=='Delete'||!photoLoaded||selectedIndex<0||document.activeElement!==canvas.parentElement)return;
+      if(event.ctrlKey||event.altKey||event.metaKey)return;
+      event.preventDefault();deleteAnnotation(selectedIndex);
+    });
 
     for (const button of section.querySelectorAll('[data-2d-tool]'))
       button.addEventListener('click',() => selectTool(button.getAttribute('data-2d-tool')));
@@ -1059,6 +1126,7 @@
       lastFrameFromVideo=false;
       stillFromVideo=false;
       fineTrails.clear();fineUncertain=[];finePeak=null;
+      lastDeletedAnnotation=null;closeDeleteMenu();
       byId('back-video').hidden=true;
       const download=byId('video-download');download.hidden=true;download.removeAttribute('href');
       showVideo(true);
@@ -1322,7 +1390,9 @@
       render();syncTimeline();updateCameraControls();schedulePhotoSave();
       const label=firstAngle?displayedAngle(firstAngle):null;
       const lost=result.lost.length;
-      byId('fine-readout').textContent=`${clockTime(next)} · ${label===null?'marcadores':`A ${format(label)}°`}${finePeak?` · pico ${format(finePeak.angle)}°`:''}${lost?` · ${lost} ponto(s) corrigir`:''}`;
+      const readout=label===null&&annotations.some(item=>item.kind==='point')?'Ponto · rastro':
+        label===null?'marcadores':`A ${format(label)}°`;
+      byId('fine-readout').textContent=`${clockTime(next)} · ${readout}${finePeak?` · pico ${format(finePeak.angle)}°`:''}${lost?` · ${lost} ponto(s) corrigir`:''}`;
       message(lost?`Quadro ${clockTime(next)}: ${lost} marcador(es) em laranja perderam a referência. Arraste cada um para o local correto e continue com a rodinha.`:
         `Quadro ${clockTime(next)}: pontos acompanhados. Confira o alinhamento anatômico; mova a rodinha novamente para procurar a extensão máxima.`);
     }
@@ -1465,6 +1535,7 @@
       photoLoaded = true;
       stillFromVideo=source===video;
       fineTrails.clear();fineUncertain=[];finePeak=null;
+      lastDeletedAnnotation=null;closeDeleteMenu();
       annotations=[];draft=[];angleSequence=[];activeDrag=null;activeDraw=null;selectedIndex=-1;
       render();showVideo(false);updateZoom(Number(byId('zoom').value));
       newPhotoRecord();schedulePhotoSave();
@@ -1723,10 +1794,12 @@
       }
       if(tool==='point'){
         annotations.push({kind:'point',role:byId('point-role').value,points:[point]});
+        lastDeletedAnnotation=null;
         selectedIndex=annotations.length-1;
         render();updateCameraControls();
         schedulePhotoSave();
-        message('Ponto colocado. Para medir outro local, escolha Calcanhar ou Quadril no seletor e clique no atleta.');
+        message(stillFromVideo?'Ponto colocado. Com “Seguir pontos por quadro” ligado, gire a rodinha: o pontinho será rastreado e seu trajeto ficará desenhado.':
+          'Ponto colocado. Para medir outro local, escolha Calcanhar ou Quadril no seletor e clique no atleta.');
         return;
       }
       if (tool==='edit') {
@@ -1745,8 +1818,9 @@
     canvas.addEventListener('pointerdown',canvasPointerDown);
     function canvasPointerMove(event) {
       const p=pointAt(event);if(!p)return;
-      if(!activeDraw&&!activeDrag)canvas.style.cursor=angleLabelAt(p)>=0?'pointer':
-        (findPoint(p,event)?'grab':'crosshair');
+      // Cruz fina inclusive em cima dos marcadores: o cursor "mão" escondia
+      // exatamente o ponto anatômico que o profissional precisava acertar.
+      canvas.style.cursor='crosshair';
       if (activeDraw?.pointer===event.pointerId) {
         event.preventDefault();
         draft=activeDraw.kind==='angle-sequence'?[...angleSequence,p]:
@@ -1776,6 +1850,7 @@
           angleSequence.push(p);
           if(angleSequence.length===3){
             annotations.push({kind:'angle',points:angleSequence.map(q=>({...q})),color:activeAngleColor});
+            lastDeletedAnnotation=null;
             selectedIndex=annotations.length-1;
             angleSequence=[];draft=[];render();updateCameraControls();schedulePhotoSave();
             message('Ângulo de três pontos concluído! Puxe cada ponto diretamente com o mouse, sem clicar em “Ajustar pontos”.');
@@ -1791,6 +1866,7 @@
           const points=draftFromDrag(activeDraw.kind,activeDraw.start,p,event.shiftKey);
           annotations.push({kind:activeDraw.kind,points,
             ...(activeDraw.kind==='angle'?{color:activeAngleColor}:{})});
+          lastDeletedAnnotation=null;
           selectedIndex=annotations.length-1;
           draft=[];render();
           updateCameraControls();
@@ -1824,15 +1900,29 @@
       if(forwardedGesture?.pointerId!==event.pointerId)stopDrag(event);
     });
     byId('undo').addEventListener('click',() => {
-      if (draft.length){draft=[];angleSequence=[];}else annotations.pop();
-      selectedIndex=annotations.length-1;
+      if(draft.length){
+        draft=[];angleSequence=[];
+        message('Marcação incompleta cancelada.');
+      }else if(lastDeletedAnnotation){
+        const {index,item}=lastDeletedAnnotation;
+        annotations.splice(Math.min(index,annotations.length),0,item);
+        selectedIndex=Math.min(index,annotations.length-1);
+        lastDeletedAnnotation=null;
+        message('Marcação recuperada na posição original.');
+      }else{
+        annotations.pop();selectedIndex=annotations.length-1;
+        message('Última anotação removida.');
+      }
+      fineTrails.clear();fineUncertain=[];finePeak=null;
       updateCameraControls();
-      render();message('Último ponto ou anotação removido.');
+      render();
       schedulePhotoSave();
     });
     byId('clear').addEventListener('click',() => {
       if (annotations.length && !window.confirm('Remover todas as linhas e ângulos desta foto?'))return;
-      annotations=[];draft=[];angleSequence=[];selectedIndex=-1;render();message('Marcações removidas. A fotografia foi preservada.');
+      annotations=[];draft=[];angleSequence=[];selectedIndex=-1;lastDeletedAnnotation=null;
+      fineTrails.clear();fineUncertain=[];finePeak=null;
+      closeDeleteMenu();render();message('Marcações removidas. A fotografia foi preservada.');
       schedulePhotoSave();
       updateCameraControls();
     });

@@ -190,6 +190,20 @@
 #paiva-athlete-2d .paiva-2d-fine-settings select {max-width:62px;
   border-radius:5px;border:1px solid #587989;background:#183440;color:#f0faff;
   padding:3px 5px;font:600 10px system-ui;}
+/* Menu pontual acionado sobre um ângulo, segmento ou marcador isolado.
+   Não ocupa altura da bancada nem reduz a imagem em zoom 175%. */
+#paiva-athlete-2d .paiva-2d-delete-menu:not([hidden]) {position:fixed;z-index:100005;
+  display:flex;flex-direction:column;gap:4px;width:170px;padding:8px;
+  border-radius:9px;border:1px solid #6b8695;background:#172934;
+  box-shadow:0 8px 28px rgba(0,0,0,.45);color:#f2f8fa;box-sizing:border-box;}
+#paiva-athlete-2d .paiva-2d-delete-menu[hidden] {display:none!important;}
+#paiva-athlete-2d .paiva-2d-delete-menu span {font:650 10px system-ui;
+  color:#c6d7e0;line-height:1.2;}
+#paiva-athlete-2d .paiva-2d-delete-menu button {padding:5px 8px;
+  font:650 11px system-ui;border-radius:5px;border:1px solid #667d89;
+  background:#263b48;color:#f4f8fa;cursor:pointer;text-align:left;}
+#paiva-athlete-2d .paiva-2d-delete-menu #paiva-2d-delete-confirm {border-color:#af6a68;
+  color:#ffdfdb;background:#513332;}
 #paiva-athlete-2d .paiva-2d-point-role:not([hidden]) {display:flex;grid-column:1/-1;
   gap:6px;align-items:center;justify-content:flex-start;font-size:10px;color:#c3e3e2;}
 #paiva-athlete-2d .paiva-2d-point-role select {width:auto;min-width:110px;max-width:200px;
