@@ -200,8 +200,8 @@ CONVERSOR DE VÍDEO LOCAL · AVI / MOV / MP4:
 
 REPRODUÇÃO CONTÍNUA (VAI E VOLTA) E NOVA BANCADA 2D:
 - Na Análise Angular 2D, os controles de vídeo ficam imediatamente EMBAIXO da imagem: linha do tempo, reproduzir/pausar, velocidade e avanço quadro a quadro. As ferramentas de ângulo, linha, ajuste de pontos, espessura e zoom também ficam sob a imagem enquanto se trabalha em fotografias ou quadros congelados. Na tela larga do Windows a área principal permanece visível durante a rolagem das opções laterais.
-- A opção “↔ Vai e volta contínuo” inicia marcada. Ao chegar ao final do arquivo, o vídeo passa a retroceder em pequenos saltos; ao voltar ao início, avança de novo. Continua até o usuário pausar. Ela também aparece nos visores A e B, individualmente. É possível desligá-la quando quiser.
-- O retorno é implementado por buscas de tempo no navegador, não é decodificação reversa nativa com todos os quadros em RAM. Arquivos com poucos quadros-chave, alta resolução ou hardware lento podem apresentar engasgos ou saltos durante a volta. Pause e capture o quadro antes de registrar qualquer ângulo clínico.
+- A opção “↻ Repetir vídeo continuamente” inicia marcada. Ao chegar ao fim do arquivo, o vídeo salta diretamente ao começo e continua reproduzindo para a frente, como uma música com replay, sem pedalar de ré. Ela também aparece nos visores A e B, individualmente. Desmarque para parar no final.
+- A repetição usa o loop nativo do navegador, sem a antiga decodificação reversa por saltos de quadros. Ao cruzar do final para o começo, o rastreio assistido é encerrado para não vincular indevidamente o último marcador ao primeiro quadro; o vídeo continua repetindo.
 - Após “Capturar quadro” e marcar ângulo/linha, “Voltar ao vídeo” e “Reproduzir” iniciam automaticamente uma TENTATIVA de seguir os pontos quando “Seguir pontos ao reproduzir” estiver marcado. Os marcadores existentes no quadro são referência inicial. O rastreador passou a amostrar a imagem em largura de 640 pixels e a aceitar pequenas mudanças de direção, incluindo a volta. O desempenho depende de marcadores contrastantes, boa iluminação, câmera lateral fixa, FPS adequado e ausência de obstrução.
 - ATENÇÃO: rastreamento e angulação dinâmica continuam EXPERIMENTAIS. Não há detecção anatômica automática, nem garantia de que um marcador permaneça na mesma articulação. Uma correspondência ambígua ou um salto temporal faz o app interromper a análise. Reposicione os pontos, capture outro quadro e confira os resultados no STT/Retül antes de relatá-los ao cliente.
 
@@ -247,7 +247,7 @@ ANÁLISE DIRETA NO VÍDEO · TAMANHO CONSTANTE · RÉGUA DE RECORTE:
 - A marcação escolhida permanece selecionada depois de criada, facilitando vários ângulos ou linhas seguidos. "Ajustar pontos" continua disponível para reposicionar extremidades e girar as hastes.
 - A largura de exibição do vídeo e da foto congelada agora é calculada com a mesma altura e proporção, evitando que o atleta diminua de tamanho na transição vídeo → foto. O 100% continua representando o quadro inteiro na janela, usando o máximo de espaço disponível; zoom acima de 100% amplia para detalhes.
 - Logo ABAIXO da imagem, a régua de corte mostra duas alças com tempos: arraste a primeira para o INÍCIO e a segunda para o FIM. O trecho escolhido fica destacado. Clique "✂ Salvar trecho" para gerar um novo MP4 (mesmo motor e limite de até 3 minutos) e armazená-lo nos registros locais. O vídeo original é preservado.
-- O controle básico ▶/⏸ fica ao lado da régua; os ajustes extras (velocidade, FPS, vai e volta, avançar quadro) ficam dentro de "⚙ Reprodução · velocidade · quadros" para não diminuir a área útil. Botão direito e rodinha do mouse continuam disponíveis.
+- O controle básico ▶/⏸ fica ao lado da régua; os ajustes extras (velocidade, FPS, repetição contínua, avançar quadro) ficam dentro de "⚙ Reprodução · velocidade · quadros" para não diminuir a área útil. Botão direito e rodinha do mouse continuam disponíveis.
 - A ferramenta "📷 Foto" permanece ao lado das ferramentas de desenho e também na régua. Com o vídeo aberto, ela congela o quadro e baixa uma imagem PNG; com o quadro já marcado, baixa a fotografia com as linhas/ângulos visíveis. O arquivamento automático no navegador permanece ativo.
 - O rastreamento dos pontos continua experimental e exige verificação manual; clicar e arrastar em outro instante congela uma nova fotografia, não um rastreamento anatômico validado.
 
@@ -333,6 +333,11 @@ AJUSTE DE INTERFACE · FERRAMENTAS 2D MAIS LIMPAS:
 - Foram retirados os botões separados "↔ Horizontal" e "↕ Vertical" da área de ferramentas 2D, pois o alinhamento horizontal ao solo já é feito com Shift durante o desenho ou o ajuste das pontas.
 - Continuam disponíveis as ferramentas ÂNGULO, LINHA, PONTO, AJUSTAR PONTOS, o rastreio, a exclusão em massa e os controles de zoom/espessura.
 - O cache do aplicativo termina em “lessbuttons1”, para que o navegador substitua a interface antiga depois da atualização dos arquivos.
+
+REPETIÇÃO DE VÍDEO · SOMENTE PARA A FRENTE:
+- O antigo "Vai e volta contínuo" foi substituído por "Repetir vídeo continuamente" na análise 2D e nos visores A e B. Quando o vídeo termina, recomeça imediatamente do início, sempre para a frente.
+- Desmarcando, o vídeo termina normalmente. O botão Pausar, a velocidade, a régua, a navegação quadro a quadro e o recorte permanecem disponíveis.
+- O novo cache termina em “forwardreplay1”.
 
 NOVO · CAPTURA FULL HD E RASTREIO DE PONTO COM SEGUNDA ESTRATÉGIA:
 - QUADRO CONGELADO: antes havia limite de 1.400 px na maior dimensão. Agora o aplicativo conserva a imagem até 1.920 px, dentro de um teto de cerca de 2,3 milhões de pixels. Fotos e vídeos de resolução menor são mantidos no tamanho original, sem ampliação artificial.

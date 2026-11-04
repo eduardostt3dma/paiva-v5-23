@@ -239,7 +239,7 @@
       startTime:start,endTime:path[path.length-1].time};
   }
 
-  function create({video,annotations,sourceWidth,sourceHeight,isReversePlaying,isPingPongEnabled,onPoints,onLost,onDone}) {
+  function create({video,annotations,sourceWidth,sourceHeight,isLoopEnabled,onPoints,onLost,onDone}) {
     if (!video || !video.videoWidth || !video.videoHeight || !annotations?.length)
       return {start:async()=>false,stop:()=>{}};
     const w=WIDTH,h=Math.max(1,Math.round(WIDTH*video.videoHeight/video.videoWidth));
@@ -266,11 +266,16 @@
     function tick() {
       if(!running)return;
       if(video.ended) {
-        if(isPingPongEnabled?.()) {schedule();return;}
         stop();onDone?.();return;
       }
       const time=video.currentTime;
-      if ((video.paused&&!isReversePlaying?.()) || time===lastVideoTime ||
+      // O vídeo pode voltar diretamente ao início em modo replay. Os pontos
+      // do último quadro não devem ser rastreados como se fossem do primeiro.
+      // Encerra apenas o rastreio; o vídeo permanece reproduzindo em loop.
+      if(isLoopEnabled?.() && lastVideoTime>=0 && time<lastVideoTime-0.05){
+        stop();onDone?.();return;
+      }
+      if (video.paused || time===lastVideoTime ||
           (lastSampleTime>=0 && Math.abs(time-lastSampleTime)<.018)) {
         schedule();return;
       }

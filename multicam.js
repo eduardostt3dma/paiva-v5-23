@@ -75,7 +75,7 @@
               <button type="button" id="paiva-multi-pause-${key}" disabled>⏸ Pausar</button>
             </div>
             <small class="paiva-multi-wheel-hint">🖱 Rodinha: quadros · Direito: play/pause · Espaço: play/pause</small>
-            <label class="paiva-multi-loop"><input type="checkbox" id="paiva-multi-loop-${key}" checked /> ↔ Vai e volta contínuo</label>
+            <label class="paiva-multi-loop"><input type="checkbox" id="paiva-multi-loop-${key}" checked /> ↻ Repetir vídeo continuamente</label>
             <label class="paiva-multi-speed">Velocidade de reprodução
               <select id="paiva-multi-speed-${key}"><option value="0.1">0,1×</option><option value="0.25">0,25×</option><option value="0.5">0,5×</option><option value="1" selected>1×</option></select>
             </label>
@@ -100,7 +100,7 @@
 
     const byId=(kind,key)=>document.getElementById(`paiva-multi-${kind}${key?'-'+key:''}`);
     const states=Object.fromEntries(['a','b'].map(key=>[key,{
-      key,stream:null,recorder:null,chunks:[],timer:null,source:null,url:null,filename:'',recording:false,pending:false,loadTimer:null,sessionId:'',backward:false,reverseFrame:null,lastReverseTick:0
+      key,stream:null,recorder:null,chunks:[],timer:null,source:null,url:null,filename:'',recording:false,pending:false,loadTimer:null,sessionId:''
     }]));
     const message=(key,text)=>byId('message',key).textContent=text;
     const status=text=>byId('discovery-status').textContent=text;
@@ -108,41 +108,6 @@
     let detecting=false;
 
     function dualMode(){return byId('mode').value==='2';}
-
-    function haltReverse(state,resetDirection=true){
-      if(state.reverseFrame!==null)cancelAnimationFrame(state.reverseFrame);
-      state.reverseFrame=null;state.lastReverseTick=0;
-      if(resetDirection)state.backward=false;
-    }
-    function reverseTick(state,timestamp){
-      state.reverseFrame=null;
-      const video=byId('video',state.key);
-      if(!state.backward||!state.source||state.stream||!byId('loop',state.key).checked)return;
-      const fps=Number(byId('fps',state.key).value)||30;
-      const rate=Number(byId('speed',state.key).value)||1;
-      const interval=1000/(fps*rate);
-      if(!state.lastReverseTick)state.lastReverseTick=timestamp-interval;
-      if(timestamp-state.lastReverseTick>=interval&&!video.seeking){
-        state.lastReverseTick=timestamp;
-        const next=Math.max(0,video.currentTime-1/fps);
-        video.currentTime=next;
-        if(next<=.001){
-          haltReverse(state);
-          video.currentTime=0;
-          Promise.resolve(video.play()).catch(()=>message(state.key,'Clique em Reproduzir para continuar.'));
-          return;
-        }
-      }
-      state.reverseFrame=requestAnimationFrame(time=>reverseTick(state,time));
-    }
-    function startReverse(state){
-      const video=byId('video',state.key);
-      if(!state.source||state.stream||!byId('loop',state.key).checked||!Number.isFinite(video.duration)||video.duration<=0)return;
-      haltReverse(state);video.pause();state.backward=true;
-      video.currentTime=Math.max(0,video.duration-1/(Number(byId('fps',state.key).value)||30));
-      state.reverseFrame=requestAnimationFrame(time=>reverseTick(state,time));
-      message(state.key,'Retornando automaticamente. Pause quando quiser examinar um quadro.');
-    }
 
     function update(key) {
       const state=states[key];
@@ -175,13 +140,11 @@
       }
     }
     function detachVideo(state) {
-      haltReverse(state);
       const video=byId('video',state.key);
       video.pause();video.srcObject=null;video.removeAttribute('src');
       video.controls=false;
     }
     function setPlayback(state,blob,filename,download) {
-      haltReverse(state);
       if(state.loadTimer) {clearTimeout(state.loadTimer);state.loadTimer=null;}
       if (state.url) URL.revokeObjectURL(state.url);
       state.source=blob;state.filename=filename;
@@ -189,6 +152,7 @@
       const player=byId('video',state.key);
       player.pause();player.srcObject=null;player.src=state.url;
       player.controls=true;player.muted=true;player.autoplay=false;player.load();
+      player.loop=byId('loop',state.key).checked;
       player.playbackRate=Number(byId('speed',state.key).value)||1;
       const expectedUrl=state.url;
       state.loadTimer=setTimeout(()=>{
@@ -206,10 +170,6 @@
     function playVideo(key) {
       const state=states[key],player=byId('video',key);
       if(!state.source || state.stream || state.recording)return;
-      if(state.backward){
-        if(state.reverseFrame===null)state.reverseFrame=requestAnimationFrame(time=>reverseTick(state,time));
-        message(key,'Vídeo retornando.');return;
-      }
       if(player.ended)player.currentTime=0;
       message(key,'Tentando reproduzir o arquivo…');
       let attempt;
@@ -226,13 +186,13 @@
     }
     function pauseVideo(key){
       const state=states[key],player=byId('video',key);
-      haltReverse(state,false);player.pause();
+      player.pause();
       if(state.source)message(key,'Vídeo pausado. Use a rodinha ou as setas para escolher o quadro.');
     }
     function toggleVideo(key){
       const state=states[key],player=byId('video',key);
       if(!state.source || state.stream || state.recording)return;
-      if(!player.paused || (state.backward&&state.reverseFrame!==null))pauseVideo(key);
+      if(!player.paused)pauseVideo(key);
       else playVideo(key);
     }
 
@@ -288,7 +248,6 @@
           video:{deviceId:{exact:selected},width:{ideal:width},height:{ideal:height},frameRate:{ideal:frameRate}},audio:false
         });
         stopStream(state);
-        haltReverse(state);
         state.stream=stream;
         const video=byId('video',key);
         video.pause();video.removeAttribute('src');video.srcObject=stream;
@@ -451,7 +410,7 @@
         else if(shortcut==='KeyL'||shortcut==='l'||shortcut==='L'){event.preventDefault();playVideo(key);}
         else if(shortcut==='ArrowLeft'||shortcut==='ArrowRight'){
           if(!Number.isFinite(video.duration)||video.duration<=0)return;
-          event.preventDefault();haltReverse(state);video.pause();
+          event.preventDefault();video.pause();
           const fps=Number(byId('fps',key).value)||30;
           const step=shortcut==='ArrowRight'?1:-1;
           video.currentTime=Math.max(0,Math.min(video.duration,video.currentTime+step/fps));
@@ -466,7 +425,7 @@
         wheelAccumulator+=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?100:1);
         if(Math.abs(wheelAccumulator)<30)return;
         const direction=Math.sign(wheelAccumulator);wheelAccumulator=0;
-        haltReverse(state);player.pause();
+        player.pause();
         const fps=Number(byId('fps',key).value)||30;
         player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+direction/fps));
         message(key,`Quadro ${direction>0?'seguinte':'anterior'} · 1/${fps} s (aproximado). Gire a rodinha sobre a imagem para continuar.`);
@@ -480,10 +439,9 @@
         pauseVideo(key);
       });
       byId('loop',key).addEventListener('change',()=>{
-        if(!byId('loop',key).checked && states[key].backward){
-          haltReverse(states[key]);byId('video',key).pause();
-        }
-        if(states[key].source)message(key,byId('loop',key).checked?'Vai e volta contínuo ativado.':'Vai e volta desativado.');
+        const player=byId('video',key);
+        player.loop=byId('loop',key).checked;
+        if(states[key].source)message(key,player.loop?'Repetição contínua ativada: volta ao início e segue para a frente.':'Repetição desativada: para ao terminar.');
       });
       byId('device',key).addEventListener('change',updateAll);
       byId('file',key).addEventListener('change',event=>{
@@ -502,12 +460,12 @@
         if(player.paused)message(key,`Vídeo reconhecido (${Number.isFinite(player.duration)?formatTime(player.duration*1000):'duração indefinida'}). Clique em “▶ Reproduzir vídeo”.`);
       });
       byId('video',key).addEventListener('ended',()=>{
-        if(states[key].source&&!states[key].stream&&byId('loop',key).checked)startReverse(states[key]);
+        const player=byId('video',key);
+        if(states[key].source&&!states[key].stream&&player.loop){player.currentTime=0;playVideo(key);}
       });
     }
     window.addEventListener('pagehide',()=>{
       for(const state of Object.values(states)){
-        haltReverse(state);
         if(state.recorder?.state==='recording')state.recorder.stop();
         if(state.timer)clearTimeout(state.timer);
         if(state.loadTimer)clearTimeout(state.loadTimer);
