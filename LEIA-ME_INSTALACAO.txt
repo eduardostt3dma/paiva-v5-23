@@ -1,3 +1,6 @@
+PAIVA V5.24 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_24.txt.
+As informações abaixo registram o histórico das revisões anteriores.
+
 EVOLUÇÃO DO RELATÓRIO DO CLIENTE — 04/11/2026:
 - Nova prévia: “Suas proporções e a posição na bicicleta”, com entreperna, tronco líquido e braço líquido em cm e % da estatura.
 - As porcentagens são independentes; não há classificação corporal nem escolha automática de quadro a partir delas.

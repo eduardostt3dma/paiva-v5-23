@@ -1,0 +1,32 @@
+PAIVA BIKE FIT STUDIO — V5.24
+Revisão de 04/11/2026
+
+INSTALACAO NO GITHUB
+1. Extraia o ZIP. Nao envie somente o ZIP ao repositorio.
+2. Entre na pagina de upload do repositorio paiva-v5-23.
+3. Envie TODOS os arquivos extraidos na raiz da branch main.
+4. Confirme o commit e abra novamente o aplicativo.
+5. Com internet, atualize a pagina para ativar o novo cache offline.
+
+O QUE MUDOU
+- Referencias de stack/reach por estatura com transicao suavizada entre faixas.
+- Resumo TT limitado a altura de selim, stack e reach, sem linhas duplicadas.
+- Road/MTB: resumo claro das referencias de selim e da geometria da bicicleta.
+- Validacao de plausibilidade para medidas finais; valores fora das faixas
+  de digitacao nao sao incluidos no relatorio.
+- Arquivo local de fichas por cliente: salvar, abrir e novo atendimento.
+- Backup JSON exportavel e importavel para a ficha de dados.
+- Navegacao rapida pelos modulos e acabamento grafite / aco fosco.
+- PDF: interpretacao atualizada do metodo.
+
+LIMITES IMPORTANTES
+- As formulas de geometria continuam EXPLORATORIAS, nao validadas como
+  prescricoes automaticas. O teste dinamico e as medidas reais prevalecem.
+- O valor 0,883 x entreperna usa o movimento central como origem;
+  o valor 1,09 x entreperna usa o eixo do pedal. Nao misturar protocolos.
+- As fichas ficam neste navegador (IndexedDB); podem ser apagadas pelo sistema.
+- O backup JSON possui dados pessoais e NAO inclui fotos, videos nem as
+  anotacoes da bancada 2D. Exporte a midia separadamente.
+- Ao iniciar outro cliente, confira manualmente o visor 2D ainda aberto.
+- O PIN simples continua sendo trava local de interface, NAO login seguro.
+- Este ZIP foi revisado estaticamente; valide no Android, iPad e Windows.

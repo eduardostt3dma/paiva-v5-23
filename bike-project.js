@@ -308,7 +308,13 @@
         rows.push({label:'Observação',value:'Triagem experimental por proporções, não equivale a fit ideal; conferir quadro, montagem e avaliação dinâmica.'});
         return {rows};
       },
-      getDraft() {switchMode();return {mode,profile,crank:id('crank').value,stack:id('stack').value,reach:id('reach').value};}
+      getDraft() {switchMode();return {mode,profile,crank:id('crank').value,stack:id('stack').value,reach:id('reach').value};},
+      resetAll() {
+        for (const key of Object.keys(drafts)) drafts[key] = fresh();
+        mode = modeNow();profile = 'balanced';
+        for (const key of ['crank','stack','reach']) id(key).value = '';
+        render();
+      }
     };
     render();
   }

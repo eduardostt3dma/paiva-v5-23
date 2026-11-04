@@ -560,6 +560,12 @@
 
     globalThis.PAIVA_FRAME_COMPARE = {
       compare,
+      resetAll() {
+        for (const key of Object.keys(drafts)) drafts[key] = {};
+        selectedMode = currentMode();
+        fields.forEach(field => { id(field).value = ''; });
+        switchMode(selectedMode, false);
+      },
       getReport() {
         render();
         if (!lastData) return null;

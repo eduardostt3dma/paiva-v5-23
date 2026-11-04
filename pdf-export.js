@@ -93,17 +93,18 @@
     document.dispatchEvent(new Event('input', { bubbles: true }));
     const sizing = globalThis.PAIVA_ANTHRO_METHOD?.getReport?.() || null;
     const isFullProfile = sizing?.mode === 'full';
+    const isTT = document.querySelector('[data-mode].active')?.dataset.mode === 'tt';
 
     const results = [...document.querySelectorAll('#results .result')].map(item => ({
       label: item.querySelector('.head span')?.textContent?.trim() || '',
       value: item.querySelector('.head strong')?.textContent?.trim() || '—',
       description: item.querySelector('small')?.textContent?.trim() || '',
-    })).filter(item => item.label && !(isFullProfile && /^(stack|reach)\b/i.test(item.label)));
+    })).filter(item => item.label && !(isFullProfile && !isTT && /^(stack|reach)\b/i.test(item.label)));
 
     const bikeMetrics = [...document.querySelectorAll('#reportBikeMetrics .report-bike-metric')].map(item => ({
       label: item.querySelector('span')?.textContent?.trim() || '',
       value: item.querySelector('strong')?.textContent?.trim() || '',
-    })).filter(item => item.label && !(isFullProfile && /^(stack|reach)\b/i.test(item.label)));
+    })).filter(item => item.label && !(isFullProfile && !isTT && /^(stack|reach)\b/i.test(item.label)));
 
     const clientName = document.getElementById('clientName')?.value?.trim() || 'Cliente';
     const clientBikeImage = globalThis.PAIVA_BIKE_PHOTOS?.getActiveImage?.();

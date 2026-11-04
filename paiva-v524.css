@@ -1,0 +1,75 @@
+/* PAIVA V5.24 — acabamento grafite e aço fosco, preservando as cores
+   funcionais dos ângulos e marcadores biomecânicos. */
+:root {
+  --accent:#bdcbd4;
+  --txt:#f1f4f6;
+  --muted:#aebbc4;
+  --line:#43515c;
+}
+body {
+  background:radial-gradient(ellipse 1100px 700px at 50% -250px,#34424c 0,transparent 78%),
+    linear-gradient(145deg,#080b0e,#111920 48%,#080b0f) !important;
+  color:#edf2f5;
+}
+main {max-width:1480px}
+header {border-bottom-color:#465560 !important}
+header #logo {filter:grayscale(1) contrast(1.08);border-color:#9daab3 !important}
+.brand-kicker,.eyebrow {color:#cbd6dd !important}
+.brand-rule {background:linear-gradient(90deg,#a3b1bb,transparent) !important}
+.card {border-color:#45525e;background:linear-gradient(150deg,#202b35,#111820 62%,#0d1318)}
+.client-first {border-color:#647480 !important;background:linear-gradient(145deg,#293641,#131d24) !important}
+.btn.primary,.primary,.mode button.active {
+  background:linear-gradient(135deg,#e3ebef,#9dadb8) !important;
+  color:#10191f !important;
+  border-color:#afbdc7 !important;
+  box-shadow:0 5px 20px #a8bbc120 !important;
+}
+.result strong,.help,.bike-label {color:#d7e5ee !important;fill:#d7e5ee !important}
+.help {border-color:#81939f !important;background:#27343e !important}
+.report-chip {border-color:#7a8c98 !important;color:#d4e0e7 !important}
+.disclaimer,.report-warning {border-left-color:#97a9b4 !important}
+.live-dot,.legend-dot {background:#a5b7c2 !important;box-shadow:0 0 10px #a5b7c255 !important}
+.paiva-anthro-spot {border-color:#a9bfcc !important;box-shadow:0 0 8px #b3c6d022 !important}
+.paiva-anthro-spot__value {color:#e2edf3 !important}
+#paiva-bike-project .paiva-prj-card[data-selected="true"] {border-color:#c4d4dc !important}
+body #paiva-bike-project {border-color:#667a87 !important;background:linear-gradient(140deg,#243440,#111b23) !important}
+.paiva-final-field input[aria-invalid="true"] {border:2px solid #e29f84 !important;background:#39251f !important}
+#paiva-v524-nav {
+  position:sticky;top:0;z-index:25;display:flex;gap:7px;overflow:auto;
+  scrollbar-width:thin;padding:10px 0;margin:12px 0 -3px;
+  background:linear-gradient(180deg,#101820f5,#101820eb);
+  border-bottom:1px solid #52616b;backdrop-filter:blur(12px);
+}
+#paiva-v524-nav button {
+  flex:0 0 auto;padding:10px 15px;color:#d6e2e9;background:#27343e;
+  border:1px solid #667986;border-radius:24px;font:650 12px system-ui,sans-serif;
+  cursor:pointer;
+}
+#paiva-v524-nav button:focus-visible {outline:2px solid #ecf4f7;outline-offset:2px}
+.paiva-sessions {margin:14px 0 6px !important;padding:18px 20px !important}
+.paiva-sessions-title {display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.paiva-sessions-title span:first-child {font-size:10px;letter-spacing:.12em;font-weight:800;color:#abbfc9}
+.paiva-sessions-title h2 {margin:5px 0 12px;font-size:21px}
+.paiva-sessions-indicator {font-size:11px;color:#dee9ee;border:1px solid #80939e;background:#24343e;border-radius:15px;padding:6px 10px}
+.paiva-sessions-actions {display:flex;flex-wrap:wrap;gap:9px;margin:8px 0 16px}
+.paiva-sessions-actions .btn,.paiva-sessions-existing .btn {padding:10px 13px;min-height:40px}
+.paiva-session-import {display:inline-flex;align-items:center;cursor:pointer}
+.paiva-session-import input {display:none}
+.paiva-sessions-existing {display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.paiva-sessions-existing label {font-size:12px;color:#c7d4db;font-weight:700}
+.paiva-sessions-existing select {flex:1;min-width:180px;padding:11px 12px;border:1px solid #738694;border-radius:9px;background:#0d171e;color:#f0f5f7}
+#paiva-session-status {font-size:12px;color:#d5e1e8;margin:12px 0 4px}
+.paiva-sessions-alert {font-size:10px;color:#a8b7c0;line-height:1.65;margin:7px 0 0}
+@media(max-width:650px) {
+  .paiva-sessions {padding:13px !important}
+  .paiva-sessions-actions .btn {flex:1;justify-content:center;text-align:center;min-width:calc(50% - 5px)}
+  #paiva-v524-nav {margin-inline:-13px;padding-inline:13px}
+  #paiva-v524-nav button {font-size:11px;padding:9px 12px}
+  .paiva-sessions-existing select {flex-basis:100%;order:3}
+}
+@media print {
+  #paiva-v524-nav,.paiva-sessions {display:none !important}
+  .report-top {border-bottom-color:#80929d !important}
+  .report-brand small,.report-grid h2 {color:#526979 !important}
+  .report-warning {background:#f0f4f6 !important}
+}

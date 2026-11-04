@@ -31,9 +31,27 @@
 
   const DEFINITIONS = GROUPS.flatMap(([group, fields]) => fields.map(([id, label, unit, help, mode, step]) =>
     ({ id, label, unit, help, mode: mode || null, step: step || '.1', group })));
+  // Limites de plausibilidade para evitar erros de unidade e digitação.
+  // Não são faixas de adequação biomecânica nem prescrições clínicas.
+  const LIMITS = {
+    finalSaddleHeight:[200,1200], finalSaddleSetback:[-350,350],
+    finalSaddleAngle:[-30,30], finalNoseHead:[1,1800],
+    finalNoseStem:[1,1800], finalNoseGrip:[1,1800],
+    finalNoseSTI:[1,1800], finalNoseTT:[1,1800],
+    finalLeverAxle:[1,2200], finalHandlebarDrop:[-500,500],
+    finalStack:[200,850], finalReach:[200,700],
+    finalSpacerCount:[0,30], finalSpacerHeight:[0,180],
+    finalStemLength:[1,260], finalHandlebarWidth:[250,1050]
+  };
   const photoEstimates = new Set();
   const getMode = () => document.querySelector('[data-mode].active')?.dataset.mode || 'road';
-  const validNumber = value => value !== '' && Number.isFinite(Number(value));
+  const validNumber = (value, definition) => {
+    if (value === '' || !Number.isFinite(Number(value))) return false;
+    const [min,max] = LIMITS[definition?.id] || [-Infinity,Infinity];
+    const n = Number(value);
+    if (n < min || n > max) return false;
+    return definition?.id !== 'finalSpacerCount' || Number.isInteger(n);
+  };
 
   function initialize() {
     const host = document.getElementById('bikeFields');
@@ -95,6 +113,9 @@
         input.step = step || '0.1';
         input.id = id;
         input.placeholder = 'Opcional';
+        const [minimum,maximum] = LIMITS[id] || [-Infinity,Infinity];
+        if (Number.isFinite(minimum)) input.min = String(minimum);
+        if (Number.isFinite(maximum)) input.max = String(maximum);
         input.title = help;
         input.setAttribute('aria-label', `${label} em ${unit}`);
         const helpNote = document.createElement('small');
@@ -150,7 +171,7 @@
       return DEFINITIONS.filter(def => !def.mode || def.mode === getMode()).flatMap(def => {
         const input = document.getElementById(def.id);
         const raw = input?.value?.trim() || '';
-        if (!validNumber(raw)) return [];
+        if (!validNumber(raw,def)) return [];
         const estimated = photoEstimates.has(def.id);
         return [{ id: def.id, label: estimated ? `${def.label} (estimativa por foto 2D)` : def.label,
           value: `${raw.replace('.', ',')} ${def.unit}`, unit: def.unit, raw: Number(raw), estimated }];
@@ -159,16 +180,25 @@
 
     function sync() {
       const mode = getMode();
+      let invalid = 0;
       for (const field of host.querySelectorAll('[data-mode-only]')) {
         field.classList.toggle('paiva-field-hidden', field.dataset.modeOnly !== mode);
+      }
+      for (const def of DEFINITIONS.filter(item=>!item.mode || item.mode===mode)) {
+        const input = document.getElementById(def.id);
+        const raw = input?.value?.trim() || '';
+        const bad = raw !== '' && !validNumber(raw,def);
+        if (input) input.setAttribute('aria-invalid',String(bad));
+        if (bad) invalid++;
       }
       const rows = reportRows();
       const handId = mode === 'mtb' ? 'finalNoseGrip' : mode === 'tt' ? 'finalNoseTT' : 'finalNoseSTI';
       const hands = document.getElementById(handId)?.value?.trim() || '';
       const handBadge = document.getElementById('bikeHands');
-      if (handBadge) handBadge.textContent = validNumber(hands) && Number(hands) > 0
+      if (handBadge) handBadge.textContent = validNumber(hands,DEFINITIONS.find(def=>def.id===handId)) && Number(hands) > 0
         ? `${(Number(hands) / 10).toFixed(1).replace('.', ',')} cm · final` : '—';
-      count.textContent = rows.length ? `${rows.length} medida(s) final(is) registrada(s).` : 'Nenhuma medida final preenchida.';
+      count.textContent = (rows.length ? `${rows.length} medida(s) final(is) registrada(s).` : 'Nenhuma medida final preenchida.') +
+        (invalid ? ` Confira ${invalid} valor(es) fora dos limites de digitação. Eles não entrarão no PDF.` : '');
       report.hidden = rows.length === 0;
       dl.replaceChildren();
       for (const row of rows) {
@@ -203,7 +233,7 @@
       fillFromPhoto: (id, value) => {
         const def = DEFINITIONS.find(item => item.id === id);
         const input = document.getElementById(id);
-        if (!def || !input || !Number.isFinite(value)) return false;
+        if (!def || !input || !validNumber(String(value),def)) return false;
         input.value = String(Math.round(value * 10) / 10);
         photoEstimates.add(id);
         input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -213,7 +243,7 @@
         const def = DEFINITIONS.find(item => item.id === id);
         const input = document.getElementById(id);
         const raw = String(value ?? '').trim();
-        if (!def || !input || (raw !== '' && !Number.isFinite(Number(raw)))) return false;
+        if (!def || !input || (raw !== '' && !validNumber(raw,def))) return false;
         input.value = raw;
         photoEstimates.delete(id);
         sync();

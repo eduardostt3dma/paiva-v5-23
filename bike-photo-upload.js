@@ -171,6 +171,14 @@
     globalThis.PAIVA_BIKE_PHOTOS = {
       getActiveImage: () => custom[activeMode()],
       activeHasCustomPhoto: () => Boolean(custom[activeMode()]),
+      clearAll() {
+        for (const mode of ['road','mtb','tt']) {
+          custom[mode] = null;
+          pictures[mode].src = originals[mode];
+          pictures[mode].classList.remove('paiva-client-photo');
+        }
+        syncControls();
+      },
     };
     syncControls();
   }
