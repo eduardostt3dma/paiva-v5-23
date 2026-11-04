@@ -1,5 +1,5 @@
-/* PAIVA · Rastreamento EXPERIMENTAL de pontos 2D por correspondência de textura.
-   Para vídeo gravado e câmera fixa. Não substitui rastreio cinemático validado. */
+/* PAIVA · rastreamento semiautomático 2D independente, por correspondência de textura.
+   Para vídeo gravado, câmera fixa e referências visíveis. Confirmação manual obrigatória. */
 (() => {
   'use strict';
   const WIDTH=640;
@@ -14,7 +14,7 @@
     return gray;
   }
 
-  function trackPoint(before,after,w,h,at,patch=PATCH,search=SEARCH) {
+  function trackPoint(before,after,w,h,at,patch=PATCH,search=SEARCH,minVariance=110,maxError=24) {
     const x=Math.round(at.x),y=Math.round(at.y);
     if (x-patch<0 || x+patch>=w || y-patch<0 || y+patch>=h) return null;
     // Rejeita tecidos/áreas sem textura. Prefira pequenas fitas ou marcadores contrastantes.
@@ -24,7 +24,7 @@
       sum+=value;sumSquared+=value*value;count++;
     }
     const variance=sumSquared/count-(sum/count)**2;
-    if (variance<110) return null;
+    if (variance<minVariance) return null;
     let best=Infinity,bestX=x,bestY=y;
     const minX=Math.max(patch,x-search),maxX=Math.min(w-patch-1,x+search);
     const minY=Math.max(patch,y-search),maxY=Math.min(h-patch-1,y+search);
@@ -40,7 +40,7 @@
       if (cost<best) {best=cost;bestX=cx;bestY=cy;}
     }
     const averageError=best/count;
-    if (averageError>24) return null;
+    if (averageError>maxError) return null;
     return {x:bestX,y:bestY,error:averageError};
   }
 
@@ -55,6 +55,26 @@
     return forward;
   }
 
+  // O deslocamento de um calcanhar pode ser maior que o de um quadril por quadro.
+  // Faz tentativas com janelas distintas e confirma ida/volta antes de aceitar.
+  // Evita herdar um ponto errado indefinidamente; em caso de dúvida, pede correção.
+  function trackCyclePoint(before,after,w,h,at) {
+    let winner=null,score=Infinity;
+    for(const [patch,search] of [[5,20],[7,28],[4,14]]){
+      const forward=trackPoint(before,after,w,h,at,patch,search,38,30);
+      if(!forward)continue;
+      const backward=trackPoint(after,before,w,h,forward,patch,search,38,30);
+      if(!backward)continue;
+      const roundTrip=Math.hypot(backward.x-at.x,backward.y-at.y);
+      if(roundTrip>4)continue;
+      const candidateScore=forward.error+backward.error*.3+roundTrip*1.5;
+      if(candidateScore<score){winner=forward;score=candidateScore;}
+      // Uma correspondência quase perfeita e reversível dispensa outras janelas.
+      if(candidateScore<=2)break;
+    }
+    return winner?{x:winner.x,y:winner.y,error:score}:null;
+  }
+
   function create({video,annotations,sourceWidth,sourceHeight,isReversePlaying,isPingPongEnabled,onPoints,onLost,onDone}) {
     if (!video || !video.videoWidth || !video.videoHeight || !annotations?.length)
       return {start:async()=>false,stop:()=>{}};
@@ -63,7 +83,7 @@
     canvas.width=w;canvas.height=h;
     const ctx=canvas.getContext('2d',{willReadFrequently:true});
     if(!ctx) return {start:async()=>false,stop:()=>{}};
-    const scaled=annotations.map(item=>({kind:item.kind,color:item.color,supplementary:!!item.supplementary,points:item.points.map(p=>({
+    const scaled=annotations.map(item=>({kind:item.kind,color:item.color,role:item.role||'',supplementary:!!item.supplementary,points:item.points.map(p=>({
       x:p.x/sourceWidth*w,y:p.y/sourceHeight*h}))}));
     let running=false,previous=null,frameId=null,lastVideoTime=-1,lastSampleTime=-1;
     const sample=()=> {
@@ -106,7 +126,7 @@
           }
           pts.push({x:found.x,y:found.y});
         }
-        nextShapes.push({kind:item.kind,color:item.color,supplementary:item.supplementary,points:pts});
+        nextShapes.push({kind:item.kind,color:item.color,role:item.role,supplementary:item.supplementary,points:pts});
       }
       scaled.splice(0,scaled.length,...nextShapes);
       previous=next;
@@ -141,9 +161,9 @@
     const surface=document.createElement('canvas');surface.width=w;surface.height=h;
     const ctx=surface.getContext('2d',{willReadFrequently:true});
     if(!ctx)throw new Error('Não foi possível preparar a análise local.');
-    const sourceShapes=annotations.map(item=>({kind:item.kind,color:item.color,supplementary:!!item.supplementary,
+    const sourceShapes=annotations.map(item=>({kind:item.kind,color:item.color,role:item.role||'',supplementary:!!item.supplementary,
       points:item.points.map(p=>({x:p.x/sourceWidth*w,y:p.y/sourceHeight*h}))}));
-    const cloneShapes=shapes=>shapes.map(item=>({kind:item.kind,color:item.color,supplementary:item.supplementary,
+    const cloneShapes=shapes=>shapes.map(item=>({kind:item.kind,color:item.color,role:item.role,supplementary:item.supplementary,
       points:item.points.map(p=>({...p}))}));
     const angleValue=shapes=>{
       const first=shapes.find(item=>item.kind==='angle'&&item.points.length===3);
@@ -218,5 +238,113 @@
     await seek(best.time);
     return {best,tested,partial,width:w,height:h,referenceTime:center};
   }
-  globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,grayscale,create,scanWindow};
+
+  // Rastreio finito de UM giro: começa no quadro marcado e procura a maior e
+  // a menor abertura INTERNA do joelho, independentemente da exibição suplementar.
+  // É semiautomático: correções feitas pelo profissional reiniciam a referência.
+  async function scanCycle({video,annotations,sourceWidth,sourceHeight,startTime,
+    duration=1,fps=30,shouldCancel=()=>false,onProgress=()=>{}}){
+    if(!video?.videoWidth || !video.videoHeight)
+      throw new Error('Carregue um vídeo antes de rastrear.');
+    if(!Number.isFinite(video.duration)||video.duration<=0)
+      throw new Error('Espere o vídeo terminar de carregar.');
+    const chosen=annotations.find(a=>a.kind==='angle'&&a.points?.length===3);
+    if(!chosen)throw new Error('Marque o ângulo com trocânter, côndilo e maléolo primeiro.');
+    if(!(sourceWidth>0&&sourceHeight>0))throw new Error('Dimensões do quadro inválidas.');
+    const w=WIDTH,h=Math.max(1,Math.round(w*video.videoHeight/video.videoWidth));
+    const surface=document.createElement('canvas');surface.width=w;surface.height=h;
+    const ctx=surface.getContext('2d',{willReadFrequently:true});
+    if(!ctx)throw new Error('Não foi possível preparar o rastreamento neste navegador.');
+    // Uma análise por vez: só o primeiro ângulo do joelho e os pontos de rastro.
+    // Linhas auxiliares não devem provocar perda da análise.
+    const tracked=[chosen,...annotations.filter(a=>a.kind==='point'&&a.points?.length===1)]
+      .map(item=>({kind:item.kind,color:item.color,role:item.role||'',
+        supplementary:!!item.supplementary,points:item.points.map(p=>({
+          x:p.x/sourceWidth*w,y:p.y/sourceHeight*h}))}));
+    const clone=items=>items.map(item=>({...item,points:item.points.map(p=>({...p}))}));
+    const angleAt=items=>{
+      const [a,b,c]=items[0].points;
+      const ux=a.x-b.x,uy=a.y-b.y,vx=c.x-b.x,vy=c.y-b.y;
+      const l1=Math.hypot(ux,uy),l2=Math.hypot(vx,vy);
+      if(l1<4||l2<4)return null;
+      return Math.acos(Math.max(-1,Math.min(1,(ux*vx+uy*vy)/(l1*l2))))*180/Math.PI;
+    };
+    const sample=()=>{ctx.drawImage(video,0,0,w,h);return grayscale(ctx.getImageData(0,0,w,h));};
+    const seek=target=>new Promise((resolve,reject)=>{
+      if(shouldCancel())return reject(new Error('Rastreio interrompido.'));
+      const time=Math.max(0,Math.min(video.duration-.001,target));
+      if(Math.abs(video.currentTime-time)<.0005 && video.readyState>=2)return resolve();
+      let timer;
+      const cleanup=()=>{clearTimeout(timer);video.removeEventListener('seeked',done);video.removeEventListener('error',fail);};
+      const done=()=>{cleanup();resolve();};
+      const fail=()=>{cleanup();reject(new Error('O navegador não conseguiu localizar o próximo quadro.'));};
+      video.addEventListener('seeked',done);video.addEventListener('error',fail);
+      timer=setTimeout(()=>{cleanup();reject(new Error('O vídeo demorou a localizar um quadro. Tente outra taxa de FPS.'));},7000);
+      try{video.currentTime=time;}catch(_){fail();}
+    });
+    const start=Math.max(0,Math.min(video.duration-.001,Number(startTime)||0));
+    const timeWindow=Math.max(.4,Math.min(2,Number(duration)||1));
+    const sampleRate=Math.max(15,Math.min(60,Number(fps)||30));
+    const reachesEnd=start+timeWindow>=video.duration;
+    const end=Math.min(video.duration-.001,start+timeWindow);
+    const steps=Math.max(1,Math.ceil((end-start)*sampleRate));
+    video.pause();await seek(start);
+    let previous=sample(),current=clone(tracked),tested=0,partial=reachesEnd;
+    let lostTime=null,referenceTime=start,lastReliable=null;
+    // Um marcador plano/sem textura não permite estimativa segura de deslocamento.
+    for(const item of current)for(const point of item.points)
+      if(!trackPoint(previous,previous,w,h,point,5,0,38,30))
+        throw new Error('Um ponto não tem contraste suficiente. Ajuste no desenho ou use marcador visível.');
+    const firstAngle=angleAt(current);
+    if(firstAngle===null)throw new Error('Os três pontos do ângulo estão muito próximos.');
+    const atFrame=(time,angle,items)=>({time,angle,shapes:clone(items)});
+    let maximum=atFrame(start,firstAngle,current),minimum=atFrame(start,firstAngle,current);
+    const frames=[atFrame(start,firstAngle,current)];
+    for(let n=1;n<=steps;n++){
+      if(shouldCancel())throw new Error('Rastreio interrompido.');
+      const time=Math.min(end,start+n/sampleRate);
+      if(time<=referenceTime+.0005)continue;
+      await seek(time);
+      if(shouldCancel())throw new Error('Rastreio interrompido.');
+      let pixels;
+      try{pixels=sample();}catch(_){throw new Error('Não foi possível ler o quadro do vídeo.');}
+      const updated=[];
+      let lost=false;
+      for(const item of current){
+        const points=[];
+        for(const point of item.points){
+          const found=trackCyclePoint(previous,pixels,w,h,point);
+          if(!found){lost=true;break;}
+          points.push({x:found.x,y:found.y});
+        }
+        if(lost)break;
+        updated.push({...item,points});
+      }
+      if(lost){partial=true;lostTime=time;break;}
+      const angle=angleAt(updated);
+      if(angle===null){partial=true;lostTime=time;break;}
+      current=updated;previous=pixels;referenceTime=time;tested++;
+      const record=atFrame(time,angle,updated);
+      frames.push(record);lastReliable=record;
+      if(angle>maximum.angle)maximum=record;
+      if(angle<minimum.angle)minimum=record;
+      if(n%3===0||n===steps)
+        onProgress({tested,step:n,total:steps,maximum:maximum.angle,minimum:minimum.angle});
+    }
+    if(tested<2)
+      throw new Error('O rastreio perdeu a referência nos primeiros quadros. Reposicione os pontos e tente novamente.');
+    const trackPath=role=>{
+      const index=tracked.findIndex(item=>item.kind==='point'&&item.role===role);
+      if(index<0)return [];
+      return frames.map(frame=>({time:frame.time,...frame.shapes[index].points[0]}));
+    };
+    const hipPath=trackPath('hip');
+    const heelPath=trackPath('heel');
+    await seek(maximum.time);
+    return {maximum,minimum,frames,tested,partial,lostTime,
+      durationAnalyzed:referenceTime-start,targetDuration:timeWindow,
+      lastReliable,width:w,height:h,startTime:start,
+      supplementary:!!tracked[0].supplementary,hipPath,heelPath};
+  }
+  globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,trackCyclePoint,grayscale,create,scanWindow,scanCycle};
 })();

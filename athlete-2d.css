@@ -171,6 +171,34 @@
   border-radius:8px;background:#243845;color:#e1eef5;padding:9px 7px;
   font:750 10px system-ui;cursor:pointer;flex:1 1 108px;}
 #paiva-athlete-2d .paiva-2d-quick-actions button:disabled {opacity:.42;cursor:not-allowed;}
+#paiva-athlete-2d .paiva-2d-point-role:not([hidden]) {display:flex;grid-column:1/-1;
+  gap:6px;align-items:center;justify-content:flex-start;font-size:10px;color:#c3e3e2;}
+#paiva-athlete-2d .paiva-2d-point-role select {width:auto;min-width:110px;max-width:200px;
+  font-size:10px;padding:3px 7px;color:#f2f8fb;background:#1c3340;
+  border:1px solid #547485;border-radius:6px;}
+#paiva-athlete-2d .paiva-2d-cycle-action {display:flex;align-items:center;flex:1 1 260px;
+  gap:5px;min-width:0;}
+#paiva-athlete-2d .paiva-2d-cycle-action button {flex:1 1 auto;min-width:0;
+  background:#294c52;border-color:#6cabb2;color:#e9ffff;}
+#paiva-athlete-2d .paiva-2d-cycle-action select {min-width:0;max-width:142px;flex:0 1 142px;
+  padding:5px 3px;background:#1d3441;border:1px solid #638293;border-radius:6px;
+  font:650 10px system-ui;color:#e2f5fa;}
+#paiva-athlete-2d .paiva-2d-cycle-action select:disabled {opacity:.42;}
+#paiva-athlete-2d .paiva-2d-cycle-results:not([hidden]) {display:flex;position:absolute;
+  z-index:8;left:8px;right:8px;bottom:8px;box-sizing:border-box;
+  flex-wrap:wrap;align-items:center;gap:5px;padding:7px 9px;
+  border:1px solid #7faeb2;background:rgba(10,32,39,.94);border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);color:#f1fcfa;}
+#paiva-athlete-2d .paiva-2d-cycle-results span {font:700 11px system-ui;
+  flex:1 1 180px;min-width:0;}
+#paiva-athlete-2d .paiva-2d-cycle-results button {font:700 10px system-ui;
+  padding:5px 8px;white-space:nowrap;border:1px solid #81b9bf;border-radius:6px;
+  color:#efffff;background:#254a54;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-cycle-results #paiva-2d-cycle-dismiss {
+  flex:0 0 27px;padding:4px 3px;font-size:15px;}
+#paiva-athlete-2d .paiva-2d-playback-advanced > .paiva-2d-short-scan {margin:5px 0;}
+#paiva-athlete-2d .paiva-2d-playback-advanced > #paiva-2d-track-start {
+  width:100%;font-size:10px;padding:5px 8px;margin-top:3px;}
 #paiva-athlete-2d .paiva-2d-follow {flex:1 1 100%;font-size:10px;color:#bcd5e1;
   display:flex;align-items:center;gap:6px;cursor:pointer;}
 #paiva-athlete-2d .paiva-2d-follow span {color:#8dabb9;}

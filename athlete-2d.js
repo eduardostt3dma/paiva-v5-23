@@ -1,6 +1,6 @@
 /* PAIVA — análise 2D em fotografia ou quadro de vídeo, 100% local.
-   Marcação MANUAL de três pontos (ângulo), dois (reta) ou um (trajetória).
-   Rastreio experimental de textura, sem reconhecimento anatômico nem 3D. */
+   Marcação MANUAL e rastreio semiautomático finito de uma volta da pedalada.
+   Não faz reconhecimento anatômico automático nem reconstrução 3D. */
 (() => {
   'use strict';
 
@@ -49,9 +49,10 @@
         <p><strong>Registro automático:</strong> cada quadro capturado é arquivado como foto PNG com as linhas e ângulos, e atualizado quando você terminar de ajustá-los. As gravações de webcam e os vídeos recortados também vão para “Fotos e vídeos salvos”. Tudo permanece no armazenamento deste navegador, não em uma pasta permanente do Windows. Abra a lista e clique em Baixar para fazer suas cópias de segurança; limpar dados do navegador pode apagar os registros.</p>
         <p><strong>Vai e volta contínuo:</strong> os comandos ficam logo abaixo da imagem. Com essa opção marcada, o vídeo segue até o fim, retorna por buscas sucessivas de quadros e volta a avançar sem parar até você clicar em Pausar. A fluidez do retorno depende dos quadros-chave, do arquivo e do computador; a reprodução reversa em navegador pode ser menos suave do que em programas nativos. Use a régua de tempo para escolher o instante exato.</p>
         <p><strong>Extensão em trecho curto:</strong> capture um quadro próximo da extensão máxima e marque os três pontos anatômicos. Use “Buscar extensão” para examinar um intervalo curto antes e depois daquele instante, procurando o maior valor na convenção angular escolhida. O rastreio é experimental e pode interromper em áreas sem contraste; é uma prévia a validar manualmente, não uma medição clínica autônoma.</p>
-        <p><strong>Rastreio beta:</strong> depois de congelar um quadro do vídeo gravado, desenhe e alinhe as marcações. Clique em “Rastrear marcações” para tentar acompanhá-las no vídeo. Essa função experimental acompanha pequenas regiões contrastantes da imagem e interrompe se perder a referência; não reconhece automaticamente as articulações e pode sofrer desvios. Use fitas contrastantes nos pontos, câmera fixa e valide cada ângulo importante antes de usar no bike fit.</p>
+        <p><strong>Seguir marcações em vídeo:</strong> depois de congelar um quadro do vídeo gravado, desenhe e alinhe as marcações. O comando avançado “Seguir marcações no vídeo” tenta acompanhá-las durante a reprodução. Se perder a referência, interrompe; não reconhece articulações e pode sofrer desvios. Use marcadores contrastantes, câmera fixa e valide cada ângulo antes de usar no bike fit.</p>
         <p><strong>Seguir pontos ao reproduzir:</strong> após capturar e marcar o quadro, escolha Voltar ao vídeo e Reproduzir. Com essa opção ativa, o rastreio assistido tenta acompanhar os pontos já desenhados, inclusive no retorno. Se perder algum marcador, a análise é interrompida para evitar um ângulo enganoso. Reposicione os pontos e recomece do quadro correto.</p>
         <p><strong>Ponto de trajetória:</strong> escolha “PONTO · RASTRO” e clique no quadril, pé ou outra referência visível; use “AJUSTAR PONTOS” para refinar a posição. Depois volte ao vídeo e reproduza com rastreio. O ponto e seu caminho recente ficam destacados sem cálculo angular. A linha do rastro representa deslocamento na imagem (pixels), não milímetros ou movimento tridimensional.</p>
+        <p><strong>Rastrear uma pedalada:</strong> congele um quadro no início de um giro, desenhe o ângulo do joelho (trocânter → côndilo → maléolo) e, se desejar, acrescente um ponto classificado como Calcanhar e outro como Quadril. Escolha a duração aproximada de um giro e clique “⟳ Rastrear 1 giro”. O aplicativo examina os quadros seguintes, mostra a maior e a menor abertura interna do joelho, e permite ver cada instante com as marcações e trajetórias. Se o ponto escapar, a busca para: corrija-o no último quadro confiável e recomece. É necessário conferir visualmente os resultados; o rastreamento não reconhece a anatomia sozinho.</p>
         <p><strong>Biomecânica:</strong> no joelho, uma referência possível é trocânter maior → côndilo femoral lateral → maléolo lateral. Escolha sempre a mesma convenção de pontos e o mesmo plano da câmera. A foto mostra uma projeção 2D, não captura rotação, profundidade nem movimento.</p>
         <p>O processamento ocorre neste aparelho. Imagens e vídeos não são transmitidos ao site ou ao GitHub. Salve a imagem marcada e o vídeo antes de fechar ou atualizar o aplicativo. Webcam exige permissão do navegador e conexão segura (HTTPS ou localhost).</p>
       </div>
@@ -59,7 +60,14 @@
         <div class="paiva-2d-view">
           <div class="paiva-2d-canvas-wrap"><canvas id="paiva-2d-canvas" width="960" height="540" aria-label="Foto ou quadro do vídeo com ângulos e linhas desenhados manualmente"></canvas>
             <video id="paiva-2d-video" playsinline muted hidden aria-label="Webcam ou vídeo gravado para análise 2D"></video>
-            <canvas id="paiva-2d-track-overlay" width="480" height="270" hidden aria-label="Visualização do rastreamento experimental sobre o vídeo"></canvas></div>
+            <canvas id="paiva-2d-track-overlay" width="480" height="270" hidden aria-label="Visualização do rastreamento semiautomático sobre o vídeo"></canvas>
+            <div class="paiva-2d-cycle-results" id="paiva-2d-cycle-results" hidden aria-label="Resultados de um giro da pedalada">
+              <span id="paiva-2d-cycle-summary">Resultados da pedalada</span>
+              <button type="button" id="paiva-2d-cycle-show-max" title="Abrir quadro da extensão máxima">Ver extensão</button>
+              <button type="button" id="paiva-2d-cycle-show-min" title="Abrir quadro da flexão máxima">Ver flexão</button>
+              <button type="button" id="paiva-2d-cycle-correct" hidden title="Corrigir os pontos no último quadro rastreado">Corrigir pontos</button>
+              <button type="button" id="paiva-2d-cycle-dismiss" aria-label="Fechar resultados">×</button>
+            </div></div>
           <div class="paiva-2d-player-dock" aria-label="Controles do vídeo sob a imagem">
             <div class="paiva-2d-trim-ruler" id="paiva-2d-trim-ruler" aria-label="Régua de recorte por tempo">
               <span class="paiva-2d-trim-ruler-caption">✂ TRECHO</span>
@@ -103,6 +111,11 @@
             <button type="button" data-2d-tool="edit" aria-pressed="false">AJUSTAR PONTOS</button>
             <button type="button" id="paiva-2d-photo-action" title="Foto com marcações" aria-label="Salvar foto do atleta com os ângulos">📷 Foto</button>
           </div>
+          <label class="paiva-2d-point-role" id="paiva-2d-point-role-field" hidden>Rastrear ponto de
+            <select id="paiva-2d-point-role" aria-label="Qual parte do atleta será rastreada">
+              <option value="heel">Calcanhar</option><option value="hip">Quadril</option><option value="free">Outro ponto</option>
+            </select>
+          </label>
           <div class="paiva-2d-align" role="group" aria-label="Alinhar linha selecionada">
             <button type="button" id="paiva-2d-align-horizontal">↔ Horizontal</button>
             <button type="button" id="paiva-2d-align-vertical">↕ Vertical</button>
@@ -154,7 +167,18 @@
             <button type="button" id="paiva-2d-stop-record" disabled>Parar gravação</button>
             <button type="button" id="paiva-2d-capture" disabled>Capturar quadro</button>
             <button type="button" id="paiva-2d-back-video" hidden>Voltar ao vídeo</button>
-            <button type="button" id="paiva-2d-track-start" disabled>Rastrear marcações · beta</button>
+            <button type="button" id="paiva-2d-track-start" disabled>Seguir marcações no vídeo</button>
+            <div class="paiva-2d-cycle-action" aria-label="Rastreamento de um giro de pedalada">
+              <button type="button" id="paiva-2d-cycle-start" disabled title="Acompanhar o ângulo, o calcanhar e o quadril por uma volta">⟳ Rastrear 1 giro</button>
+              <select id="paiva-2d-cycle-duration" aria-label="Duração aproximada de uma pedalada completa">
+                <option value="0.6">0,60 s · 100 rpm</option>
+                <option value="0.75" selected>0,75 s · 80 rpm</option>
+                <option value="0.86">0,86 s · 70 rpm</option>
+                <option value="1">1,00 s · 60 rpm</option>
+                <option value="1.2">1,20 s · 50 rpm</option>
+                <option value="1.5">1,50 s · 40 rpm</option>
+              </select>
+            </div>
             <div class="paiva-2d-short-scan">
               <button type="button" id="paiva-2d-scan-short" disabled>Buscar extensão ±0,5 s</button>
               <select id="paiva-2d-scan-radius" aria-label="Trecho para busca da extensão máxima">
@@ -195,7 +219,7 @@
     playbackAdvanced.append(section.querySelector('.paiva-2d-playback'));
     playerDock.append(playbackAdvanced);
     const markingDock=section.querySelector('.paiva-2d-marking-dock');
-    for(const selector of ['.paiva-2d-tools','.paiva-2d-align','.paiva-2d-zoom','.paiva-2d-width'])
+    for(const selector of ['.paiva-2d-tools','.paiva-2d-point-role','.paiva-2d-align','.paiva-2d-zoom','.paiva-2d-width'])
       markingDock.append(section.querySelector(selector));
     const quickDock=section.querySelector('.paiva-2d-quick-actions');
     quickDock.append(document.getElementById('paiva-2d-capture'));
@@ -203,9 +227,10 @@
     // A captura manual fica como recurso de compatibilidade, mas o gesto direto
     // sobre o vídeo passa a congelar o quadro automaticamente.
     document.getElementById('paiva-2d-capture').hidden=true;
-    quickDock.append(section.querySelector('.paiva-2d-short-scan'));
-    for(const id of ['paiva-2d-track-start','paiva-2d-track-stop'])
-      quickDock.append(document.getElementById(id));
+    quickDock.append(section.querySelector('.paiva-2d-cycle-action'));
+    quickDock.append(document.getElementById('paiva-2d-track-stop'));
+    playbackAdvanced.append(section.querySelector('.paiva-2d-short-scan'));
+    playbackAdvanced.append(document.getElementById('paiva-2d-track-start'));
     quickDock.insertAdjacentHTML('afterbegin','<label class="paiva-2d-follow"><input type="checkbox" id="paiva-2d-auto-track" /> Seguir pontos ao reproduzir <span>· experimental</span></label>');
     playbackAdvanced.append(quickDock.querySelector('.paiva-2d-follow'));
     section.querySelector('.paiva-2d-player-dock').hidden=true;
@@ -230,6 +255,7 @@
     let activeDraw = null;
     let selectedIndex = -1;
     let lineWidth = 3;
+    let cycleResult=null,cycleTrailsVisible=false;
     const colors = {angle:'#e7cf86',line:'#8bd6e4',point:'#a8f5c3'};
     const palette=['#f56b6b','#f3f6fb','#57d39a','#b99cff','#64cbff','#ffca73'];
     let activeAngleColor=palette[0];
@@ -354,7 +380,7 @@
 
     function drawAnnotation(item,index,partial=false) {
       const pts = item.points;
-      const color = item.color||colors[item.kind];
+      const color = item.color||(item.kind==='point'&&item.role==='hip'?'#64cbff':colors[item.kind]);
       if(item.kind==='point') {
         if(pts.length){
           const p=pts[0];
@@ -387,7 +413,7 @@
         if (item.kind === 'angle') {
           const a = displayedAngle(item);
           values.push(`Ângulo ${index+1}: ${a === null ? 'rever pontos' : format(a)+'°'}`);
-        } else if(item.kind==='point') values.push(`Ponto ${index+1} · rastro`);
+        } else if(item.kind==='point') values.push(`${item.role==='heel'?'Calcanhar':item.role==='hip'?'Quadril':`Ponto ${index+1}`} · rastro`);
         else values.push(`Linha ${index+1}`);
       });
       byId('values').textContent = values.join('  ·  ');
@@ -403,6 +429,19 @@
         ctx.fillText('Escolha a fotografia do atleta',canvas.width/2,canvas.height/2);
         ctx.textAlign='start';
       }
+      if(cycleTrailsVisible&&cycleResult){
+        for(const [role,color] of [['heel','#a8f5c3'],['hip','#64cbff']]){
+          const path=role==='heel'?cycleResult.heelPath:cycleResult.hipPath;
+          if(path.length<2)continue;
+          ctx.save();ctx.beginPath();ctx.lineWidth=Math.max(2,lineWidth);
+          ctx.strokeStyle=color;ctx.globalAlpha=.75;
+          path.forEach((p,i)=>{
+            const x=p.x/cycleResult.width*canvas.width,y=p.y/cycleResult.height*canvas.height;
+            if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+          });
+          ctx.stroke();ctx.restore();
+        }
+      }
       annotations.forEach((item,index) => drawAnnotation(item,index));
       if (draft.length) drawAnnotation({kind:tool,points:draft},annotations.length,true);
       updateValues();
@@ -410,6 +449,7 @@
 
     function selectTool(next) {
       tool=next;draft=[];activeDrag=null;activeDraw=null;
+      byId('point-role-field').hidden=next!=='point';
       for (const button of section.querySelectorAll('[data-2d-tool]'))
         button.setAttribute('aria-pressed',String(button.getAttribute('data-2d-tool')===tool));
       render();
@@ -681,7 +721,10 @@
       byId('track-start').disabled = scanningActive || !hasPlayback || !lastFrameFromVideo || !annotations.length || trackingActive || recording;
       byId('scan-short').disabled = scanningActive || !hasPlayback || !lastFrameFromVideo ||
         !annotations.some(item=>item.kind==='angle') || trackingActive || recording;
+      byId('cycle-start').disabled = scanningActive || !hasPlayback || !lastFrameFromVideo ||
+        !annotations.some(item=>item.kind==='angle') || trackingActive || recording;
       byId('scan-radius').disabled = scanningActive;
+      byId('cycle-duration').disabled = scanningActive;
       byId('track-stop').disabled = !trackingActive && !scanningActive;
       byId('prev-frame').disabled = !hasPlayback || recording || trackingActive || scanningActive;
       byId('next-frame').disabled = !hasPlayback || recording || trackingActive || scanningActive;
@@ -723,7 +766,7 @@
       const readings=[];
       points.forEach((item,index)=> {
         const pts=item.points;
-        const color=item.color||(item.kind==='angle'?'#ffe9a8':item.kind==='point'?'#a8f5c3':'#a6eeff');
+        const color=item.color||(item.kind==='angle'?'#ffe9a8':item.kind==='point'&&item.role==='hip'?'#64cbff':item.kind==='point'?'#a8f5c3':'#a6eeff');
         if(item.kind==='point'){
           const p=pts[0];
           if(!p)return;
@@ -734,12 +777,13 @@
           if(trail.length>1){
             trackCtx.beginPath();trackCtx.moveTo(trail[0].x,trail[0].y);
             for(let j=1;j<trail.length;j++)trackCtx.lineTo(trail[j].x,trail[j].y);
-            trackCtx.strokeStyle='rgba(168,245,195,.82)';trackCtx.lineWidth=2;trackCtx.stroke();
+            trackCtx.strokeStyle=item.role==='hip'?'rgba(100,203,255,.82)':'rgba(168,245,195,.82)';
+            trackCtx.lineWidth=2;trackCtx.stroke();
           }
           trackCtx.beginPath();trackCtx.arc(p.x,p.y,5,0,Math.PI*2);
           trackCtx.fillStyle=color;trackCtx.fill();
           trackCtx.strokeStyle='#102d25';trackCtx.lineWidth=1.5;trackCtx.stroke();
-          readings.push(`Ponto ${index+1} · trajetória`);
+          readings.push(`${item.role==='heel'?'Calcanhar':item.role==='hip'?'Quadril':`Ponto ${index+1}`} · trajetória`);
           return;
         }
         trackCtx.strokeStyle=color;trackCtx.fillStyle=color;
@@ -770,7 +814,7 @@
       pointTrails.clear();
       const currentTime=video.currentTime;
       motionTracker=motion.create({video,annotations:annotations.map(item=>({
-        kind:item.kind,color:item.color,supplementary:!!item.supplementary,points:item.points.map(p=>({...p}))})),
+        kind:item.kind,color:item.color,role:item.role,supplementary:!!item.supplementary,points:item.points.map(p=>({...p}))})),
         sourceWidth:canvas.width,sourceHeight:canvas.height,
         isReversePlaying:()=>backwardMode&&reverseFrame!==null,
         isPingPongEnabled:()=>byId('pingpong').checked,
@@ -802,7 +846,7 @@
       message(`Buscando a extensão em ±${String(radius).replace('.',',')} s do quadro marcado. Aguarde; você pode interromper em “Parar rastreio”.`);
       try{
         const result=await motion.scanWindow({video,centerTime:center,radius,fps,
-          annotations:annotations.map(item=>({kind:item.kind,color:item.color,supplementary:!!item.supplementary,
+          annotations:annotations.map(item=>({kind:item.kind,color:item.color,role:item.role,supplementary:!!item.supplementary,
             points:item.points.map(p=>({...p}))})),
           sourceWidth:canvas.width,sourceHeight:canvas.height,
           shouldCancel:()=>scanCancelled,
@@ -812,7 +856,7 @@
         // Ao terminar, expõe o quadro em que a MAIOR leitura experimental ocorreu.
         // Os pontos desse quadro são correspondências rastreadas, não detecção anatômica.
         originalCtx.drawImage(video,0,0,original.width,original.height);
-        annotations=result.best.shapes.map(item=>({kind:item.kind,color:item.color,supplementary:item.supplementary,
+        annotations=result.best.shapes.map(item=>({kind:item.kind,color:item.color,role:item.role,supplementary:item.supplementary,
           points:item.points.map(p=>({x:p.x/result.width*canvas.width,y:p.y/result.height*canvas.height}))}));
         lastFrameFromVideo=true;stillFromVideo=true;
         render();showVideo(false);updateZoom(100);
@@ -827,14 +871,111 @@
         for(const button of section.querySelectorAll('[data-2d-tool]'))button.disabled=false;
       }
     }
+    function resetCycleResults(){
+      cycleResult=null;cycleTrailsVisible=false;
+      byId('cycle-results').hidden=true;
+      if(photoLoaded)render();
+    }
+    function seekCycleFrame(time){
+      return new Promise((resolve,reject)=>{
+        if(!hasFileVideo()||!Number.isFinite(video.duration)){
+          reject(new Error('Vídeo indisponível para abrir o quadro.'));return;
+        }
+        const target=Math.max(0,Math.min(video.duration-.001,time));
+        if(Math.abs(video.currentTime-target)<.0005&&video.readyState>=2){resolve();return;}
+        let timer;
+        const cleanup=()=>{
+          clearTimeout(timer);
+          video.removeEventListener('seeked',done);
+          video.removeEventListener('error',fail);
+        };
+        const done=()=>{cleanup();resolve();};
+        const fail=()=>{cleanup();reject(new Error('Não foi possível abrir esse quadro.'));};
+        video.addEventListener('seeked',done);video.addEventListener('error',fail);
+        timer=setTimeout(fail,7000);
+        try{video.currentTime=target;}catch(_){fail();}
+      });
+    }
+    async function showCycleFrame(which){
+      if(!cycleResult||!hasFileVideo())return;
+      const result=cycleResult;
+      const chosen=which==='minimum'?result.minimum:
+        which==='correct'?result.lastReliable:result.maximum;
+      if(!chosen)return;
+      try{
+        haltReverse();video.pause();
+        await seekCycleFrame(chosen.time);
+        if(cycleResult!==result)return;
+        originalCtx.drawImage(video,0,0,original.width,original.height);
+        annotations=chosen.shapes.map(item=>({kind:item.kind,color:item.color,role:item.role,
+          supplementary:!!item.supplementary,
+          points:item.points.map(p=>({x:p.x/result.width*canvas.width,y:p.y/result.height*canvas.height}))}));
+        selectedIndex=-1;draft=[];lastFrameFromVideo=true;stillFromVideo=true;
+        cycleTrailsVisible=which!=='correct';
+        render();showVideo(false);updateZoom(100);
+        newPhotoRecord();schedulePhotoSave();
+        byId('back-video').hidden=false;
+        byId('cycle-results').hidden=false;
+        updateCameraControls();
+        if(which==='correct'){
+          selectTool('edit');
+          message(`Quadro de correção em ${clockTime(chosen.time)}. Ajuste o ponto que escapou e inicie um novo giro. O trecho anterior foi preservado nos resultados.`);
+        }else{
+          message(`${which==='minimum'?'Menor ângulo (flexão)':'Maior ângulo (extensão)'}: ${format(chosen.angle)}° em ${clockTime(chosen.time)}. Confira os pontos e o ângulo suplementar antes de registrar.`);
+        }
+      }catch(error){message(`Não foi possível mostrar o quadro: ${error?.message||'erro no vídeo'}.`);}
+    }
+    async function trackOneCycle(){
+      if(scanningActive||trackingActive||!lastFrameFromVideo||!hasFileVideo()||
+        !annotations.some(item=>item.kind==='angle'))return;
+      const motion=globalThis.PAIVA_MOTION_TRACKER;
+      if(!motion?.scanCycle){message('Atualize também o arquivo athlete-motion.js.');return;}
+      const start=video.currentTime;
+      const duration=Number(byId('cycle-duration').value)||.75;
+      const fps=Number(byId('file-fps').value)||30;
+      resetCycleResults();
+      haltReverse();video.pause();
+      scanCancelled=false;scanningActive=true;updateCameraControls();
+      for(const button of section.querySelectorAll('[data-2d-tool]'))button.disabled=true;
+      message(`Rastreando um giro a partir de ${clockTime(start)} (${duration.toFixed(2).replace('.',',')} s). Aguarde; “Parar rastreio” cancela a busca.`);
+      try{
+        const result=await motion.scanCycle({video,startTime:start,duration,fps,
+          annotations:annotations.map(item=>({kind:item.kind,role:item.role,
+            color:item.color,supplementary:!!item.supplementary,
+            points:item.points.map(p=>({...p}))})),
+          sourceWidth:canvas.width,sourceHeight:canvas.height,
+          shouldCancel:()=>scanCancelled,
+          onProgress:progress=>message(`Um giro: ${progress.tested}/${progress.total} quadros · maior ${format(progress.maximum)}° · menor ${format(progress.minimum)}°.`)
+        });
+        if(scanCancelled)return;
+        cycleResult=result;
+        const adjective=result.partial?'Trecho parcial':'Um giro';
+        const complement=result.supplementary?' · rótulo A mostra suplementar':'';
+        byId('cycle-summary').textContent=`${adjective} · extensão ${format(result.maximum.angle)}° · flexão ${format(result.minimum.angle)}°${complement}`;
+        byId('cycle-correct').hidden=!result.partial||!result.lastReliable;
+        await showCycleFrame('maximum');
+        message(`${adjective}: extensão ${format(result.maximum.angle)}° · flexão ${format(result.minimum.angle)}° · ${result.tested} quadros. `+
+          `${result.partial?'Ponto perdido: use “Corrigir pontos”. ':' '}Confira os marcos nos dois instantes.`);
+      }catch(error){
+        if(!scanCancelled)message(`O giro não pôde ser concluído: ${error?.message||'rastreamento insuficiente'}. Reposicione os marcadores em áreas contrastantes e tente novamente.`);
+      }finally{
+        scanningActive=false;scanCancelled=false;updateCameraControls();
+        for(const button of section.querySelectorAll('[data-2d-tool]'))button.disabled=false;
+      }
+    }
     function stopTrackingPlayback() {
-      if(scanningActive){scanCancelled=true;message('Interrompendo a busca curta. O quadro original continua marcado.');return;}
+      if(scanningActive){scanCancelled=true;message('Interrompendo o rastreamento. O quadro original continua marcado.');return;}
       if(!trackingActive)return;
       stopTracking();video.pause();
       message('Rastreio encerrado. Pause noutro instante e capture um novo quadro para corrigir os pontos.');
     }
     byId('track-start').addEventListener('click',startTracking);
     byId('scan-short').addEventListener('click',scanShortSegment);
+    byId('cycle-start').addEventListener('click',trackOneCycle);
+    byId('cycle-show-max').addEventListener('click',()=>showCycleFrame('maximum'));
+    byId('cycle-show-min').addEventListener('click',()=>showCycleFrame('minimum'));
+    byId('cycle-correct').addEventListener('click',()=>showCycleFrame('correct'));
+    byId('cycle-dismiss').addEventListener('click',()=>{byId('cycle-results').hidden=true;});
     byId('track-stop').addEventListener('click',stopTrackingPlayback);
 
     function stopStream() {
@@ -852,7 +993,7 @@
       const allowed=/\.(mp4|mov|webm|m4v|avi)$/i.test(filename) ||
         String(file.type||'').startsWith('video/');
       if (!allowed) {message('Selecione um vídeo, por exemplo MP4, WebM ou MOV.');return false;}
-      haltReverse();stopTracking();stopStream();video.pause();
+      haltReverse();stopTracking();stopStream();video.pause();resetCycleResults();
       if (recordedUrl) URL.revokeObjectURL(recordedUrl);
       recordedUrl=URL.createObjectURL(file);
       currentVideoFile=file;
@@ -1302,6 +1443,7 @@
 
     function captureVideoFrame() {
       if(scanningActive)return false;
+      resetCycleResults();
       if (recorder?.state==='recording') {
         message('Pare a gravação antes de capturar um quadro para análise.');return false;
       }
@@ -1384,7 +1526,7 @@
       const uri=URL.createObjectURL(chosen);
       const photo=new Image();
       photo.onload=() => {
-        haltReverse();stopTracking();lastFrameFromVideo=false;
+        haltReverse();stopTracking();resetCycleResults();lastFrameFromVideo=false;
         stopStream();video.pause();
         if (video.srcObject) video.srcObject=null;
         byId('back-video').hidden=true;
@@ -1414,11 +1556,11 @@
         return;
       }
       if(tool==='point'){
-        annotations.push({kind:'point',points:[point]});
+        annotations.push({kind:'point',role:byId('point-role').value,points:[point]});
         selectedIndex=annotations.length-1;
         render();updateCameraControls();
         schedulePhotoSave();
-        message('Ponto colocado. Para mover o marcador, escolha “Ajustar pontos”; para outro ponto, continue clicando.');
+        message('Ponto colocado. Para medir outro local, escolha Calcanhar ou Quadril no seletor e clique no atleta.');
         return;
       }
       if (tool==='edit') {
