@@ -23,7 +23,11 @@
     section.innerHTML = `
       <div class="paiva-2d-title">
         <div><span>FERRAMENTA COMPLEMENTAR</span><h2>ANÁLISE ANGULAR 2D</h2></div>
-        <button type="button" id="paiva-2d-help" aria-label="Como medir ângulos e linhas" aria-expanded="false">?</button>
+        <div class="paiva-2d-title-actions">
+          <button type="button" id="paiva-2d-fit" title="Mostrar a foto inteira sem barras de rolagem">▣ Ajustar foto</button>
+          <button type="button" id="paiva-2d-wide" aria-pressed="false" title="Ampliar a área de análise">⛶ Tela ampla</button>
+          <button type="button" id="paiva-2d-help" aria-label="Como medir ângulos e linhas" aria-expanded="false">?</button>
+        </div>
       </div>
       <div id="paiva-2d-explain" class="paiva-2d-explain" hidden>
         <p><strong>Ângulo:</strong> clique no vértice e arraste o mouse: duas hastes são criadas de uma vez. No modo “Ajustar pontos”, arraste as extremidades para alinhar ao atleta. O aplicativo exibe o ângulo interno, de 0° a 180°.</p>
@@ -34,6 +38,7 @@
         <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
         <p><strong>Congelar com clique:</strong> no vídeo gravado, clique com o botão ESQUERDO sobre a imagem para pausar e capturar automaticamente o quadro atual; as ferramentas compactas ficam logo abaixo. Com o quadro capturado, você pode marcar ou editar os pontos.</p>
         <p><strong>Zoom:</strong> aproxime até 400% pelo controle inferior ou com Ctrl + roda do mouse sobre a foto.</p>
+        <p><strong>Enquadramento:</strong> em 100%, a foto inteira se ajusta automaticamente à altura e largura visíveis, sem precisar rolar a imagem. O botão “Ajustar foto” restaura esse enquadramento. “Tela ampla” esconde temporariamente o painel lateral e ocupa a janela para analisar com mais espaço. Saia pela mesma tecla ou Esc. O zoom acima de 100% volta a permitir deslocamento intencional para ver detalhes.</p>
         <p><strong>Espessura:</strong> ajuste as linhas de 1 a 8 px no painel lateral. A mudança aparece imediatamente nas linhas existentes e nas novas marcações.</p>
         <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Você pode gravar até 3 minutos, salvar o vídeo no aparelho, pausá-lo e usar “Capturar quadro” para medir os ângulos de um instante. Os pontos iniciais são sempre marcados manualmente.</p>
         <p><strong>Vídeos antigos:</strong> use “Abrir vídeo do computador ou pendrive” para carregar MP4, WebM, MOV e outros formatos que seu navegador consiga decodificar. Pause num quadro, capture e analise com as mesmas ferramentas; nenhum arquivo é enviado à internet.</p>
@@ -445,19 +450,61 @@
       render();
     });
     byId('width').addEventListener('change',schedulePhotoSave);
+    function availableImageHeight(){
+      const view=section.querySelector('.paiva-2d-view');
+      const viewport=canvas.parentElement;
+      let controls=0;
+      for(const element of view.children){
+        if(element===viewport || element.hidden || getComputedStyle(element).display==='none')continue;
+        const css=getComputedStyle(element);
+        controls+=element.offsetHeight+(parseFloat(css.marginTop)||0)+(parseFloat(css.marginBottom)||0);
+      }
+      const fullHeight=window.visualViewport?.height||window.innerHeight;
+      // Reserva margem para título, barras do navegador e espaçamento do layout.
+      const viewportLimit=parseFloat(getComputedStyle(viewport).maxHeight);
+      const byWindow=Math.max(180,Math.floor(fullHeight-controls-
+        (section.classList.contains('paiva-2d-expanded')?56:82)));
+      // A própria janela de desenho tem limite de altura: respeitá-lo impede
+      // o reaparecimento de barras internas mesmo em monitores muito largos.
+      return Number.isFinite(viewportLimit)?Math.min(byWindow,Math.max(150,viewportLimit-4)):byWindow;
+    }
     function updateZoom(value) {
       const old=Number(byId('zoom').value);
       const next=Math.max(100,Math.min(400,Math.round(value/25)*25));
       byId('zoom').value=String(next);
       byId('zoom-value').textContent=`${next}%`;
-      canvas.style.width=`${next}%`;
+      // A 100%, o canvas mantém a proporção ORIGINAL e cabe inteiro no quadro.
+      // Zoom maior libera a imagem para deslocamento intencional.
+      canvas.style.width=next===100?'auto':`${next}%`;
+      canvas.style.maxWidth=next===100?'100%':'none';
+      canvas.style.maxHeight=next===100?`${availableImageHeight()}px`:'none';
+      canvas.style.height='auto';
       const viewport=canvas.parentElement;
-      if (viewport && next!==old) {
+      if (viewport && next===100){viewport.scrollLeft=0;viewport.scrollTop=0;}
+      else if (viewport && next!==old) {
         const shift=(next-old)/200;
         viewport.scrollLeft+=viewport.clientWidth*shift;
         viewport.scrollTop+=viewport.clientHeight*shift;
       }
     }
+    byId('fit').addEventListener('click',()=>updateZoom(100));
+    window.addEventListener('resize',()=>{
+      if(Number(byId('zoom').value)===100&&!canvas.hidden)updateZoom(100);
+    });
+    let previousBodyOverflow='';
+    function setWideMode(enable){
+      if(section.classList.contains('paiva-2d-expanded')===enable)return;
+      section.classList.toggle('paiva-2d-expanded',enable);
+      if(enable){previousBodyOverflow=document.body.style.overflow;document.body.style.overflow='hidden';}
+      else document.body.style.overflow=previousBodyOverflow;
+      byId('wide').textContent=enable?'↙ Sair da tela ampla':'⛶ Tela ampla';
+      byId('wide').setAttribute('aria-pressed',String(enable));
+      updateZoom(100);
+    }
+    byId('wide').addEventListener('click',()=>setWideMode(!section.classList.contains('paiva-2d-expanded')));
+    document.addEventListener('keydown',event=>{
+      if(event.key==='Escape'&&section.classList.contains('paiva-2d-expanded'))setWideMode(false);
+    });
     byId('zoom').addEventListener('input',()=>updateZoom(Number(byId('zoom').value)));
     byId('zoom-in').addEventListener('click',()=>updateZoom(Number(byId('zoom').value)+25));
     byId('zoom-out').addEventListener('click',()=>updateZoom(Number(byId('zoom').value)-25));
@@ -719,7 +766,7 @@
         annotations=result.best.shapes.map(item=>({kind:item.kind,color:item.color,supplementary:item.supplementary,
           points:item.points.map(p=>({x:p.x/result.width*canvas.width,y:p.y/result.height*canvas.height}))}));
         lastFrameFromVideo=true;stillFromVideo=true;
-        render();showVideo(false);
+        render();showVideo(false);updateZoom(100);
         newPhotoRecord();schedulePhotoSave();
         byId('back-video').hidden=false;
         message(`Maior leitura encontrada: A ${format(result.best.angle)}° em ${clockTime(result.best.time)} · ${result.tested} quadros próximos. ${result.partial?'Parte do intervalo foi interrompida por falta de referência; ':''}Confira visualmente cada ponto e a convenção angular antes de usar no bike fit.`);
@@ -1002,8 +1049,7 @@
       photoLoaded = true;
       stillFromVideo=source===video;
       annotations=[];draft=[];activeDrag=null;activeDraw=null;selectedIndex=-1;
-      updateZoom(100);
-      render();showVideo(false);
+      render();showVideo(false);updateZoom(100);
       newPhotoRecord();schedulePhotoSave();
       return true;
     }
