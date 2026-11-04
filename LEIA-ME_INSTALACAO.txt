@@ -1,4 +1,6 @@
-PAIVA V5.24 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_24.txt.
+PAIVA V5.25 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_25.txt.
+Esta revisao corrige a retencao dos angulos ao mover a rodinha do mouse.
+As melhorias da V5.24 tambem estao incluidas neste pacote completo.
 As informações abaixo registram o histórico das revisões anteriores.
 
 EVOLUÇÃO DO RELATÓRIO DO CLIENTE — 04/11/2026:

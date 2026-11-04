@@ -1,0 +1,31 @@
+PAIVA BIKE FIT STUDIO — V5.25
+Revisao de retencao de angulos na analise 2D
+
+CORRECOES
+- Um registro antigo vazio de determinado quadro nao substitui mais o
+  angulo ativo quando a rodinha avanca ou retrocede o video.
+- A ultima geometria pode ser recuperada mesmo se a troca de quadro a limpar
+  temporariamente. Ela permanece visivel por cinco movimentos ou mais.
+- Pontos carregados como referencia provisoria ficam marcados para conferencia.
+- Uma exclusao solicitada pelo usuario continua valida: o sistema nao deve
+  ressuscitar marcacoes deliberadamente removidas.
+- Foi reforcada a protecao no visor congelado e na sobreposicao sobre o video.
+- Uma marcacao incompleta de tres pontos nao interrompe o desenho do angulo.
+- Cache offline atualizado para nao manter a versao antiga apos novo upload.
+
+TESTE REAL RECOMENDADO
+1. Abra um video MP4 de pedalada e pause em um quadro.
+2. Marque os tres pontos do angulo do joelho e confira os graus.
+3. Gire a rodinha cinco vezes para tras, devagar, e cinco para a frente.
+4. O angulo deve permanecer desenhado. Se o rastreio perder a referencia,
+   os pontos sao sinalizados para conferencia; ajuste-os manualmente.
+5. Exclua um angulo para conferir que a exclusao nao e revertida.
+
+ATENCAO
+Apos atualizar o GitHub, recarregue o software com internet para instalar
+o novo cache. A persistencia visual nao significa que o angulo foi medido
+automaticamente de forma confiavel em outro quadro. O ajuste anatomico
+continua exigindo conferencia profissional.
+
+O restante do software PAIVA V5.24 foi preservado, incluindo as fichas,
+o pre-fit, o comparador, o relatorio PDF e o modulo de cameras.
