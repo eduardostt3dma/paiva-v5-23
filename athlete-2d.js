@@ -30,9 +30,69 @@
       trunk:horizontalInclination(points[2],points[3]),
       foot:horizontalInclination(points[7],points[6])};
   }
+  // O boneco já nasce montado. A forma inicial é apenas um guia visual:
+  // Paiva posiciona o conjunto, depois refina cada articulação pelo mouse.
+  function full8Template(width,height){
+    const outline=[[.25,.46],[.36,.36],[.42,.19],[.65,.43],
+      [.53,.65],[.58,.86],[.66,.89],[.55,.91]];
+    return outline.map(([x,y])=>({x:x*width,y:y*height}));
+  }
+  // Busca local por um núcleo luminoso cercado de pixels mais escuros.
+  // Não confunde isso com reconhecimento anatômico: falhas não movem o ponto.
+  function reflectorNear(image,target,radius,excluded=[]){
+    const {data,width:w,height:h}=image;
+    if(!data||!(w>28&&h>28))return null;
+    const light=(x,y)=>{
+      const k=(y*w+x)*4;
+      return data[k]*.2126+data[k+1]*.7152+data[k+2]*.0722;
+    };
+    const minX=Math.max(13,Math.round(target.x-radius));
+    const maxX=Math.min(w-14,Math.round(target.x+radius));
+    const minY=Math.max(13,Math.round(target.y-radius));
+    const maxY=Math.min(h-14,Math.round(target.y+radius));
+    let best=null,score=-Infinity;
+    for(let y=minY;y<=maxY;y+=2)for(let x=minX;x<=maxX;x+=2){
+      const dist=Math.hypot(x-target.x,y-target.y);
+      if(dist>radius||excluded.some(p=>Math.hypot(x-p.x,y-p.y)<14))continue;
+      const center=light(x,y);
+      if(center<205)continue;
+      const ring=(light(x-12,y)+light(x+12,y)+light(x,y-12)+light(x,y+12)+
+        light(x-9,y-9)+light(x+9,y-9)+light(x-9,y+9)+light(x+9,y+9))/8;
+      const contrast=center-ring;
+      if(contrast<53)continue;
+      const rank=contrast-dist*.32;
+      if(rank>score){score=rank;best={x,y};}
+    }
+    if(!best)return null;
+    let sx=0,sy=0,total=0;
+    for(let y=Math.max(0,best.y-4);y<=Math.min(h-1,best.y+4);y++)
+      for(let x=Math.max(0,best.x-4);x<=Math.min(w-1,best.x+4);x++){
+        const brightness=light(x,y);
+        if(brightness<190)continue;
+        const weight=brightness-180;
+        sx+=x*weight;sy+=y*weight;total+=weight;
+      }
+    return total>0?{x:sx/total,y:sy/total}:best;
+  }
+  function stableFull8Measurements(item){
+    const measured=full8Measurements(item.points);
+    if(!measured)return null;
+    const cached=item.lastReadings&&typeof item.lastReadings==='object'?item.lastReadings:{};
+    const readings={};
+    for(const [key,value] of Object.entries(measured)){
+      if(Number.isFinite(value))cached[key]=value;
+      readings[key]=Number.isFinite(value)?value:Number.isFinite(cached[key])?cached[key]:null;
+    }
+    item.lastReadings=cached;
+    return readings;
+  }
   function kneeReading(item){
-    if(item?.kind==='full8')return full8Measurements(item.points)?.knee??null;
-    if(item?.kind==='angle'&&item.points.length===3)return angleDegrees(...item.points);
+    if(item?.kind==='full8')return stableFull8Measurements(item)?.knee??null;
+    if(item?.kind==='angle'&&item.points.length===3){
+      const angle=angleDegrees(...item.points);
+      if(angle!==null)item.lastValidAngle=angle;
+      return angle??(Number.isFinite(item.lastValidAngle)?item.lastValidAngle:null);
+    }
     return null;
   }
 
@@ -55,7 +115,7 @@
       </div>
       <div id="paiva-2d-explain" class="paiva-2d-explain" hidden>
         <p><strong>Ângulo direto por três pontos:</strong> com a ferramenta Ângulo selecionada, clique no trocânter maior, depois no côndilo lateral (vértice) e finalmente no maléolo. Os três pontos aparecem no momento do clique e podem ser arrastados diretamente, sem trocar para Ajustar pontos. Esc cancela uma marcação incompleta. Como alternativa, clique e arraste para abrir as duas hastes de uma vez; depois puxe cada extremidade livremente.</p>
-        <p><strong>Análise completa · 8 pontos:</strong> selecione o botão azul e marque, nesta ordem: 1 Punho → 2 Cotovelo lateral → 3 Ombro/acrômio → 4 Quadril/trocânter maior → 5 Joelho/côndilo lateral → 6 Tornozelo/maléolo lateral → 7 Antepé/metatarso → 8 Calcanhar. Os oito pontos formam uma cadeia única editável. O joelho e o ângulo do pé aparecem sobre a imagem; os demais ângulos aparecem abaixo. O pé é medido pela inclinação calcanhar–antepé em relação à horizontal do solo, sem referência à tíbia. Arraste qualquer um dos oito pontos para corrigir; Esc cancela a marcação incompleta. O rastreio por quadro é assistido e pode perder pontos; as posições continuam visíveis para correção manual.</p>
+        <p><strong>Boneco pronto · 8 pontos:</strong> ao clicar no botão azul, aparece um boneco articulado inteiro na foto ou no quadro congelado. Arraste uma linha para mover o conjunto, ou uma bolinha para acertar cada plug refletivo. Use Espelhar ou −/+ para adaptar as proporções. “Encaixar refletores” procura pequenos pontos brilhantes próximos das bolinhas e ativa uma tentativa adicional de rastrear esses reflexos quadro a quadro. NÃO identifica articulações por IA: confira cada encaixe, corrija os laranjas e não confunda brilhos na bike com marcadores anatômicos. A alternativa “Marcar 8 um a um” continua disponível. O joelho usa quadril, côndilo e maléolo. O pé usa somente calcanhar e metatarso contra a horizontal do solo, sem usar a tíbia. Mesmo com falha no rastreio, os últimos valores continuam visíveis como referência provisória.</p>
         <p><strong>Ângulo suplementar:</strong> clique diretamente na etiqueta “A 35°”, por exemplo, para alternar entre 35° e 145° (180° − 35°). A geometria das hastes não muda, somente a convenção mostrada. Confirme qual convenção está usando no laudo.</p>
         <p><strong>Linha:</strong> clique e arraste de uma extremidade até a outra. Depois, “Ajustar pontos” permite puxar as pontas ou mover a reta inteira pelo centro. Sem calibração métrica, não é uma régua em milímetros.</p>
         <p><strong>Alinhamento ao solo:</strong> segure Shift enquanto desenha ou move uma ponta para deixá-la exatamente na mesma altura da referência (linha horizontal de 0°). Isso vale também para qualquer haste de um ângulo de três pontos: a outra haste permanece livre para medir a inclinação real do pé. Shift nunca força a vertical nem um ângulo de 90°.</p>
@@ -139,8 +199,15 @@
             <input type="file" id="paiva-2d-file" accept="image/*" aria-label="Escolher foto do atleta para análise 2D" />
           </label>
           <div class="paiva-2d-tools" role="group" aria-label="Ferramenta de desenho">
-            <button type="button" data-2d-tool="full8" aria-pressed="false">ANÁLISE COMPLETA · 8 PONTOS</button>
+            <button type="button" data-2d-tool="full8" aria-pressed="false">BONECO COMPLETO · 8 PONTOS</button>
             <small id="paiva-2d-full8-guide" class="paiva-2d-full8-guide" hidden></small>
+            <div class="paiva-2d-full8-actions" id="paiva-2d-full8-actions" hidden>
+              <button type="button" id="paiva-2d-full8-reflectors">◉ Encaixar refletores</button>
+              <button type="button" id="paiva-2d-full8-mirror">↔ Espelhar</button>
+              <button type="button" id="paiva-2d-full8-shrink">− Menor</button>
+              <button type="button" id="paiva-2d-full8-grow">+ Maior</button>
+              <button type="button" id="paiva-2d-full8-manual">Marcar 8 um a um</button>
+            </div>
             <button type="button" data-2d-tool="angle" aria-pressed="true">ÂNGULO · ARRASTAR</button>
             <button type="button" data-2d-tool="line" aria-pressed="false">LINHA · ARRASTAR</button>
             <button type="button" data-2d-tool="point" aria-pressed="false">PONTO · RASTRO</button>
@@ -324,6 +391,7 @@
     let draft = [];
     let angleSequence = [];
     let full8Sequence = [];
+    let full8ManualMode = false;
     let annotations = [];
     let activeDrag = null;
     let activeDraw = null;
@@ -350,7 +418,9 @@
     const message = text => {byId('status').textContent = text;};
     const format = value => value.toFixed(1).replace('.',',');
     const displayedAngle = item => {
-      const a=angleDegrees(item.points[0],item.points[1],item.points[2]);
+      const actual=angleDegrees(item.points[0],item.points[1],item.points[2]);
+      if(actual!==null)item.lastValidAngle=actual;
+      const a=actual??(Number.isFinite(item.lastValidAngle)?item.lastValidAngle:null);
       return a===null?null:item.supplementary?180-a:a;
     };
     // Um registro por quadro capturado. Novas marcações atualizam a foto do mesmo
@@ -369,6 +439,9 @@
     const cloneAnnotations=items=>items.map(item=>({kind:item.kind,role:item.role||'free',
       color:item.color||null,supplementary:!!item.supplementary,
       trackEnabled:item.trackEnabled!==false,
+      ...(item.reflectorMode?{reflectorMode:true}:{}),
+      ...(Number.isFinite(item.lastValidAngle)?{lastValidAngle:item.lastValidAngle}:{}),
+      ...(item.lastReadings?{lastReadings:{...item.lastReadings}}:{}),
       points:item.points.map(p=>({x:p.x,y:p.y}))}));
     const clonePaths=()=>[...singlePointTrails].map(([index,path])=>({index,
       path:path.slice(-240).map(p=>({x:p.x,y:p.y,time:p.time}))}));
@@ -760,15 +833,27 @@
       if (!partial && item.kind === 'angle' && pts.length === 3) {
         item.labelBounds=null;
         const a = displayedAngle(item);
-        if (a !== null) item.labelBounds=tag(pts[1].x,pts[1].y,`A ${format(a)}°`,color);
+        const held=angleDegrees(pts[0],pts[1],pts[2])===null;
+        item.labelBounds=tag(pts[1].x,pts[1].y,a===null?'A — · ajustar':
+          `A ${held?'≈ ':''}${format(a)}°${held?' · último':''}`,color);
       }
       if (!partial && item.kind === 'line' && pts.length === 2) {
         tag((pts[0].x+pts[1].x)/2,(pts[0].y+pts[1].y)/2,`L${index+1}`,color);
       }
       if(!partial&&item.kind==='full8'&&pts.length===8){
-        const m=full8Measurements(pts);
-        if(m&&m.knee!==null)tag(pts[4].x,pts[4].y,`Joelho ${format(m.knee)}°`,color);
-        if(m&&m.foot!==null)tag(pts[6].x,pts[6].y,`Pé/solo ${format(m.foot)}°`,color);
+        // Referência horizontal do solo para o ângulo do pé. O calcanhar
+        // nunca é medido em relação à tíbia.
+        ctx.save();ctx.setLineDash([7,5]);ctx.strokeStyle='rgba(72,215,234,.62)';
+        ctx.lineWidth=Math.max(1.5,lineWidth*.6);ctx.beginPath();
+        ctx.moveTo(pts[7].x,pts[7].y);ctx.lineTo(pts[6].x,pts[7].y);
+        ctx.stroke();ctx.restore();
+        const raw=full8Measurements(pts),m=stableFull8Measurements(item);
+        if(m){
+          tag(pts[4].x,pts[4].y,m.knee===null?'Joelho — · ajustar':
+            `Joelho ${raw.knee===null?'≈ ':''}${format(m.knee)}°`,color);
+          tag(pts[6].x,pts[6].y,m.foot===null?'Pé/solo — · ajustar':
+            `Pé/solo ${raw.foot===null?'≈ ':''}${format(m.foot)}°`,color);
+        }
       }
     }
 
@@ -779,7 +864,7 @@
           const a = displayedAngle(item);
           values.push(`Ângulo ${index+1}: ${a === null ? 'rever pontos' : format(a)+'°'}`);
         } else if(item.kind==='full8'){
-          const m=full8Measurements(item.points);
+          const m=stableFull8Measurements(item);
           const val=(label,n)=>`${label} ${n===null?'rever':format(n)+'°'}`;
           if(m)values.push(`8 pontos · ${val('Cotovelo',m.elbow)} · ${val('Ombro',m.shoulder)} · ${val('Quadril',m.hip)} · ${val('Joelho',m.knee)} · ${val('Tornozelo',m.ankle)} · ${val('Tronco/solo',m.trunk)} · ${val('Pé/solo',m.foot)}`);
         } else if(item.kind==='point') values.push(`${item.role==='heel'?'Calcanhar':item.role==='hip'?'Quadril':`Ponto ${index+1}`} · rastro`);
@@ -930,23 +1015,91 @@
     function updateFull8Guide(){
       const guide=byId('full8-guide');
       guide.hidden=tool!=='full8';
-      if(tool==='full8')guide.textContent=`${full8Sequence.length}/8 marcados · próximo: ${FULL8_POINTS[full8Sequence.length]}`;
+      byId('full8-actions').hidden=tool!=='full8';
+      if(tool==='full8')guide.textContent=full8ManualMode?
+        `${full8Sequence.length}/8 marcados · próximo: ${FULL8_POINTS[full8Sequence.length]}`:
+        'Boneco pronto: arraste uma linha para mover tudo; arraste cada bolinha para acertar o refletor. O pé é medido em relação ao solo.';
     }
 
-    function selectTool(next) {
+    function installFull8Skeleton(){
+      if(!photoLoaded||canvas.hidden||!canvas.width||!canvas.height)return false;
+      let existing=annotations.findIndex(item=>item.kind==='full8'&&item.points.length===8);
+      if(existing<0){
+        annotations.push({kind:'full8',points:full8Template(canvas.width,canvas.height),
+          trackEnabled:defaultTrackEnabled,color:colors.full8});
+        existing=annotations.length-1;
+        lastDeletedAnnotation=null;
+      }
+      selectedIndex=existing;render();updateCameraControls();schedulePhotoSave();
+      message('Boneco completo colocado! Arraste uma linha para mover as oito referências juntas; ajuste as bolinhas nos refletores e use Espelhar/−/+ se necessário.');
+      return true;
+    }
+    function transformFull8(transform){
+      if(canvas.hidden){message('Congele o vídeo para ajustar o boneco.');return;}
+      const index=annotations[selectedIndex]?.kind==='full8'?selectedIndex:
+        annotations.findIndex(item=>item.kind==='full8');
+      if(index<0){message('Primeiro coloque o boneco sobre uma foto ou quadro congelado.');return;}
+      const item=annotations[index];
+      const xs=item.points.map(p=>p.x),ys=item.points.map(p=>p.y);
+      const cx=(Math.min(...xs)+Math.max(...xs))/2,cy=(Math.min(...ys)+Math.max(...ys))/2;
+      item.points=item.points.map(p=>constrain({x:cx+(p.x-cx)*(transform==='mirror'?-1:transform),
+        y:cy+(p.y-cy)*(transform==='mirror'?1:transform)}));
+      selectedIndex=index;fineUncertain=[];render();updateCameraControls();schedulePhotoSave();
+      message('Proporção do boneco ajustada. Agora confira e arraste cada ponto sobre seu refletor.');
+    }
+    function snapFull8ToReflectors(){
+      if(!photoLoaded||canvas.hidden){message('Primeiro congele uma imagem com o boneco visível.');return;}
+      const index=annotations[selectedIndex]?.kind==='full8'?selectedIndex:
+        annotations.findIndex(item=>item.kind==='full8');
+      if(index<0){message('Primeiro coloque o boneco sobre o ciclista.');return;}
+      let pixels;
+      try{pixels=originalCtx.getImageData(0,0,original.width,original.height);}
+      catch(_){message('Não foi possível examinar os refletores desta imagem. Ajuste os pontos com o mouse.');return;}
+      const group=annotations[index],radius=Math.max(22,Math.min(140,canvas.width*.08));
+      const used=[],notFound=[];
+      let foundCount=0;
+      group.points=group.points.map((p,j)=>{
+        const found=reflectorNear(pixels,p,radius,used);
+        if(!found){notFound.push({item:index,point:j});return {...p};}
+        used.push(found);foundCount++;
+        return constrain(found);
+      });
+      if(foundCount){
+        selectedIndex=index;
+        group.reflectorMode=true;
+        fineUncertain=fineUncertain.filter(p=>p.item!==index).concat(notFound);
+        render();updateCameraControls();schedulePhotoSave();
+      }
+      message(foundCount?`${foundCount}/8 referências próximas foram encaixadas em regiões refletivas. Confira a anatomia: pontos laranja precisam de correção manual.`:
+        'Nenhum refletor isolado foi identificado perto das bolinhas. Mova o boneco inteiro para perto dos plugs e tente novamente.');
+    }
+    byId('full8-reflectors').addEventListener('click',snapFull8ToReflectors);
+    byId('full8-mirror').addEventListener('click',()=>transformFull8('mirror'));
+    byId('full8-shrink').addEventListener('click',()=>transformFull8(.88));
+    byId('full8-grow').addEventListener('click',()=>transformFull8(1.14));
+    byId('full8-manual').addEventListener('click',()=>selectTool('full8',true));
+
+    function selectTool(next,manual=false) {
+      full8ManualMode=next==='full8'&&manual;
       tool=next;draft=[];angleSequence=[];full8Sequence=[];activeDrag=null;activeDraw=null;
       byId('point-role-field').hidden=true; // O ponto é livre: não precisa escolher parte do corpo.
       for (const button of section.querySelectorAll('[data-2d-tool]'))
         button.setAttribute('aria-pressed',String(button.getAttribute('data-2d-tool')===tool));
       updateFull8Guide();
       render();
+      if(tool==='full8'&&!full8ManualMode){
+        if(!video.hidden&&videoCanCapture())captureVideoFrame();
+        if(installFull8Skeleton())return;
+        message('Abra uma foto ou vídeo e congele a imagem para colocar o boneco completo.');
+        return;
+      }
       if(!video.hidden && videoCanCapture()){
-        message(tool==='full8'?'Análise completa: clique sobre a ciclista para congelar, depois marque os oito pontos na ordem indicada.':
+        message(tool==='full8'?'Marcação manual: congele o vídeo e clique nos oito pontos em ordem.':
           'Ferramenta pronta. Clique sobre o atleta para congelar. Ângulo: marque os 3 pontos com cliques ou abra as hastes arrastando.');
         return;
       }
       if (!photoLoaded) return;
-      message(tool==='full8' ? 'Análise completa: 1 Punho → 2 Cotovelo → 3 Ombro → 4 Quadril → 5 Joelho → 6 Tornozelo → 7 Metatarso → 8 Calcanhar. Clique ponto a ponto.' :
+      message(tool==='full8' ? 'Modo manual: 1 Punho → 2 Cotovelo → 3 Ombro → 4 Quadril → 5 Joelho → 6 Tornozelo → 7 Metatarso → 8 Calcanhar.' :
         tool==='angle' ? 'Ângulo: clique em trocânter → côndilo → maléolo (3 cliques), ou arraste para abrir um ângulo. Depois puxe qualquer ponto, sem mudar de ferramenta.' :
         tool==='line' ? 'Linha: clique e ARRASTE do início ao fim. Segure Shift para alinhar horizontalmente ao solo (0°).' :
         tool==='point' ? 'Ponto: clique onde quiser no atleta. Arraste-o diretamente para corrigir e use Rastreio ON/OFF.' :
@@ -1165,6 +1318,7 @@
     const trackOverlay=byId('track-overlay');
     const trackCtx=trackOverlay.getContext('2d');
     const pointTrails=new Map();
+    const trackedLastValues=new Map();
     const maxRecordingMs = 180000;
     let scrubActive=false,wheelAccumulator=0;
     let scrubPointerDown=false,scrubReleasePending=false,pendingScrubTime=null;
@@ -1188,6 +1342,7 @@
     function showVideo(enabled) {
       video.hidden = !enabled;
       canvas.hidden = enabled;
+      if(!enabled)trackOverlay.hidden=true;
       // Ferramentas de marcação permanecem sempre visíveis, inclusive no vídeo.
       const videoContext=hasFileVideo()&&(enabled||stillFromVideo);
       section.querySelector('.paiva-2d-player-dock').hidden=!videoContext;
@@ -1197,7 +1352,7 @@
       for (const button of section.querySelectorAll('[data-2d-tool]')) button.disabled=scanningActive;
       for (const key of ['undo','clear','save']) byId(key).disabled=enabled||scanningActive;
       byId('width').disabled=scanningActive;
-      if(enabled)requestAnimationFrame(fitVideoImage);
+      if(enabled)requestAnimationFrame(()=>{fitVideoImage();if(!trackingActive)paintHeldOverlay();});
     }
     function fitVideoImage(){
       if(video.hidden||!video.videoWidth||!video.videoHeight)return;
@@ -1211,6 +1366,7 @@
       const viewport=video.parentElement;
       viewport.scrollLeft=Math.max(0,(viewport.scrollWidth-viewport.clientWidth)/2);
       viewport.scrollTop=Math.max(0,(viewport.scrollHeight-viewport.clientHeight)/2);
+      if(!trackOverlay.hidden)alignTrackedOverlay();
     }
 
     function updateCameraControls() {
@@ -1256,7 +1412,7 @@
       if(scanningActive)scanCancelled=true;
       motionTracker?.stop();motionTracker=null;trackingActive=false;
       lastTrackedGeometry=null;
-      if (clear) trackOverlay.hidden=true;
+      if(clear)paintHeldOverlay();
       updateCameraControls();
     }
 
@@ -1284,6 +1440,59 @@
       trackOverlay.style.top=`${frame.top-holder.top+video.parentElement.scrollTop+(frame.height-visibleHeight)/2}px`;
     }
     window.addEventListener('resize',()=>{if(!trackOverlay.hidden)alignTrackedOverlay();});
+
+    // A camada visual não depende do rastreador. Ao sair do quadro congelado,
+    // parar o rastreio ou chegar ao fim do vídeo, os graus permanecem visíveis.
+    // São referências, NÃO medidas novas de um quadro ainda não corrigido.
+    function paintHeldOverlay(){
+      if(!trackCtx||video.hidden||!lastFrameFromVideo||!stillFromVideo||
+        !annotations.length||!video.videoWidth||trackingActive){
+        if(!trackingActive)trackOverlay.hidden=true;
+        return;
+      }
+      alignTrackedOverlay();
+      const w=canvas.width,h=canvas.height;
+      if(!(w>0&&h>0))return;
+      trackOverlay.width=w;trackOverlay.height=h;
+      trackCtx.clearRect(0,0,w,h);
+      const stamp=(p,label,color)=>{
+        trackCtx.font=`700 ${Math.max(12,Math.min(18,w/75))}px system-ui,sans-serif`;
+        const width=trackCtx.measureText(label).width+12,height=25;
+        const x=Math.max(4,Math.min(w-width-4,p.x+12));
+        const y=Math.max(27,Math.min(h-4,p.y-11));
+        trackCtx.fillStyle='rgba(8,25,33,.88)';trackCtx.fillRect(x,y-height,width,height);
+        trackCtx.strokeStyle=color;trackCtx.lineWidth=1;trackCtx.strokeRect(x,y-height,width,height);
+        trackCtx.fillStyle='#effdff';trackCtx.fillText(label,x+6,y-8);
+      };
+      annotations.forEach(item=>{
+        const pts=item.points,color=item.color||colors[item.kind]||'#70d8e8';
+        if(!pts?.length)return;
+        trackCtx.beginPath();trackCtx.moveTo(pts[0].x,pts[0].y);
+        if(item.kind!=='point')for(let i=1;i<pts.length;i++)trackCtx.lineTo(pts[i].x,pts[i].y);
+        trackCtx.lineWidth=Math.max(2,lineWidth);trackCtx.strokeStyle=color;trackCtx.stroke();
+        for(const p of pts){
+          trackCtx.beginPath();trackCtx.arc(p.x,p.y,6,0,2*Math.PI);
+          trackCtx.fillStyle='#102631';trackCtx.fill();
+          trackCtx.strokeStyle=color;trackCtx.lineWidth=2;trackCtx.stroke();
+        }
+        if(item.kind==='angle'&&pts.length===3){
+          const a=displayedAngle(item);
+          stamp(pts[1],a===null?'A — · corrigir':`A ${format(a)}° · referência`,color);
+        }else if(item.kind==='full8'&&pts.length===8){
+          const m=stableFull8Measurements(item);
+          if(m){
+            stamp(pts[4],m.knee===null?'Joelho — · corrigir':`Joelho ${format(m.knee)}° · referência`,color);
+            stamp(pts[6],m.foot===null?'Pé — · corrigir':`Pé/solo ${format(m.foot)}° · referência`,color);
+          }
+        }
+      });
+      trackCtx.fillStyle='rgba(9,28,38,.86)';
+      trackCtx.fillRect(4,4,Math.min(w-8,292),23);
+      trackCtx.fillStyle='#ffc786';trackCtx.font='700 13px system-ui,sans-serif';
+      trackCtx.fillText('GUIA RETIDO · congele para conferir',12,20);
+      trackOverlay.hidden=false;
+    }
+    video.addEventListener('seeked',()=>{if(!video.hidden&&!trackingActive)paintHeldOverlay();});
 
     function paintTracked(points,w,h,time) {
       if (!trackCtx) return;
@@ -1323,23 +1532,27 @@
           trackCtx.fill();
         }
         if(item.kind==='angle') {
-          const angle=angleDegrees(pts[0],pts[1],pts[2]);
-          if(angle!==null) {
-            const shown=item.supplementary?180-angle:angle;
-            readings.push(`A ${format(shown)}°`);
-            trackCtx.font='650 13px system-ui,sans-serif';
-            trackCtx.fillText(`A ${format(shown)}°`,Math.min(w-82,pts[1].x+8),Math.max(15,pts[1].y-8));
-          }
+          const actual=angleDegrees(pts[0],pts[1],pts[2]);
+          const cached=trackedLastValues.get(index)||{};
+          if(actual!==null){cached.angle=actual;trackedLastValues.set(index,cached);}
+          const angle=actual??cached.angle??null;
+          const shown=angle===null?null:item.supplementary?180-angle:angle;
+          const label=shown===null?'A — · corrigir':`A ${actual===null?'≈ ':''}${format(shown)}°`;
+          readings.push(label);
+          trackCtx.font='650 13px system-ui,sans-serif';
+          trackCtx.fillText(label,Math.min(w-115,pts[1].x+8),Math.max(15,pts[1].y-8));
         }else if(item.kind==='full8'&&pts.length===8){
           const m=full8Measurements(pts);
+          const cached=trackedLastValues.get(index)||{};
           trackCtx.font='650 13px system-ui,sans-serif';
-          if(m.knee!==null){
-            readings.push(`Joelho ${format(m.knee)}°`);
-            trackCtx.fillText(`Joelho ${format(m.knee)}°`,Math.min(w-112,pts[4].x+8),Math.max(15,pts[4].y-8));
-          }
-          if(m.foot!==null){
-            readings.push(`Pé/solo ${format(m.foot)}°`);
-            trackCtx.fillText(`Pé/solo ${format(m.foot)}°`,Math.min(w-112,pts[6].x+8),Math.max(15,pts[6].y-8));
+          if(m.knee!==null)cached.knee=m.knee;
+          if(m.foot!==null)cached.foot=m.foot;
+          trackedLastValues.set(index,cached);
+          for(const [name,point,value,key] of [['Joelho',pts[4],m.knee,'knee'],['Pé/solo',pts[6],m.foot,'foot']]){
+            const last=value??cached[key]??null;
+            const label=last===null?`${name} — · corrigir`:`${name} ${value===null?'≈ ':''}${format(last)}°`;
+            readings.push(label);
+            trackCtx.fillText(label,Math.min(w-130,point.x+8),Math.max(15,point.y-8));
           }
         }
       });
@@ -1352,6 +1565,7 @@
       const motion=globalThis.PAIVA_MOTION_TRACKER;
       if (!motion?.create || !trackCtx) {message('Módulo de rastreio indisponível. Atualize todos os arquivos do aplicativo.');return;}
       pointTrails.clear();
+      trackedLastValues.clear();
       lastTrackedGeometry=null;
       const currentTime=video.currentTime;
       const trackedIndices=annotations.flatMap((item,i)=>item.trackEnabled!==false?[i]:[]);
@@ -2478,6 +2692,10 @@
           updateTrackToggle();
           if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* ponteiro transferido do vídeo */}
         } else message('Clique sobre uma ponta ou sobre o corpo da linha para arrastá-la.');
+        return;
+      }
+      if(tool==='full8'&&!full8ManualMode){
+        message('O boneco já está montado. Arraste uma linha para movê-lo por inteiro, ou uma bolinha para corrigir um refletor.');
         return;
       }
       if(tool==='full8'){

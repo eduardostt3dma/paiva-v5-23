@@ -142,6 +142,51 @@
     return {x:fallback.x,y:fallback.y,method:'brightness',confidence:null};
   }
 
+  // Rastreador opcional para plugs retrorefletivos: localiza um núcleo claro
+  // isolado e verifica se ele volta ao mesmo ponto no quadro anterior.
+  // É ativado apenas após o profissional escolher "Encaixar refletores".
+  function brightMarker(gray,w,h,around,radius){
+    const ring=11;
+    const minX=Math.max(ring,Math.round(around.x-radius));
+    const maxX=Math.min(w-ring-1,Math.round(around.x+radius));
+    const minY=Math.max(ring,Math.round(around.y-radius));
+    const maxY=Math.min(h-ring-1,Math.round(around.y+radius));
+    let best=null,bestScore=-Infinity;
+    for(let y=minY;y<=maxY;y+=2)for(let x=minX;x<=maxX;x+=2){
+      const dist=Math.hypot(x-around.x,y-around.y);
+      if(dist>radius)continue;
+      const center=gray[y*w+x];
+      if(center<195)continue;
+      const background=(gray[y*w+x-ring]+gray[y*w+x+ring]+gray[(y-ring)*w+x]+gray[(y+ring)*w+x])/4;
+      const contrast=center-background;
+      if(contrast<48)continue;
+      const score=contrast-dist*.35;
+      if(score>bestScore){bestScore=score;best={x,y,contrast};}
+    }
+    if(!best)return null;
+    let sumX=0,sumY=0,weight=0;
+    for(let y=Math.max(0,best.y-3);y<=Math.min(h-1,best.y+3);y++)
+      for(let x=Math.max(0,best.x-3);x<=Math.min(w-1,best.x+3);x++){
+        const brightness=gray[y*w+x];
+        if(brightness<185)continue;
+        const v=brightness-175;
+        sumX+=x*v;sumY+=y*v;weight+=v;
+      }
+    return weight?{x:sumX/weight,y:sumY/weight,contrast:best.contrast}:best;
+  }
+  function trackReflector(before,after,w,h,at,options={}){
+    const source=brightMarker(before,w,h,at,7);
+    if(!source||Math.hypot(source.x-at.x,source.y-at.y)>6)return null;
+    const search=Math.max(12,Math.min(42,Number(options.search)||22));
+    const found=brightMarker(after,w,h,source,search);
+    if(!found)return null;
+    const reverse=brightMarker(before,w,h,found,search);
+    const error=reverse?Math.hypot(reverse.x-source.x,reverse.y-source.y):Infinity;
+    if(error>3.5)return null;
+    return {x:found.x,y:found.y,confidence:Math.min(1,found.contrast/110),
+      returnError:error,method:'reflector'};
+  }
+
   function trackFineShapes(before,after,w,h,annotations,sourceWidth,sourceHeight,options={}) {
     if(!before||!after||before.length!==w*h||after.length!==w*h)
       throw new Error('Os dois quadros devem possuir as mesmas dimensões.');
@@ -150,7 +195,9 @@
       ...item,points:item.points.map((point,j)=>{
         if(item.trackEnabled===false||!['point','angle','line','full8'].includes(item.kind))return {...point};
         const scaled={x:point.x/sourceWidth*w,y:point.y/sourceHeight*h};
-        let found=item.kind==='point'?
+        let found=item.kind==='full8'&&item.reflectorMode?
+          trackReflector(before,after,w,h,scaled,options):null;
+        if(!found)found=item.kind==='point'?
           trackRobustPoint(before,after,w,h,scaled,options):
           trackFinePoint(before,after,w,h,scaled,options);
         if(!found){
