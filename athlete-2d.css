@@ -27,7 +27,7 @@
   align-items:start;gap:15px;min-width:0;}
 #paiva-athlete-2d .paiva-2d-view {min-width:0;}
 #paiva-athlete-2d .paiva-2d-sidebar {position:sticky;top:12px;max-height:calc(100vh - 24px);
-  overflow-y:auto;min-width:0;padding:13px 12px;border-radius:12px;
+  overflow-y:auto;overscroll-behavior:contain;min-width:0;padding:13px 12px;border-radius:12px;
   background:linear-gradient(155deg,#253642,#15232d);border:1px solid #5c7381;
   scrollbar-width:thin;scrollbar-color:#637d8d transparent;}
 #paiva-athlete-2d .paiva-2d-sidebar-heading {color:#d5e6ee;font-size:11px;
@@ -65,7 +65,8 @@
   font-variant-numeric:tabular-nums;}
 #paiva-athlete-2d .paiva-2d-width input {display:block;width:100%;margin:13px 0 4px;
   accent-color:#c4edf9;cursor:pointer;}
-#paiva-athlete-2d .paiva-2d-canvas-wrap {overflow:auto;position:relative;
+#paiva-athlete-2d .paiva-2d-canvas-wrap {overflow:auto;overscroll-behavior:contain;
+  scroll-behavior:auto;position:relative;
   background:#0d1923;border:1px solid #566c7c;border-radius:12px;
   width:100%;min-height:160px;max-height:78vh;}
 #paiva-athlete-2d canvas {display:block;width:100%;height:auto;

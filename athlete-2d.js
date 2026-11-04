@@ -275,6 +275,7 @@
     const fineTrails=new Map();
     let fineUncertain=[];
     let finePeak=null,finePending=0,fineSequence=Promise.resolve();
+    let fineSampler=null,fineSamplerSource=null;
     let lastDeletedAnnotation=null;
     const deleteMenu=document.createElement('div');
     deleteMenu.className='paiva-2d-delete-menu';
@@ -303,7 +304,7 @@
       photoRecordName=photoName();photoVersion++;
       clearTimeout(photoSaveTimer);
     }
-    function schedulePhotoSave(){
+    function schedulePhotoSave(delayMs=650){
       if(!photoLoaded||!records()?.save||!autoPhotoId)return;
       const version=++photoVersion;
       clearTimeout(photoSaveTimer);
@@ -315,7 +316,7 @@
             description:`Imagem 2D com ${annotations.filter(a=>a.kind==='angle').length} ângulo(s)`,blob})
             .catch(error=>{byId('record-count').textContent='· salvamento indisponível';console.warn('PAIVA: registro local',error);});
         },'image/png');
-      },650);
+      },delayMs);
     }
     async function saveVideoRecord(blob,name,description){
       if(!records()?.save)return false;
@@ -749,6 +750,8 @@
     const pointTrails=new Map();
     const maxRecordingMs = 180000;
     let backwardMode=false,reverseFrame=null,lastReverseTick=0,scrubActive=false,wheelAccumulator=0;
+    let scrubPointerDown=false,scrubReleasePending=false,pendingScrubTime=null;
+    let fineNavigationEpoch=0;
 
     const hasFileVideo=()=>!!recordedUrl && video.getAttribute('src')===recordedUrl;
     const clockTime=value=>{
@@ -762,7 +765,7 @@
       slider.disabled=!available;
       slider.max=String(available?video.duration:1);
       if(!scrubActive)slider.value=String(available?Math.max(0,Math.min(video.duration,video.currentTime)):0);
-      byId('time-current').textContent=clockTime(available?video.currentTime:0);
+      byId('time-current').textContent=clockTime(available?(scrubActive?Number(slider.value):video.currentTime):0);
       byId('time-total').textContent=clockTime(available?video.duration:0);
     }
     function haltReverse(resetDirection=true) {
@@ -1123,9 +1126,12 @@
       video.srcObject=null;video.src=recordedUrl;video.controls=false;
       video.muted=true;video.autoplay=false;video.load();
       video.playbackRate=Number(byId('speed').value)||1;
+      fineNavigationEpoch++;
+      pendingScrubTime=null;scrubActive=false;scrubPointerDown=false;scrubReleasePending=false;
       lastFrameFromVideo=false;
       stillFromVideo=false;
       fineTrails.clear();fineUncertain=[];finePeak=null;
+      fineSampler=null;fineSamplerSource=null;
       lastDeletedAnnotation=null;closeDeleteMenu();
       byId('back-video').hidden=true;
       const download=byId('video-download');download.hidden=true;download.removeAttribute('href');
@@ -1174,17 +1180,26 @@
     }
     let draggedRuler=null;
     const rulerTrack=byId('trim-ruler-track');
+    let rulerPaintFrame=null;
+    function scheduleRulerPaint(){
+      if(rulerPaintFrame!==null)return;
+      rulerPaintFrame=requestAnimationFrame(()=>{
+        rulerPaintFrame=null;updateTrimRuler();
+      });
+    }
     function changeRulerTime(event,handle){
       const duration=Number(video.duration);
       if(!hasFileVideo()||!Number.isFinite(duration)||duration<=0)return;
-      const r=rulerTrack.getBoundingClientRect();
+      // A geometria da régua não muda durante o arraste: medimos uma vez,
+      // evitando forçar recálculo de layout em cada pixel do movimento.
+      const r=draggedRuler?.rect||rulerTrack.getBoundingClientRect();
       const time=Math.max(0,Math.min(duration,(event.clientX-r.left)/Math.max(1,r.width)*duration));
       const start=Math.max(0,parseTime(byId('trim-start').value)||0);
       const end=Math.min(duration,parseTime(byId('trim-end').value)||duration);
       const adjusted=handle==='start'?Math.min(time,Math.max(0,end-0.2)):
         Math.max(time,Math.min(duration,start+0.2));
       byId(`trim-${handle}`).value=trimClockTenths(adjusted);
-      updateTrimRuler();
+      scheduleRulerPaint();
       if(!video.hidden && !video.seeking){
         haltReverse();video.pause();video.currentTime=Math.max(0,Math.min(duration,adjusted));
       }
@@ -1197,7 +1212,7 @@
       const t=Math.max(0,Math.min(video.duration,(event.clientX-r.left)/Math.max(1,r.width)*video.duration));
       const start=parseTime(byId('trim-start').value)||0,end=parseTime(byId('trim-end').value)||video.duration;
       const handle=direct||(Math.abs(t-start)<=Math.abs(t-end)?'start':'end');
-      draggedRuler={pointerId:event.pointerId,handle};
+      draggedRuler={pointerId:event.pointerId,handle,rect:r};
       try{rulerTrack.setPointerCapture?.(event.pointerId);}catch(_){/* segue sem captura em navegadores antigos */}
       changeRulerTime(event,handle);
     });
@@ -1209,6 +1224,8 @@
       if(draggedRuler?.pointerId!==event.pointerId)return;
       draggedRuler=null;
       if(rulerTrack.hasPointerCapture?.(event.pointerId))rulerTrack.releasePointerCapture(event.pointerId);
+      if(rulerPaintFrame!==null){cancelAnimationFrame(rulerPaintFrame);rulerPaintFrame=null;}
+      updateTrimRuler();
       trimStatus('Intervalo marcado na régua. Clique em “✂ Salvar trecho” quando estiver pronto.');
     };
     rulerTrack.addEventListener('pointerup',finishRuler);
@@ -1330,16 +1347,49 @@
       }
       message(byId('pingpong').checked?'Vai e volta ativado: o vídeo retornará automaticamente no final.':'Vai e volta desativado.');
     });
-    byId('scrub').addEventListener('pointerdown',()=>{scrubActive=true;});
-    byId('scrub').addEventListener('pointerup',()=>{scrubActive=false;syncTimeline();});
-    byId('scrub').addEventListener('change',()=>{scrubActive=false;syncTimeline();});
+    // Não enviar dezenas de seeks concorrentes ao decodificador durante um
+    // único arraste da barra. Guarda o destino mais recente e só o aplica
+    // quando o seek anterior terminar, sem atrasar o movimento da régua.
+    function flushScrubSeek(){
+      if(!hasFileVideo()||!Number.isFinite(video.duration)){
+        pendingScrubTime=null;return;
+      }
+      if(video.seeking)return;
+      if(pendingScrubTime!==null){
+        const destination=pendingScrubTime;
+        pendingScrubTime=null;
+        if(Math.abs(video.currentTime-destination)>.0005){
+          video.currentTime=destination;
+          return;
+        }
+      }
+      if(scrubReleasePending){
+        scrubActive=false;scrubReleasePending=false;syncTimeline();
+      }
+    }
+    video.addEventListener('seeked',flushScrubSeek);
+    byId('scrub').addEventListener('pointerdown',()=>{
+      scrubPointerDown=true;scrubActive=true;scrubReleasePending=false;
+      fineNavigationEpoch++;
+    });
+    const finishScrub=()=>{
+      scrubPointerDown=false;scrubReleasePending=true;
+      flushScrubSeek();
+    };
+    byId('scrub').addEventListener('pointerup',finishScrub);
+    byId('scrub').addEventListener('pointercancel',finishScrub);
+    byId('scrub').addEventListener('change',finishScrub);
     byId('scrub').addEventListener('input',()=>{
       if(!hasFileVideo()||!Number.isFinite(video.duration))return;
+      fineNavigationEpoch++;
+      scrubActive=true;
+      if(!scrubPointerDown)scrubReleasePending=true;
       haltReverse();video.pause();
       if(trackingActive)stopTracking();
       lastFrameFromVideo=false;
-      video.currentTime=Math.max(0,Math.min(video.duration,Number(byId('scrub').value)||0));
-      syncTimeline();
+      pendingScrubTime=Math.max(0,Math.min(video.duration,Number(byId('scrub').value)||0));
+      byId('time-current').textContent=clockTime(pendingScrubTime);
+      flushScrubSeek();
       message('Posição ajustada. Capture um novo quadro antes de iniciar um rastreio.');
     });
     async function fineStepFrame(direction){
@@ -1348,13 +1398,20 @@
         message('Rastreio fino indisponível: envie TODOS os arquivos da atualização para o GitHub.');return;
       }
       const source=recordedUrl;
+      const navigationEpoch=fineNavigationEpoch;
       const fps=Number(byId('file-fps').value)||30;
       const from=video.currentTime;
       const duration=Number.isFinite(video.duration)?video.duration:from;
       const next=Math.max(0,Math.min(Math.max(0,duration-.001),from+direction/fps));
       if(Math.abs(next-from)<.0005)return;
       haltReverse();video.pause();
-      const sampler=motion.createFrameSampler(video);
+      // Reaproveita o canvas e seu contexto enquanto a gravação for a mesma:
+      // menos alocações durante a rolagem, sem mudar o rastreamento validado.
+      if(!fineSampler||fineSamplerSource!==source){
+        fineSampler=motion.createFrameSampler(video);
+        fineSamplerSource=source;
+      }
+      const sampler=fineSampler;
       const before=sampler.sample();
       if(!finePeak){
         const angle=annotations.find(a=>a.kind==='angle'&&a.points.length===3);
@@ -1363,7 +1420,8 @@
           shapes:annotations.map(a=>({...a,points:a.points.map(p=>({...p}))}))};
       }
       await seekCycleFrame(next);
-      if(source!==recordedUrl||!stillFromVideo||canvas.hidden)return;
+      if(source!==recordedUrl||navigationEpoch!==fineNavigationEpoch||
+        !lastFrameFromVideo||!stillFromVideo||canvas.hidden)return;
       const after=sampler.sample();
       const result=motion.trackFineShapes(before,after,sampler.width,sampler.height,
         annotations,canvas.width,canvas.height,{
@@ -1387,7 +1445,10 @@
       }
       originalCtx.drawImage(video,0,0,original.width,original.height);
       lastFrameFromVideo=true;stillFromVideo=true;
-      render();syncTimeline();updateCameraControls();schedulePhotoSave();
+      render();syncTimeline();
+      byId('fine-peak').disabled=!finePeak;
+      // Evita codificar um PNG enquanto a rodinha ainda está avançando quadros.
+      schedulePhotoSave(1600);
       const label=firstAngle?displayedAngle(firstAngle):null;
       const lost=result.lost.length;
       const readout=label===null&&annotations.some(item=>item.kind==='point')?'Ponto · rastro':
