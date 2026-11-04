@@ -400,7 +400,15 @@
   margin:5px 0;box-sizing:border-box;}
 #paiva-athlete-2d #paiva-2d-trim-status {display:block;margin-top:6px;}
 #paiva-athlete-2d .paiva-2d-records small {display:block;margin:5px 0 8px;}
-#paiva-athlete-2d .paiva-2d-record-row {display:grid;grid-template-columns:minmax(0,1fr) 39px 22px;
+#paiva-athlete-2d .paiva-2d-record-bulk {display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:5px;margin:8px 0;padding:5px 0;border-block:1px solid #345263;}
+#paiva-athlete-2d .paiva-2d-record-bulk label {display:flex;align-items:center;gap:4px;font-size:10px;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-record-bulk input,
+#paiva-athlete-2d .paiva-2d-record-check {width:14px;height:14px;accent-color:#b8dbe9;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-record-bulk button {width:auto;min-width:0;padding:5px;font-size:10px;}
+#paiva-athlete-2d #paiva-2d-records-list {max-height:280px;overflow-y:auto;
+  overscroll-behavior:contain;scrollbar-width:thin;}
+#paiva-athlete-2d .paiva-2d-record-row {display:grid;grid-template-columns:16px minmax(0,1fr) 39px 22px;
   gap:3px;align-items:center;padding:5px 0;border-top:1px solid #345263;}
 #paiva-athlete-2d .paiva-2d-record-row span {font-size:9px;min-width:0;
   overflow-wrap:anywhere;color:#cbdce5;}

@@ -47,6 +47,18 @@
     await transaction('readwrite',store=>store.delete(key));
     window.dispatchEvent(new Event('paiva-records-changed'));
   }
+  // Exclusão em uma única transação: evita dezenas de travadas e de eventos
+  // enquanto o usuário limpa os arquivos de teste selecionados.
+  async function removeMany(keys){
+    const unique=[...new Set(keys)].filter(key=>typeof key==='string'&&key.length);
+    if(!unique.length)return 0;
+    await transaction('readwrite',store=>{
+      for(const key of unique)store.delete(key);
+      return null;
+    });
+    window.dispatchEvent(new Event('paiva-records-changed'));
+    return unique.length;
+  }
   async function list(limit=40){
     const db=await open();
     return new Promise((resolve,reject)=>{
@@ -73,5 +85,5 @@
     document.body.append(anchor);anchor.click();anchor.remove();
     setTimeout(()=>URL.revokeObjectURL(url),60000);
   }
-  globalThis.PAIVA_RECORDS={save,get,list,remove,download,id};
+  globalThis.PAIVA_RECORDS={save,get,list,remove,removeMany,download,id};
 })();

@@ -33,7 +33,8 @@
         <p><strong>Ângulo direto por três pontos:</strong> com a ferramenta Ângulo selecionada, clique no trocânter maior, depois no côndilo lateral (vértice) e finalmente no maléolo. Os três pontos aparecem no momento do clique e podem ser arrastados diretamente, sem trocar para Ajustar pontos. Esc cancela uma marcação incompleta. Como alternativa, clique e arraste para abrir as duas hastes de uma vez; depois puxe cada extremidade livremente.</p>
         <p><strong>Ângulo suplementar:</strong> clique diretamente na etiqueta “A 35°”, por exemplo, para alternar entre 35° e 145° (180° − 35°). A geometria das hastes não muda, somente a convenção mostrada. Confirme qual convenção está usando no laudo.</p>
         <p><strong>Linha:</strong> clique e arraste de uma extremidade até a outra. Depois, “Ajustar pontos” permite puxar as pontas ou mover a reta inteira pelo centro. Sem calibração métrica, não é uma régua em milímetros.</p>
-        <p><strong>Alinhamento:</strong> selecione uma linha tocando nela e use Horizontal / Vertical; mantenha Shift pressionado ao desenhar para limitar a inclinação a passos de 45°.</p>
+        <p><strong>Alinhamento:</strong> segure Shift enquanto desenha ou move uma ponta para manter a reta 100% horizontal ou vertical. No ângulo de três pontos, Shift posiciona a terceira haste a 90° da primeira.</p>
+        <p><strong>Excluir vários registros:</strong> abra “Fotos, vídeos e análises salvos”, marque os arquivos desejados ou “Selecionar tudo” e clique em “Excluir selecionados”. Uma confirmação evita exclusões acidentais. Essa limpeza é definitiva neste navegador; baixe antes as análises que queira conservar.</p>
         <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. No quadro de vídeo capturado, a nova opção “Seguir pontos por quadro” tenta deslocar os marcadores automaticamente; quando um ponto se perder, corrija-o com o mouse. Com essa opção desligada, as marcações permanecem fixas.</p>
         <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
         <p><strong>Congelar com clique:</strong> no vídeo gravado, clique com o botão ESQUERDO sobre a imagem para pausar e capturar automaticamente o quadro atual; as ferramentas compactas ficam logo abaixo. Com o quadro capturado, você pode marcar ou editar os pontos.</p>
@@ -209,6 +210,10 @@
             <small id="paiva-2d-camera-info">Sem envio para a internet. Webcam requer permissão.</small>
             <details class="paiva-2d-records"><summary>▣ Fotos, vídeos e análises salvos <span id="paiva-2d-record-count"></span></summary>
               <small>Salvos automaticamente neste navegador, sem enviar ao site. Para guardar permanentemente, use Baixar; limpar dados do site pode apagá-los.</small>
+              <div class="paiva-2d-record-bulk">
+                <label><input type="checkbox" id="paiva-2d-record-select-all" /> Selecionar tudo</label>
+                <button type="button" id="paiva-2d-record-delete-bulk" disabled>Excluir selecionados</button>
+              </div>
               <div id="paiva-2d-records-list">Carregando registros…</div>
             </details>
           </div>
@@ -523,15 +528,61 @@
       catch(error){message('Vídeo disponível para baixar, mas o salvamento automático falhou: '+(error?.message||'sem espaço'));return false;}
     }
     const recordList=byId('records-list');
+    const recordSelectAll=byId('record-select-all');
+    const recordDeleteBulk=byId('record-delete-bulk');
+    const selectedRecordIds=new Set();
+    let listedRecords=[];
+    let deletingRecords=false;
+    function syncRecordSelection(){
+      const total=listedRecords.length;
+      const count=listedRecords.filter(item=>selectedRecordIds.has(item.id)).length;
+      recordSelectAll.checked=total>0&&count===total;
+      recordSelectAll.indeterminate=count>0&&count<total;
+      recordSelectAll.disabled=!total||deletingRecords;
+      recordDeleteBulk.disabled=!count||deletingRecords;
+      recordDeleteBulk.textContent=count?`Excluir selecionados (${count})`:'Excluir selecionados';
+    }
+    recordSelectAll.addEventListener('change',()=>{
+      if(recordSelectAll.checked)for(const item of listedRecords)selectedRecordIds.add(item.id);
+      else selectedRecordIds.clear();
+      for(const box of recordList.querySelectorAll('.paiva-2d-record-check'))
+        box.checked=selectedRecordIds.has(box.value);
+      syncRecordSelection();
+    });
+    recordDeleteBulk.addEventListener('click',async()=>{
+      if(deletingRecords||!records()?.removeMany)return;
+      const ids=listedRecords.filter(item=>selectedRecordIds.has(item.id)).map(item=>item.id);
+      if(!ids.length)return;
+      if(!confirm(`Excluir definitivamente ${ids.length} registro(s) selecionado(s)? Fotos, vídeos e análises apagados deste navegador não poderão ser recuperados. Baixe antes o que desejar guardar.`))return;
+      deletingRecords=true;syncRecordSelection();
+      try{
+        const removed=await records().removeMany(ids);
+        for(const id of ids)selectedRecordIds.delete(id);
+        message(`${removed} registro(s) removido(s) do arquivo local.`);
+      }catch(error){message('Não foi possível excluir os registros: '+(error?.message||'erro local'));}
+      finally{deletingRecords=false;await refreshRecordList();}
+    });
     async function refreshRecordList(){
       if(!records()?.list){recordList.textContent='Registros indisponíveis neste navegador.';return;}
       try{
-        const items=await records().list(40);
-        byId('record-count').textContent=items.length?`· ${items.length}${items.length===40?'+':''}`:'';
+        // Sem limite de 40: "Selecionar tudo" cobre também registros antigos.
+        const items=await records().list(Infinity);
+        listedRecords=items;
+        const availableIds=new Set(items.map(item=>item.id));
+        for(const id of selectedRecordIds)if(!availableIds.has(id))selectedRecordIds.delete(id);
+        byId('record-count').textContent=items.length?`· ${items.length}`:'';
         recordList.replaceChildren();
-        if(!items.length){recordList.textContent='Nenhum registro ainda.';return;}
+        if(!items.length){recordList.textContent='Nenhum registro ainda.';syncRecordSelection();return;}
         for(const item of items){
           const row=document.createElement('div');row.className='paiva-2d-record-row';
+          const check=document.createElement('input');check.type='checkbox';check.className='paiva-2d-record-check';
+          check.value=item.id;check.checked=selectedRecordIds.has(item.id);
+          check.setAttribute('aria-label',`Selecionar ${item.name} para excluir`);
+          check.addEventListener('change',()=>{
+            if(check.checked)selectedRecordIds.add(item.id);
+            else selectedRecordIds.delete(item.id);
+            syncRecordSelection();
+          });row.append(check);
           const info=document.createElement('span');info.textContent=`${item.kind==='foto'?'📷':item.kind==='analise'?'📐':'🎞'} ${item.name} · ${item.kind==='analise'?`${(item.size/1024).toFixed(1)} KB`:`${(item.size/1048576).toFixed(1)} MB`}`;
           info.title=item.description;row.append(info);
           const download=document.createElement('button');download.type='button';download.textContent='Baixar';
@@ -542,6 +593,7 @@
             try{await records().remove(item.id);}catch(e){message(e.message);}
           });row.append(remove);recordList.append(row);
         }
+        syncRecordSelection();
       }catch(error){recordList.textContent='Não foi possível ler os registros: '+(error?.message||'erro local');}
     }
     // Não reconstruir a lista oculta a cada quadro: evita engasgos do vídeo.
@@ -567,9 +619,34 @@
     function snapAngle(anchor,point,shiftKey) {
       if (!shiftKey) return point;
       const dx=point.x-anchor.x,dy=point.y-anchor.y;
-      const length=Math.hypot(dx,dy);
-      const direction=Math.round(Math.atan2(dy,dx)/(Math.PI/4))*(Math.PI/4);
-      return constrain({x:anchor.x+Math.cos(direction)*length,y:anchor.y+Math.sin(direction)*length});
+      // Shift trava no eixo mais próximo do movimento: 0° ou 90° exatos.
+      return Math.abs(dx)>=Math.abs(dy)?constrain({x:point.x,y:anchor.y}):
+        constrain({x:anchor.x,y:point.y});
+    }
+    function snapPerpendicular(vertex,fixed,point,shiftKey) {
+      if(!shiftKey)return point;
+      const vx=fixed.x-vertex.x,vy=fixed.y-vertex.y;
+      const length=Math.hypot(vx,vy);
+      if(length<0.001)return snapAngle(vertex,point,true);
+      // Projeção sobre a perpendicular, com lado escolhido pelo próprio cursor.
+      const ux=-vy/length,uy=vx/length;
+      const projection=(point.x-vertex.x)*ux+(point.y-vertex.y)*uy;
+      return constrain({x:vertex.x+projection*ux,y:vertex.y+projection*uy});
+    }
+    function snapAngleSequencePoint(point,shiftKey) {
+      if(!shiftKey||!angleSequence.length)return point;
+      if(angleSequence.length===1)return snapAngle(angleSequence[0],point,true);
+      return snapPerpendicular(angleSequence[1],angleSequence[0],point,true);
+    }
+    function snapEditedPoint(annotation,index,point,shiftKey){
+      if(!shiftKey||!annotation||annotation.kind==='point')return point;
+      const pts=annotation.points;
+      if(annotation.kind==='line')return snapAngle(pts[1-index],point,true);
+      if(annotation.kind==='angle'){
+        if(index===1)return snapAngle(pts[0],point,true);
+        return snapPerpendicular(pts[1],pts[index===0?2:0],point,true);
+      }
+      return point;
     }
     function draftFromDrag(kind,anchor,pointer,shiftKey) {
       const end=snapAngle(anchor,pointer,shiftKey);
@@ -800,7 +877,7 @@
       }
       if (!photoLoaded) return;
       message(tool==='angle' ? 'Ângulo: clique em trocânter → côndilo → maléolo (3 cliques), ou arraste para abrir um ângulo. Depois puxe qualquer ponto, sem mudar de ferramenta.' :
-        tool==='line' ? 'Linha: clique e ARRASTE do início ao fim. Use Shift para alinhar a cada 45°.' :
+        tool==='line' ? 'Linha: clique e ARRASTE do início ao fim. Segure Shift para alinhar 100% horizontal ou vertical.' :
         tool==='point' ? 'Ponto: clique onde quiser no atleta. Arraste-o diretamente para corrigir e use Rastreio ON/OFF.' :
         'Ajustar: arraste uma ponta ou o corpo da linha/ângulo para reposicionar.');
     }
@@ -2275,13 +2352,16 @@
       canvas.style.cursor='crosshair';
       if (activeDraw?.pointer===event.pointerId) {
         event.preventDefault();
-        draft=activeDraw.kind==='angle-sequence'?[...angleSequence,p]:
+        draft=activeDraw.kind==='angle-sequence'?[...angleSequence,snapAngleSequencePoint(p,event.shiftKey)]:
           draftFromDrag(activeDraw.kind,activeDraw.start,p,event.shiftKey);
         render();return;
       }
       if (!activeDrag || event.pointerId!==activeDrag.pointer)return;
       event.preventDefault();
-      if (activeDrag.index>=0) annotations[activeDrag.item].points[activeDrag.index]=p;
+      if (activeDrag.index>=0){
+        const item=annotations[activeDrag.item];
+        item.points[activeDrag.index]=snapEditedPoint(item,activeDrag.index,p,event.shiftKey);
+      }
       else {
         const dx=p.x-activeDrag.origin.x,dy=p.y-activeDrag.origin.y;
         annotations[activeDrag.item].points=activeDrag.original.map(q=>constrain({x:q.x+dx,y:q.y+dy}));
@@ -2299,7 +2379,7 @@
           angleSequence=[];draft=[];render();
           message('Marcação interrompida. Comece novamente.');
         } else if(activeDraw.kind==='angle-sequence'||(activeDraw.kind==='angle'&&travel<8)){
-          angleSequence.push(p);
+          angleSequence.push(snapAngleSequencePoint(p,event.shiftKey));
           if(angleSequence.length===3){
             annotations.push({kind:'angle',points:angleSequence.map(q=>({...q})),
               trackEnabled:defaultTrackEnabled,color:activeAngleColor});
