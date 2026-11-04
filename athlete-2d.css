@@ -143,9 +143,19 @@
 #paiva-athlete-2d .paiva-2d-marking-dock {display:grid;
   grid-template-columns:1fr 1fr;gap:5px 9px;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools {grid-column:1/-1;
-  flex-direction:row;margin:0;}
+  flex-direction:row;flex-wrap:wrap;margin:0;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools button {width:auto;
   min-width:0;flex:1;padding:8px 5px;}
+#paiva-athlete-2d .paiva-2d-tools [data-2d-tool="full8"] {
+  background:#193c49;border-color:#58aebc;
+  color:#e0faff;font-size:11px;letter-spacing:.025em;}
+#paiva-athlete-2d .paiva-2d-marking-dock [data-2d-tool="full8"] {
+  flex:1 0 100%;}
+#paiva-athlete-2d .paiva-2d-tools [data-2d-tool="full8"][aria-pressed="true"] {
+  background:#c9f2f6;color:#14353c;border-color:#c9f2f6;}
+#paiva-athlete-2d .paiva-2d-full8-guide {flex:1 0 100%;display:block;
+  background:#13303a;border:1px solid #397888;border-radius:7px;
+  color:#bcecf2;font:700 11px system-ui,sans-serif;padding:7px 10px;}
 #paiva-athlete-2d .paiva-2d-marking-dock [data-2d-tool="point"][aria-pressed="true"] {
   background:#d2f1df;color:#173327;border-color:#bcdfc9;}
 #paiva-athlete-2d .paiva-2d-marking-dock #paiva-2d-track-toggle {min-width:78px;

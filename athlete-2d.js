@@ -12,6 +12,30 @@
     return Math.acos(Math.max(-1,Math.min(1,(ux*vx+uy*vy)/(uLength*vLength)))) * 180 / Math.PI;
   }
 
+  // Oito referências conectadas, na ordem do membro superior até o pé.
+  // O eixo do pé usa calcanhar -> antepé comparado à horizontal do solo;
+  // não depende da inclinação da tíbia nem da posição do pedivela.
+  const FULL8_POINTS=['Punho','Cotovelo lateral','Ombro / acrômio',
+    'Quadril / trocânter maior','Joelho / côndilo lateral',
+    'Tornozelo / maléolo lateral','Antepé / metatarso','Calcanhar'];
+  function horizontalInclination(a,b){
+    const dx=Math.abs(b.x-a.x),dy=Math.abs(b.y-a.y);
+    return Math.hypot(dx,dy)<8?null:Math.atan2(dy,dx)*180/Math.PI;
+  }
+  function full8Measurements(points){
+    if(points.length!==8)return null;
+    const angle=(a,b,c)=>angleDegrees(points[a],points[b],points[c]);
+    return {elbow:angle(0,1,2),shoulder:angle(1,2,3),
+      hip:angle(2,3,4),knee:angle(3,4,5),ankle:angle(4,5,6),
+      trunk:horizontalInclination(points[2],points[3]),
+      foot:horizontalInclination(points[7],points[6])};
+  }
+  function kneeReading(item){
+    if(item?.kind==='full8')return full8Measurements(item.points)?.knee??null;
+    if(item?.kind==='angle'&&item.points.length===3)return angleDegrees(...item.points);
+    return null;
+  }
+
   function initialize() {
     if (document.getElementById('paiva-athlete-2d')) return;
     const target = document.querySelector('main > footer');
@@ -31,6 +55,7 @@
       </div>
       <div id="paiva-2d-explain" class="paiva-2d-explain" hidden>
         <p><strong>Ângulo direto por três pontos:</strong> com a ferramenta Ângulo selecionada, clique no trocânter maior, depois no côndilo lateral (vértice) e finalmente no maléolo. Os três pontos aparecem no momento do clique e podem ser arrastados diretamente, sem trocar para Ajustar pontos. Esc cancela uma marcação incompleta. Como alternativa, clique e arraste para abrir as duas hastes de uma vez; depois puxe cada extremidade livremente.</p>
+        <p><strong>Análise completa · 8 pontos:</strong> selecione o botão azul e marque, nesta ordem: 1 Punho → 2 Cotovelo lateral → 3 Ombro/acrômio → 4 Quadril/trocânter maior → 5 Joelho/côndilo lateral → 6 Tornozelo/maléolo lateral → 7 Antepé/metatarso → 8 Calcanhar. Os oito pontos formam uma cadeia única editável. O joelho e o ângulo do pé aparecem sobre a imagem; os demais ângulos aparecem abaixo. O pé é medido pela inclinação calcanhar–antepé em relação à horizontal do solo, sem referência à tíbia. Arraste qualquer um dos oito pontos para corrigir; Esc cancela a marcação incompleta. O rastreio por quadro é assistido e pode perder pontos; as posições continuam visíveis para correção manual.</p>
         <p><strong>Ângulo suplementar:</strong> clique diretamente na etiqueta “A 35°”, por exemplo, para alternar entre 35° e 145° (180° − 35°). A geometria das hastes não muda, somente a convenção mostrada. Confirme qual convenção está usando no laudo.</p>
         <p><strong>Linha:</strong> clique e arraste de uma extremidade até a outra. Depois, “Ajustar pontos” permite puxar as pontas ou mover a reta inteira pelo centro. Sem calibração métrica, não é uma régua em milímetros.</p>
         <p><strong>Alinhamento ao solo:</strong> segure Shift enquanto desenha ou move uma ponta para deixá-la exatamente na mesma altura da referência (linha horizontal de 0°). Isso vale também para qualquer haste de um ângulo de três pontos: a outra haste permanece livre para medir a inclinação real do pé. Shift nunca força a vertical nem um ângulo de 90°.</p>
@@ -114,6 +139,8 @@
             <input type="file" id="paiva-2d-file" accept="image/*" aria-label="Escolher foto do atleta para análise 2D" />
           </label>
           <div class="paiva-2d-tools" role="group" aria-label="Ferramenta de desenho">
+            <button type="button" data-2d-tool="full8" aria-pressed="false">ANÁLISE COMPLETA · 8 PONTOS</button>
+            <small id="paiva-2d-full8-guide" class="paiva-2d-full8-guide" hidden></small>
             <button type="button" data-2d-tool="angle" aria-pressed="true">ÂNGULO · ARRASTAR</button>
             <button type="button" data-2d-tool="line" aria-pressed="false">LINHA · ARRASTAR</button>
             <button type="button" data-2d-tool="point" aria-pressed="false">PONTO · RASTRO</button>
@@ -290,6 +317,7 @@
     let tool = 'angle';
     let draft = [];
     let angleSequence = [];
+    let full8Sequence = [];
     let annotations = [];
     let activeDrag = null;
     let activeDraw = null;
@@ -310,7 +338,7 @@
     deleteMenu.innerHTML='<span id="paiva-2d-delete-label">Marcação selecionada</span><button type="button" id="paiva-2d-delete-confirm" role="menuitem">✕ Excluir marcação</button><button type="button" id="paiva-2d-delete-cancel" role="menuitem">Cancelar</button>';
     section.append(deleteMenu);
     let pendingDeleteIndex=-1;
-    const colors = {angle:'#e7cf86',line:'#8bd6e4',point:'#a8f5c3'};
+    const colors = {angle:'#e7cf86',line:'#8bd6e4',point:'#a8f5c3',full8:'#48d7ea'};
     const palette=['#f56b6b','#f3f6fb','#57d39a','#b99cff','#64cbff','#ffca73'];
     let activeAngleColor=palette[0];
     const message = text => {byId('status').textContent = text;};
@@ -417,7 +445,8 @@
             singlePointTrails.set(trail.index,trail.path.slice(-240).map(p=>({...p})));
         }
       }
-      selectedIndex=-1;draft=[];angleSequence=[];activeDrag=null;activeDraw=null;
+      selectedIndex=-1;draft=[];angleSequence=[];full8Sequence=[];activeDrag=null;activeDraw=null;
+      updateFull8Guide();
       lastDeletedAnnotation=null;
       fineTrails.clear();
       // Sem medição salva neste instante, manter a última geometria visível
@@ -446,7 +475,7 @@
         if(epoch!==timelineEpoch||data?.version!==1||!Array.isArray(data.frames))return;
         for(const frame of data.frames){
           if(!Number.isFinite(frame.time)||!Array.isArray(frame.annotations))continue;
-          if(frame.annotations.some(a=>!['point','line','angle'].includes(a.kind)||
+          if(frame.annotations.some(a=>!['point','line','angle','full8'].includes(a.kind)||
             !Array.isArray(a.points)||a.points.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y))))continue;
           timelineFrames.set(frameKey(frame.time),frame);
         }
@@ -482,7 +511,7 @@
           if(!Number.isFinite(entry?.time)||entry.time<0||!Array.isArray(entry.annotations)||entry.annotations.length>100)
             throw new Error('Há um instante inválido no projeto.');
           for(const shape of entry.annotations){
-            const required={point:1,line:2,angle:3}[shape.kind];
+            const required={point:1,line:2,angle:3,full8:8}[shape.kind];
             if(!required||!Array.isArray(shape.points)||shape.points.length!==required||
               shape.points.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))
               throw new Error('Há uma marcação com pontos inválidos no projeto.');
@@ -529,7 +558,7 @@
         // A conclusão de uma marcação tira uma foto imediatamente. A cópia
         // conserva o quadro mesmo se o usuário mover a régua em seguida.
         const id=autoPhotoId,name=photoRecordName;
-        const count=annotations.filter(a=>a.kind==='angle').length;
+        const count=annotations.filter(a=>a.kind==='angle'||a.kind==='full8').length;
         canvas.toBlob(blob=>{
           writePhotoVersion(blob,version,id,name,`Imagem 2D com ${count} ângulo(s) · instante preservado`);
         },'image/png');
@@ -538,7 +567,7 @@
       photoSaveTimer=setTimeout(()=>{
         if(version!==photoVersion||!photoLoaded)return;
         const id=autoPhotoId,name=photoRecordName;
-        const count=annotations.filter(a=>a.kind==='angle').length;
+        const count=annotations.filter(a=>a.kind==='angle'||a.kind==='full8').length;
         canvas.toBlob(blob=>{
           writePhotoVersion(blob,version,id,name,`Imagem 2D com ${count} ângulo(s)`);
         },'image/png');
@@ -730,6 +759,11 @@
       if (!partial && item.kind === 'line' && pts.length === 2) {
         tag((pts[0].x+pts[1].x)/2,(pts[0].y+pts[1].y)/2,`L${index+1}`,color);
       }
+      if(!partial&&item.kind==='full8'&&pts.length===8){
+        const m=full8Measurements(pts);
+        if(m&&m.knee!==null)tag(pts[4].x,pts[4].y,`Joelho ${format(m.knee)}°`,color);
+        if(m&&m.foot!==null)tag(pts[6].x,pts[6].y,`Pé/solo ${format(m.foot)}°`,color);
+      }
     }
 
     function updateValues() {
@@ -738,6 +772,10 @@
         if (item.kind === 'angle') {
           const a = displayedAngle(item);
           values.push(`Ângulo ${index+1}: ${a === null ? 'rever pontos' : format(a)+'°'}`);
+        } else if(item.kind==='full8'){
+          const m=full8Measurements(item.points);
+          const val=(label,n)=>`${label} ${n===null?'rever':format(n)+'°'}`;
+          if(m)values.push(`8 pontos · ${val('Cotovelo',m.elbow)} · ${val('Ombro',m.shoulder)} · ${val('Quadril',m.hip)} · ${val('Joelho',m.knee)} · ${val('Tornozelo',m.ankle)} · ${val('Tronco/solo',m.trunk)} · ${val('Pé/solo',m.foot)}`);
         } else if(item.kind==='point') values.push(`${item.role==='heel'?'Calcanhar':item.role==='hip'?'Quadril':`Ponto ${index+1}`} · rastro`);
         else values.push(`Linha ${index+1}`);
       });
@@ -795,7 +833,7 @@
         selected.trackEnabled=selected.trackEnabled===false;
         fineTrails.clear();finePeak=null;
         if(selected.trackEnabled===false)singlePointTrails.delete(selectedIndex);
-        message(`Rastreio ${selected.trackEnabled?'ON':'OFF'} para ${selected.kind==='angle'?'este ângulo':selected.kind==='line'?'esta linha':'este ponto'}. Os demais desenhos mantêm suas escolhas.`);
+        message(`Rastreio ${selected.trackEnabled?'ON':'OFF'} para ${selected.kind==='full8'?'esta análise completa':selected.kind==='angle'?'este ângulo':selected.kind==='line'?'esta linha':'este ponto'}. Os demais desenhos mantêm suas escolhas.`);
       }else{
         defaultTrackEnabled=!defaultTrackEnabled;
         message(`Rastreio ${defaultTrackEnabled?'ON':'OFF'} para as próximas marcações.`);
@@ -883,18 +921,27 @@
       updateTrackToggle();
     }
 
+    function updateFull8Guide(){
+      const guide=byId('full8-guide');
+      guide.hidden=tool!=='full8';
+      if(tool==='full8')guide.textContent=`${full8Sequence.length}/8 marcados · próximo: ${FULL8_POINTS[full8Sequence.length]}`;
+    }
+
     function selectTool(next) {
-      tool=next;draft=[];angleSequence=[];activeDrag=null;activeDraw=null;
+      tool=next;draft=[];angleSequence=[];full8Sequence=[];activeDrag=null;activeDraw=null;
       byId('point-role-field').hidden=true; // O ponto é livre: não precisa escolher parte do corpo.
       for (const button of section.querySelectorAll('[data-2d-tool]'))
         button.setAttribute('aria-pressed',String(button.getAttribute('data-2d-tool')===tool));
+      updateFull8Guide();
       render();
       if(!video.hidden && videoCanCapture()){
-        message('Ferramenta pronta. Clique sobre o atleta para congelar. Ângulo: marque os 3 pontos com cliques ou abra as hastes arrastando.');
+        message(tool==='full8'?'Análise completa: clique sobre a ciclista para congelar, depois marque os oito pontos na ordem indicada.':
+          'Ferramenta pronta. Clique sobre o atleta para congelar. Ângulo: marque os 3 pontos com cliques ou abra as hastes arrastando.');
         return;
       }
       if (!photoLoaded) return;
-      message(tool==='angle' ? 'Ângulo: clique em trocânter → côndilo → maléolo (3 cliques), ou arraste para abrir um ângulo. Depois puxe qualquer ponto, sem mudar de ferramenta.' :
+      message(tool==='full8' ? 'Análise completa: 1 Punho → 2 Cotovelo → 3 Ombro → 4 Quadril → 5 Joelho → 6 Tornozelo → 7 Metatarso → 8 Calcanhar. Clique ponto a ponto.' :
+        tool==='angle' ? 'Ângulo: clique em trocânter → côndilo → maléolo (3 cliques), ou arraste para abrir um ângulo. Depois puxe qualquer ponto, sem mudar de ferramenta.' :
         tool==='line' ? 'Linha: clique e ARRASTE do início ao fim. Segure Shift para alinhar horizontalmente ao solo (0°).' :
         tool==='point' ? 'Ponto: clique onde quiser no atleta. Arraste-o diretamente para corrigir e use Rastreio ON/OFF.' :
         'Ajustar: arraste uma ponta ou o corpo da linha/ângulo para reposicionar.');
@@ -941,7 +988,8 @@
       const tolerance=Math.max(8,12*canvas.width/rect.width);
       for (let i=annotations.length-1;i>=0;i--) {
         const pts=annotations[i].points;
-        const segments=annotations[i].kind==='angle' ? [[0,1],[1,2]] : annotations[i].kind==='line' ? [[0,1]] : [];
+        const segments=annotations[i].kind==='angle' ? [[0,1],[1,2]] : annotations[i].kind==='line' ? [[0,1]] :
+          annotations[i].kind==='full8' ? [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7]] : [];
         if (segments.some(([a,b])=>segmentDistance(point,pts[a],pts[b])<=tolerance))
           return {item:i,index:-1,pointer:event.pointerId,origin:point,
             original:pts.map(p=>({...p}))};
@@ -971,20 +1019,21 @@
       const kind=annotations[index].kind;
       lastDeletedAnnotation={index,item:annotations[index]};
       annotations.splice(index,1);
-      selectedIndex=-1;draft=[];angleSequence=[];activeDrag=null;activeDraw=null;
+      selectedIndex=-1;draft=[];angleSequence=[];full8Sequence=[];activeDrag=null;activeDraw=null;
+      updateFull8Guide();
       fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       byId('fine-readout').textContent='Marcação excluída · Desfazer restaura';
       closeDeleteMenu();
       rememberTimelineFrame(0);
       render();updateCameraControls();schedulePhotoSave();
-      const type=kind==='angle'?'Ângulo':kind==='point'?'Ponto':'Linha';
+      const type=kind==='full8'?'Análise completa':kind==='angle'?'Ângulo':kind==='point'?'Ponto':'Linha';
       message(`${type} excluído. Clique em “Desfazer” para recuperar se precisar.`);
       return true;
     }
     deleteMenu.querySelector('#paiva-2d-delete-confirm').addEventListener('click',()=>deleteAnnotation(pendingDeleteIndex));
     byId('delete-selected').addEventListener('click',()=>{
       if(!deleteAnnotation(selectedIndex))
-        message('Selecione primeiro um ângulo, uma linha ou um ponto para excluir.');
+        message('Selecione primeiro uma análise de oito pontos, um ângulo, uma linha ou um ponto para excluir.');
     });
     deleteMenu.querySelector('#paiva-2d-delete-cancel').addEventListener('click',closeDeleteMenu);
     document.addEventListener('pointerdown',event=>{
@@ -999,7 +1048,7 @@
       updateTrackToggle();
       const kind=annotations[index].kind;
       deleteMenu.querySelector('#paiva-2d-delete-label').textContent=
-        kind==='angle'?'Ângulo selecionado':kind==='point'?'Ponto selecionado':'Linha selecionada';
+        kind==='full8'?'Análise completa selecionada':kind==='angle'?'Ângulo selecionado':kind==='point'?'Ponto selecionado':'Linha selecionada';
       const width=170,height=88;
       deleteMenu.style.left=`${Math.max(4,Math.min(event.clientX,window.innerWidth-width-8))}px`;
       deleteMenu.style.top=`${Math.max(4,Math.min(event.clientY,window.innerHeight-height-8))}px`;
@@ -1079,9 +1128,9 @@
     byId('wide').addEventListener('click',()=>setWideMode(!section.classList.contains('paiva-2d-expanded')));
     document.addEventListener('keydown',event=>{
       if(event.key==='Escape'&&section.classList.contains('paiva-2d-expanded'))setWideMode(false);
-      if(event.key==='Escape'&&angleSequence.length){
-        angleSequence=[];draft=[];activeDraw=null;render();
-        message('Marcação de três pontos cancelada. Pode começar novamente.');
+      if(event.key==='Escape'&&(angleSequence.length||full8Sequence.length)){
+        angleSequence=[];full8Sequence=[];draft=[];activeDraw=null;updateFull8Guide();render();
+        message('Marcação incompleta cancelada. Pode começar novamente.');
       }
     });
     byId('zoom').addEventListener('input',()=>updateZoom(Number(byId('zoom').value)));
@@ -1273,6 +1322,17 @@
             readings.push(`A ${format(shown)}°`);
             trackCtx.font='650 13px system-ui,sans-serif';
             trackCtx.fillText(`A ${format(shown)}°`,Math.min(w-82,pts[1].x+8),Math.max(15,pts[1].y-8));
+          }
+        }else if(item.kind==='full8'&&pts.length===8){
+          const m=full8Measurements(pts);
+          trackCtx.font='650 13px system-ui,sans-serif';
+          if(m.knee!==null){
+            readings.push(`Joelho ${format(m.knee)}°`);
+            trackCtx.fillText(`Joelho ${format(m.knee)}°`,Math.min(w-112,pts[4].x+8),Math.max(15,pts[4].y-8));
+          }
+          if(m.foot!==null){
+            readings.push(`Pé/solo ${format(m.foot)}°`);
+            trackCtx.fillText(`Pé/solo ${format(m.foot)}°`,Math.min(w-112,pts[6].x+8),Math.max(15,pts[6].y-8));
           }
         }
       });
@@ -1847,8 +1907,8 @@
       const sampler=fineSampler;
       const before=sampler.sample();
       if(!finePeak){
-        const angle=annotations.find(a=>a.kind==='angle'&&a.trackEnabled!==false&&a.points.length===3);
-        const degrees=angle?angleDegrees(...angle.points):null;
+        const angle=annotations.find(a=>a.trackEnabled!==false&&kneeReading(a)!==null);
+        const degrees=kneeReading(angle);
         if(degrees!==null)finePeak={time:from,angle:degrees,
           shapes:annotations.map(a=>({...a,points:a.points.map(p=>({...p}))}))};
       }
@@ -1892,9 +1952,9 @@
             appendSinglePoint(match.item,old,current,from,next);
         }
       }
-      const firstAngleIndex=annotations.findIndex(a=>a.kind==='angle'&&a.trackEnabled!==false&&a.points.length===3);
+      const firstAngleIndex=annotations.findIndex(a=>a.trackEnabled!==false&&kneeReading(a)!==null);
       const firstAngle=annotations[firstAngleIndex];
-      const angle=firstAngle?angleDegrees(...firstAngle.points):null;
+      const angle=kneeReading(firstAngle);
       if(angle!==null&&!fineUncertain.some(p=>p.item===firstAngleIndex)&&(!finePeak||angle>finePeak.angle)){
         finePeak={time:next,angle,shapes:annotations.map(a=>({...a,points:a.points.map(p=>({...p}))}))};
       }
@@ -1904,7 +1964,7 @@
       byId('fine-peak').disabled=!finePeak;
       // Evita codificar um PNG enquanto a rodinha ainda está avançando quadros.
       if(!saved)schedulePhotoSave(1600,'tracking');
-      const label=firstAngle?displayedAngle(firstAngle):null;
+      const label=firstAngle?.kind==='full8'?angle:firstAngle?displayedAngle(firstAngle):null;
       const lost=fineUncertain.length;
       const readout=label===null&&annotations.some(item=>item.kind==='point')?'Ponto · rastro':
         label===null?'marcadores':`A ${format(label)}°`;
@@ -2061,7 +2121,8 @@
       stillFromVideo=source===video;
       fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       lastDeletedAnnotation=null;closeDeleteMenu();
-      annotations=[];draft=[];angleSequence=[];activeDrag=null;activeDraw=null;selectedIndex=-1;
+      annotations=[];draft=[];angleSequence=[];full8Sequence=[];activeDrag=null;activeDraw=null;selectedIndex=-1;
+      updateFull8Guide();
       render();showVideo(false);updateZoom(Number(byId('zoom').value));
       newPhotoRecord();
       // A captura de vídeo recupera primeiro o quadro salvo. Uma foto estática
@@ -2319,6 +2380,12 @@
         if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* gesto transferido */}
         render();return;
       }
+      if(tool==='full8'&&full8Sequence.length){
+        activeDraw={pointer:event.pointerId,kind:'full8-sequence',start:point};
+        draft=[...full8Sequence,point];
+        if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* gesto transferido */}
+        render();return;
+      }
       // Manipulação direta: uma ponta já desenhada pode ser puxada mesmo
       // enquanto a ferramenta Ângulo/Linha/Ponto continua selecionada.
       const endpoint=findPoint(point,event);
@@ -2331,7 +2398,7 @@
         if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* gesto transferido */}
         return;
       }
-      if(tool==='angle'||tool==='line'){
+      if(tool==='angle'||tool==='line'||tool==='full8'){
         const existingSegment=findSegment(point,event);
         if(existingSegment&&(tool===annotations[existingSegment.item]?.kind)){
           activeDrag=existingSegment;selectedIndex=existingSegment.item;
@@ -2359,6 +2426,12 @@
         } else message('Clique sobre uma ponta ou sobre o corpo da linha para arrastá-la.');
         return;
       }
+      if(tool==='full8'){
+        activeDraw={pointer:event.pointerId,kind:'full8-sequence',start:point};
+        draft=[point];
+        if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* gesto transferido */}
+        render();return;
+      }
       activeDraw={pointer:event.pointerId,kind:tool,start:point};
       draft=draftFromDrag(tool,point,point,false);
       if(!forwardedGesture)try{canvas.setPointerCapture?.(event.pointerId);}catch(_){/* ponteiro transferido do vídeo */}
@@ -2373,6 +2446,7 @@
       if (activeDraw?.pointer===event.pointerId) {
         event.preventDefault();
         draft=activeDraw.kind==='angle-sequence'?[...angleSequence,snapAngleSequencePoint(p,event.shiftKey)]:
+          activeDraw.kind==='full8-sequence'?[...full8Sequence,p]:
           draftFromDrag(activeDraw.kind,activeDraw.start,p,event.shiftKey);
         render();return;
       }
@@ -2396,8 +2470,21 @@
         const p=pointAt(event) || activeDraw.start;
         const travel=Math.hypot(p.x-activeDraw.start.x,p.y-activeDraw.start.y);
         if(event.type==='pointercancel'){
-          angleSequence=[];draft=[];render();
+          angleSequence=[];full8Sequence=[];draft=[];updateFull8Guide();render();
           message('Marcação interrompida. Comece novamente.');
+        } else if(activeDraw.kind==='full8-sequence'){
+          full8Sequence.push(p);
+          if(full8Sequence.length===8){
+            annotations.push({kind:'full8',points:full8Sequence.map(q=>({...q})),
+              trackEnabled:defaultTrackEnabled,color:colors.full8});
+            lastDeletedAnnotation=null;selectedIndex=annotations.length-1;
+            full8Sequence=[];draft=[];updateFull8Guide();
+            render();updateCameraControls();schedulePhotoSave();
+            message('Análise completa concluída! Os 8 pontos estão interligados. Arraste qualquer referência para corrigir; o joelho e o pé são calculados automaticamente.');
+          }else{
+            draft=[...full8Sequence];updateFull8Guide();render();
+            message(`${full8Sequence.length}/8 pontos marcados. Próximo: ${FULL8_POINTS[full8Sequence.length]}. Esc cancela.`);
+          }
         } else if(activeDraw.kind==='angle-sequence'||(activeDraw.kind==='angle'&&travel<8)){
           angleSequence.push(snapAngleSequencePoint(p,event.shiftKey));
           if(angleSequence.length===3){
@@ -2456,7 +2543,7 @@
     });
     byId('undo').addEventListener('click',() => {
       if(draft.length){
-        draft=[];angleSequence=[];
+        draft=[];angleSequence=[];full8Sequence=[];updateFull8Guide();
         message('Marcação incompleta cancelada.');
       }else if(lastDeletedAnnotation){
         const {index,item}=lastDeletedAnnotation;
@@ -2475,7 +2562,8 @@
     });
     byId('clear').addEventListener('click',() => {
       if (annotations.length && !window.confirm('Remover todas as linhas e ângulos desta foto?'))return;
-      annotations=[];draft=[];angleSequence=[];selectedIndex=-1;lastDeletedAnnotation=null;
+      annotations=[];draft=[];angleSequence=[];full8Sequence=[];selectedIndex=-1;lastDeletedAnnotation=null;
+      updateFull8Guide();
       fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       closeDeleteMenu();render();message('Marcações removidas. A fotografia foi preservada.');
       schedulePhotoSave();

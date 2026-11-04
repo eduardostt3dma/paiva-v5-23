@@ -148,7 +148,7 @@
     const lost=[],moved=[];
     const shapes=annotations.map((item,i)=>({
       ...item,points:item.points.map((point,j)=>{
-        if(item.trackEnabled===false||!['point','angle','line'].includes(item.kind))return {...point};
+        if(item.trackEnabled===false||!['point','angle','line','full8'].includes(item.kind))return {...point};
         const scaled={x:point.x/sourceWidth*w,y:point.y/sourceHeight*h};
         let found=item.kind==='point'?
           trackRobustPoint(before,after,w,h,scaled,options):

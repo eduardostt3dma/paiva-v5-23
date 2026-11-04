@@ -347,6 +347,15 @@ ANÁLISE 2D · ÂNGULOS SEM DESAPARECER E PONTOS FIÉIS POR QUADRO:
 - Um marcador perdido não é reposicionado automaticamente em quadros posteriores até ser corrigido pelo profissional. As marcações são armazenadas no navegador e podem ser exportadas em JSON como cópia de segurança.
 - O cache atualizado termina em “stickyangles2-framehistory2”.
 
+ANÁLISE COMPLETA · OITO PONTOS INTERLIGADOS:
+- Foi acrescentado o botão azul “ANÁLISE COMPLETA · 8 PONTOS” na barra de ferramentas 2D, sem retirar Ângulo, Linha, Ponto ou Ajustar pontos.
+- Clique sucessivamente nos pontos anatômicos: 1 Punho, 2 Cotovelo lateral, 3 Ombro/acrômio, 4 Quadril/trocânter maior, 5 Joelho/côndilo femoral lateral, 6 Tornozelo/maléolo lateral, 7 Antepé/metatarso e 8 Calcanhar. O progresso e o próximo ponto aparecem abaixo do botão.
+- Os oito pontos compõem um único desenho conectado. Qualquer ponto pode ser arrastado separadamente com o mouse, e o corpo da cadeia pode ser deslocado inteiro.
+- O aplicativo destaca sobre a imagem o ângulo do joelho (quadril–joelho–tornozelo) e a inclinação do pé ao solo. A inclinação do pé usa exclusivamente a linha calcanhar–antepé comparada à horizontal, não o ângulo interno com a tíbia; respeita a referência escolhida pelo profissional.
+- Leituras de cotovelo, ombro, quadril, joelho, tornozelo, tronco/solo e pé/solo também aparecem no painel. São ângulos 2D experimentais sujeitos à qualidade da imagem, da câmera e dos pontos colocados manualmente.
+- Rastreio ON acompanha as oito referências pelo modo quadro a quadro e pode tentar seguir na reprodução do vídeo. Se perder textura, os pontos permanecem visíveis para correção manual. As correções ficam salvas no histórico do quadro, como nas ferramentas anteriores.
+- O cache atualizado termina em “full8chain1”.
+
 NOVO · CAPTURA FULL HD E RASTREIO DE PONTO COM SEGUNDA ESTRATÉGIA:
 - QUADRO CONGELADO: antes havia limite de 1.400 px na maior dimensão. Agora o aplicativo conserva a imagem até 1.920 px, dentro de um teto de cerca de 2,3 milhões de pixels. Fotos e vídeos de resolução menor são mantidos no tamanho original, sem ampliação artificial.
 - RASTREIO FINO: a leitura de textura por quadro passou de até 960 px de largura para até 1.280 px, respeitando a resolução real do vídeo e reutilizando a mesma amostra enquanto avança com a rodinha. A melhoria aumenta detalhe, mas pode exigir um pouco mais do computador.
