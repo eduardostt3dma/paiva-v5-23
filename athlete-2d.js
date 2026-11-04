@@ -56,6 +56,7 @@
         <p><strong>Ponto de trajetória:</strong> escolha “PONTO · RASTRO” e clique em qualquer referência visível. Não é necessário escolher “quadril” nem “calcanhar”. Em “↗ Traçar ponto”, escolha um intervalo curto para desenhar o caminho sobre o atleta. Não exibimos medidas horizontais/verticais: a finalidade é ver a trajetória. Distâncias reais exigirão calibração posterior.</p>
         <p><strong>Rastreio ON/OFF:</strong> marque ou selecione um Ângulo, Linha ou Ponto na imagem e clique em “Rastreio ON/OFF” para ativar ou desativar o acompanhamento desta marcação. Uma linha tem duas pontas, um ângulo tem três pontos e um ponto isolado tem um; cada ferramenta respeita a escolha.</p>
         <p><strong>Análises guardadas pelo tempo:</strong> ao concluir as marcações, o aplicativo registra o instante do vídeo e o desenho. Ao voltar com a régua ou a rodinha ao mesmo quadro, a análise reaparece para continuar editando. Fotos e a lista de instantes são armazenadas neste navegador. O MP4 original e os recortes continuam arquivos de vídeo limpos: as marcações ficam no projeto local salvo separadamente, não são incorporadas aos pixels do MP4 nesta versão.</p>
+        <p><strong>Não perder o ângulo nem a correção:</strong> se o rastreador perder um ponto, o ângulo permanece visível na última posição conhecida, com os marcadores incertos em laranja. Corrija-os manualmente antes de interpretar o valor. Ao voltar a um quadro já corrigido, o programa restaura exatamente os pontos que você deixou naquele instante, sem substituir sua medição pela estimativa automática. Em quadros novos, o desenho anterior continua visível apenas como referência provisória, até você ajustá-lo.</p>
         <p><strong>Rastreio fino (estilo de trabalho do Kinovea):</strong> congele o quadro próximo ao pedivela em 178°–180° e marque trocânter, côndilo e maléolo; opcionalmente, marque calcanhar e quadril. Com “Seguir pontos por quadro” ativado, gire a rodinha ou use ◀/▶ para mover somente UM quadro e atualizar cada marcador. Se uma referência escapar, ela permanece na posição anterior, sinalizada para corrigir: arraste o ponto diretamente na foto e continue com a rodinha. Não há necessidade de percorrer uma volta inteira. Em “Ajustes do rastreio” escolha o tamanho do alvo e a área de busca em pixels; a visualização das janelas é opcional. Os três marcos do ângulo são rastreados separadamente, mas exigem conferência visual. O método é implementação independente, não código do Kinovea.</p>
         <p><strong>Cursor e exclusão:</strong> sobre qualquer ponto, ângulo ou linha, o cursor permanece em cruz. Clique com o botão DIREITO sobre uma marcação para abrir “Excluir”, ou selecione a marcação e use “✕ Excluir” ao lado de Rastreio ON/OFF. A exclusão fica registrada naquele instante e não reaparece ao voltar com a régua. “Desfazer” recupera se você mudou de ideia. Fora da marcação, o botão direito controla pausa/play do vídeo.</p>
         <p><strong>Rastrear um ponto isolado:</strong> escolha “PONTO · RASTRO”, marque um ponto onde desejar, ligue o rastreio e use a rodinha do mouse para acompanhá-lo e desenhar o pequeno trajeto, mesmo sem ângulo desenhado. Se perder a referência, arraste-o de volta e continue.</p>
@@ -375,9 +376,14 @@
       clearTimeout(timelinePersistTimer);
       timelinePersistTimer=setTimeout(persistTimelineNow,delay);
     }
-    function rememberTimelineFrame(urgency=480){
+    function rememberTimelineFrame(urgency=480,source='manual'){
       if(!timelineIdentity||!stillFromVideo||!hasFileVideo()||!photoLoaded)return;
       const time=video.currentTime,slot=timelineSlot(time),key=slot?.key??frameKey(time);
+      // Uma posição corrigida pelo profissional é definitiva naquele quadro.
+      // O rastreio automático pode preencher quadros novos, jamais substituí-la.
+      if(source==='tracking'&&slot?.entry&&slot.entry.source!=='tracking'){
+        shownFrameKey=slot.key;return;
+      }
       // Também remove versões duplicadas do mesmo quadro criadas antes desta
       // correção, para que nenhuma delas reapareça ao voltar com a régua.
       const fps=Number(byId('file-fps')?.value)||30;
@@ -387,28 +393,40 @@
         if(duplicate!==key&&entry&&Math.abs(entry.time-time)<=tolerance)
           timelineFrames.delete(duplicate);
       }
-      timelineFrames.set(key,{time:slot?.entry.time??time,annotations:cloneAnnotations(annotations),trails:clonePaths()});
+      timelineFrames.set(key,{time:slot?.entry.time??time,source,
+        annotations:cloneAnnotations(annotations),trails:clonePaths(),
+        uncertain:fineUncertain.map(p=>({item:p.item,point:p.point}))});
       shownFrameKey=key;
-      if(timelineFrames.size>1800)timelineFrames.delete(timelineFrames.keys().next().value);
+      if(timelineFrames.size>1800){
+        // Descartar primeiro um quadro estimado automaticamente. Assim uma
+        // longa sessão de rastreio não expulsa medições corrigidas à mão.
+        const automatic=[...timelineFrames].find(([id,entry])=>id!==key&&entry.source==='tracking');
+        const oldest=automatic?.[0]??[...timelineFrames.keys()].find(id=>id!==key);
+        if(oldest!==undefined)timelineFrames.delete(oldest);
+      }
       scheduleTimelinePersist(urgency);
     }
-    function findTimelineFrame(time){
-      return timelineSlot(time)?.entry??null;
-    }
     function restoreTimelineFrame(time,clearMissing=true,paint=true,preservePeak=false){
-      const entry=findTimelineFrame(time);
+      const slot=timelineSlot(time),entry=slot?.entry;
       if(!entry&&!clearMissing)return false;
-      annotations=entry?cloneAnnotations(entry.annotations):[];
-      singlePointTrails.clear();
-      if(entry?.trails)for(const trail of entry.trails){
-        if(Number.isInteger(trail.index)&&annotations[trail.index]?.kind==='point'&&Array.isArray(trail.path))
-          singlePointTrails.set(trail.index,trail.path.slice(-240).map(p=>({...p})));
+      if(entry){
+        annotations=cloneAnnotations(entry.annotations);
+        singlePointTrails.clear();
+        if(entry.trails)for(const trail of entry.trails){
+          if(Number.isInteger(trail.index)&&annotations[trail.index]?.kind==='point'&&Array.isArray(trail.path))
+            singlePointTrails.set(trail.index,trail.path.slice(-240).map(p=>({...p})));
+        }
       }
       selectedIndex=-1;draft=[];angleSequence=[];activeDrag=null;activeDraw=null;
       lastDeletedAnnotation=null;
-      fineTrails.clear();fineUncertain=[];
+      fineTrails.clear();
+      // Sem medição salva neste instante, manter a última geometria visível
+      // e sinalizar que os pontos precisam ser conferidos. O ângulo não some.
+      fineUncertain=entry?(entry.uncertain||[]).map(p=>({...p})):
+        annotations.flatMap((item,i)=>item.trackEnabled===false?[]:
+          item.points.map((_,j)=>({item:i,point:j})));
       if(!preservePeak)finePeak=null;
-      shownFrameKey=timelineSlot(time)?.key??frameKey(time);
+      shownFrameKey=slot?.key??frameKey(time);
       if(paint){render();updateCameraControls();}
       return !!entry;
     }
@@ -438,7 +456,7 @@
     }
     byId('project-export').addEventListener('click',()=>{
       if(!timelineIdentity||!currentVideoFile){message('Abra primeiro o vídeo cuja análise deseja baixar.');return;}
-      if(stillFromVideo&&!canvas.hidden)rememberTimelineFrame(0);
+      if(stillFromVideo&&!canvas.hidden&&!timelineSlot(video.currentTime))rememberTimelineFrame(0,'tracking');
       const frames=[...timelineFrames.values()].sort((a,b)=>a.time-b.time);
       const blob=new Blob([JSON.stringify({version:1,videoName:timelineFileName,
         videoSize:timelineVideoSize,frames})],{type:'application/json'});
@@ -470,7 +488,11 @@
               throw new Error('Há uma marcação com pontos inválidos no projeto.');
           }
           imported.set(frameKey(entry.time),{time:entry.time,
-            annotations:cloneAnnotations(entry.annotations),trails:Array.isArray(entry.trails)?entry.trails:[]});
+            source:entry.source==='tracking'?'tracking':'manual',
+            annotations:cloneAnnotations(entry.annotations),trails:Array.isArray(entry.trails)?entry.trails:[],
+            uncertain:Array.isArray(entry.uncertain)?entry.uncertain.filter(p=>
+              Number.isInteger(p.item)&&Number.isInteger(p.point)&&p.item>=0&&p.item<entry.annotations.length&&
+              p.point>=0&&p.point<entry.annotations[p.item].points.length).map(p=>({item:p.item,point:p.point})):[]});
         }
         timelineFrames=imported;persistTimelineNow();
         if(stillFromVideo&&!canvas.hidden){restoreTimelineFrame(video.currentTime,true);}
@@ -494,10 +516,10 @@
         return records().save({id,kind:'foto',name,description,blob});
       }).catch(error=>{console.warn('PAIVA: não foi possível atualizar a foto automática',error);});
     }
-    function schedulePhotoSave(delayMs=650){
+    function schedulePhotoSave(delayMs=650,source='manual'){
       // Histórico de marcações é independente da exportação de fotos PNG.
       // Mesmo sem espaço/ID para foto, exclusões e alterações ficam no projeto.
-      rememberTimelineFrame(delayMs<=700?0:480);
+      rememberTimelineFrame(delayMs<=700?0:480,source);
       if(!photoLoaded||!records()?.save||!autoPhotoId)return;
       if(stillFromVideo&&hasFileVideo()&&photoTimeKey!==frameKey(video.currentTime))newPhotoRecord();
       const version=++photoVersion;
@@ -836,13 +858,13 @@
         ctx.restore();
       }
       annotations.forEach((item,index) => drawAnnotation(item,index));
-      if(stillFromVideo&&byId('fine-mode').checked){
+      if(stillFromVideo){
         for(const lost of fineUncertain){
           const p=annotations[lost.item]?.points?.[lost.point];if(!p)continue;
           ctx.save();ctx.strokeStyle='#ffb45e';ctx.lineWidth=2.5;
           ctx.beginPath();ctx.arc(p.x,p.y,11,0,Math.PI*2);ctx.stroke();ctx.restore();
         }
-        if(byId('fine-boxes').checked&&selectedIndex>=0){
+        if(byId('fine-mode').checked&&byId('fine-boxes').checked&&selectedIndex>=0){
           const marker=annotations[selectedIndex]?.points?.[0];
           if(marker){
             const scale=canvas.width/Math.min(960,video.videoWidth||960);
@@ -1082,6 +1104,7 @@
     let lastFrameFromVideo = false;
     let stillFromVideo = false;
     let motionTracker = null;
+    let lastTrackedGeometry=null;
     let trackingActive = false;
     let scanningActive = false,scanCancelled = false;
     const trackOverlay=byId('track-overlay');
@@ -1176,8 +1199,19 @@
     function stopTracking(clear=true) {
       if(scanningActive)scanCancelled=true;
       motionTracker?.stop();motionTracker=null;trackingActive=false;
+      lastTrackedGeometry=null;
       if (clear) trackOverlay.hidden=true;
       updateCameraControls();
+    }
+
+    function lastTrackedAnnotations(){
+      const kept=cloneAnnotations(annotations);
+      if(lastTrackedGeometry?.source!==recordedUrl)return kept;
+      for(const item of lastTrackedGeometry.entries){
+        if(kept[item.index]&&kept[item.index].points.length===item.points.length)
+          kept[item.index].points=item.points.map(p=>({...p}));
+      }
+      return kept;
     }
 
     function alignTrackedOverlay() {
@@ -1251,15 +1285,36 @@
       const motion=globalThis.PAIVA_MOTION_TRACKER;
       if (!motion?.create || !trackCtx) {message('Módulo de rastreio indisponível. Atualize todos os arquivos do aplicativo.');return;}
       pointTrails.clear();
+      lastTrackedGeometry=null;
       const currentTime=video.currentTime;
+      const trackedIndices=annotations.flatMap((item,i)=>item.trackEnabled!==false?[i]:[]);
       motionTracker=motion.create({video,annotations:annotations.filter(a=>a.trackEnabled!==false).map(item=>({
         kind:item.kind,color:item.color,role:item.role,supplementary:!!item.supplementary,points:item.points.map(p=>({...p}))})),
         sourceWidth:canvas.width,sourceHeight:canvas.height,
         isLoopEnabled:()=>video.loop,
-        onPoints:(points,w,h,t)=>paintTracked(points,w,h,t),
+        onPoints:(points,w,h,t)=>{
+          lastTrackedGeometry={source:recordedUrl,time:t,entries:points.map((item,i)=>({
+            index:trackedIndices[i],points:item.points.map(p=>({
+              x:p.x/w*canvas.width,y:p.y/h*canvas.height
+            }))
+          }))};
+          paintTracked(points,w,h,t);
+        },
         onLost:reason=>{
-          stopTracking();video.pause();
-          message(`Rastreio interrompido em ${video.currentTime.toFixed(1).replace('.',',')} s. ${reason} Não use esse ângulo sem conferir os marcadores.`);
+          const held=lastTrackedAnnotations();
+          video.pause();stopTracking();
+          if(videoCanCapture()&&setFrame(video,video.videoWidth,video.videoHeight)){
+            annotations=held;
+            fineUncertain=held.flatMap((item,i)=>item.trackEnabled===false?[]:
+              item.points.map((_,j)=>({item:i,point:j})));
+            lastFrameFromVideo=true;stillFromVideo=true;
+            byId('back-video').hidden=false;
+            render();updateCameraControls();schedulePhotoSave(650,'tracking');
+            message(`Rastreio interrompido em ${video.currentTime.toFixed(1).replace('.',',')} s. O ângulo ficou visível no último lugar conhecido. Corrija os pontos laranja antes de usar a medida. ${reason}`);
+          }else{
+            trackOverlay.hidden=false;
+            message(`Rastreio interrompido. Os últimos marcadores foram mantidos sobre o vídeo; pause e capture para conferir. ${reason}`);
+          }
         },
         onDone:()=>{stopTracking();message(video.loop
           ?'Vídeo reiniciado no começo. O rastreio da volta anterior foi encerrado; confira os ângulos antes de usar.'
@@ -1490,6 +1545,7 @@
       stopTracking();stopStream();video.pause();resetCycleResults();
       if (recordedUrl) URL.revokeObjectURL(recordedUrl);
       recordedUrl=URL.createObjectURL(file);
+      lastTrackedGeometry=null;
       currentVideoFile=file;
       loadTimelineForVideo(file);
       video.srcObject=null;video.src=recordedUrl;video.controls=false;
@@ -1741,8 +1797,9 @@
       const restored=restoreTimelineFrame(time,true,false);
       lastFrameFromVideo=true;stillFromVideo=true;
       newPhotoRecord();render();updateCameraControls();
-      message(restored?`Análise de ${clockTime(time)} recuperada. Pode continuar editando.`:
-        `Quadro ${clockTime(time)} pronto para uma nova medição. A anterior permanece salva.`);
+      message(restored?`Análise de ${clockTime(time)} recuperada com os pontos salvos. Pode continuar editando.`:
+        annotations.length?`Quadro ${clockTime(time)}: o ângulo foi mantido como referência provisória. Ajuste os pontos laranja; os quadros já medidos estão salvos.`:
+        `Quadro ${clockTime(time)} pronto para uma nova medição.`);
     });
     byId('scrub').addEventListener('pointerdown',()=>{
       scrubPointerDown=true;scrubActive=true;scrubReleasePending=false;
@@ -1798,30 +1855,47 @@
       await seekCycleFrame(next);
       if(source!==recordedUrl||navigationEpoch!==fineNavigationEpoch||
         !lastFrameFromVideo||!stillFromVideo||canvas.hidden)return;
-      const after=sampler.sample();
-      const result=motion.trackFineShapes(before,after,sampler.width,sampler.height,
-        annotations,canvas.width,canvas.height,{
-          patch:Number(byId('fine-patch').value),search:Number(byId('fine-search').value)
-        });
-      const previous=annotations;
-      annotations=result.shapes;
-      fineUncertain=result.lost;
-      for(const match of result.moved){
-        const key=`${match.item}:${match.point}`;
-        const old=previous[match.item]?.points?.[match.point];
-        const current=annotations[match.item]?.points?.[match.point];
-        if(!old||!current)continue;
-        const path=fineTrails.get(key)||[{...old}];path.push({...current});
-        if(path.length>13)path.shift();fineTrails.set(key,path);
-        if(annotations[match.item]?.kind==='point'&&match.point===0)
-          appendSinglePoint(match.item,old,current,from,next);
+      // Ao retornar a um quadro já medido, recuperar primeiro seus pontos
+      // EXATOS. Não passar novamente pelo rastreador e nem regravar essa
+      // geometria com uma estimativa de ida/volta da rodinha.
+      const saved=restoreTimelineFrame(video.currentTime,false,false,true);
+      if(!saved){
+        const after=sampler.sample();
+        // Um marcador já perdido não volta a ser "confiável" por acaso na
+        // rodada seguinte. Ele fica parado até o profissional reposicioná-lo.
+        const blocked=new Set(fineUncertain.map(p=>`${p.item}:${p.point}`));
+        const result=motion.trackFineShapes(before,after,sampler.width,sampler.height,
+          annotations,canvas.width,canvas.height,{
+            patch:Number(byId('fine-patch').value),search:Number(byId('fine-search').value)
+          });
+        const previous=annotations;
+        for(const token of blocked){
+          const [i,j]=token.split(':').map(Number);
+          const fixed=previous[i]?.points?.[j];
+          if(!fixed||!result.shapes[i]?.points?.[j])continue;
+          result.shapes[i].points[j]={...fixed};
+          if(!result.lost.some(p=>p.item===i&&p.point===j))result.lost.push({item:i,point:j});
+        }
+        result.moved=result.moved.filter(p=>!blocked.has(`${p.item}:${p.point}`));
+        annotations=result.shapes;
+        // Se a textura escapar, os próprios pontos permanecem na última
+        // posição conhecida, circundados de laranja para ajuste manual.
+        fineUncertain=result.lost;
+        for(const match of result.moved){
+          const key=`${match.item}:${match.point}`;
+          const old=previous[match.item]?.points?.[match.point];
+          const current=annotations[match.item]?.points?.[match.point];
+          if(!old||!current)continue;
+          const path=fineTrails.get(key)||[{...old}];path.push({...current});
+          if(path.length>13)path.shift();fineTrails.set(key,path);
+          if(annotations[match.item]?.kind==='point'&&match.point===0)
+            appendSinglePoint(match.item,old,current,from,next);
+        }
       }
-      // Se o profissional corrigiu um ângulo neste exato instante, a marcação
-      // salva tem prioridade sobre uma nova aproximação do rastreador.
-      restoreTimelineFrame(next,false,false,true);
-      const firstAngle=annotations.find(a=>a.kind==='angle'&&a.trackEnabled!==false&&a.points.length===3);
+      const firstAngleIndex=annotations.findIndex(a=>a.kind==='angle'&&a.trackEnabled!==false&&a.points.length===3);
+      const firstAngle=annotations[firstAngleIndex];
       const angle=firstAngle?angleDegrees(...firstAngle.points):null;
-      if(angle!==null&&!result.lost.some(p=>annotations[p.item]===firstAngle)&&(!finePeak||angle>finePeak.angle)){
+      if(angle!==null&&!fineUncertain.some(p=>p.item===firstAngleIndex)&&(!finePeak||angle>finePeak.angle)){
         finePeak={time:next,angle,shapes:annotations.map(a=>({...a,points:a.points.map(p=>({...p}))}))};
       }
       originalCtx.drawImage(video,0,0,original.width,original.height);
@@ -1829,13 +1903,14 @@
       render();syncTimeline();
       byId('fine-peak').disabled=!finePeak;
       // Evita codificar um PNG enquanto a rodinha ainda está avançando quadros.
-      schedulePhotoSave(1600);
+      if(!saved)schedulePhotoSave(1600,'tracking');
       const label=firstAngle?displayedAngle(firstAngle):null;
-      const lost=result.lost.length;
+      const lost=fineUncertain.length;
       const readout=label===null&&annotations.some(item=>item.kind==='point')?'Ponto · rastro':
         label===null?'marcadores':`A ${format(label)}°`;
       byId('fine-readout').textContent=`${clockTime(next)} · ${readout}${finePeak?` · pico ${format(finePeak.angle)}°`:''}${lost?` · ${lost} ponto(s) corrigir`:''}`;
-      message(lost?`Quadro ${clockTime(next)}: ${lost} marcador(es) em laranja perderam a referência. Arraste cada um para o local correto e continue com a rodinha.`:
+      message(lost?`Quadro ${clockTime(next)}: ${lost} marcador(es) em laranja precisam de correção. O ângulo foi mantido; ajuste os pontos e continue com a rodinha.`:
+        saved?`Quadro ${clockTime(next)}: pontos salvos recuperados exatamente como estavam. Pode comparar a medida.`:
         `Quadro ${clockTime(next)}: pontos acompanhados. Confira o alinhamento anatômico; mova a rodinha novamente para procurar a extensão máxima.`);
     }
     function stepFrame(direction,preserveCapturedImage=false) {
@@ -2111,6 +2186,10 @@
       if (recorder?.state==='recording') {
         message('Pare a gravação antes de capturar um quadro para análise.');return false;
       }
+      // Capturar outro instante do MESMO vídeo não deve apagar o ângulo.
+      // Primeiro tentaremos restaurar a medição exata daquele quadro; se ela
+      // não existir, mantemos as pontas anteriores para correção manual.
+      const carried=hasFileVideo()&&lastFrameFromVideo?lastTrackedAnnotations():[];
       if (trackingActive) stopTracking();
       video.pause();
       if (!videoCanCapture() || !setFrame(video,video.videoWidth,video.videoHeight)) {
@@ -2120,14 +2199,20 @@
       let restored=false;
       if(lastFrameFromVideo){
         restored=restoreTimelineFrame(video.currentTime,false,false);
-        render();schedulePhotoSave();
+        if(!restored&&carried.length){
+          annotations=carried;
+          fineUncertain=carried.flatMap((item,i)=>item.trackEnabled===false?[]:
+            item.points.map((_,j)=>({item:i,point:j})));
+        }
+        render();schedulePhotoSave(650,restored?'manual':'tracking');
       }
       if (cameraStream) {
         stopStream();video.srcObject=null;
         byId('back-video').hidden=true;
       } else byId('back-video').hidden = !recordedUrl;
       updateCameraControls();
-      message(restored?`Análise salva recuperada em ${clockTime(video.currentTime)}. Continue ajustando os pontos.`:
+      message(restored?`Análise salva recuperada em ${clockTime(video.currentTime)}, com os pontos na posição original.`:
+        carried.length?'Quadro congelado com o ângulo preservado. Ajuste os pontos laranja no atleta e continue a comparação.':
         'Quadro congelado. Ângulo: clique no trocânter, côndilo e maléolo; depois arraste qualquer ponto para refinar.');
       return true;
     }

@@ -339,6 +339,14 @@ REPETIÇÃO DE VÍDEO · SOMENTE PARA A FRENTE:
 - Desmarcando, o vídeo termina normalmente. O botão Pausar, a velocidade, a régua, a navegação quadro a quadro e o recorte permanecem disponíveis.
 - O novo cache termina em “forwardreplay1”.
 
+ANÁLISE 2D · ÂNGULOS SEM DESAPARECER E PONTOS FIÉIS POR QUADRO:
+- Ao perder contraste ou rastreamento, o ângulo continua visível com as últimas coordenadas conhecidas. Os pontos que precisam de correção recebem contornos laranja; a leitura é provisória até conferência manual.
+- Quando o rastreio contínuo falha, o vídeo pausa e o quadro abre automaticamente com o desenho preservado, pronto para arrastar os pontos. Não é necessário marcar as três articulações novamente.
+- A rodinha e os botões de quadro preservam a geometria de instantes já medidos. Retornando a um quadro, a posição ajustada manualmente tem prioridade absoluta sobre qualquer estimativa do rastreador.
+- Em quadros ainda sem medição, a geometria anterior permanece visível apenas como guia. Depois de corrigir, esse novo instante também fica guardado no projeto local.
+- Um marcador perdido não é reposicionado automaticamente em quadros posteriores até ser corrigido pelo profissional. As marcações são armazenadas no navegador e podem ser exportadas em JSON como cópia de segurança.
+- O cache atualizado termina em “stickyangles2-framehistory2”.
+
 NOVO · CAPTURA FULL HD E RASTREIO DE PONTO COM SEGUNDA ESTRATÉGIA:
 - QUADRO CONGELADO: antes havia limite de 1.400 px na maior dimensão. Agora o aplicativo conserva a imagem até 1.920 px, dentro de um teto de cerca de 2,3 milhões de pixels. Fotos e vídeos de resolução menor são mantidos no tamanho original, sem ampliação artificial.
 - RASTREIO FINO: a leitura de textura por quadro passou de até 960 px de largura para até 1.280 px, respeitando a resolução real do vídeo e reutilizando a mesma amostra enquanto avança com a rodinha. A melhoria aumenta detalhe, mas pode exigir um pouco mais do computador.
