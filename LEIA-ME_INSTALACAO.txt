@@ -8,6 +8,13 @@ IDENTIDADE VISUAL:
 - A mesma marca aparece no cabeçalho, na tela de PIN, no relatório impresso/PDF e nos ícones de instalação icon-192.png e icon-512.png.
 - Ao atualizar o aplicativo instalado, é necessário publicar TODOS os arquivos e reabrir a PWA para renovar o cache offline. Se outra logo tiver sido carregada manualmente no pré-fit, use "Restaurar logo" para voltar à nova marca padrão.
 
+AJUSTES FINOS DA ANÁLISE 2D (04/11/2026):
+- Rastreio ON no ângulo, na linha ou no ponto também habilita o acompanhamento quadro a quadro. Se a textura se perder, uma busca auxiliar mais ampla tenta reencontrar o marcador; referências ambíguas continuam sinalizadas para correção manual.
+- Clique com o botão direito na marcação e escolha Excluir, ou selecione o ângulo/linha/ponto e clique no botão compacto "✕ Excluir" junto a Rastreio ON/OFF.
+- A exclusão grava imediatamente aquele instante. Ao voltar com a régua, o desenho excluído não reaparece; marcações mantidas em outros instantes continuam lá. Desfazer restaura uma exclusão recente no mesmo quadro.
+- O controle único "Linhas e tamanho dos pontos" agora vai de 1 a 20, ajustando a espessura das hastes e também o tamanho dos marcadores redondos.
+- O software não reconhece articulações anatomicamente: o rastreio por textura ainda exige conferência e reajustes manuais quando a imagem não oferece contraste suficiente.
+
 ANTROPOMETRIA: a altura do ponto esternal ao solo e a entrepernas (cavalo) são informadas separadamente.
 O campo "Tronco líquido" é calculado automaticamente: Esterno ao solo - Entrepernas = Tronco líquido (cm).
 Exemplo: 145 cm - 82 cm = 63 cm. A fórmula corresponde ao protocolo de medição utilizado pelo profissional; outros sistemas podem definir a medida do tronco de maneira diferente.

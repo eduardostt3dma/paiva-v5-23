@@ -138,7 +138,16 @@
       ...item,points:item.points.map((point,j)=>{
         if(item.trackEnabled===false||!['point','angle','line'].includes(item.kind))return {...point};
         const scaled={x:point.x/sourceWidth*w,y:point.y/sourceHeight*h};
-        const found=trackFinePoint(before,after,w,h,scaled,options);
+        let found=trackFinePoint(before,after,w,h,scaled,options);
+        if(!found){
+          // Segunda tentativa apenas quando o alvo falhou: um pequeno
+          // deslocamento maior entre quadros pode ultrapassar a busca padrão.
+          // Exigimos confiança mais alta para não inventar o movimento.
+          const patch=Math.max(4,Math.min(8,Number(options.patch)||6));
+          const search=Math.min(42,Math.max(32,(Number(options.search)||22)+14));
+          const rescue=trackFinePoint(before,after,w,h,scaled,{patch,search});
+          if(rescue?.confidence>=.68&&rescue.returnError<=3)found=rescue;
+        }
         if(!found){lost.push({item:i,point:j});return {...point};}
         moved.push({item:i,point:j,confidence:found.confidence});
         return {x:found.x/w*sourceWidth,y:found.y/h*sourceHeight};

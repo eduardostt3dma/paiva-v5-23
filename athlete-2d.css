@@ -157,6 +157,11 @@
   white-space:nowrap;font-size:10px;}
 #paiva-athlete-2d .paiva-2d-marking-dock #paiva-2d-track-toggle[aria-pressed="false"] {
   background:#303d46;border-color:#566876;color:#cfdae2;}
+#paiva-athlete-2d .paiva-2d-marking-dock #paiva-2d-delete-selected {
+  flex:0 1 76px;min-width:64px;background:#382930;border-color:#74505a;
+  color:#f1cdd3;white-space:nowrap;}
+#paiva-athlete-2d .paiva-2d-marking-dock #paiva-2d-delete-selected:disabled {
+  opacity:.45;cursor:not-allowed;}
 #paiva-athlete-2d .paiva-2d-canvas-wrap video:not([hidden]) {cursor:crosshair;}
 #paiva-athlete-2d .paiva-2d-canvas-wrap video {touch-action:none;cursor:crosshair;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align {grid-column:1/2;

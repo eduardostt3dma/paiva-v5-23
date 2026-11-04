@@ -41,7 +41,7 @@
         <p><strong>Enquadramento:</strong> em 100%, a foto inteira se ajusta automaticamente à altura e largura visíveis, sem precisar rolar a imagem. O botão “Ajustar foto” restaura esse enquadramento. “Tela ampla” esconde temporariamente o painel lateral e ocupa a janela para analisar com mais espaço. Saia pela mesma tecla ou Esc. O zoom acima de 100% volta a permitir deslocamento intencional para ver detalhes.</p>
         <p><strong>Marcar sem capturar:</strong> com um vídeo carregado, escolha Ângulo, Linha ou Ponto (as ferramentas ficam sempre visíveis). Clique e arraste diretamente no atleta: o vídeo congela naquele instante automaticamente e a marcação já começa com o mouse pressionado. Um clique simples também congela para você ajustar os pontos em seguida. O tamanho da imagem é mantido ao alternar do vídeo para o quadro congelado.</p>
         <p><strong>Régua de recorte:</strong> abaixo do vídeo, arraste as duas alças da régua — início e fim — até o trecho desejado. O botão “✂ Salvar trecho” gera o novo MP4 local, preservando o original. O ícone 📷 tira uma foto do quadro e salva um PNG com as marcações que estiverem visíveis.</p>
-        <p><strong>Espessura:</strong> ajuste as linhas de 1 a 8 px no painel lateral. A mudança aparece imediatamente nas linhas existentes e nas novas marcações.</p>
+        <p><strong>Linhas e tamanho dos pontos:</strong> o único controle de 1 a 20 aumenta ou diminui tanto a espessura das linhas quanto os círculos dos pontos de ângulos, linhas e rastros. Você pode deixá-los bem maiores para enxergar a referência.</p>
         <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Grave até 3 minutos ou clique e arraste diretamente no quadro da webcam para congelar e marcar. Não é mais obrigatório apertar “Capturar quadro”. Os pontos iniciais são sempre marcados manualmente.</p>
         <p><strong>Vídeos antigos:</strong> use “Abrir vídeo do computador ou pendrive” para carregar MP4, WebM, MOV e outros formatos que seu navegador consiga decodificar. Pause num quadro, capture e analise com as mesmas ferramentas; nenhum arquivo é enviado à internet.</p>
         <p><strong>Recortar vídeo:</strong> na coluna lateral, abra “✂ Recortar trecho do vídeo”. Marque início e fim pelo tempo atual ou digite mm:ss (ex.: 00:15 a 02:00). “Recortar e salvar MP4” gera um novo arquivo de até 3 minutos pelo motor de vídeo local; a filmagem original não é alterada. Esse processamento pode levar alguns minutos.</p>
@@ -55,7 +55,7 @@
         <p><strong>Rastreio ON/OFF:</strong> marque ou selecione um Ângulo, Linha ou Ponto na imagem e clique em “Rastreio ON/OFF” para ativar ou desativar o acompanhamento desta marcação. Uma linha tem duas pontas, um ângulo tem três pontos e um ponto isolado tem um; cada ferramenta respeita a escolha.</p>
         <p><strong>Análises guardadas pelo tempo:</strong> ao concluir as marcações, o aplicativo registra o instante do vídeo e o desenho. Ao voltar com a régua ou a rodinha ao mesmo quadro, a análise reaparece para continuar editando. Fotos e a lista de instantes são armazenadas neste navegador. O MP4 original e os recortes continuam arquivos de vídeo limpos: as marcações ficam no projeto local salvo separadamente, não são incorporadas aos pixels do MP4 nesta versão.</p>
         <p><strong>Rastreio fino (estilo de trabalho do Kinovea):</strong> congele o quadro próximo ao pedivela em 178°–180° e marque trocânter, côndilo e maléolo; opcionalmente, marque calcanhar e quadril. Com “Seguir pontos por quadro” ativado, gire a rodinha ou use ◀/▶ para mover somente UM quadro e atualizar cada marcador. Se uma referência escapar, ela permanece na posição anterior, sinalizada para corrigir: arraste o ponto diretamente na foto e continue com a rodinha. Não há necessidade de percorrer uma volta inteira. Em “Ajustes do rastreio” escolha o tamanho do alvo e a área de busca em pixels; a visualização das janelas é opcional. Os três marcos do ângulo são rastreados separadamente, mas exigem conferência visual. O método é implementação independente, não código do Kinovea.</p>
-        <p><strong>Cursor e exclusão:</strong> sobre qualquer ponto, ângulo ou linha, o cursor permanece em cruz para posicionar com precisão. Clique com o botão DIREITO sobre uma marcação para abrir a opção “Excluir”. A exclusão pode ser revertida pelo botão Desfazer. Fora da marcação, o botão direito continua controlando pausa/play do vídeo. A tecla Delete também remove a marca selecionada quando a área do vídeo está em foco.</p>
+        <p><strong>Cursor e exclusão:</strong> sobre qualquer ponto, ângulo ou linha, o cursor permanece em cruz. Clique com o botão DIREITO sobre uma marcação para abrir “Excluir”, ou selecione a marcação e use “✕ Excluir” ao lado de Rastreio ON/OFF. A exclusão fica registrada naquele instante e não reaparece ao voltar com a régua. “Desfazer” recupera se você mudou de ideia. Fora da marcação, o botão direito controla pausa/play do vídeo.</p>
         <p><strong>Rastrear um ponto isolado:</strong> escolha “PONTO · RASTRO”, marque um ponto onde desejar, ligue o rastreio e use a rodinha do mouse para acompanhá-lo e desenhar o pequeno trajeto, mesmo sem ângulo desenhado. Se perder a referência, arraste-o de volta e continue.</p>
         <p><strong>Rastrear uma pedalada (alternativa avançada):</strong> o antigo comando “⟳ Rastrear 1 giro” continua disponível nas opções avançadas, mas para identificar a extensão máxima perto de 180° do pedivela prefira o rastreio fino quadro a quadro, corrigindo os pontos quando necessário.</p>
         <p><strong>Biomecânica:</strong> no joelho, uma referência possível é trocânter maior → côndilo femoral lateral → maléolo lateral. Escolha sempre a mesma convenção de pontos e o mesmo plano da câmera. A foto mostra uma projeção 2D, não captura rotação, profundidade nem movimento.</p>
@@ -115,6 +115,7 @@
             <button type="button" data-2d-tool="point" aria-pressed="false">PONTO · RASTRO</button>
             <button type="button" data-2d-tool="edit" aria-pressed="false">AJUSTAR PONTOS</button>
             <button type="button" id="paiva-2d-track-toggle" title="Rastreio ON/OFF da marcação selecionada">Rastreio ON</button>
+            <button type="button" id="paiva-2d-delete-selected" title="Excluir a marcação selecionada deste quadro" disabled>✕ Excluir</button>
             <button type="button" id="paiva-2d-photo-action" title="Foto com marcações" aria-label="Salvar foto do atleta com os ângulos">📷 Foto</button>
           </div>
           <label class="paiva-2d-point-role" id="paiva-2d-point-role-field" hidden>Rastrear ponto de
@@ -133,8 +134,8 @@
             <button type="button" id="paiva-2d-zoom-reset">100%</button>
             <button type="button" id="paiva-2d-zoom-in">+</button>
           </div>
-          <label class="paiva-2d-width" for="paiva-2d-width">Espessura das linhas <output id="paiva-2d-width-value" for="paiva-2d-width">3 px</output>
-            <input id="paiva-2d-width" type="range" min="1" max="8" step="1" value="3" aria-label="Espessura das linhas, de um a oito pixels" />
+          <label class="paiva-2d-width" for="paiva-2d-width">Linhas e tamanho dos pontos <output id="paiva-2d-width-value" for="paiva-2d-width">3 px</output>
+            <input id="paiva-2d-width" type="range" min="1" max="20" step="1" value="3" aria-label="Espessura das linhas e tamanho dos pontos, de um a vinte" />
           </label>
           <div class="paiva-2d-actions">
             <button type="button" id="paiva-2d-undo">Desfazer</button>
@@ -315,6 +316,8 @@
     // Um registro por quadro capturado. Novas marcações atualizam a foto do mesmo
     // instante, em vez de criar uma cópia a cada movimento do mouse.
     let autoPhotoId=null,photoSaveTimer=null,photoVersion=0,photoTimeKey=null;
+    let photoWriteChain=Promise.resolve();
+    const photoRecordVersions=new Map();
     const records=()=>globalThis.PAIVA_RECORDS;
     const photoName=()=>`PAIVA_Analise_2D_${new Date().toISOString().replace(/[:.]/g,'-')}.png`;
     // Um projeto leve por arquivo de vídeo: cada instante guarda suas
@@ -329,6 +332,21 @@
       points:item.points.map(p=>({x:p.x,y:p.y}))}));
     const clonePaths=()=>[...singlePointTrails].map(([index,path])=>({index,
       path:path.slice(-240).map(p=>({x:p.x,y:p.y,time:p.time}))}));
+    // O navegador pode retornar 2,347 s ao voltar para um quadro salvo em
+    // 2,333 s. Esses instantes são a MESMA imagem; um novo registro próximo
+    // não deve ressuscitar a marcação antiga depois de uma exclusão.
+    function timelineSlot(time){
+      const raw=frameKey(time),fps=Number(byId('file-fps')?.value)||30;
+      const tolerance=Math.min(.022,.62/Math.max(1,fps));
+      let best=null;
+      for(let offset=-3;offset<=3;offset++){
+        const key=raw+offset,entry=timelineFrames.get(key);
+        if(!entry)continue;
+        const gap=Math.abs(entry.time-time);
+        if(gap<=tolerance&&(!best||gap<best.gap))best={key,entry,gap};
+      }
+      return best;
+    }
     function timelineFileId(file){
       const signature=`${file.name||'video'}|${file.size||0}|${file.type||''}`;
       let hash=2166136261;
@@ -354,22 +372,23 @@
     }
     function rememberTimelineFrame(urgency=480){
       if(!timelineIdentity||!stillFromVideo||!hasFileVideo()||!photoLoaded)return;
-      const time=video.currentTime,key=frameKey(time);
-      timelineFrames.set(key,{time,annotations:cloneAnnotations(annotations),trails:clonePaths()});
+      const time=video.currentTime,slot=timelineSlot(time),key=slot?.key??frameKey(time);
+      // Também remove versões duplicadas do mesmo quadro criadas antes desta
+      // correção, para que nenhuma delas reapareça ao voltar com a régua.
+      const fps=Number(byId('file-fps')?.value)||30;
+      const tolerance=Math.min(.022,.62/Math.max(1,fps));
+      for(let offset=-3;offset<=3;offset++){
+        const duplicate=key+offset,entry=timelineFrames.get(duplicate);
+        if(duplicate!==key&&entry&&Math.abs(entry.time-time)<=tolerance)
+          timelineFrames.delete(duplicate);
+      }
+      timelineFrames.set(key,{time:slot?.entry.time??time,annotations:cloneAnnotations(annotations),trails:clonePaths()});
       shownFrameKey=key;
       if(timelineFrames.size>1800)timelineFrames.delete(timelineFrames.keys().next().value);
       scheduleTimelinePersist(urgency);
     }
     function findTimelineFrame(time){
-      const key=frameKey(time),direct=timelineFrames.get(key);
-      if(direct)return direct;
-      // Um quadro a 30 fps tem ~33 ms; diferenças de arredondamento do seek
-      // até 15 ms ainda se referem ao mesmo instante marcado.
-      for(const offset of [-1,1,-2,2]){
-        const found=timelineFrames.get(key+offset);
-        if(found&&Math.abs(found.time-time)<=.016)return found;
-      }
-      return null;
+      return timelineSlot(time)?.entry??null;
     }
     function restoreTimelineFrame(time,clearMissing=true,paint=true,preservePeak=false){
       const entry=findTimelineFrame(time);
@@ -381,9 +400,10 @@
           singlePointTrails.set(trail.index,trail.path.slice(-240).map(p=>({...p})));
       }
       selectedIndex=-1;draft=[];angleSequence=[];activeDrag=null;activeDraw=null;
+      lastDeletedAnnotation=null;
       fineTrails.clear();fineUncertain=[];
       if(!preservePeak)finePeak=null;
-      shownFrameKey=frameKey(time);
+      shownFrameKey=timelineSlot(time)?.key??frameKey(time);
       if(paint){render();updateCameraControls();}
       return !!entry;
     }
@@ -459,11 +479,24 @@
       photoRecordName=photoName();photoVersion++;
       clearTimeout(photoSaveTimer);
     }
+    function writePhotoVersion(blob,version,id,name,description){
+      if(!blob||photoRecordVersions.get(id)!==version||!records()?.save)return;
+      photoWriteChain=photoWriteChain.catch(()=>{}).then(()=>{
+        // O PNG pode demorar a codificar: nunca deixar uma captura antiga
+        // sobrescrever correções DO MESMO quadro. Quadros distintos mantêm
+        // IDs próprios e podem terminar de salvar em qualquer ordem.
+        if(photoRecordVersions.get(id)!==version)return;
+        return records().save({id,kind:'foto',name,description,blob});
+      }).catch(error=>{console.warn('PAIVA: não foi possível atualizar a foto automática',error);});
+    }
     function schedulePhotoSave(delayMs=650){
+      // Histórico de marcações é independente da exportação de fotos PNG.
+      // Mesmo sem espaço/ID para foto, exclusões e alterações ficam no projeto.
+      rememberTimelineFrame(delayMs<=700?0:480);
       if(!photoLoaded||!records()?.save||!autoPhotoId)return;
       if(stillFromVideo&&hasFileVideo()&&photoTimeKey!==frameKey(video.currentTime))newPhotoRecord();
-      rememberTimelineFrame(delayMs<=700?0:480);
       const version=++photoVersion;
+      photoRecordVersions.set(autoPhotoId,version);
       clearTimeout(photoSaveTimer);
       if(delayMs<=700){
         // A conclusão de uma marcação tira uma foto imediatamente. A cópia
@@ -471,20 +504,16 @@
         const id=autoPhotoId,name=photoRecordName;
         const count=annotations.filter(a=>a.kind==='angle').length;
         canvas.toBlob(blob=>{
-          if(!blob)return;
-          records().save({id,kind:'foto',name,
-            description:`Imagem 2D com ${count} ângulo(s) · instante preservado`,blob})
-            .catch(error=>console.warn('PAIVA: foto automática',error));
+          writePhotoVersion(blob,version,id,name,`Imagem 2D com ${count} ângulo(s) · instante preservado`);
         },'image/png');
         return;
       }
       photoSaveTimer=setTimeout(()=>{
         if(version!==photoVersion||!photoLoaded)return;
+        const id=autoPhotoId,name=photoRecordName;
+        const count=annotations.filter(a=>a.kind==='angle').length;
         canvas.toBlob(blob=>{
-          if(!blob||version!==photoVersion)return;
-          records().save({id:autoPhotoId,kind:'foto',name:photoRecordName,
-            description:`Imagem 2D com ${annotations.filter(a=>a.kind==='angle').length} ângulo(s)`,blob})
-            .catch(error=>{byId('record-count').textContent='· salvamento indisponível';console.warn('PAIVA: registro local',error);});
+          writePhotoVersion(blob,version,id,name,`Imagem 2D com ${count} ângulo(s)`);
         },'image/png');
       },delayMs);
     }
@@ -558,7 +587,7 @@
     }
 
     function mark(p,color) {
-      const radius = Math.max(3,Math.min(10,lineWidth+2));
+      const radius = Math.max(3,Math.min(25,lineWidth*1.1+2));
       ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);
       ctx.fillStyle = '#0b1a24';ctx.fill();
       ctx.lineWidth = Math.max(1,lineWidth/2);ctx.strokeStyle = color;ctx.stroke();
@@ -585,7 +614,7 @@
       if(item.kind==='point') {
         if(pts.length){
           const p=pts[0];
-          ctx.beginPath();ctx.arc(p.x,p.y,Math.max(4,lineWidth+1),0,Math.PI*2);
+          ctx.beginPath();ctx.arc(p.x,p.y,Math.max(4,Math.min(29,lineWidth*1.4+2)),0,Math.PI*2);
           ctx.fillStyle=color;ctx.fill();
           ctx.strokeStyle='#102a24';ctx.lineWidth=1.5;ctx.stroke();
         }
@@ -663,6 +692,7 @@
       button.title=selected
         ?`Rastreio ${enabled?'ligado':'desligado'} desta marcação. Clique para alternar.`
         :'Clique para configurar o rastreio das próximas marcações.';
+      byId('delete-selected').disabled=!selected;
     }
     byId('track-toggle').addEventListener('click',()=>{
       const selected=annotations[selectedIndex];
@@ -675,6 +705,10 @@
         defaultTrackEnabled=!defaultTrackEnabled;
         message(`Rastreio ${defaultTrackEnabled?'ON':'OFF'} para as próximas marcações.`);
       }
+      // Rastreio ON também prepara o acompanhamento com a rodinha. A caixa
+      // separada de "Seguir por quadro" podia ficar desligada sem aviso.
+      if((selected?selected.trackEnabled!==false:defaultTrackEnabled)&&hasFileVideo())
+        byId('fine-mode').checked=true;
       render();updateCameraControls();schedulePhotoSave();
     });
 
@@ -836,6 +870,9 @@
     }
     function deleteAnnotation(index){
       if(index<0||index>=annotations.length)return false;
+      // Invalida um seek/rastreio assíncrono que poderia restaurar a geometria
+      // antiga depois do clique em Excluir.
+      fineNavigationEpoch++;
       const kind=annotations[index].kind;
       lastDeletedAnnotation={index,item:annotations[index]};
       annotations.splice(index,1);
@@ -843,12 +880,17 @@
       fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       byId('fine-readout').textContent='Marcação excluída · Desfazer restaura';
       closeDeleteMenu();
+      rememberTimelineFrame(0);
       render();updateCameraControls();schedulePhotoSave();
       const type=kind==='angle'?'Ângulo':kind==='point'?'Ponto':'Linha';
       message(`${type} excluído. Clique em “Desfazer” para recuperar se precisar.`);
       return true;
     }
     deleteMenu.querySelector('#paiva-2d-delete-confirm').addEventListener('click',()=>deleteAnnotation(pendingDeleteIndex));
+    byId('delete-selected').addEventListener('click',()=>{
+      if(!deleteAnnotation(selectedIndex))
+        message('Selecione primeiro um ângulo, uma linha ou um ponto para excluir.');
+    });
     deleteMenu.querySelector('#paiva-2d-delete-cancel').addEventListener('click',closeDeleteMenu);
     document.addEventListener('pointerdown',event=>{
       if(!deleteMenu.hidden&&!deleteMenu.contains(event.target))closeDeleteMenu();
@@ -881,7 +923,7 @@
     for (const button of section.querySelectorAll('[data-2d-tool]'))
       button.addEventListener('click',() => selectTool(button.getAttribute('data-2d-tool')));
     byId('width').addEventListener('input', () => {
-      lineWidth = Math.max(1,Math.min(8,Number(byId('width').value) || 3));
+      lineWidth = Math.max(1,Math.min(20,Number(byId('width').value) || 3));
       byId('width-value').textContent = `${lineWidth} px`;
       render();
     });
@@ -1792,7 +1834,8 @@
     }
     function stepFrame(direction,preserveCapturedImage=false) {
       if(scanningActive||!hasFileVideo())return;
-      const fine=lastFrameFromVideo&&stillFromVideo&&!canvas.hidden&&annotations.length&&byId('fine-mode').checked;
+      const fine=lastFrameFromVideo&&stillFromVideo&&!canvas.hidden&&
+        annotations.some(item=>item.trackEnabled!==false)&&byId('fine-mode').checked;
       if(fine){
         if(finePending>=5)return;
         finePending++;
@@ -2164,6 +2207,7 @@
       const selectedLabel=angleLabelAt(point);
       if(selectedLabel>=0){
         const angle=annotations[selectedLabel];
+        selectedIndex=selectedLabel;
         angle.supplementary=!angle.supplementary;
         render();
         schedulePhotoSave();
