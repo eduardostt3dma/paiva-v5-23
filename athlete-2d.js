@@ -241,6 +241,15 @@
       <button type="button" id="paiva-2d-fine-prev" title="Voltar um quadro seguindo os pontos">◀</button>
       <button type="button" id="paiva-2d-fine-next" title="Avançar um quadro seguindo os pontos">▶</button>
       <button type="button" id="paiva-2d-fine-peak" title="Abrir o maior ângulo do joelho observado nos quadros percorridos" disabled>↗ Pico</button>
+      <div class="paiva-2d-trajectory-controls" aria-label="Trajetória de um ponto do atleta">
+        <button type="button" id="paiva-2d-trace-point" title="Seguir somente o ponto selecionado e desenhar sua trajetória" disabled>↗ Traçar ponto</button>
+        <select id="paiva-2d-trace-duration" aria-label="Duração da trajetória">
+          <option value="0.5">0,5 s</option><option value="1" selected>1 s</option><option value="2">2 s</option><option value="3">3 s</option>
+        </select>
+        <button type="button" id="paiva-2d-trace-stop" title="Interromper o traçado em andamento" disabled>■ Parar</button>
+        <button type="button" id="paiva-2d-trace-clear" title="Apagar somente o caminho rastreado" disabled>✕ Trajeto</button>
+        <small id="paiva-2d-trace-readout" aria-live="polite">Marque um ponto no quadril ou calcanhar.</small>
+      </div>
       <details class="paiva-2d-fine-settings"><summary>Ajustes do rastreio</summary>
         <label>Alvo (px) <select id="paiva-2d-fine-patch"><option value="4">4</option><option value="6" selected>6</option><option value="8">8</option><option value="10">10</option></select></label>
         <label>Busca (px) <select id="paiva-2d-fine-search"><option value="12">12</option><option value="22" selected>22</option><option value="32">32</option><option value="42">42</option></select></label>
@@ -273,6 +282,7 @@
     let lineWidth = 3;
     let cycleResult=null,cycleTrailsVisible=false;
     const fineTrails=new Map();
+    const singlePointTrails=new Map();
     let fineUncertain=[];
     let finePeak=null,finePending=0,fineSequence=Promise.resolve();
     let fineSampler=null,fineSamplerSource=null;
@@ -447,6 +457,41 @@
       byId('values').textContent = values.join('  ·  ');
     }
 
+    function chosenPointIndex(){
+      if(annotations[selectedIndex]?.kind==='point')return selectedIndex;
+      for(let i=annotations.length-1;i>=0;i--)if(annotations[i].kind==='point')return i;
+      return -1;
+    }
+    function appendSinglePoint(index,oldPoint,newPoint,from,to){
+      if(annotations[index]?.kind!=='point'||!oldPoint||!newPoint)return;
+      const gap=1.8/(Number(byId('file-fps').value)||30);
+      let path=singlePointTrails.get(index)||[];
+      if(!path.length||Math.min(Math.abs(from-path[0].time),Math.abs(from-path[path.length-1].time))>gap){
+        path=[{...oldPoint,time:from}];
+      }
+      if(to<from && Math.abs(from-path[0].time)<=gap)
+        path.unshift({...newPoint,time:to});
+      else if(to>from && Math.abs(from-path[path.length-1].time)<=gap)
+        path.push({...newPoint,time:to});
+      else path=[{...oldPoint,time:from},{...newPoint,time:to}];
+      if(path.length>240)path=path.slice(-240);
+      singlePointTrails.set(index,path);
+    }
+    function trajectoryMetrics(path){
+      if(!path||path.length<2)return null;
+      const xs=path.map(p=>p.x),ys=path.map(p=>p.y);
+      const dx=Math.max(...xs)-Math.min(...xs),dy=Math.max(...ys)-Math.min(...ys);
+      return {dx,dy};
+    }
+    function updateTrajectoryReadout(){
+      const current=chosenPointIndex(),path=singlePointTrails.get(current);
+      const metrics=trajectoryMetrics(path);
+      byId('trace-readout').textContent=metrics
+        ?`↔ ${format(metrics.dx)} px · ↕ ${format(metrics.dy)} px · ${path.length} quadros · mm/cm após calibrar`
+        :'Trajetória em pixels; mm/cm exigem calibração.';
+      byId('trace-clear').disabled=singlePointTrails.size===0;
+    }
+
     function render() {
       ctx.clearRect(0,0,canvas.width,canvas.height);
       if (photoLoaded) ctx.drawImage(original,0,0,canvas.width,canvas.height);
@@ -481,6 +526,22 @@
           ctx.stroke();ctx.restore();
         }
       }
+      // Caminho do marcador individual permanece sobre a imagem, mesmo ao
+      // pausar ou desligar a opção de seguir vários marcadores por quadro.
+      for(const [index,path] of singlePointTrails){
+        if(path.length<2||annotations[index]?.kind!=='point')continue;
+        const item=annotations[index];
+        const color=item.color||(item.role==='hip'?'#64cbff':'#a8f5c3');
+        ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+        ctx.strokeStyle=color;ctx.globalAlpha=.9;
+        ctx.lineWidth=Math.max(2,lineWidth*.9);
+        ctx.beginPath();path.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
+        const first=path[0],last=path[path.length-1];
+        ctx.globalAlpha=1;ctx.fillStyle=color;
+        ctx.beginPath();ctx.arc(first.x,first.y,3.5,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.arc(last.x,last.y,4,0,Math.PI*2);ctx.fill();
+        ctx.restore();
+      }
       annotations.forEach((item,index) => drawAnnotation(item,index));
       if(stillFromVideo&&byId('fine-mode').checked){
         for(const lost of fineUncertain){
@@ -503,6 +564,7 @@
       }
       if (draft.length) drawAnnotation({kind:tool,points:draft},annotations.length,true);
       updateValues();
+      updateTrajectoryReadout();
     }
 
     function selectTool(next) {
@@ -591,7 +653,7 @@
       lastDeletedAnnotation={index,item:annotations[index]};
       annotations.splice(index,1);
       selectedIndex=-1;draft=[];angleSequence=[];activeDrag=null;activeDraw=null;
-      fineTrails.clear();fineUncertain=[];finePeak=null;
+      fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       byId('fine-readout').textContent='Marcação excluída · Desfazer restaura';
       closeDeleteMenu();
       render();updateCameraControls();schedulePhotoSave();
@@ -849,6 +911,12 @@
       byId('cycle-duration').disabled = scanningActive;
       byId('track-stop').disabled = !trackingActive && !scanningActive;
       const canFine=hasPlayback&&!recording&&!scanningActive;
+      byId('trace-point').disabled=!canFine||finePending>0||trackingActive||!lastFrameFromVideo||
+        !stillFromVideo||chosenPointIndex()<0;
+      byId('trace-point').textContent=scanningActive?'Traçando…':'↗ Traçar ponto';
+      byId('trace-stop').disabled=!scanningActive;
+      byId('trace-duration').disabled=scanningActive;
+      byId('trace-clear').disabled=scanningActive||singlePointTrails.size===0;
       byId('fine-prev').disabled=!canFine;
       byId('fine-next').disabled=!canFine;
       byId('fine-peak').disabled=!canFine||!finePeak;
@@ -997,6 +1065,59 @@
         for(const button of section.querySelectorAll('[data-2d-tool]'))button.disabled=false;
       }
     }
+    async function traceSinglePoint(){
+      const index=chosenPointIndex();
+      if(scanningActive||finePending>0||trackingActive||index<0||!stillFromVideo||!lastFrameFromVideo||!hasFileVideo())return;
+      const motion=globalThis.PAIVA_MOTION_TRACKER;
+      if(!motion?.scanSinglePoint){message('Atualize também athlete-motion.js para traçar o ponto.');return;}
+      const start=video.currentTime;
+      const selected=annotations[index];
+      const point={...selected.points[0]};
+      const duration=Number(byId('trace-duration').value)||1;
+      const source=recordedUrl;
+      const fps=Number(byId('file-fps').value)||30;
+      haltReverse();video.pause();
+      singlePointTrails.delete(index);
+      scanCancelled=false;scanningActive=true;updateCameraControls();
+      for(const button of section.querySelectorAll('[data-2d-tool]'))button.disabled=true;
+      message(`Traçando somente o ${selected.role==='hip'?'quadril':selected.role==='heel'?'calcanhar':'ponto'} por ${String(duration).replace('.',',')} s. O caminho fica desenhado; “Parar rastreio” interrompe.`);
+      const displayPath=path=>{
+        if(!path?.length||source!==recordedUrl||annotations[index]!==selected)return;
+        singlePointTrails.set(index,path);
+        const last=path[path.length-1];
+        selected.points=[{x:last.x,y:last.y}];
+        originalCtx.drawImage(video,0,0,original.width,original.height);
+        lastFrameFromVideo=true;stillFromVideo=true;
+        render();syncTimeline();
+      };
+      try{
+        const result=await motion.scanSinglePoint({video,point,sourceWidth:canvas.width,
+          sourceHeight:canvas.height,startTime:start,duration,fps,
+          patch:Number(byId('fine-patch').value),search:Number(byId('fine-search').value),
+          shouldCancel:()=>scanCancelled,
+          onProgress:progress=>{
+            displayPath(progress.path);
+            message(`Traçando o ponto… ${progress.tested}/${progress.total} quadros. A linha mostra a trajetória observada.`);
+          }
+        });
+        displayPath(result.path);
+        const metrics=trajectoryMetrics(result.path);
+        schedulePhotoSave(400);
+        message(`Trajetória desenhada: ↔ ${format(metrics.dx)} px · ↕ ${format(metrics.dy)} px. ${result.partial?'Trecho parcial: o ponto perdeu contraste ou a análise foi interrompida. ':''}Confira o caminho; a conversão em milímetros ficará para a calibração.`);
+      }catch(error){
+        if(!scanCancelled)message(`Não foi possível traçar o ponto: ${error?.message||'erro no rastreamento'}. Coloque-o sobre uma referência contrastante, corrija e tente novamente.`);
+      }finally{
+        scanningActive=false;scanCancelled=false;
+        updateCameraControls();
+        for(const button of section.querySelectorAll('[data-2d-tool]'))button.disabled=false;
+      }
+    }
+    byId('trace-point').addEventListener('click',traceSinglePoint);
+    byId('trace-stop').addEventListener('click',stopTrackingPlayback);
+    byId('trace-clear').addEventListener('click',()=>{
+      singlePointTrails.clear();render();updateCameraControls();schedulePhotoSave();
+      message('Trajetória apagada. O ponto e os ângulos continuam preservados.');
+    });
     function resetCycleResults(){
       cycleResult=null;cycleTrailsVisible=false;
       byId('cycle-results').hidden=true;
@@ -1130,7 +1251,7 @@
       pendingScrubTime=null;scrubActive=false;scrubPointerDown=false;scrubReleasePending=false;
       lastFrameFromVideo=false;
       stillFromVideo=false;
-      fineTrails.clear();fineUncertain=[];finePeak=null;
+      fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       fineSampler=null;fineSamplerSource=null;
       lastDeletedAnnotation=null;closeDeleteMenu();
       byId('back-video').hidden=true;
@@ -1437,6 +1558,8 @@
         if(!old||!current)continue;
         const path=fineTrails.get(key)||[{...old}];path.push({...current});
         if(path.length>13)path.shift();fineTrails.set(key,path);
+        if(annotations[match.item]?.kind==='point'&&match.point===0)
+          appendSinglePoint(match.item,old,current,from,next);
       }
       const firstAngle=annotations.find(a=>a.kind==='angle'&&a.points.length===3);
       const angle=firstAngle?angleDegrees(...firstAngle.points):null;
@@ -1595,7 +1718,7 @@
       originalCtx.drawImage(source,0,0,width,height);
       photoLoaded = true;
       stillFromVideo=source===video;
-      fineTrails.clear();fineUncertain=[];finePeak=null;
+      fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       lastDeletedAnnotation=null;closeDeleteMenu();
       annotations=[];draft=[];angleSequence=[];activeDrag=null;activeDraw=null;selectedIndex=-1;
       render();showVideo(false);updateZoom(Number(byId('zoom').value));
@@ -1943,12 +2066,14 @@
         const changedPoint=activeDrag.index;
         activeDrag=null;
         fineUncertain=fineUncertain.filter(p=>!(p.item===changed&&(changedPoint<0||p.point===changedPoint)));
+        const removedTrajectory=singlePointTrails.delete(changed);
         if(stillFromVideo&&byId('fine-mode').checked){
           for(const key of fineTrails.keys())if(key.startsWith(`${changed}:`))fineTrails.delete(key);
           finePeak=null;
           byId('fine-readout').textContent='Ponto corrigido · continue com a rodinha';
           updateCameraControls();render();
         }
+        else if(removedTrajectory)render();
         if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
         message('Marcador ajustado. Confira o ângulo atualizado na imagem.');
         schedulePhotoSave();
@@ -1974,7 +2099,7 @@
         annotations.pop();selectedIndex=annotations.length-1;
         message('Última anotação removida.');
       }
-      fineTrails.clear();fineUncertain=[];finePeak=null;
+      fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       updateCameraControls();
       render();
       schedulePhotoSave();
@@ -1982,7 +2107,7 @@
     byId('clear').addEventListener('click',() => {
       if (annotations.length && !window.confirm('Remover todas as linhas e ângulos desta foto?'))return;
       annotations=[];draft=[];angleSequence=[];selectedIndex=-1;lastDeletedAnnotation=null;
-      fineTrails.clear();fineUncertain=[];finePeak=null;
+      fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       closeDeleteMenu();render();message('Marcações removidas. A fotografia foi preservada.');
       schedulePhotoSave();
       updateCameraControls();

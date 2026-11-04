@@ -160,6 +160,58 @@
     }};
   }
 
+  // Trajetória de UM marcador: não depende de ângulos nem assume uma volta da
+  // pedalada. Nunca inventa a posição quando a textura deixa de corresponder.
+  async function scanSinglePoint({video,point,sourceWidth,sourceHeight,startTime,
+    duration=1,fps=30,patch=6,search=22,shouldCancel=()=>false,onProgress=()=>{}}){
+    if(!video?.videoWidth||!video.videoHeight||!Number.isFinite(video.duration)||video.duration<=0)
+      throw new Error('Abra um vídeo válido e aguarde o carregamento.');
+    if(!point||!(sourceWidth>0&&sourceHeight>0))throw new Error('Marque um ponto sobre o atleta.');
+    const sampler=createFrameSampler(video,960);
+    const {width,height}=sampler;
+    const seek=target=>new Promise((resolve,reject)=>{
+      const time=Math.max(0,Math.min(video.duration-.001,target));
+      if(Math.abs(video.currentTime-time)<.0005&&video.readyState>=2){resolve();return;}
+      let timer;
+      const cleanup=()=>{clearTimeout(timer);video.removeEventListener('seeked',done);video.removeEventListener('error',fail);};
+      const done=()=>{cleanup();resolve();};
+      const fail=()=>{cleanup();reject(new Error('O vídeo demorou a localizar um quadro. Confira o FPS.'));};
+      video.addEventListener('seeked',done);video.addEventListener('error',fail);
+      timer=setTimeout(fail,7000);
+      try{video.currentTime=time;}catch(_){fail();}
+    });
+    const start=Math.max(0,Math.min(video.duration-.001,Number(startTime)||0));
+    const end=Math.min(video.duration-.001,start+Math.max(.25,Math.min(3,Number(duration)||1)));
+    const rate=Math.max(10,Math.min(60,Number(fps)||30));
+    video.pause();await seek(start);
+    let previous=sampler.sample();
+    let current={x:point.x/sourceWidth*width,y:point.y/sourceHeight*height};
+    const settings={patch,search};
+    if(!trackFinePoint(previous,previous,width,height,current,settings))
+      throw new Error('Este ponto não tem contraste suficiente. Marque uma textura ou referência mais visível.');
+    const path=[{x:point.x,y:point.y,time:start}];
+    let partial=false,lostTime=null;
+    const steps=Math.ceil((end-start)*rate);
+    for(let n=1;n<=steps;n++){
+      if(shouldCancel()){partial=true;break;}
+      const time=Math.min(end,start+n/rate);
+      if(time<=path[path.length-1].time+.0005)continue;
+      await seek(time);
+      if(shouldCancel()){partial=true;break;}
+      const next=sampler.sample();
+      const found=trackFinePoint(previous,next,width,height,current,settings);
+      if(!found){partial=true;lostTime=time;break;}
+      current={x:found.x,y:found.y};previous=next;
+      path.push({x:current.x/width*sourceWidth,y:current.y/height*sourceHeight,time});
+      if(n%3===0||n===steps)onProgress({path:path.slice(),tested:path.length-1,total:steps});
+    }
+    if(path.length<2)throw new Error('O ponto se perdeu logo no começo. Ajuste o marcador e tente novamente.');
+    if(shouldCancel())partial=true;
+    await seek(path[path.length-1].time);
+    return {path,partial,lostTime,width:sourceWidth,height:sourceHeight,
+      startTime:start,endTime:path[path.length-1].time};
+  }
+
   function create({video,annotations,sourceWidth,sourceHeight,isReversePlaying,isPingPongEnabled,onPoints,onLost,onDone}) {
     if (!video || !video.videoWidth || !video.videoHeight || !annotations?.length)
       return {start:async()=>false,stop:()=>{}};
@@ -432,5 +484,5 @@
       supplementary:!!tracked[0].supplementary,hipPath,heelPath};
   }
   globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,trackCyclePoint,trackFinePoint,
-    trackFineShapes,createFrameSampler,grayscale,create,scanWindow,scanCycle};
+    trackFineShapes,createFrameSampler,scanSinglePoint,grayscale,create,scanWindow,scanCycle};
 })();
