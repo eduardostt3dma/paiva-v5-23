@@ -33,7 +33,7 @@
         <p><strong>Ângulo direto por três pontos:</strong> com a ferramenta Ângulo selecionada, clique no trocânter maior, depois no côndilo lateral (vértice) e finalmente no maléolo. Os três pontos aparecem no momento do clique e podem ser arrastados diretamente, sem trocar para Ajustar pontos. Esc cancela uma marcação incompleta. Como alternativa, clique e arraste para abrir as duas hastes de uma vez; depois puxe cada extremidade livremente.</p>
         <p><strong>Ângulo suplementar:</strong> clique diretamente na etiqueta “A 35°”, por exemplo, para alternar entre 35° e 145° (180° − 35°). A geometria das hastes não muda, somente a convenção mostrada. Confirme qual convenção está usando no laudo.</p>
         <p><strong>Linha:</strong> clique e arraste de uma extremidade até a outra. Depois, “Ajustar pontos” permite puxar as pontas ou mover a reta inteira pelo centro. Sem calibração métrica, não é uma régua em milímetros.</p>
-        <p><strong>Alinhamento:</strong> segure Shift enquanto desenha ou move uma ponta para manter a reta 100% horizontal ou vertical. No ângulo de três pontos, Shift posiciona a terceira haste a 90° da primeira.</p>
+        <p><strong>Alinhamento ao solo:</strong> segure Shift enquanto desenha ou move uma ponta para deixá-la exatamente na mesma altura da referência (linha horizontal de 0°). Isso vale também para qualquer haste de um ângulo de três pontos: a outra haste permanece livre para medir a inclinação real do pé. Shift nunca força a vertical nem um ângulo de 90°.</p>
         <p><strong>Excluir vários registros:</strong> abra “Fotos, vídeos e análises salvos”, marque os arquivos desejados ou “Selecionar tudo” e clique em “Excluir selecionados”. Uma confirmação evita exclusões acidentais. Essa limpeza é definitiva neste navegador; baixe antes as análises que queira conservar.</p>
         <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. No quadro de vídeo capturado, a nova opção “Seguir pontos por quadro” tenta deslocar os marcadores automaticamente; quando um ponto se perder, corrija-o com o mouse. Com essa opção desligada, as marcações permanecem fixas.</p>
         <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
@@ -618,43 +618,39 @@
 
     const constrain = p => ({x:Math.max(0,Math.min(canvas.width,p.x)),
       y:Math.max(0,Math.min(canvas.height,p.y))});
-    function snapAngle(anchor,point,shiftKey) {
+    function snapHorizontal(anchor,point,shiftKey) {
       if (!shiftKey) return point;
-      const dx=point.x-anchor.x,dy=point.y-anchor.y;
-      // Shift trava no eixo mais próximo do movimento: 0° ou 90° exatos.
-      return Math.abs(dx)>=Math.abs(dy)?constrain({x:point.x,y:anchor.y}):
-        constrain({x:anchor.x,y:point.y});
-    }
-    function snapPerpendicular(vertex,fixed,point,shiftKey) {
-      if(!shiftKey)return point;
-      const vx=fixed.x-vertex.x,vy=fixed.y-vertex.y;
-      const length=Math.hypot(vx,vy);
-      if(length<0.001)return snapAngle(vertex,point,true);
-      // Projeção sobre a perpendicular, com lado escolhido pelo próprio cursor.
-      const ux=-vy/length,uy=vx/length;
-      const projection=(point.x-vertex.x)*ux+(point.y-vertex.y)*uy;
-      return constrain({x:vertex.x+projection*ux,y:vertex.y+projection*uy});
+      // A linha do solo deve permanecer em 0°, mesmo se o movimento do
+      // cursor for mais vertical. A referência (anchor) não é deslocada.
+      return constrain({x:point.x,y:anchor.y});
     }
     function snapAngleSequencePoint(point,shiftKey) {
       if(!shiftKey||!angleSequence.length)return point;
-      if(angleSequence.length===1)return snapAngle(angleSequence[0],point,true);
-      return snapPerpendicular(angleSequence[1],angleSequence[0],point,true);
+      // No ângulo de três cliques, o vértice é a referência da terceira
+      // haste. Nunca criar automaticamente uma perpendicular de 90°.
+      return snapHorizontal(angleSequence[angleSequence.length===1?0:1],point,true);
     }
     function snapEditedPoint(annotation,index,point,shiftKey){
       if(!shiftKey||!annotation||annotation.kind==='point')return point;
       const pts=annotation.points;
-      if(annotation.kind==='line')return snapAngle(pts[1-index],point,true);
+      if(annotation.kind==='line')return snapHorizontal(pts[1-index],point,true);
       if(annotation.kind==='angle'){
-        if(index===1)return snapAngle(pts[0],point,true);
-        return snapPerpendicular(pts[1],pts[index===0?2:0],point,true);
+        // Extremos alinham ao vértice; vértice alinha ao primeiro extremo.
+        // A haste que não está sendo editada mantém sua geometria.
+        return snapHorizontal(pts[index===1?0:1],point,true);
       }
       return point;
     }
     function draftFromDrag(kind,anchor,pointer,shiftKey) {
-      const end=snapAngle(anchor,pointer,shiftKey);
+      const end=snapHorizontal(anchor,pointer,shiftKey);
       if (kind==='line') return [anchor,end];
+      if (shiftKey) {
+        // Ao abrir um ângulo arrastando, Shift produz uma referência
+        // horizontal e deixa a outra haste seguir a inclinação do cursor.
+        return [end,anchor,constrain(pointer)];
+      }
       const dx=end.x-anchor.x,dy=end.y-anchor.y;
-      // Uma única ação abre um ângulo reto editável; as hastes continuam livres.
+      // Sem Shift, preservar o gesto anterior que abre um ângulo editável.
       return [end,anchor,constrain({x:anchor.x-dy,y:anchor.y+dx})];
     }
     function segmentDistance(p,a,b) {
@@ -879,7 +875,7 @@
       }
       if (!photoLoaded) return;
       message(tool==='angle' ? 'Ângulo: clique em trocânter → côndilo → maléolo (3 cliques), ou arraste para abrir um ângulo. Depois puxe qualquer ponto, sem mudar de ferramenta.' :
-        tool==='line' ? 'Linha: clique e ARRASTE do início ao fim. Segure Shift para alinhar 100% horizontal ou vertical.' :
+        tool==='line' ? 'Linha: clique e ARRASTE do início ao fim. Segure Shift para alinhar horizontalmente ao solo (0°).' :
         tool==='point' ? 'Ponto: clique onde quiser no atleta. Arraste-o diretamente para corrigir e use Rastreio ON/OFF.' :
         'Ajustar: arraste uma ponta ou o corpo da linha/ângulo para reposicionar.');
     }

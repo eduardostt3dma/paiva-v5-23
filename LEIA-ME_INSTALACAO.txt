@@ -159,7 +159,7 @@ ANÁLISE ANGULAR 2D — NOVA FERRAMENTA:
 - Selecione uma foto LATERAL do atleta, da galeria ou câmera. Máximo: 20 MB; a imagem é reduzida localmente para diminuir o consumo de memória.
 - Em "Ângulo · arrastar", clique no VÉRTICE e arraste para abrir duas hastes de 90°, inicialmente. Solte e puxe as pontas individualmente até alinhar às referências anatômicas: o software calcula o ângulo interno de 0° a 180°.
 - Em "Linha · arrastar", clique e arraste de uma ponta até a outra para traçar uma reta. Sem calibração métrica, ela NÃO informa milímetros.
-- Em "Ajustar pontos", puxe as pontas para esticar e girar ou arraste o corpo da linha/ângulo para reposicioná-lo. Os ângulos são recalculados continuamente. A linha selecionada pode ser alinhada com os botões "Horizontal" ou "Vertical". A tecla Shift limita linhas novas a passos de 45°.
+- Em "Ajustar pontos", puxe as pontas para esticar e girar ou arraste o corpo da linha/ângulo para reposicioná-lo. Os ângulos são recalculados continuamente. Ao segurar Shift, uma ponta fica exatamente na horizontal (0°) em relação à ponta de referência.
 - Use o zoom de 100 a 400%, ou Ctrl + roda do mouse, para aproximar pontos pequenos. A imagem ampliada tem rolagem dentro do visor, sem deslocar o painel lateral.
 - "Desfazer" remove o último ponto ainda incompleto ou a última anotação; "Limpar linhas" remove as anotações, preservando a fotografia.
 - "Salvar imagem marcada" gera um PNG com a foto e as linhas/ângulos, para guardar com a ficha do cliente. A foto NÃO vai automaticamente para o PDF do pré-fit nesta versão.
@@ -323,10 +323,11 @@ NOVO · MARCAÇÕES POR INSTANTE, RASTREIO ON/OFF E PONTO LIVRE:
 NOVO · SELECIONAR TUDO E ALINHAMENTO PRECISO COM SHIFT:
 - Abra a seção “Fotos, vídeos e análises salvos”, na lateral da análise 2D. Agora há uma caixa de seleção para cada foto, vídeo e análise, mais o comando “Selecionar tudo” e o botão “Excluir selecionados (N)”. A lista inclui também os registros anteriores aos primeiros 40, permitindo limpar os arquivos de teste em uma só operação.
 - Antes de excluir, aparece uma confirmação indicando a quantidade exata de registros selecionados. A exclusão ocorre no armazenamento deste navegador e não tem desfazer. Baixe previamente os arquivos que deseja manter.
-- Com o botão esquerdo do mouse pressionado, SEGURE SHIFT ao desenhar uma linha: ela trava exatamente no eixo horizontal (nível do solo) ou vertical, conforme a direção mais próxima do movimento. Solte Shift para voltar ao posicionamento livre.
-- Na ferramenta ÂNGULO com três cliques, Shift alinha o segundo ponto horizontal/verticalmente em relação ao primeiro. Ao marcar o terceiro ponto com Shift pressionado, a última haste fica perpendicular à primeira, formando 90° exatos.
-- Shift também vale ao ARRASTAR uma extremidade de uma linha ou ângulo já desenhado. A medição em vídeo, o rastreio por quadros, os pontos anatômicos e as demais ferramentas permanecem disponíveis.
-- O novo cache termina em “bulkdelete1-shiftalign1”. Após enviar os arquivos do ZIP para o GitHub, atualize a aba do aplicativo e confira os novos comandos.
+- Com o botão esquerdo do mouse pressionado, SEGURE SHIFT ao desenhar uma linha: a ponta móvel fica exatamente na horizontal (0°) da ponta inicial, independentemente da direção do cursor. Solte Shift para voltar ao posicionamento livre.
+- Na ferramenta ÂNGULO com três cliques, Shift alinha o segundo ponto com o primeiro ou a terceira haste com o vértice, sempre na horizontal. Para medir o calcanhar contra o solo, alinhe somente a haste que representa o solo e deixe a haste do pé livre.
+- Shift também vale ao ARRASTAR uma extremidade de uma linha ou ângulo já desenhado. Shift NÃO força vertical ou ângulo de 90°. Ao abrir um novo ângulo por arraste com Shift, uma haste fica horizontal e a outra acompanha o cursor.
+- A medição em vídeo, o rastreio por quadros, o “Selecionar tudo”, os pontos anatômicos e as demais ferramentas permanecem disponíveis.
+- O novo cache termina em “shiftground0”. Após enviar os arquivos do ZIP para o GitHub, atualize a aba do aplicativo e confira os novos comandos.
 
 NOVO · CAPTURA FULL HD E RASTREIO DE PONTO COM SEGUNDA ESTRATÉGIA:
 - QUADRO CONGELADO: antes havia limite de 1.400 px na maior dimensão. Agora o aplicativo conserva a imagem até 1.920 px, dentro de um teto de cerca de 2,3 milhões de pixels. Fotos e vídeos de resolução menor são mantidos no tamanho original, sem ampliação artificial.
