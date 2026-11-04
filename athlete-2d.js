@@ -274,7 +274,7 @@
             <button type="button" id="paiva-2d-stop-record" disabled>Parar gravação</button>
             <button type="button" id="paiva-2d-capture" disabled>Capturar quadro</button>
             <button type="button" id="paiva-2d-back-video" hidden>Voltar ao vídeo</button>
-            <button type="button" id="paiva-2d-track-start" disabled>Seguir marcações no vídeo</button>
+            <button type="button" id="paiva-2d-track-start" disabled>▶ Começar rastreamento</button>
             <div class="paiva-2d-cycle-action" aria-label="Rastreamento de um giro de pedalada">
               <button type="button" id="paiva-2d-cycle-start" disabled title="Acompanhar o ângulo, o calcanhar e o quadril por uma volta">⟳ Rastrear 1 giro</button>
               <select id="paiva-2d-cycle-duration" aria-label="Duração aproximada de uma pedalada completa">
@@ -833,9 +833,10 @@
       if (!partial && item.kind === 'angle' && pts.length === 3) {
         item.labelBounds=null;
         const a = displayedAngle(item);
-        const held=angleDegrees(pts[0],pts[1],pts[2])===null;
+        const pending=stillFromVideo&&fineUncertain.some(p=>p.item===index);
+        const held=pending||angleDegrees(pts[0],pts[1],pts[2])===null;
         item.labelBounds=tag(pts[1].x,pts[1].y,a===null?'A — · ajustar':
-          `A ${held?'≈ ':''}${format(a)}°${held?' · último':''}`,color);
+          `A ${held?'≈ ':''}${format(a)}°${pending?' · conferir':held?' · último':''}`,color);
       }
       if (!partial && item.kind === 'line' && pts.length === 2) {
         tag((pts[0].x+pts[1].x)/2,(pts[0].y+pts[1].y)/2,`L${index+1}`,color);
@@ -849,10 +850,13 @@
         ctx.stroke();ctx.restore();
         const raw=full8Measurements(pts),m=stableFull8Measurements(item);
         if(m){
+          const pending=stillFromVideo?fineUncertain.filter(p=>p.item===index).map(p=>p.point):[];
+          const kneePending=pending.some(j=>[3,4,5].includes(j));
+          const footPending=pending.some(j=>[6,7].includes(j));
           tag(pts[4].x,pts[4].y,m.knee===null?'Joelho — · ajustar':
-            `Joelho ${raw.knee===null?'≈ ':''}${format(m.knee)}°`,color);
+            `Joelho ${kneePending||raw.knee===null?'≈ ':''}${format(m.knee)}°${kneePending?' · conferir':''}`,color);
           tag(pts[6].x,pts[6].y,m.foot===null?'Pé/solo — · ajustar':
-            `Pé/solo ${raw.foot===null?'≈ ':''}${format(m.foot)}°`,color);
+            `Pé/solo ${footPending||raw.foot===null?'≈ ':''}${format(m.foot)}°${footPending?' · conferir':''}`,color);
         }
       }
     }
@@ -862,11 +866,13 @@
       annotations.forEach((item,index) => {
         if (item.kind === 'angle') {
           const a = displayedAngle(item);
-          values.push(`Ângulo ${index+1}: ${a === null ? 'rever pontos' : format(a)+'°'}`);
+          const pending=stillFromVideo&&fineUncertain.some(p=>p.item===index);
+          values.push(`Ângulo ${index+1}: ${a === null ? 'rever pontos' : `${pending?'≈ ':''}${format(a)}°${pending?' (conferir)':''}`}`);
         } else if(item.kind==='full8'){
           const m=stableFull8Measurements(item);
-          const val=(label,n)=>`${label} ${n===null?'rever':format(n)+'°'}`;
-          if(m)values.push(`8 pontos · ${val('Cotovelo',m.elbow)} · ${val('Ombro',m.shoulder)} · ${val('Quadril',m.hip)} · ${val('Joelho',m.knee)} · ${val('Tornozelo',m.ankle)} · ${val('Tronco/solo',m.trunk)} · ${val('Pé/solo',m.foot)}`);
+          const pending=stillFromVideo?fineUncertain.filter(p=>p.item===index).map(p=>p.point):[];
+          const val=(label,n,indices=[])=>`${label} ${n===null?'rever':`${pending.some(j=>indices.includes(j))?'≈ ':''}${format(n)}°`}`;
+          if(m)values.push(`8 pontos · ${val('Cotovelo',m.elbow,[0,1,2])} · ${val('Ombro',m.shoulder,[1,2,3])} · ${val('Quadril',m.hip,[2,3,4])} · ${val('Joelho',m.knee,[3,4,5])} · ${val('Tornozelo',m.ankle,[4,5,6])} · ${val('Tronco/solo',m.trunk,[2,3])} · ${val('Pé/solo',m.foot,[6,7])}`);
         } else if(item.kind==='point') values.push(`${item.role==='heel'?'Calcanhar':item.role==='hip'?'Quadril':`Ponto ${index+1}`} · rastro`);
         else values.push(`Linha ${index+1}`);
       });
@@ -1411,8 +1417,12 @@
     function stopTracking(clear=true) {
       if(scanningActive)scanCancelled=true;
       motionTracker?.stop();motionTracker=null;trackingActive=false;
-      lastTrackedGeometry=null;
-      if(clear)paintHeldOverlay();
+      // Ao pausar no mesmo instante, PRESERVAR a última camada já desenhada:
+      // nela está o grau que acabou de ser calculado (por exemplo 145°).
+      // Só voltar ao guia original quando o vídeo realmente mudar de instante.
+      const recent=lastTrackedGeometry?.source===recordedUrl&&!video.hidden&&
+        Math.abs((lastTrackedGeometry?.time??-10)-video.currentTime)<.08;
+      if(clear&&(!recent||trackOverlay.hidden))paintHeldOverlay();
       updateCameraControls();
     }
 
@@ -1445,7 +1455,7 @@
     // parar o rastreio ou chegar ao fim do vídeo, os graus permanecem visíveis.
     // São referências, NÃO medidas novas de um quadro ainda não corrigido.
     function paintHeldOverlay(){
-      if(!trackCtx||video.hidden||!lastFrameFromVideo||!stillFromVideo||
+      if(!trackCtx||video.hidden||!hasFileVideo()||!stillFromVideo||
         !annotations.length||!video.videoWidth||trackingActive){
         if(!trackingActive)trackOverlay.hidden=true;
         return;
@@ -1494,13 +1504,15 @@
     }
     video.addEventListener('seeked',()=>{if(!video.hidden&&!trackingActive)paintHeldOverlay();});
 
-    function paintTracked(points,w,h,time) {
+    function paintTracked(points,w,h,time,uncertain=[]) {
       if (!trackCtx) return;
       alignTrackedOverlay();
       trackOverlay.width=w;trackOverlay.height=h;
       trackCtx.clearRect(0,0,w,h);
       trackCtx.lineWidth=2;trackCtx.lineCap='round';trackCtx.lineJoin='round';
       const readings=[];
+      const lost=new Set(uncertain.map(p=>`${p.item}:${p.point}`));
+      const needsCheck=(item,indices)=>indices.some(point=>lost.has(`${item}:${point}`));
       points.forEach((item,index)=> {
         const pts=item.points;
         const color=item.color||(item.kind==='angle'?'#ffe9a8':item.kind==='point'&&item.role==='hip'?'#64cbff':item.kind==='point'?'#a8f5c3':'#a6eeff');
@@ -1520,6 +1532,10 @@
           trackCtx.beginPath();trackCtx.arc(p.x,p.y,5,0,Math.PI*2);
           trackCtx.fillStyle=color;trackCtx.fill();
           trackCtx.strokeStyle='#102d25';trackCtx.lineWidth=1.5;trackCtx.stroke();
+          if(needsCheck(index,[0])){
+            trackCtx.beginPath();trackCtx.arc(p.x,p.y,11,0,2*Math.PI);
+            trackCtx.strokeStyle='#ffb45e';trackCtx.lineWidth=2.5;trackCtx.stroke();
+          }
           readings.push(`${item.role==='heel'?'Calcanhar':item.role==='hip'?'Quadril':`Ponto ${index+1}`} · trajetória`);
           return;
         }
@@ -1527,17 +1543,23 @@
         trackCtx.beginPath();trackCtx.moveTo(pts[0].x,pts[0].y);
         for(let j=1;j<pts.length;j++)trackCtx.lineTo(pts[j].x,pts[j].y);
         trackCtx.stroke();
-        for(const p of pts){
+        for(let j=0;j<pts.length;j++){
+          const p=pts[j];
           trackCtx.beginPath();trackCtx.arc(p.x,p.y,4,0,Math.PI*2);
           trackCtx.fill();
+          if(needsCheck(index,[j])){
+            trackCtx.beginPath();trackCtx.arc(p.x,p.y,11,0,2*Math.PI);
+            trackCtx.strokeStyle='#ffb45e';trackCtx.lineWidth=2.5;trackCtx.stroke();
+          }
         }
         if(item.kind==='angle') {
           const actual=angleDegrees(pts[0],pts[1],pts[2]);
           const cached=trackedLastValues.get(index)||{};
-          if(actual!==null){cached.angle=actual;trackedLastValues.set(index,cached);}
-          const angle=actual??cached.angle??null;
+          const provisional=needsCheck(index,[0,1,2])||actual===null;
+          if(!provisional){cached.angle=actual;trackedLastValues.set(index,cached);}
+          const angle=provisional?(cached.angle??actual):actual;
           const shown=angle===null?null:item.supplementary?180-angle:angle;
-          const label=shown===null?'A — · corrigir':`A ${actual===null?'≈ ':''}${format(shown)}°`;
+          const label=shown===null?'A — · corrigir':`A ${provisional?'≈ ':''}${format(shown)}°${provisional?' · conferir':''}`;
           readings.push(label);
           trackCtx.font='650 13px system-ui,sans-serif';
           trackCtx.fillText(label,Math.min(w-115,pts[1].x+8),Math.max(15,pts[1].y-8));
@@ -1545,18 +1567,21 @@
           const m=full8Measurements(pts);
           const cached=trackedLastValues.get(index)||{};
           trackCtx.font='650 13px system-ui,sans-serif';
-          if(m.knee!==null)cached.knee=m.knee;
-          if(m.foot!==null)cached.foot=m.foot;
+          const kneePending=needsCheck(index,[3,4,5])||m.knee===null;
+          const footPending=needsCheck(index,[6,7])||m.foot===null;
+          if(!kneePending)cached.knee=m.knee;
+          if(!footPending)cached.foot=m.foot;
           trackedLastValues.set(index,cached);
-          for(const [name,point,value,key] of [['Joelho',pts[4],m.knee,'knee'],['Pé/solo',pts[6],m.foot,'foot']]){
-            const last=value??cached[key]??null;
-            const label=last===null?`${name} — · corrigir`:`${name} ${value===null?'≈ ':''}${format(last)}°`;
+          for(const [name,point,value,key,pending] of [['Joelho',pts[4],m.knee,'knee',kneePending],['Pé/solo',pts[6],m.foot,'foot',footPending]]){
+            const last=pending?(cached[key]??value):value;
+            const label=last===null?`${name} — · corrigir`:`${name} ${pending?'≈ ':''}${format(last)}°${pending?' · conferir':''}`;
             readings.push(label);
             trackCtx.fillText(label,Math.min(w-130,point.x+8),Math.max(15,point.y-8));
           }
         }
       });
-      byId('values').textContent=`Rastreio experimental ${time.toFixed(1).replace('.',',')} s · ${readings.join('  |  ') || 'linhas em movimento'}`;
+      byId('values').textContent=`Rastreio experimental ${time.toFixed(1).replace('.',',')} s · ${readings.join('  |  ') || 'linhas em movimento'}${lost.size?` · ${lost.size} ponto(s) para corrigir`:''}`;
+      trackOverlay.hidden=false;
     }
 
     async function startTracking() {
@@ -1569,17 +1594,29 @@
       lastTrackedGeometry=null;
       const currentTime=video.currentTime;
       const trackedIndices=annotations.flatMap((item,i)=>item.trackEnabled!==false?[i]:[]);
-      motionTracker=motion.create({video,annotations:annotations.filter(a=>a.trackEnabled!==false).map(item=>({
-        kind:item.kind,color:item.color,role:item.role,supplementary:!!item.supplementary,points:item.points.map(p=>({...p}))})),
+      const selectedAnnotations=annotations.filter(a=>a.trackEnabled!==false);
+      selectedAnnotations.forEach((item,index)=>{
+        if(item.kind==='angle'){
+          const value=angleDegrees(...item.points);
+          if(value!==null||Number.isFinite(item.lastValidAngle))
+            trackedLastValues.set(index,{angle:value??item.lastValidAngle});
+        }else if(item.kind==='full8'){
+          const value=stableFull8Measurements(item);
+          trackedLastValues.set(index,{knee:value?.knee??null,foot:value?.foot??null});
+        }
+      });
+      motionTracker=motion.create({video,annotations:selectedAnnotations.map(item=>({
+        kind:item.kind,color:item.color,role:item.role,supplementary:!!item.supplementary,
+        reflectorMode:!!item.reflectorMode,points:item.points.map(p=>({...p}))})),
         sourceWidth:canvas.width,sourceHeight:canvas.height,
         isLoopEnabled:()=>video.loop,
-        onPoints:(points,w,h,t)=>{
-          lastTrackedGeometry={source:recordedUrl,time:t,entries:points.map((item,i)=>({
+        onPoints:(points,w,h,t,uncertain=[])=>{
+          lastTrackedGeometry={source:recordedUrl,time:t,uncertain,entries:points.map((item,i)=>({
             index:trackedIndices[i],points:item.points.map(p=>({
               x:p.x/w*canvas.width,y:p.y/h*canvas.height
             }))
           }))};
-          paintTracked(points,w,h,t);
+          paintTracked(points,w,h,t,uncertain);
         },
         onLost:reason=>{
           const held=lastTrackedAnnotations();
@@ -1601,7 +1638,10 @@
           ?'Vídeo reiniciado no começo. O rastreio da volta anterior foi encerrado; confira os ângulos antes de usar.'
           :'Fim do vídeo. Rastreio encerrado; confira os ângulos antes de usar.');}
       });
-      showVideo(true);trackOverlay.hidden=false;
+      showVideo(true);
+      // O rastreador pode demorar para analisar seu primeiro quadro. Até lá,
+      // a medida e os pontos originais já precisam estar desenhados no vídeo.
+      paintHeldOverlay();trackOverlay.hidden=false;
       trackingActive=true;updateCameraControls();
       const started=await motionTracker.start();
       if (!started) {stopTracking();showVideo(false);return;}
@@ -2003,6 +2043,7 @@
       if(!trackingActive && lastFrameFromVideo && annotations.length && byId('auto-track').checked){
         startTracking();return;
       }
+      if(video.hidden){showVideo(true);byId('back-video').hidden=true;}
       if(video.ended)video.currentTime=0;
       let attempt;
       try{attempt=video.play();}catch(error){message(`Não foi possível iniciar o vídeo: ${error?.message||'erro de reprodução'}.`);return;}
@@ -2187,8 +2228,9 @@
       if(!saved)schedulePhotoSave(1600,'tracking');
       const label=firstAngle?.kind==='full8'?angle:firstAngle?displayedAngle(firstAngle):null;
       const lost=fineUncertain.length;
+      const checking=firstAngleIndex>=0&&fineUncertain.some(p=>p.item===firstAngleIndex);
       const readout=label===null&&annotations.some(item=>item.kind==='point')?'Ponto · rastro':
-        label===null?'marcadores':`A ${format(label)}°`;
+        label===null?'marcadores':`A ${checking?'≈ ':''}${format(label)}°${checking?' (conferir)':''}`;
       byId('fine-readout').textContent=`${clockTime(next)} · ${readout}${finePeak?` · pico ${format(finePeak.angle)}°`:''}${lost?` · ${lost} ponto(s) corrigir`:''}`;
       message(lost?`Quadro ${clockTime(next)}: ${lost} marcador(es) em laranja precisam de correção. O ângulo foi mantido; ajuste os pontos e continue com a rodinha.`:
         saved?`Quadro ${clockTime(next)}: pontos salvos recuperados exatamente como estavam. Pode comparar a medida.`:

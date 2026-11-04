@@ -1,5 +1,13 @@
 PAIVA BIKE FIT STUDIO — V5.23 PWA · EDIÇÃO PIN
 
+CORREÇÃO DO ÂNGULO / RASTREIO CONTÍNUO — 04/11/2026:
+- Ao clicar em "Começar rastreamento", o programa já desenha o grau e os marcadores no primeiro quadro, antes de o vídeo começar a rodar.
+- O rastreador acompanha os pontos separadamente; se um marcador perde contraste, ele deixa de se mover e fica sinalizado em laranja. Os outros continuam sendo acompanhados e o grau anterior permanece na tela.
+- Grau com prefixo ≈ e indicação "conferir" é a última leitura retida, NÃO uma nova medição confiável. Congele o quadro, reposicione os pontos pelo mouse e prossiga com a rodinha.
+- Ao pausar o rastreio, o grau visto naquele instante permanece sobre o vídeo. Ao voltar ou avançar com a régua, o guia não desaparece, mesmo que a imagem não esteja no quadro originalmente capturado.
+- O fluxo fino com a rodinha preserva o ângulo durante pelo menos cinco avanços consecutivos, inclusive quando há perda de contraste; os pontos manuais corrigidos ficam associados aos seus quadros anteriores.
+- O boneco de oito pontos e a forma de medir o calcanhar em relação ao solo não foram alterados.
+
 O que é: versão instalável baseada na V5.22, com cache offline e tela de bloqueio por PIN de 6 dígitos.
 
 IDENTIDADE VISUAL:

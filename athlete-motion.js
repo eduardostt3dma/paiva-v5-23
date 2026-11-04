@@ -294,9 +294,16 @@
     canvas.width=w;canvas.height=h;
     const ctx=canvas.getContext('2d',{willReadFrequently:true});
     if(!ctx) return {start:async()=>false,stop:()=>{}};
-    const scaled=annotations.map(item=>({kind:item.kind,color:item.color,role:item.role||'',supplementary:!!item.supplementary,points:item.points.map(p=>({
+    const scaled=annotations.map(item=>({kind:item.kind,color:item.color,role:item.role||'',supplementary:!!item.supplementary,reflectorMode:!!item.reflectorMode,points:item.points.map(p=>({
       x:p.x/sourceWidth*w,y:p.y/sourceHeight*h}))}));
     let running=false,previous=null,frameId=null,lastVideoTime=-1,lastSampleTime=-1;
+    // Um ponto perdido não pode apagar os outros sete, nem a medida já vista.
+    // Não o reencontramos automaticamente em quadros posteriores: ele exige
+    // correção manual no quadro congelado, sem inventar ângulos novos.
+    const uncertain=new Set();
+    const uncertainPoints=()=>[...uncertain].map(token=>{
+      const [item,point]=token.split(':').map(Number);return {item,point};
+    });
     const sample=()=> {
       ctx.drawImage(video,0,0,w,h);
       return grayscale(ctx.getImageData(0,0,w,h));
@@ -333,30 +340,43 @@
       let next;
       try{next=sample();}catch(_){stop();video.pause();onLost?.('Quadro não pôde ser analisado.');return;}
       const nextShapes=[];
-      for(const item of scaled) {
+      for(let i=0;i<scaled.length;i++) {
+        const item=scaled[i];
         const pts=[];
-        for(const point of item.points) {
-          const found=trackSafePoint(previous,next,w,h,point);
+        for(let j=0;j<item.points.length;j++) {
+          const point=item.points[j],token=`${i}:${j}`;
+          if(uncertain.has(token)){pts.push({...point});continue;}
+          const found=(item.reflectorMode?trackReflector(previous,next,w,h,point,{search:22}):null)
+            ||trackSafePoint(previous,next,w,h,point);
           if(!found) {
-            stop();video.pause();onLost?.('Um marcador ficou ambíguo ou se afastou. O rastreio foi interrompido por segurança; capture outro quadro e reposicione os pontos.');return;
+            uncertain.add(token);
+            pts.push({...point});
+            continue;
           }
           pts.push({x:found.x,y:found.y});
         }
-        nextShapes.push({kind:item.kind,color:item.color,role:item.role,supplementary:item.supplementary,points:pts});
+        nextShapes.push({...item,points:pts});
       }
       scaled.splice(0,scaled.length,...nextShapes);
       previous=next;
-      onPoints?.(nextShapes,w,h,time);
+      onPoints?.(nextShapes,w,h,time,uncertainPoints());
       schedule();
     }
     async function start() {
       if(running || video.ended || video.readyState<2)return false;
       try {previous=sample();}catch(_){onLost?.('Não foi possível ler o vídeo local.');return false;}
-      for(const item of scaled)for(const p of item.points)
+      uncertain.clear();
+      for(let i=0;i<scaled.length;i++)for(let j=0;j<scaled[i].points.length;j++){
+        const item=scaled[i],p=item.points[j];
+        const initial=(item.reflectorMode?trackReflector(previous,previous,w,h,p,{search:14}):null);
+        if(initial){item.points[j]={x:initial.x,y:initial.y};continue;}
         if(!trackPoint(previous,previous,w,h,p,5,0)) {
-          onLost?.('Algum ponto tem pouco contraste. Coloque os marcadores sobre referências visíveis e tente novamente.');
-          return false;
+          uncertain.add(`${i}:${j}`);
         }
+      }
+      // Pintar SEMPRE o primeiro quadro, mesmo sem textura suficiente ou
+      // quando o navegador ainda não iniciou a reprodução do vídeo.
+      onPoints?.(scaled,w,h,video.currentTime,uncertainPoints());
       running=true;lastVideoTime=video.currentTime;lastSampleTime=-1;
       try{await video.play();}catch(_){stop();onLost?.('O navegador bloqueou a reprodução. Dê play e tente novamente.');return false;}
       schedule();return true;
