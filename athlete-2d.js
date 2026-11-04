@@ -126,10 +126,6 @@
               <option value="free" selected>Ponto livre</option>
             </select>
           </label>
-          <div class="paiva-2d-align" role="group" aria-label="Alinhar linha selecionada">
-            <button type="button" id="paiva-2d-align-horizontal">↔ Horizontal</button>
-            <button type="button" id="paiva-2d-align-vertical">↕ Vertical</button>
-          </div>
           <div class="paiva-2d-zoom" role="group" aria-label="Zoom da fotografia">
             <label for="paiva-2d-zoom">Zoom <output id="paiva-2d-zoom-value">175%</output></label>
             <input id="paiva-2d-zoom" type="range" min="100" max="400" step="5" value="175" />
@@ -233,7 +229,7 @@
     playbackAdvanced.append(section.querySelector('.paiva-2d-playback'));
     playerDock.append(playbackAdvanced);
     const markingDock=section.querySelector('.paiva-2d-marking-dock');
-    for(const selector of ['.paiva-2d-tools','.paiva-2d-point-role','.paiva-2d-align','.paiva-2d-zoom','.paiva-2d-width'])
+    for(const selector of ['.paiva-2d-tools','.paiva-2d-point-role','.paiva-2d-zoom','.paiva-2d-width'])
       markingDock.append(section.querySelector(selector));
     const quickDock=section.querySelector('.paiva-2d-quick-actions');
     playbackAdvanced.append(document.getElementById('paiva-2d-capture'));
@@ -1068,32 +1064,6 @@
     byId('zoom-in').addEventListener('click',()=>updateZoom(Number(byId('zoom').value)+5));
     byId('zoom-out').addEventListener('click',()=>updateZoom(Number(byId('zoom').value)-5));
     byId('zoom-reset').addEventListener('click',()=>updateZoom(100));
-    function alignLine(vertical) {
-      let index=selectedIndex;
-      if (annotations[index]?.kind!=='line') {
-        index=-1;
-        for (let i=annotations.length-1;i>=0;i--) {
-          if (annotations[i].kind==='line') {index=i;break;}
-        }
-      }
-      if (index<0) {message('Desenhe primeiro uma linha para alinhar.');return;}
-      const pts=annotations[index].points;
-      const center={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
-      const length=Math.hypot(pts[1].x-pts[0].x,pts[1].y-pts[0].y)/2;
-      if (vertical) {
-        pts[0]=constrain({x:center.x,y:center.y-length});
-        pts[1]=constrain({x:center.x,y:center.y+length});
-      } else {
-        pts[0]=constrain({x:center.x-length,y:center.y});
-        pts[1]=constrain({x:center.x+length,y:center.y});
-      }
-      selectedIndex=index;
-      selectTool('edit');
-      schedulePhotoSave();
-      message(`Linha ${index+1} alinhada ${vertical?'verticalmente':'horizontalmente'}. Arraste as pontas para refinar.`);
-    }
-    byId('align-horizontal').addEventListener('click',()=>alignLine(false));
-    byId('align-vertical').addEventListener('click',()=>alignLine(true));
     byId('help').addEventListener('click',() => {
       const box=byId('explain');const open=box.hidden;
       box.hidden=!open;byId('help').setAttribute('aria-expanded',String(open));

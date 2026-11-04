@@ -45,10 +45,6 @@
   font:800 10px system-ui,sans-serif;}
 #paiva-athlete-2d .paiva-2d-tools button[aria-pressed="true"] {background:#dbe7ef;
   border-color:#dbe7ef;color:#162634;}
-#paiva-athlete-2d .paiva-2d-align {display:flex;gap:6px;margin-bottom:10px;}
-#paiva-athlete-2d .paiva-2d-align button {flex:1;min-width:0;padding:9px 4px;
-  border-radius:8px;border:1px solid #667b89;background:#233542;
-  color:#cde1ec;font:700 10px system-ui;cursor:pointer;}
 #paiva-athlete-2d .paiva-2d-zoom {display:grid;grid-template-columns:repeat(3,1fr);
   gap:6px;padding:10px 0 13px;border-top:1px solid #526978;}
 #paiva-athlete-2d .paiva-2d-zoom label {grid-column:1/-1;color:#dae8ef;
@@ -164,10 +160,7 @@
   opacity:.45;cursor:not-allowed;}
 #paiva-athlete-2d .paiva-2d-canvas-wrap video:not([hidden]) {cursor:crosshair;}
 #paiva-athlete-2d .paiva-2d-canvas-wrap video {touch-action:none;cursor:crosshair;}
-#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align {grid-column:1/2;
-  margin:0;align-items:center;}
-#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align button {padding:7px 3px;}
-#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-width {grid-column:2/3;
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-width {grid-column:1/-1;
   padding:0;border:0;font-size:10px;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-width input {margin:6px 0 0;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom {grid-column:1/-1;
@@ -309,7 +302,6 @@
   #paiva-athlete-2d .paiva-2d-marking-dock {gap:3px 7px;}
   #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools {gap:4px;}
   #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools button {font-size:9px;padding:5px 3px;}
-  #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align button {font-size:9px;padding:4px 2px;}
   #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom {padding:1px 0 0;}
   #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom button {padding:3px 1px;}
   #paiva-athlete-2d .paiva-2d-quick-actions {gap:4px;}
