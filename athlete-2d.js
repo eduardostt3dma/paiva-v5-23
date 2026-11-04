@@ -259,8 +259,6 @@
               <label>Quadros por segundo do arquivo (para avançar manualmente)
                 <select id="paiva-2d-file-fps"><option value="24">24 fps</option><option value="25">25 fps</option><option value="30" selected>30 fps</option><option value="50">50 fps</option><option value="60">60 fps</option></select>
               </label>
-              <div><button type="button" id="paiva-2d-prev-frame" disabled>◀ Quadro</button>
-                <button type="button" id="paiva-2d-next-frame" disabled>Quadro ▶</button></div>
               <small class="paiva-2d-wheel-hint">🖱 Rodinha: quadros · Direito: play/pause · Espaço: play/pause · ← →: quadros</small>
             </div>
             <label class="paiva-2d-camera-quality">Qualidade da captação
@@ -516,6 +514,9 @@
     function restoreTimelineFrame(time,clearMissing=true,paint=true,preservePeak=false){
       const slot=timelineSlot(time),entry=slot?.entry;
       if(!entry&&!clearMissing)return false;
+      // Coordenadas armazenadas/corrigidas neste quadro têm prioridade sobre
+      // qualquer rastreio contínuo antigo que tenha coincidido no mesmo tempo.
+      lastTrackedGeometry=null;
       if(entry){
         annotations=cloneAnnotations(entry.annotations);
         singlePointTrails.clear();
@@ -627,7 +628,11 @@
     function schedulePhotoSave(delayMs=650,source='manual'){
       // Histórico de marcações é independente da exportação de fotos PNG.
       // Mesmo sem espaço/ID para foto, exclusões e alterações ficam no projeto.
+      if(source!=='tracking')lastTrackedGeometry=null;
       rememberTimelineFrame(delayMs<=700?0:480,source);
+      // Se a foto atual foi excluída pelo usuário, só criar outro registro
+      // quando houver uma NOVA alteração; não ressuscitar o arquivo apagado.
+      if(!autoPhotoId&&photoLoaded&&records()?.id)newPhotoRecord();
       if(!photoLoaded||!records()?.save||!autoPhotoId)return;
       if(stillFromVideo&&hasFileVideo()&&photoTimeKey!==frameKey(video.currentTime))newPhotoRecord();
       const version=++photoVersion;
@@ -663,6 +668,17 @@
     const selectedRecordIds=new Set();
     let listedRecords=[];
     let deletingRecords=false;
+    async function finishWritesBeforeDeletion(ids){
+      // Um PNG ainda sendo codificado não pode reaparecer depois da exclusão.
+      // Invalidar somente os IDs escolhidos, sem interferir em outros exames.
+      const targets=new Set(ids);
+      for(const id of targets)photoRecordVersions.delete(id);
+      if(targets.has(autoPhotoId)){
+        clearTimeout(photoSaveTimer);
+        autoPhotoId=null;
+      }
+      await Promise.all([photoWriteChain.catch(()=>{}),timelineWriteChain.catch(()=>{})]);
+    }
     function syncRecordSelection(){
       const total=listedRecords.length;
       const count=listedRecords.filter(item=>selectedRecordIds.has(item.id)).length;
@@ -686,6 +702,7 @@
       if(!confirm(`Excluir definitivamente ${ids.length} registro(s) selecionado(s)? Fotos, vídeos e análises apagados deste navegador não poderão ser recuperados. Baixe antes o que desejar guardar.`))return;
       deletingRecords=true;syncRecordSelection();
       try{
+        await finishWritesBeforeDeletion(ids);
         const removed=await records().removeMany(ids);
         for(const id of ids)selectedRecordIds.delete(id);
         message(`${removed} registro(s) removido(s) do arquivo local.`);
@@ -720,7 +737,8 @@
           const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.title='Apagar este registro';
           remove.addEventListener('click',async()=>{
             if(!confirm('Apagar este registro salvo no navegador?'))return;
-            try{await records().remove(item.id);}catch(e){message(e.message);}
+            try{await finishWritesBeforeDeletion([item.id]);await records().remove(item.id);}
+            catch(e){message(e.message);}
           });row.append(remove);recordList.append(row);
         }
         syncRecordSelection();
@@ -1405,8 +1423,6 @@
       byId('fine-prev').disabled=!canFine;
       byId('fine-next').disabled=!canFine;
       byId('fine-peak').disabled=!canFine||!finePeak;
-      byId('prev-frame').disabled = !hasPlayback || recording || trackingActive || scanningActive;
-      byId('next-frame').disabled = !hasPlayback || recording || trackingActive || scanningActive;
       byId('speed').disabled = !hasPlayback || recording;
       byId('pingpong').disabled = !hasPlayback || recording;
       byId('play-video').disabled = !hasPlayback || recording || scanningActive;
@@ -2270,8 +2286,6 @@
         ? `Quadro deslocado em 1/${fps} s. As marcações estão fixas: ajuste os pontos ao atleta antes de interpretar o ângulo; recapture para reativar o rastreio.`
         : `Avanço aproximado de 1/${fps} s. Ajuste o FPS conforme o vídeo; aguarde atualizar antes de capturar.`);
     }
-    byId('prev-frame').addEventListener('click',()=>stepFrame(-1,true));
-    byId('next-frame').addEventListener('click',()=>stepFrame(1,true));
     byId('fine-prev').addEventListener('click',()=>stepFrame(-1,true));
     byId('fine-next').addEventListener('click',()=>stepFrame(1,true));
     byId('fine-mode').addEventListener('change',()=>{
@@ -2560,7 +2574,14 @@
       // Capturar outro instante do MESMO vídeo não deve apagar o ângulo.
       // Primeiro tentaremos restaurar a medição exata daquele quadro; se ela
       // não existir, mantemos as pontas anteriores para correção manual.
-      const carried=hasFileVideo()&&lastFrameFromVideo?lastTrackedAnnotations():[];
+      // A rodinha ou a régua pode desligar 'quadro recém-capturado', mas os
+      // três pontos anteriores continuam sendo a referência do novo instante.
+      // Só utilizar coordenadas rastreadas se forem do MESMO instante.
+      const hasPriorMarks=hasFileVideo()&&stillFromVideo&&annotations.length>0;
+      const trackedAtThisTime=lastTrackedGeometry?.source===recordedUrl&&
+        Math.abs(lastTrackedGeometry.time-video.currentTime)<.09;
+      const carried=hasPriorMarks?
+        (trackedAtThisTime?lastTrackedAnnotations():cloneAnnotations(annotations)):[];
       if (trackingActive) stopTracking();
       video.pause();
       if (!videoCanCapture() || !setFrame(video,video.videoWidth,video.videoHeight)) {
@@ -2915,6 +2936,9 @@
     render();
   }
 
-  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',initialize,{once:true});
-  else initialize();
+  // O HTML carrega este arquivo com `defer`, antes dos módulos de registros e
+  // rastreamento. `interactive` ainda é cedo: esperar DOMContentLoaded garante
+  // que todos os scripts deferidos estejam prontos ao montar a bancada 2D.
+  if (document.readyState==='complete') initialize();
+  else document.addEventListener('DOMContentLoaded',initialize,{once:true});
 })();

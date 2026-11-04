@@ -1,5 +1,15 @@
 PAIVA BIKE FIT STUDIO — V5.23 PWA · EDIÇÃO PIN
 
+REVISÃO PREVENTIVA DA CAPTURA 2D — 04/11/2026:
+- Ângulo e leitura anterior permanecem na tela também quando o usuário desloca a barra do vídeo e captura outro quadro. Os pontos trazidos do quadro anterior ficam marcados para conferência manual até serem corrigidos.
+- Depois de corrigir uma ponta com o mouse, o sistema descarta coordenadas antigas do rastreamento contínuo para nunca sobrescrever aquela correção ao voltar ao vídeo ou recuperar um quadro salvo.
+- O rastreio contínuo, a rodinha de quadros e o boneco de oito pontos mantêm os comportamentos da edição anterior; nenhuma medição anatômica foi alterada.
+- A repetição do vídeo foi conferida: já era inicializada na abertura da bancada e respondia ao checkbox. Esse controle foi preservado sem código redundante.
+- Os botões duplicados de quadro na reprodução avançada foram retirados. Permanecem os botões ◀/▶ abaixo do vídeo, a rodinha e as setas do teclado.
+- A bancada 2D passa a ser inicializada somente depois dos módulos de rastreamento e de armazenamento, evitando problemas de carregamento em alguns navegadores.
+- Ao excluir fotos ou análises salvas, o aplicativo espera gravações anteriores terminarem e impede que um salvamento atrasado ressuscite uma foto apagada. Novos ajustes feitos DEPOIS da exclusão continuam podendo gerar novos registros.
+- Os dados já salvos no navegador e as análises existentes NÃO são removidos por esta atualização.
+
 CORREÇÃO DO ÂNGULO / RASTREIO CONTÍNUO — 04/11/2026:
 - Ao clicar em "Começar rastreamento", o programa já desenha o grau e os marcadores no primeiro quadro, antes de o vídeo começar a rodar.
 - O rastreador acompanha os pontos separadamente; se um marcador perde contraste, ele deixa de se mover e fica sinalizado em laranja. Os outros continuam sendo acompanhados e o grau anterior permanece na tela.
