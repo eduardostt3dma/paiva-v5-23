@@ -27,15 +27,18 @@
       </div>
       <div id="paiva-2d-explain" class="paiva-2d-explain" hidden>
         <p><strong>Ângulo:</strong> clique no vértice e arraste o mouse: duas hastes são criadas de uma vez. No modo “Ajustar pontos”, arraste as extremidades para alinhar ao atleta. O aplicativo exibe o ângulo interno, de 0° a 180°.</p>
+        <p><strong>Ângulo suplementar:</strong> clique diretamente na etiqueta “A 35°”, por exemplo, para alternar entre 35° e 145° (180° − 35°). A geometria das hastes não muda, somente a convenção mostrada. Confirme qual convenção está usando no laudo.</p>
         <p><strong>Linha:</strong> clique e arraste de uma extremidade até a outra. Depois, “Ajustar pontos” permite puxar as pontas ou mover a reta inteira pelo centro. Sem calibração métrica, não é uma régua em milímetros.</p>
         <p><strong>Alinhamento:</strong> selecione uma linha tocando nela e use Horizontal / Vertical; mantenha Shift pressionado ao desenhar para limitar a inclinação a passos de 45°.</p>
         <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. Os pontos desenhados sobre um quadro parado não são reposicionados automaticamente ao girar a rodinha: reajuste-os antes de interpretar os números.</p>
         <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
+        <p><strong>Congelar com clique:</strong> no vídeo gravado, clique com o botão ESQUERDO sobre a imagem para pausar e capturar automaticamente o quadro atual; as ferramentas compactas ficam logo abaixo. Com o quadro capturado, você pode marcar ou editar os pontos.</p>
         <p><strong>Zoom:</strong> aproxime até 400% pelo controle inferior ou com Ctrl + roda do mouse sobre a foto.</p>
         <p><strong>Espessura:</strong> ajuste as linhas de 1 a 8 px no painel lateral. A mudança aparece imediatamente nas linhas existentes e nas novas marcações.</p>
         <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Você pode gravar até 3 minutos, salvar o vídeo no aparelho, pausá-lo e usar “Capturar quadro” para medir os ângulos de um instante. Os pontos iniciais são sempre marcados manualmente.</p>
         <p><strong>Vídeos antigos:</strong> use “Abrir vídeo do computador ou pendrive” para carregar MP4, WebM, MOV e outros formatos que seu navegador consiga decodificar. Pause num quadro, capture e analise com as mesmas ferramentas; nenhum arquivo é enviado à internet.</p>
         <p><strong>Vai e volta contínuo:</strong> os comandos ficam logo abaixo da imagem. Com essa opção marcada, o vídeo segue até o fim, retorna por buscas sucessivas de quadros e volta a avançar sem parar até você clicar em Pausar. A fluidez do retorno depende dos quadros-chave, do arquivo e do computador; a reprodução reversa em navegador pode ser menos suave do que em programas nativos. Use a régua de tempo para escolher o instante exato.</p>
+        <p><strong>Extensão em trecho curto:</strong> capture um quadro próximo da extensão máxima e marque os três pontos anatômicos. Use “Buscar extensão” para examinar um intervalo curto antes e depois daquele instante, procurando o maior valor na convenção angular escolhida. O rastreio é experimental e pode interromper em áreas sem contraste; é uma prévia a validar manualmente, não uma medição clínica autônoma.</p>
         <p><strong>Rastreio beta:</strong> depois de congelar um quadro do vídeo gravado, desenhe e alinhe as marcações. Clique em “Rastrear marcações” para tentar acompanhá-las no vídeo. Essa função experimental acompanha pequenas regiões contrastantes da imagem e interrompe se perder a referência; não reconhece automaticamente as articulações e pode sofrer desvios. Use fitas contrastantes nos pontos, câmera fixa e valide cada ângulo importante antes de usar no bike fit.</p>
         <p><strong>Seguir pontos ao reproduzir:</strong> após capturar e marcar o quadro, escolha Voltar ao vídeo e Reproduzir. Com essa opção ativa, o rastreio assistido tenta acompanhar os pontos já desenhados, inclusive no retorno. Se perder algum marcador, a análise é interrompida para evitar um ângulo enganoso. Reposicione os pontos e recomece do quadro correto.</p>
         <p><strong>Ponto de trajetória:</strong> escolha “PONTO · RASTRO” e clique no quadril, pé ou outra referência visível; use “AJUSTAR PONTOS” para refinar a posição. Depois volte ao vídeo e reproduza com rastreio. O ponto e seu caminho recente ficam destacados sem cálculo angular. A linha do rastro representa deslocamento na imagem (pixels), não milímetros ou movimento tridimensional.</p>
@@ -116,6 +119,12 @@
             <button type="button" id="paiva-2d-capture" disabled>Capturar quadro</button>
             <button type="button" id="paiva-2d-back-video" hidden>Voltar ao vídeo</button>
             <button type="button" id="paiva-2d-track-start" disabled>Rastrear marcações · beta</button>
+            <div class="paiva-2d-short-scan">
+              <button type="button" id="paiva-2d-scan-short" disabled>Buscar extensão ±0,5 s</button>
+              <select id="paiva-2d-scan-radius" aria-label="Trecho para busca da extensão máxima">
+                <option value="0.25">±0,25 s</option><option value="0.5" selected>±0,5 s</option><option value="1">±1 s</option>
+              </select>
+            </div>
             <button type="button" id="paiva-2d-track-stop" disabled>Parar rastreio</button>
             <button type="button" id="paiva-2d-camera-stop" disabled>Desligar webcam</button>
             <a id="paiva-2d-video-download" hidden>Baixar vídeo gravado</a>
@@ -133,9 +142,12 @@
     for(const selector of ['.paiva-2d-tools','.paiva-2d-align','.paiva-2d-zoom','.paiva-2d-width'])
       markingDock.append(section.querySelector(selector));
     const quickDock=section.querySelector('.paiva-2d-quick-actions');
-    for(const id of ['paiva-2d-capture','paiva-2d-back-video','paiva-2d-track-start','paiva-2d-track-stop'])
+    for(const id of ['paiva-2d-capture','paiva-2d-back-video'])
       quickDock.append(document.getElementById(id));
-    quickDock.insertAdjacentHTML('afterbegin','<label class="paiva-2d-follow"><input type="checkbox" id="paiva-2d-auto-track" checked /> Seguir pontos ao reproduzir <span>· experimental</span></label>');
+    quickDock.append(section.querySelector('.paiva-2d-short-scan'));
+    for(const id of ['paiva-2d-track-start','paiva-2d-track-stop'])
+      quickDock.append(document.getElementById(id));
+    quickDock.insertAdjacentHTML('afterbegin','<label class="paiva-2d-follow"><input type="checkbox" id="paiva-2d-auto-track" /> Seguir pontos ao reproduzir <span>· experimental</span></label>');
     section.querySelector('.paiva-2d-player-dock').hidden=true;
 
     const byId = key => document.getElementById('paiva-2d-' + key);
@@ -161,6 +173,10 @@
     const colors = {angle:'#e7cf86',line:'#8bd6e4',point:'#a8f5c3'};
     const message = text => {byId('status').textContent = text;};
     const format = value => value.toFixed(1).replace('.',',');
+    const displayedAngle = item => {
+      const a=angleDegrees(item.points[0],item.points[1],item.points[2]);
+      return a===null?null:item.supplementary?180-a:a;
+    };
 
     function pointAt(event) {
       const rect = canvas.getBoundingClientRect();
@@ -214,6 +230,7 @@
       ctx.fillRect(tx,ty-h,w,h);
       ctx.strokeStyle = color;ctx.lineWidth=1;ctx.strokeRect(tx,ty-h,w,h);
       ctx.fillStyle = '#f4f8fa';ctx.textBaseline='middle';ctx.fillText(text,tx+padding,ty-h/2);
+      return {left:tx,top:ty-h,right:tx+w,bottom:ty};
     }
 
     function drawAnnotation(item,index,partial=false) {
@@ -236,8 +253,9 @@
       ctx.stroke();
       for (const p of pts) mark(p,color);
       if (!partial && item.kind === 'angle' && pts.length === 3) {
-        const a = angleDegrees(pts[0],pts[1],pts[2]);
-        if (a !== null) tag(pts[1].x,pts[1].y,`A ${format(a)}°`,color);
+        item.labelBounds=null;
+        const a = displayedAngle(item);
+        if (a !== null) item.labelBounds=tag(pts[1].x,pts[1].y,`A ${format(a)}°`,color);
       }
       if (!partial && item.kind === 'line' && pts.length === 2) {
         tag((pts[0].x+pts[1].x)/2,(pts[0].y+pts[1].y)/2,`L${index+1}`,color);
@@ -248,7 +266,7 @@
       const values = [];
       annotations.forEach((item,index) => {
         if (item.kind === 'angle') {
-          const a = angleDegrees(item.points[0],item.points[1],item.points[2]);
+          const a = displayedAngle(item);
           values.push(`Ângulo ${index+1}: ${a === null ? 'rever pontos' : format(a)+'°'}`);
         } else if(item.kind==='point') values.push(`Ponto ${index+1} · rastro`);
         else values.push(`Linha ${index+1}`);
@@ -294,6 +312,15 @@
         }
       }
       return null;
+    }
+    function angleLabelAt(point){
+      for(let i=annotations.length-1;i>=0;i--){
+        const a=annotations[i];
+        if(a.kind!=='angle'||!a.labelBounds)continue;
+        const {left,right,top,bottom}=a.labelBounds;
+        if(point.x>=left-3&&point.x<=right+3&&point.y>=top-3&&point.y<=bottom+3)return i;
+      }
+      return -1;
     }
 
     function findSegment(point,event) {
@@ -374,6 +401,7 @@
     let stillFromVideo = false;
     let motionTracker = null;
     let trackingActive = false;
+    let scanningActive = false,scanCancelled = false;
     const trackOverlay=byId('track-overlay');
     const trackCtx=trackOverlay.getContext('2d');
     const pointTrails=new Map();
@@ -436,8 +464,8 @@
       section.querySelector('.paiva-2d-player-dock').hidden=!enabled;
       section.querySelector('.paiva-2d-marking-dock').hidden=enabled;
       byId('auto-track').disabled=!enabled;
-      for (const button of section.querySelectorAll('[data-2d-tool]')) button.disabled=enabled;
-      for (const key of ['undo','clear','save','width']) byId(key).disabled=enabled;
+      for (const button of section.querySelectorAll('[data-2d-tool]')) button.disabled=enabled||scanningActive;
+      for (const key of ['undo','clear','save','width']) byId(key).disabled=enabled||scanningActive;
     }
 
     function updateCameraControls() {
@@ -448,19 +476,23 @@
       byId('camera-stop').disabled = !live;
       byId('record').disabled = !live || recording || typeof MediaRecorder === 'undefined';
       byId('stop-record').disabled = !recording;
-      byId('capture').disabled = recording || (!live && !hasPlayback);
-      byId('track-start').disabled = !hasPlayback || !lastFrameFromVideo || !annotations.length || trackingActive || recording;
-      byId('track-stop').disabled = !trackingActive;
-      byId('prev-frame').disabled = !hasPlayback || recording || trackingActive;
-      byId('next-frame').disabled = !hasPlayback || recording || trackingActive;
+      byId('capture').disabled = scanningActive || recording || (!live && !hasPlayback);
+      byId('track-start').disabled = scanningActive || !hasPlayback || !lastFrameFromVideo || !annotations.length || trackingActive || recording;
+      byId('scan-short').disabled = scanningActive || !hasPlayback || !lastFrameFromVideo ||
+        !annotations.some(item=>item.kind==='angle') || trackingActive || recording;
+      byId('scan-radius').disabled = scanningActive;
+      byId('track-stop').disabled = !trackingActive && !scanningActive;
+      byId('prev-frame').disabled = !hasPlayback || recording || trackingActive || scanningActive;
+      byId('next-frame').disabled = !hasPlayback || recording || trackingActive || scanningActive;
       byId('speed').disabled = !hasPlayback || recording;
       byId('pingpong').disabled = !hasPlayback || recording;
-      byId('play-video').disabled = !hasPlayback || recording;
-      byId('pause-video').disabled = !hasPlayback || recording;
+      byId('play-video').disabled = !hasPlayback || recording || scanningActive;
+      byId('pause-video').disabled = !hasPlayback || recording || scanningActive;
       syncTimeline();
     }
 
     function stopTracking(clear=true) {
+      if(scanningActive)scanCancelled=true;
       motionTracker?.stop();motionTracker=null;trackingActive=false;
       if (clear) trackOverlay.hidden=true;
       updateCameraControls();
@@ -520,9 +552,10 @@
         if(item.kind==='angle') {
           const angle=angleDegrees(pts[0],pts[1],pts[2]);
           if(angle!==null) {
-            readings.push(`A ${format(angle)}°`);
+            const shown=item.supplementary?180-angle:angle;
+            readings.push(`A ${format(shown)}°`);
             trackCtx.font='650 13px system-ui,sans-serif';
-            trackCtx.fillText(`A ${format(angle)}°`,Math.min(w-82,pts[1].x+8),Math.max(15,pts[1].y-8));
+            trackCtx.fillText(`A ${format(shown)}°`,Math.min(w-82,pts[1].x+8),Math.max(15,pts[1].y-8));
           }
         }
       });
@@ -530,13 +563,13 @@
     }
 
     async function startTracking() {
-      if (trackingActive || !lastFrameFromVideo || !annotations.length || !recordedUrl) return;
+      if (trackingActive || scanningActive || !lastFrameFromVideo || !annotations.length || !recordedUrl) return;
       const motion=globalThis.PAIVA_MOTION_TRACKER;
       if (!motion?.create || !trackCtx) {message('Módulo de rastreio indisponível. Atualize todos os arquivos do aplicativo.');return;}
       pointTrails.clear();
       const currentTime=video.currentTime;
       motionTracker=motion.create({video,annotations:annotations.map(item=>({
-        kind:item.kind,points:item.points.map(p=>({...p}))})),
+        kind:item.kind,supplementary:!!item.supplementary,points:item.points.map(p=>({...p}))})),
         sourceWidth:canvas.width,sourceHeight:canvas.height,
         isReversePlaying:()=>backwardMode&&reverseFrame!==null,
         isPingPongEnabled:()=>byId('pingpong').checked,
@@ -553,12 +586,53 @@
       if (!started) {stopTracking();showVideo(false);return;}
       message(`Rastreio experimental iniciado em ${currentTime.toFixed(1).replace('.',',')} s. Use marcadores contrastantes e interrompa se um ponto se afastar da articulação.`);
     }
+    async function scanShortSegment(){
+      if(scanningActive||trackingActive||!lastFrameFromVideo||!hasFileVideo()||
+        !annotations.some(item=>item.kind==='angle'))return;
+      const motion=globalThis.PAIVA_MOTION_TRACKER;
+      if(!motion?.scanWindow){message('Atualize também athlete-motion.js para usar a busca de extensão.');return;}
+      const radius=Number(byId('scan-radius').value)||0.5;
+      const fps=Number(byId('file-fps').value)||30;
+      const center=video.currentTime;
+      haltReverse();video.pause();
+      scanCancelled=false;scanningActive=true;
+      updateCameraControls();
+      for(const button of section.querySelectorAll('[data-2d-tool]'))button.disabled=true;
+      message(`Buscando a extensão em ±${String(radius).replace('.',',')} s do quadro marcado. Aguarde; você pode interromper em “Parar rastreio”.`);
+      try{
+        const result=await motion.scanWindow({video,centerTime:center,radius,fps,
+          annotations:annotations.map(item=>({kind:item.kind,supplementary:!!item.supplementary,
+            points:item.points.map(p=>({...p}))})),
+          sourceWidth:canvas.width,sourceHeight:canvas.height,
+          shouldCancel:()=>scanCancelled,
+          onProgress:progress=>message(`Analisando quadros próximos… ${progress.tested} conferidos · maior A ${format(progress.bestAngle)}° até agora.`)
+        });
+        if(scanCancelled)return;
+        // Ao terminar, expõe o quadro em que a MAIOR leitura experimental ocorreu.
+        // Os pontos desse quadro são correspondências rastreadas, não detecção anatômica.
+        originalCtx.drawImage(video,0,0,original.width,original.height);
+        annotations=result.best.shapes.map(item=>({kind:item.kind,supplementary:item.supplementary,
+          points:item.points.map(p=>({x:p.x/result.width*canvas.width,y:p.y/result.height*canvas.height}))}));
+        lastFrameFromVideo=true;stillFromVideo=true;
+        render();showVideo(false);
+        byId('back-video').hidden=false;
+        message(`Maior leitura encontrada: A ${format(result.best.angle)}° em ${clockTime(result.best.time)} · ${result.tested} quadros próximos. ${result.partial?'Parte do intervalo foi interrompida por falta de referência; ':''}Confira visualmente cada ponto e a convenção angular antes de usar no bike fit.`);
+      }catch(error){
+        if(!scanCancelled)message(`Busca curta interrompida: ${error?.message||'não foi possível acompanhar os pontos'}. Confira contraste, FPS e posição dos marcadores.`);
+      }finally{
+        scanningActive=false;scanCancelled=false;
+        updateCameraControls();
+        for(const button of section.querySelectorAll('[data-2d-tool]'))button.disabled=!video.hidden;
+      }
+    }
     function stopTrackingPlayback() {
+      if(scanningActive){scanCancelled=true;message('Interrompendo a busca curta. O quadro original continua marcado.');return;}
       if(!trackingActive)return;
       stopTracking();video.pause();
       message('Rastreio encerrado. Pause noutro instante e capture um novo quadro para corrigir os pontos.');
     }
     byId('track-start').addEventListener('click',startTracking);
+    byId('scan-short').addEventListener('click',scanShortSegment);
     byId('track-stop').addEventListener('click',stopTrackingPlayback);
 
     function stopStream() {
@@ -594,7 +668,7 @@
       return true;
     }
     function attemptPlayback() {
-      if(!hasFileVideo())return;
+      if(scanningActive||!hasFileVideo())return;
       if(backwardMode){
         if(reverseFrame===null)reverseFrame=requestAnimationFrame(reverseTick);
         message('Vídeo retornando. Clique em Pausar no instante desejado.');
@@ -620,7 +694,7 @@
       message('Vídeo pausado. Ajuste a posição na linha do tempo ou clique em “Capturar quadro”.');
     }
     function togglePlayback() {
-      if(!hasFileVideo())return;
+      if(scanningActive||!hasFileVideo())return;
       if(!video.paused || (backwardMode && reverseFrame!==null))pausePlayback();
       else {
         if(video.hidden){showVideo(true);byId('back-video').hidden=true;}
@@ -657,7 +731,7 @@
       message('Posição ajustada. Capture um novo quadro antes de iniciar um rastreio.');
     });
     function stepFrame(direction,preserveCapturedImage=false) {
-      if(!hasFileVideo())return;
+      if(scanningActive||!hasFileVideo())return;
       haltReverse();video.pause();
       if(trackingActive)stopTracking();
       const refreshStill=preserveCapturedImage && stillFromVideo && !canvas.hidden;
@@ -685,6 +759,7 @@
     // Sobre o visor da análise, a rodinha move o vídeo de fato: não rola a página.
     // Ctrl + rodinha mantém o zoom da foto; arquivos de webcam ao vivo não sofrem seek.
     canvas.parentElement.addEventListener('wheel',event=>{
+      if(scanningActive){event.preventDefault();return;}
       if(event.ctrlKey && !canvas.hidden){
         event.preventDefault();
         updateZoom(Number(byId('zoom').value)+(event.deltaY<0?25:-25));
@@ -752,6 +827,7 @@
       photoLoaded = true;
       stillFromVideo=source===video;
       annotations=[];draft=[];activeDrag=null;activeDraw=null;selectedIndex=-1;
+      updateZoom(100);
       render();showVideo(false);
       return true;
     }
@@ -862,15 +938,16 @@
     }
 
     function captureVideoFrame() {
+      if(scanningActive)return;
       if (recorder?.state==='recording') {
         message('Pare a gravação antes de capturar um quadro para análise.');return;
       }
       haltReverse();
       if (trackingActive) stopTracking();
+      video.pause();
       if (!videoCanCapture() || !setFrame(video,video.videoWidth,video.videoHeight)) {
         message('Aguarde o vídeo carregar. Depois pause no quadro desejado e tente novamente.');return;
       }
-      video.pause();
       lastFrameFromVideo=!cameraStream && !!recordedUrl;
       if (cameraStream) {
         stopStream();video.srcObject=null;
@@ -885,6 +962,12 @@
     byId('stop-record').addEventListener('click',stopRecording);
     byId('camera-stop').addEventListener('click',stopCamera);
     byId('capture').addEventListener('click',captureVideoFrame);
+    video.addEventListener('pointerdown',event=>{
+      if(event.button!==0 || scanningActive || recorder?.state==='recording')return;
+      if(!videoCanCapture()||(!hasFileVideo()&&!cameraStream))return;
+      event.preventDefault();
+      captureVideoFrame();
+    });
     byId('back-video').addEventListener('click',() => {
       if (!recordedUrl) return;
       if (trackingActive) stopTracking();
@@ -926,10 +1009,20 @@
     });
 
     canvas.addEventListener('pointerdown',event => {
+      if(event.button!==0)return;
+      if(scanningActive)return;
       if (!photoLoaded) {message('Primeiro escolha uma fotografia do atleta.');return;}
       const point=pointAt(event);
       if (!point) return;
       event.preventDefault();
+      const selectedLabel=angleLabelAt(point);
+      if(selectedLabel>=0){
+        const angle=annotations[selectedLabel];
+        angle.supplementary=!angle.supplementary;
+        render();
+        message(`Convenção alterada: A ${format(displayedAngle(angle))}°. Clique novamente no valor para inverter.`);
+        return;
+      }
       if(tool==='point'){
         annotations.push({kind:'point',points:[point]});
         selectedIndex=annotations.length-1;
@@ -952,6 +1045,7 @@
     });
     canvas.addEventListener('pointermove',event => {
       const p=pointAt(event);if(!p)return;
+      if(!activeDraw&&!activeDrag)canvas.style.cursor=angleLabelAt(p)>=0?'pointer':'crosshair';
       if (activeDraw?.pointer===event.pointerId) {
         event.preventDefault();
         draft=draftFromDrag(activeDraw.kind,activeDraw.start,p,event.shiftKey);
@@ -1018,8 +1112,7 @@
     });
 
     globalThis.PAIVA_ATHLETE_2D = {
-      getAngles:() => annotations.filter(item => item.kind==='angle')
-        .map(item => angleDegrees(item.points[0],item.points[1],item.points[2])),
+      getAngles:() => annotations.filter(item => item.kind==='angle').map(displayedAngle),
       hasImage:() => photoLoaded,
       openVideo:(file,label) => {
         const loaded=loadVideoFile(file,label);

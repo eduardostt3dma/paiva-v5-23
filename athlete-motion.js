@@ -63,7 +63,7 @@
     canvas.width=w;canvas.height=h;
     const ctx=canvas.getContext('2d',{willReadFrequently:true});
     if(!ctx) return {start:async()=>false,stop:()=>{}};
-    const scaled=annotations.map(item=>({kind:item.kind,points:item.points.map(p=>({
+    const scaled=annotations.map(item=>({kind:item.kind,supplementary:!!item.supplementary,points:item.points.map(p=>({
       x:p.x/sourceWidth*w,y:p.y/sourceHeight*h}))}));
     let running=false,previous=null,frameId=null,lastVideoTime=-1,lastSampleTime=-1;
     const sample=()=> {
@@ -106,7 +106,7 @@
           }
           pts.push({x:found.x,y:found.y});
         }
-        nextShapes.push({kind:item.kind,points:pts});
+        nextShapes.push({kind:item.kind,supplementary:item.supplementary,points:pts});
       }
       scaled.splice(0,scaled.length,...nextShapes);
       previous=next;
@@ -127,5 +127,96 @@
     }
     return {start,stop};
   }
-  globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,grayscale,create};
+
+  // Busca curta EM TORNO de um quadro de referência manualmente marcado.
+  // Cada direção inicia do mesmo ponto e utiliza verificações ida/volta por quadro.
+  // Não detecta articulações; os resultados são apenas hipóteses para conferência.
+  async function scanWindow({video,annotations,sourceWidth,sourceHeight,
+    centerTime,radius=0.5,fps=30,shouldCancel=()=>false,onProgress=()=>{}}){
+    if(!video?.videoWidth || !video.videoHeight || !annotations?.some(item=>item.kind==='angle'))
+      throw new Error('Marque pelo menos um ângulo no quadro capturado.');
+    if(!Number.isFinite(video.duration)||video.duration<=0)
+      throw new Error('O vídeo ainda não informou sua duração.');
+    const w=WIDTH,h=Math.max(1,Math.round(w*video.videoHeight/video.videoWidth));
+    const surface=document.createElement('canvas');surface.width=w;surface.height=h;
+    const ctx=surface.getContext('2d',{willReadFrequently:true});
+    if(!ctx)throw new Error('Não foi possível preparar a análise local.');
+    const sourceShapes=annotations.map(item=>({kind:item.kind,supplementary:!!item.supplementary,
+      points:item.points.map(p=>({x:p.x/sourceWidth*w,y:p.y/sourceHeight*h}))}));
+    const cloneShapes=shapes=>shapes.map(item=>({kind:item.kind,supplementary:item.supplementary,
+      points:item.points.map(p=>({...p}))}));
+    const angleValue=shapes=>{
+      const first=shapes.find(item=>item.kind==='angle'&&item.points.length===3);
+      if(!first)return null;
+      const [a,b,c]=first.points;
+      const ux=a.x-b.x,uy=a.y-b.y,vx=c.x-b.x,vy=c.y-b.y;
+      const ul=Math.hypot(ux,uy),vl=Math.hypot(vx,vy);
+      if(ul<4||vl<4)return null;
+      const degrees=Math.acos(Math.max(-1,Math.min(1,(ux*vx+uy*vy)/(ul*vl))))*180/Math.PI;
+      return first.supplementary?180-degrees:degrees;
+    };
+    const sample=()=>{ctx.drawImage(video,0,0,w,h);return grayscale(ctx.getImageData(0,0,w,h));};
+    const seek=target=>new Promise((resolve,reject)=>{
+      if(shouldCancel()){reject(new Error('Busca interrompida.'));return;}
+      const next=Math.max(0,Math.min(video.duration,target));
+      if(Math.abs(video.currentTime-next)<0.0005 && video.readyState>=2){resolve();return;}
+      let timer;
+      const cleanup=()=>{clearTimeout(timer);video.removeEventListener('seeked',done);video.removeEventListener('error',fail);};
+      const done=()=>{cleanup();resolve();};
+      const fail=()=>{cleanup();reject(new Error('Não foi possível buscar o quadro no arquivo.'));};
+      video.addEventListener('seeked',done);video.addEventListener('error',fail);
+      timer=setTimeout(()=>{cleanup();reject(new Error('O vídeo demorou para localizar o quadro. Tente outro arquivo ou FPS.'));},7000);
+      try{video.currentTime=next;}catch(_){fail();}
+    });
+    video.pause();
+    const center=Math.max(0,Math.min(video.duration,Number(centerTime)||0));
+    await seek(center);
+    const centralFrame=sample();
+    for(const item of sourceShapes)for(const p of item.points)
+      if(!trackPoint(centralFrame,centralFrame,w,h,p,PATCH,0))
+        throw new Error('Um marcador está sem textura/contraste suficiente. Use uma referência visível e tente novamente.');
+    const firstAngle=angleValue(sourceShapes);
+    if(firstAngle===null)throw new Error('Confira os três pontos do ângulo antes de buscar a extensão.');
+    let best={time:center,angle:firstAngle,shapes:cloneShapes(sourceShapes)};
+    let tested=0,partial=false;
+    const sampleRate=Math.max(10,Math.min(60,Number(fps)||30));
+    const steps=Math.max(1,Math.ceil(Math.max(.1,Math.min(1,Number(radius)||.5))*sampleRate));
+    for(const direction of [-1,1]){
+      let previous=centralFrame;
+      let currentShapes=cloneShapes(sourceShapes);
+      let previousTime=center;
+      for(let n=1;n<=steps;n++){
+        if(shouldCancel())throw new Error('Busca interrompida.');
+        const time=Math.max(0,Math.min(video.duration,center+direction*n/sampleRate));
+        if(Math.abs(time-previousTime)<.0005)break;
+        await seek(time);
+        if(shouldCancel())throw new Error('Busca interrompida.');
+        let pixels;
+        try{pixels=sample();}catch(_){throw new Error('Não foi possível ler um quadro do vídeo.');}
+        let lost=false;
+        const updated=[];
+        for(const item of currentShapes){
+          const points=[];
+          for(const p of item.points){
+            const match=trackSafePoint(previous,pixels,w,h,p);
+            if(!match){lost=true;break;}
+            points.push({x:match.x,y:match.y});
+          }
+          if(lost)break;
+          updated.push({...item,points});
+        }
+        if(lost){partial=true;break;}
+        currentShapes=updated;previous=pixels;previousTime=time;tested++;
+        const measured=angleValue(updated);
+        if(measured!==null && measured>best.angle)
+          best={time,angle:measured,shapes:cloneShapes(updated)};
+        if(n%4===0)onProgress({tested,bestAngle:best.angle,bestTime:best.time});
+      }
+    }
+    if(!tested)throw new Error('Nenhum quadro vizinho pôde ser rastreado com confiança. Reposicione os marcadores.');
+    if(shouldCancel())throw new Error('Busca interrompida.');
+    await seek(best.time);
+    return {best,tested,partial,width:w,height:h,referenceTime:center};
+  }
+  globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,grayscale,create,scanWindow};
 })();
