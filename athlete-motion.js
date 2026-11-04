@@ -130,6 +130,18 @@
     return best;
   }
 
+  // Um ponto isolado nem sempre contém a mesma textura rica dos três marcos
+  // do ângulo. Primeiro usamos correlação normalizada; quando ela falha,
+  // tentamos a correspondência de brilho com ida/volta que já funciona no
+  // rastreio curto de pedalada. Sem correspondência confiável, paramos.
+  function trackRobustPoint(before,after,w,h,at,options={}){
+    const fine=trackFinePoint(before,after,w,h,at,options);
+    if(fine)return fine;
+    const fallback=trackCyclePoint(before,after,w,h,at);
+    if(!fallback||fallback.error>26)return null;
+    return {x:fallback.x,y:fallback.y,method:'brightness',confidence:null};
+  }
+
   function trackFineShapes(before,after,w,h,annotations,sourceWidth,sourceHeight,options={}) {
     if(!before||!after||before.length!==w*h||after.length!==w*h)
       throw new Error('Os dois quadros devem possuir as mesmas dimensões.');
@@ -138,14 +150,18 @@
       ...item,points:item.points.map((point,j)=>{
         if(item.trackEnabled===false||!['point','angle','line'].includes(item.kind))return {...point};
         const scaled={x:point.x/sourceWidth*w,y:point.y/sourceHeight*h};
-        let found=trackFinePoint(before,after,w,h,scaled,options);
+        let found=item.kind==='point'?
+          trackRobustPoint(before,after,w,h,scaled,options):
+          trackFinePoint(before,after,w,h,scaled,options);
         if(!found){
           // Segunda tentativa apenas quando o alvo falhou: um pequeno
           // deslocamento maior entre quadros pode ultrapassar a busca padrão.
           // Exigimos confiança mais alta para não inventar o movimento.
           const patch=Math.max(4,Math.min(8,Number(options.patch)||6));
           const search=Math.min(42,Math.max(32,(Number(options.search)||22)+14));
-          const rescue=trackFinePoint(before,after,w,h,scaled,{patch,search});
+          const rescue=item.kind==='point'?
+            trackRobustPoint(before,after,w,h,scaled,{patch,search}):
+            trackFinePoint(before,after,w,h,scaled,{patch,search});
           if(rescue?.confidence>=.68&&rescue.returnError<=3)found=rescue;
         }
         if(!found){lost.push({item:i,point:j});return {...point};}
@@ -156,7 +172,7 @@
     return {shapes,lost,moved};
   }
 
-  function createFrameSampler(video,preferredWidth=960){
+  function createFrameSampler(video,preferredWidth=1280){
     if(!video?.videoWidth||!video.videoHeight)throw new Error('Aguarde o vídeo carregar.');
     const width=Math.min(preferredWidth,Math.max(1,video.videoWidth));
     const height=Math.max(1,Math.round(width*video.videoHeight/video.videoWidth));
@@ -176,7 +192,9 @@
     if(!video?.videoWidth||!video.videoHeight||!Number.isFinite(video.duration)||video.duration<=0)
       throw new Error('Abra um vídeo válido e aguarde o carregamento.');
     if(!point||!(sourceWidth>0&&sourceHeight>0))throw new Error('Marque um ponto sobre o atleta.');
-    const sampler=createFrameSampler(video,960);
+    // Mais detalhe na amostra: até 1280 px, sem ampliar artificialmente vídeo
+    // de resolução inferior. A foto capturada permanece em resolução maior.
+    const sampler=createFrameSampler(video,1280);
     const {width,height}=sampler;
     const seek=target=>new Promise((resolve,reject)=>{
       const time=Math.max(0,Math.min(video.duration-.001,target));
@@ -196,7 +214,7 @@
     let previous=sampler.sample();
     let current={x:point.x/sourceWidth*width,y:point.y/sourceHeight*height};
     const settings={patch,search};
-    if(!trackFinePoint(previous,previous,width,height,current,settings))
+    if(!trackRobustPoint(previous,previous,width,height,current,settings))
       throw new Error('Este ponto não tem contraste suficiente. Marque uma textura ou referência mais visível.');
     const path=[{x:point.x,y:point.y,time:start}];
     let partial=false,lostTime=null;
@@ -208,7 +226,7 @@
       await seek(time);
       if(shouldCancel()){partial=true;break;}
       const next=sampler.sample();
-      const found=trackFinePoint(previous,next,width,height,current,settings);
+      const found=trackRobustPoint(previous,next,width,height,current,settings);
       if(!found){partial=true;lostTime=time;break;}
       current={x:found.x,y:found.y};previous=next;
       path.push({x:current.x/width*sourceWidth,y:current.y/height*sourceHeight,time});
@@ -492,6 +510,6 @@
       lastReliable,width:w,height:h,startTime:start,
       supplementary:!!tracked[0].supplementary,hipPath,heelPath};
   }
-  globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,trackCyclePoint,trackFinePoint,
+  globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,trackCyclePoint,trackFinePoint,trackRobustPoint,
     trackFineShapes,createFrameSampler,scanSinglePoint,grayscale,create,scanWindow,scanCycle};
 })();
