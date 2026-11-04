@@ -356,6 +356,14 @@ ANÁLISE COMPLETA · OITO PONTOS INTERLIGADOS:
 - Rastreio ON acompanha as oito referências pelo modo quadro a quadro e pode tentar seguir na reprodução do vídeo. Se perder textura, os pontos permanecem visíveis para correção manual. As correções ficam salvas no histórico do quadro, como nas ferramentas anteriores.
 - O cache atualizado termina em “full8chain1”.
 
+CAPTAÇÃO MAIS NÍTIDA · WEBCAM PRINCIPAL:
+- Novo seletor “Qualidade da captação” antes de ligar a webcam. “Alta nitidez” solicita Full HD (1920 × 1080) com até 60 fps, conforme disponibilidade real da câmera; “Leve” preserva o perfil antigo HD/30 fps para computadores e webcams mais simples.
+- A gravação na opção Alta nitidez utiliza taxa de bits maior, ajustada à resolução e ao FPS negociados (até 10 Mb/s, em vez dos antigos 1,5 Mb/s). Isso tende a conservar melhor bordas e detalhes dos marcadores, mas aumenta o tamanho dos arquivos, especialmente em filmagens longas. A opção Leve mantém 1,5 Mb/s.
+- Após ligar a webcam, o aplicativo mostra a resolução e os fps efetivamente informados pelo dispositivo; não inventa 60 fps se a câmera não suportar. Ao terminar a gravação, o seletor manual de FPS é aproximado automaticamente ao valor registrado pela câmera para a navegação quadro a quadro.
+- A resolução do quadro congelado, os oito pontos, as medidas, o rastreio existente e o histórico manual continuam iguais. O melhor resultado depende também de iluminação forte e exposição curta (quando a webcam permite esse ajuste). Filmes importados não podem ganhar detalhes que não foram gravados na origem.
+- Na captação com dois visores, foi acrescentada a opção manual “Detalhes/refletores · 10 Mb/s” à lista de qualidade do arquivo, preservando as opções anteriores e o padrão de 3 Mb/s. Duas câmeras Full HD/60 fps requerem hardware e USB adequados.
+- O cache atualizado termina em “captureclarity1”.
+
 NOVO · CAPTURA FULL HD E RASTREIO DE PONTO COM SEGUNDA ESTRATÉGIA:
 - QUADRO CONGELADO: antes havia limite de 1.400 px na maior dimensão. Agora o aplicativo conserva a imagem até 1.920 px, dentro de um teto de cerca de 2,3 milhões de pixels. Fotos e vídeos de resolução menor são mantidos no tamanho original, sem ampliação artificial.
 - RASTREIO FINO: a leitura de textura por quadro passou de até 960 px de largura para até 1.280 px, respeitando a resolução real do vídeo e reutilizando a mesma amostra enquanto avança com a rodinha. A melhoria aumenta detalhe, mas pode exigir um pouco mais do computador.

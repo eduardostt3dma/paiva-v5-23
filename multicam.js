@@ -66,7 +66,7 @@
                 <select id="paiva-multi-fps-${key}"><option value="15">15 fps</option><option value="30" selected>30 fps</option><option value="60">60 fps</option></select>
               </label>
               <label>Qualidade do arquivo
-                <select id="paiva-multi-bitrate-${key}"><option value="1500000">Leve · 1,5 Mb/s</option><option value="3000000" selected>Alta · 3 Mb/s</option><option value="6000000">Máxima · 6 Mb/s</option></select>
+                <select id="paiva-multi-bitrate-${key}"><option value="1500000">Leve · 1,5 Mb/s</option><option value="3000000" selected>Alta · 3 Mb/s</option><option value="6000000">Máxima · 6 Mb/s</option><option value="10000000">Detalhes/refletores · 10 Mb/s</option></select>
               </label>
             </div>
             <video id="paiva-multi-video-${key}" playsinline muted preload="auto"></video>

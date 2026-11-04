@@ -45,6 +45,13 @@
   font:800 10px system-ui,sans-serif;}
 #paiva-athlete-2d .paiva-2d-tools button[aria-pressed="true"] {background:#dbe7ef;
   border-color:#dbe7ef;color:#162634;}
+#paiva-athlete-2d .paiva-2d-camera-quality {display:flex;flex-direction:column;
+  gap:5px;padding:8px 10px;border:1px solid #486c79;border-radius:9px;
+  background:#172d39;color:#c9e1e7;font:700 11px system-ui,sans-serif;}
+#paiva-athlete-2d .paiva-2d-camera-quality select {width:100%;min-width:0;
+  background:#24404e;color:#eefaff;border:1px solid #5c8190;
+  border-radius:7px;padding:8px 6px;font:650 11px system-ui,sans-serif;}
+#paiva-athlete-2d .paiva-2d-camera-quality select:disabled {opacity:.6;}
 #paiva-athlete-2d .paiva-2d-zoom {display:grid;grid-template-columns:repeat(3,1fr);
   gap:6px;padding:10px 0 13px;border-top:1px solid #526978;}
 #paiva-athlete-2d .paiva-2d-zoom label {grid-column:1/-1;color:#dae8ef;

@@ -64,7 +64,7 @@
         <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
         <p><strong>Congelar com clique:</strong> no vídeo gravado, clique com o botão ESQUERDO sobre a imagem para pausar e capturar automaticamente o quadro atual; as ferramentas compactas ficam logo abaixo. Com o quadro capturado, você pode marcar ou editar os pontos.</p>
         <p><strong>Zoom:</strong> a análise abre centralizada em 175% para facilitar os pontos. O controle varia de 5% em 5%, incluindo 175% e 180%, até 400%. Clique em “Ajustar foto” ou “100%” para ver toda a imagem.</p>
-        <p><strong>Qualidade da imagem:</strong> o quadro congelado preserva até Full HD (1920 × 1080, quando a fonte oferece essa resolução). O rastreio usa uma amostra de até 1280 px para reconhecer melhor as texturas, sem aumentar artificialmente a resolução do vídeo. Para movimentos rápidos, iluminação forte e gravação com pouca borragem ajudam mais que o zoom.</p>
+        <p><strong>Qualidade da imagem:</strong> o quadro congelado preserva até Full HD (1920 × 1080, quando a fonte oferece essa resolução). Para filmar pela webcam, escolha Alta nitidez (solicita Full HD/até 60 fps e grava com menos compressão) ou Leve (HD/até 30 fps). O navegador negocia o que a câmera realmente suporta; confira resolução e fps mostrados após ligar. O rastreio usa uma amostra de até 1280 px, sem ampliar artificialmente o vídeo. Iluminação forte e exposição curta, quando ajustável na câmera, reduzem o borrão dos refletores. A opção de alta nitidez gera arquivos maiores e não melhora vídeos já gravados.</p>
         <p><strong>Enquadramento:</strong> em 100%, a foto inteira se ajusta automaticamente à altura e largura visíveis, sem precisar rolar a imagem. O botão “Ajustar foto” restaura esse enquadramento. “Tela ampla” esconde temporariamente o painel lateral e ocupa a janela para analisar com mais espaço. Saia pela mesma tecla ou Esc. O zoom acima de 100% volta a permitir deslocamento intencional para ver detalhes.</p>
         <p><strong>Marcar sem capturar:</strong> com um vídeo carregado, escolha Ângulo, Linha ou Ponto (as ferramentas ficam sempre visíveis). Clique e arraste diretamente no atleta: o vídeo congela naquele instante automaticamente e a marcação já começa com o mouse pressionado. Um clique simples também congela para você ajustar os pontos em seguida. O tamanho da imagem é mantido ao alternar do vídeo para o quadro congelado.</p>
         <p><strong>Régua de recorte:</strong> abaixo do vídeo, arraste as duas alças da régua — início e fim — até o trecho desejado. O botão “✂ Salvar trecho” gera o novo MP4 local, preservando o original. O ícone 📷 tira uma foto do quadro e salva um PNG com as marcações que estiverem visíveis.</p>
@@ -196,6 +196,12 @@
                 <button type="button" id="paiva-2d-next-frame" disabled>Quadro ▶</button></div>
               <small class="paiva-2d-wheel-hint">🖱 Rodinha: quadros · Direito: play/pause · Espaço: play/pause · ← →: quadros</small>
             </div>
+            <label class="paiva-2d-camera-quality">Qualidade da captação
+              <select id="paiva-2d-camera-quality" aria-label="Qualidade da webcam">
+                <option value="detail" selected>Alta nitidez · Full HD / até 60 fps</option>
+                <option value="standard">Leve · HD / até 30 fps</option>
+              </select>
+            </label>
             <button type="button" id="paiva-2d-camera-start">Ligar webcam</button>
             <button type="button" id="paiva-2d-record" disabled>Iniciar gravação</button>
             <button type="button" id="paiva-2d-stop-record" disabled>Parar gravação</button>
@@ -1212,6 +1218,7 @@
       const recording = recorder?.state === 'recording';
       const hasPlayback = !!recordedUrl && video.getAttribute('src')===recordedUrl;
       byId('camera-start').disabled = live || recording;
+      byId('camera-quality').disabled = live || recording;
       byId('camera-stop').disabled = !live;
       byId('record').disabled = !live || recording || typeof MediaRecorder === 'undefined';
       byId('stop-record').disabled = !recording;
@@ -2135,6 +2142,22 @@
       return video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0;
     }
 
+    function recordingBitrate(settings,detail){
+      if(!detail)return 1500000;
+      const width=Number(settings.width)||1280;
+      const height=Number(settings.height)||720;
+      const fps=Number(settings.frameRate)||30;
+      return Math.round(Math.max(4000000,Math.min(10000000,width*height*fps*.10)));
+    }
+
+    function matchRecordingFps(fps){
+      const choice=byId('file-fps');
+      if(!(fps>0)||!choice)return;
+      const rates=Array.from(choice.options).map(option=>Number(option.value));
+      const nearest=rates.reduce((best,value)=>Math.abs(value-fps)<Math.abs(best-fps)?value:best,rates[0]);
+      choice.value=String(nearest);
+    }
+
     async function startCamera() {
       if (cameraStream) return;
       if (!navigator.mediaDevices?.getUserMedia || !window.isSecureContext) {
@@ -2142,18 +2165,30 @@
         return;
       }
       byId('camera-start').disabled = true;
+      byId('camera-quality').disabled = true;
       try {
         stopTracking();lastFrameFromVideo=false;
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video:{width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}}, audio:false
-        });
+        const detail=byId('camera-quality').value==='detail';
+        const high={video:{width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:60}},audio:false};
+        const standard={video:{width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false};
+        let stream;
+        let fallback=false;
+        try{stream=await navigator.mediaDevices.getUserMedia(detail?high:standard);}
+        catch(error){
+          if(!detail||['NotAllowedError','PermissionDeniedError','SecurityError'].includes(error?.name))throw error;
+          stream=await navigator.mediaDevices.getUserMedia(standard);
+          fallback=true;
+        }
         cameraStream = stream;
         video.pause();video.removeAttribute('src');video.srcObject=stream;
         video.controls = false;video.muted = true;video.autoplay = true;
         showVideo(true);byId('back-video').hidden=true;
         try {await video.play();} catch (_) { /* alguns navegadores exigem outro clique */ }
-        byId('camera-info').textContent = 'Webcam ligada. Apenas vídeo local, sem áudio nem envio à internet.';
-        message('Webcam ligada. Você pode gravar ou começar um ângulo diretamente na imagem para congelar o quadro.');
+        const actual=stream.getVideoTracks()[0]?.getSettings?.()||{};
+        const size=`${actual.width||video.videoWidth||'?'} × ${actual.height||video.videoHeight||'?'}`;
+        const fps=actual.frameRate?`${Math.round(actual.frameRate)} fps`:'fps não informado';
+        byId('camera-info').textContent=`Webcam: ${size} · ${fps}${fallback?' · modo leve de compatibilidade':''}. Vídeo local, sem áudio.`;
+        message(`Webcam ligada em ${size} · ${fps}. A nitidez real depende da câmera e da iluminação; agora pode gravar ou congelar o quadro.`);
       } catch (error) {
         stopStream();
         const denied = ['NotAllowedError','PermissionDeniedError','SecurityError'].includes(error?.name);
@@ -2170,11 +2205,28 @@
       }
       const supported = ['video/webm;codecs=vp8','video/webm','video/mp4']
         .find(type => MediaRecorder.isTypeSupported?.(type));
+      const settings=cameraStream.getVideoTracks()[0]?.getSettings?.()||{};
+      const requestedQuality=byId('camera-quality').value==='detail';
+      let bitrate=recordingBitrate(settings,requestedQuality);
       try {
         recorder = new MediaRecorder(cameraStream,supported
-          ? {mimeType:supported,videoBitsPerSecond:1500000}
-          : {videoBitsPerSecond:1500000});
-      } catch (_) {message('A gravação não é compatível com esta webcam/navegador. Tente marcar o ângulo diretamente sobre a imagem.');return;}
+          ? {mimeType:supported,videoBitsPerSecond:bitrate}
+          : {videoBitsPerSecond:bitrate});
+      } catch (_) {
+        // A webcam ainda pode fotografar e filmar no perfil de compatibilidade
+        // caso o codificador do aparelho recuse a taxa maior.
+        if(requestedQuality){
+          bitrate=1500000;
+          try{recorder=new MediaRecorder(cameraStream,supported
+            ? {mimeType:supported,videoBitsPerSecond:bitrate}
+            : {videoBitsPerSecond:bitrate});}
+          catch(_){recorder=null;}
+        }
+        if(!recorder){
+          message('A gravação não é compatível com esta webcam/navegador. Você ainda pode capturar um quadro.');
+          return;
+        }
+      }
       const thisRecorder = recorder;
       recordedChunks=[];
       thisRecorder.ondataavailable = event => {if (event.data?.size) recordedChunks.push(event.data);};
@@ -2201,11 +2253,13 @@
         download.download=filename;
         download.hidden=false;
         video.pause();video.srcObject=null;video.src=recordedUrl;
+        matchRecordingFps(Number(settings.frameRate));
         lastFrameFromVideo=false;
         stillFromVideo=false;
         video.controls=false;video.muted=true;video.autoplay=false;video.load();
         showVideo(true);byId('back-video').hidden=true;
-        byId('camera-info').textContent = 'Vídeo registrado automaticamente no navegador. Use Baixar para cópia permanente.';
+        byId('camera-info').textContent = `Vídeo registrado no navegador · ${Math.round(bitrate/1000000*10)/10} Mb/s solicitados. Use Baixar para guardar. `+
+          'A gravação em alta nitidez ocupa mais espaço.';
         message('Gravação concluída. Arraste um ângulo diretamente sobre o vídeo para congelar e medir. A filmagem também foi registrada no navegador.');
         updateCameraControls();
       };
@@ -2218,7 +2272,7 @@
           message('Limite de 3 minutos atingido. Finalizando o vídeo...');
         }
       },maxRecordingMs);
-      byId('camera-info').textContent='Gravando vídeo local · máximo de 3 minutos. Sem áudio.';
+      byId('camera-info').textContent=`Gravando ${requestedQuality?'em alta nitidez':'em modo leve'} · ${Math.round(bitrate/1000000*10)/10} Mb/s solicitados · máximo de 3 minutos. Sem áudio.`;
       message('Gravação iniciada. Pedale normalmente e depois toque em “Parar gravação”.');
       updateCameraControls();
     }
