@@ -136,7 +136,7 @@
     const lost=[],moved=[];
     const shapes=annotations.map((item,i)=>({
       ...item,points:item.points.map((point,j)=>{
-        if(item.kind!=='point'&&item.kind!=='angle')return {...point};
+        if(item.trackEnabled===false||!['point','angle','line'].includes(item.kind))return {...point};
         const scaled={x:point.x/sourceWidth*w,y:point.y/sourceHeight*h};
         const found=trackFinePoint(before,after,w,h,scaled,options);
         if(!found){lost.push({item:i,point:j});return {...point};}

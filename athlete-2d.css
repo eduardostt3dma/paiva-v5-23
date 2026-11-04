@@ -152,6 +152,11 @@
   min-width:0;flex:1;padding:8px 5px;}
 #paiva-athlete-2d .paiva-2d-marking-dock [data-2d-tool="point"][aria-pressed="true"] {
   background:#d2f1df;color:#173327;border-color:#bcdfc9;}
+#paiva-athlete-2d .paiva-2d-marking-dock #paiva-2d-track-toggle {min-width:78px;
+  flex:0 1 105px;background:#21443d;border-color:#4e907b;color:#dcf9ed;
+  white-space:nowrap;font-size:10px;}
+#paiva-athlete-2d .paiva-2d-marking-dock #paiva-2d-track-toggle[aria-pressed="false"] {
+  background:#303d46;border-color:#566876;color:#cfdae2;}
 #paiva-athlete-2d .paiva-2d-canvas-wrap video:not([hidden]) {cursor:crosshair;}
 #paiva-athlete-2d .paiva-2d-canvas-wrap video {touch-action:none;cursor:crosshair;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align {grid-column:1/2;
@@ -203,6 +208,14 @@
 #paiva-athlete-2d .paiva-2d-fine-settings select {max-width:62px;
   border-radius:5px;border:1px solid #587989;background:#183440;color:#f0faff;
   padding:3px 5px;font:600 10px system-ui;}
+#paiva-athlete-2d .paiva-2d-project-tools {display:flex;align-items:center;
+  flex-wrap:wrap;gap:6px;padding:7px 3px;border-top:1px solid #385060;}
+#paiva-athlete-2d .paiva-2d-project-tools button,
+#paiva-athlete-2d .paiva-2d-project-tools label {display:inline-flex;align-items:center;
+  border:1px solid #557a86;border-radius:6px;padding:6px 8px;
+  background:#213b47;color:#e5f8fb;font:700 10px system-ui;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-project-tools label input {font-size:9px;max-width:145px;}
+#paiva-athlete-2d .paiva-2d-project-tools small {flex:1 1 100%;color:#a9c6d1;font-size:10px;}
 /* Menu pontual acionado sobre um ângulo, segmento ou marcador isolado.
    Não ocupa altura da bancada nem reduz a imagem em zoom 175%. */
 #paiva-athlete-2d .paiva-2d-delete-menu:not([hidden]) {position:fixed;z-index:100005;
