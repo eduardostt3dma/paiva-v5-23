@@ -132,6 +132,50 @@
         if(cancelled)status('Conversão cancelada. O arquivo original não foi alterado.');
       }
     }
+    // Recorte temporal preciso, realizado inteiramente neste computador.
+    // A reencodificação evita cortes imprecisos nos quadros-chave de MP4/AVI/MOV.
+    async function trim(file,start,end,onProgress=()=>{}) {
+      if(busy)throw new Error('O motor está ocupado com outra conversão. Aguarde o término.');
+      if(!(file instanceof Blob)||!file.size)throw new Error('Carregue primeiro um vídeo.');
+      if(file.size>MAX_FILE_BYTES)throw new Error('Limite de 250 MB por arquivo para proteger a memória do navegador.');
+      if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start)
+        throw new Error('Marque início e fim diferentes (por exemplo, 00:10 até 02:00).');
+      busy=true;cancelled=false;lastLog='';refresh();
+      try {
+        onProgress('Preparando o motor de recorte local…');
+        const FFmpeg=await loadLibrary();
+        engine=new FFmpeg();
+        engine.on('log',({message})=>{lastLog=message||lastLog;});
+        engine.on('progress',({progress})=>onProgress(`Recortando · ${Math.max(0,Math.min(99,Math.round(progress*100)))}% (estimativa). Não feche a página.`));
+        if(!('DecompressionStream' in globalThis))throw new Error('Atualize o Chrome ou Edge para usar o motor de vídeo.');
+        const base=new URL('./',document.baseURI);
+        const compressed=await fetch(new URL('ffmpeg-core.wasm.gz',base));
+        if(!compressed.ok||!compressed.body)throw new Error('Motor de vídeo não encontrado no site.');
+        const decompressed=new Response(compressed.body.pipeThrough(new DecompressionStream('gzip')),{headers:{'Content-Type':'application/wasm'}});
+        wasmBlobUrl=URL.createObjectURL(await decompressed.blob());
+        await engine.load({coreURL:new URL('ffmpeg-core.js',base).href,wasmURL:wasmBlobUrl});
+        URL.revokeObjectURL(wasmBlobUrl);wasmBlobUrl=null;
+        const originalName=file.name||'video.mp4';
+        const extension=(originalName.match(/\.([a-z\d]+)$/i)?.[1]||'mp4').toLowerCase();
+        const source=`paiva-entrada.${extension}`,destination='paiva-recorte.mp4';
+        await engine.writeFile(source,new Uint8Array(await file.arrayBuffer()));
+        onProgress('Processando o intervalo selecionado…');
+        const result=await engine.exec(['-ss',start.toFixed(3),'-i',source,
+          '-t',(end-start).toFixed(3),'-map','0:v:0','-an',
+          '-c:v','libx264','-preset','ultrafast','-crf','18','-pix_fmt','yuv420p','-movflags','+faststart',destination]);
+        if(result!==0)throw new Error('Não foi possível processar o trecho. '+(lastLog||'Verifique o codec.'));
+        const bytes=await engine.readFile(destination);
+        if(!bytes?.byteLength)throw new Error('Não foi produzido um recorte válido.');
+        const name=(originalName.replace(/\.[^.]+$/,'')||'video')+'_PAIVA_'+Math.round(start)+'-'+Math.round(end)+'s.mp4';
+        onProgress('Recorte pronto. O vídeo original permanece intacto.');
+        return new File([bytes],name,{type:'video/mp4'});
+      }finally {
+        if(engine){try{engine.terminate();}catch(_){}engine=null;}
+        if(wasmBlobUrl){URL.revokeObjectURL(wasmBlobUrl);wasmBlobUrl=null;}
+        busy=false;refresh();
+      }
+    }
+    globalThis.PAIVA_VIDEO_CONVERTER={trim};
     el('start').addEventListener('click',convert);
     el('cancel').addEventListener('click',()=>{
       cancelled=true;

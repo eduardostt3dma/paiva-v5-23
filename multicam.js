@@ -341,7 +341,10 @@
           const view=VIEWS.find(([id])=>id===byId('view',key).value)?.[1] || 'Visor';
           const filename=`PAIVA_${state.sessionId}_${key.toUpperCase()}_${view.replaceAll(' ','_')}.${mimeType.includes('mp4')?'mp4':'webm'}`;
           setPlayback(state,movie,filename,true);
-          message(key,`Gravação concluída (${(movie.size/1048576).toFixed(1).replace('.',',')} MB). Baixe o vídeo ou clique em “Analisar no 2D”.`);
+          globalThis.PAIVA_RECORDS?.save({kind:'video',name:filename,
+            description:`Webcam ${key.toUpperCase()} · ${view} · gravação individual`,blob:movie})
+            .catch(error=>message(key,`Vídeo pronto para baixar, mas o salvamento local falhou: ${error.message}`));
+          message(key,`Gravação concluída (${(movie.size/1048576).toFixed(1).replace('.',',')} MB), registrada no navegador. Baixe para guardar permanentemente.`);
         } else {
           detachVideo(state);
           message(key,'A gravação terminou sem dados. Tente novamente com um trecho menor.');

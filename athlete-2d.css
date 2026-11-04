@@ -226,4 +226,46 @@
   #paiva-athlete-2d .paiva-2d-actions button {width:auto;flex:1 1 135px;}
   #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom {grid-template-columns:70px 1fr 30px 48px 30px;}
 }
+/* Cores de ângulos: seis opções discretas, sem reduzir o quadro do atleta. */
+#paiva-athlete-2d .paiva-2d-angle-palette {display:flex;align-items:center;
+  justify-content:center;gap:8px;padding:4px 8px;margin:4px 0 0;
+  background:#16232d;border:1px solid #3c5363;border-radius:7px;}
+#paiva-athlete-2d .paiva-2d-angle-palette span {font:750 10px system-ui;color:#dcebf2;}
+#paiva-athlete-2d .paiva-2d-angle-palette button {width:18px;height:18px;padding:0;
+  flex:none;cursor:pointer;border-radius:50%;border:1px solid #ffffff75;
+  box-shadow:0 0 0 1px #141e25;}
+#paiva-athlete-2d .paiva-2d-angle-palette button[aria-pressed="true"]{
+  outline:2px solid #e3f4fc;outline-offset:2px;}
+#paiva-athlete-2d .paiva-2d-angle-palette small {font:9px system-ui;color:#9eb5c1;}
+/* Recorte e arquivo ficam recolhidos na coluna estreita; abrem sob demanda. */
+#paiva-athlete-2d .paiva-2d-trimmer,
+#paiva-athlete-2d .paiva-2d-records {width:100%;min-width:0;border:1px solid #516d7e;
+  border-radius:8px;background:#12222e;padding:5px;box-sizing:border-box;
+  font:10px system-ui;color:#d6e8f1;}
+#paiva-athlete-2d .paiva-2d-trimmer summary,
+#paiva-athlete-2d .paiva-2d-records summary {cursor:pointer;font-weight:800;
+  color:#e1f0f6;padding:3px 2px;}
+#paiva-athlete-2d .paiva-2d-trim-inputs,
+#paiva-athlete-2d .paiva-2d-trim-buttons {display:grid;grid-template-columns:1fr 1fr;
+  gap:5px;margin:6px 0;}
+#paiva-athlete-2d .paiva-2d-trim-inputs label {font-size:9px;min-width:0;}
+#paiva-athlete-2d .paiva-2d-trim-inputs input {display:block;width:100%;min-width:0;
+  box-sizing:border-box;margin-top:3px;padding:6px 4px;border:1px solid #657c8d;
+  border-radius:6px;background:#142b3a;color:#eaf4f9;font:11px ui-monospace,monospace;}
+#paiva-athlete-2d .paiva-2d-webcam .paiva-2d-trim-buttons button {
+  font-size:9px;padding:6px 2px;}
+#paiva-athlete-2d #paiva-2d-trim-download {background:#cfe5ed;color:#162c37;
+  margin:5px 0;box-sizing:border-box;}
+#paiva-athlete-2d #paiva-2d-trim-status {display:block;margin-top:6px;}
+#paiva-athlete-2d .paiva-2d-records small {display:block;margin:5px 0 8px;}
+#paiva-athlete-2d .paiva-2d-record-row {display:grid;grid-template-columns:minmax(0,1fr) 39px 22px;
+  gap:3px;align-items:center;padding:5px 0;border-top:1px solid #345263;}
+#paiva-athlete-2d .paiva-2d-record-row span {font-size:9px;min-width:0;
+  overflow-wrap:anywhere;color:#cbdce5;}
+#paiva-athlete-2d .paiva-2d-webcam .paiva-2d-record-row button {width:auto;
+  min-width:0;padding:5px 1px;font-size:9px;border-radius:5px;}
+@media(max-width:720px){
+  #paiva-athlete-2d .paiva-2d-angle-palette {flex-wrap:wrap;}
+  #paiva-athlete-2d .paiva-2d-angle-palette small {width:100%;text-align:center;}
+}
 @media print {#paiva-athlete-2d {display:none!important;}}

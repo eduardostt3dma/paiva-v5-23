@@ -63,7 +63,7 @@
     canvas.width=w;canvas.height=h;
     const ctx=canvas.getContext('2d',{willReadFrequently:true});
     if(!ctx) return {start:async()=>false,stop:()=>{}};
-    const scaled=annotations.map(item=>({kind:item.kind,supplementary:!!item.supplementary,points:item.points.map(p=>({
+    const scaled=annotations.map(item=>({kind:item.kind,color:item.color,supplementary:!!item.supplementary,points:item.points.map(p=>({
       x:p.x/sourceWidth*w,y:p.y/sourceHeight*h}))}));
     let running=false,previous=null,frameId=null,lastVideoTime=-1,lastSampleTime=-1;
     const sample=()=> {
@@ -106,7 +106,7 @@
           }
           pts.push({x:found.x,y:found.y});
         }
-        nextShapes.push({kind:item.kind,supplementary:item.supplementary,points:pts});
+        nextShapes.push({kind:item.kind,color:item.color,supplementary:item.supplementary,points:pts});
       }
       scaled.splice(0,scaled.length,...nextShapes);
       previous=next;
@@ -141,9 +141,9 @@
     const surface=document.createElement('canvas');surface.width=w;surface.height=h;
     const ctx=surface.getContext('2d',{willReadFrequently:true});
     if(!ctx)throw new Error('Não foi possível preparar a análise local.');
-    const sourceShapes=annotations.map(item=>({kind:item.kind,supplementary:!!item.supplementary,
+    const sourceShapes=annotations.map(item=>({kind:item.kind,color:item.color,supplementary:!!item.supplementary,
       points:item.points.map(p=>({x:p.x/sourceWidth*w,y:p.y/sourceHeight*h}))}));
-    const cloneShapes=shapes=>shapes.map(item=>({kind:item.kind,supplementary:item.supplementary,
+    const cloneShapes=shapes=>shapes.map(item=>({kind:item.kind,color:item.color,supplementary:item.supplementary,
       points:item.points.map(p=>({...p}))}));
     const angleValue=shapes=>{
       const first=shapes.find(item=>item.kind==='angle'&&item.points.length===3);
