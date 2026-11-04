@@ -151,7 +151,8 @@
   min-width:0;flex:1;padding:8px 5px;}
 #paiva-athlete-2d .paiva-2d-marking-dock [data-2d-tool="point"][aria-pressed="true"] {
   background:#d2f1df;color:#173327;border-color:#bcdfc9;}
-#paiva-athlete-2d .paiva-2d-canvas-wrap video:not([hidden]) {cursor:ns-resize;}
+#paiva-athlete-2d .paiva-2d-canvas-wrap video:not([hidden]) {cursor:crosshair;}
+#paiva-athlete-2d .paiva-2d-canvas-wrap video {touch-action:none;cursor:crosshair;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align {grid-column:1/2;
   margin:0;align-items:center;}
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-align button {padding:7px 3px;}
@@ -245,6 +246,47 @@
 #paiva-athlete-2d .paiva-2d-angle-palette button[aria-pressed="true"]{
   outline:2px solid #e3f4fc;outline-offset:2px;}
 #paiva-athlete-2d .paiva-2d-angle-palette small {font:9px system-ui;color:#9eb5c1;}
+/* Régua Kinovea-like: duas alças, trecho destacado e foto ao lado do vídeo. */
+#paiva-athlete-2d .paiva-2d-trim-ruler {display:grid;
+  grid-template-columns:auto 28px auto minmax(65px,1fr) auto auto auto;
+  gap:7px;align-items:center;min-width:0;}
+#paiva-athlete-2d .paiva-2d-trim-ruler-caption {font:800 9px system-ui;
+  color:#a8c4d2;letter-spacing:.03em;white-space:nowrap;}
+#paiva-athlete-2d .paiva-2d-trim-ruler output {font:800 10px ui-monospace,monospace;
+  color:#e0eaf2;white-space:nowrap;}
+#paiva-athlete-2d .paiva-2d-trim-ruler-track {position:relative;height:26px;
+  margin:0 7px;border-radius:5px;cursor:ew-resize;touch-action:none;
+  background:linear-gradient(to bottom,transparent 9px,#415867 10px,#415867 15px,transparent 16px);}
+#paiva-athlete-2d .paiva-2d-trim-ruler-track.paiva-2d-ruler-disabled {opacity:.35;cursor:not-allowed;}
+#paiva-athlete-2d .paiva-2d-trim-ruler-selected {position:absolute;left:0;
+  width:100%;top:10px;height:6px;border-radius:3px;background:#a5d4e6;pointer-events:none;}
+#paiva-athlete-2d .paiva-2d-trim-ruler-track button {position:absolute;
+  width:14px;height:26px;top:0;transform:translateX(-50%);padding:0;
+  background:#e3f0f5;border:2px solid #102733;border-radius:4px;
+  cursor:ew-resize;box-shadow:0 0 0 1px #b5d7e7;z-index:2;touch-action:none;}
+#paiva-athlete-2d .paiva-2d-trim-ruler-track button[data-2d-trim-handle="end"]{
+  background:#a5d4e6;}
+#paiva-athlete-2d .paiva-2d-trim-ruler > button:not([data-2d-trim-handle]) {
+  background:#263c4b;border:1px solid #6c8494;border-radius:5px;
+  color:#e8f4fa;font:750 10px system-ui;padding:5px 7px;
+  cursor:pointer;white-space:nowrap;}
+#paiva-athlete-2d .paiva-2d-trim-ruler #paiva-2d-ruler-toggle {padding:5px 2px;}
+#paiva-athlete-2d .paiva-2d-trim-ruler-status {grid-column:1/-1;}
+#paiva-athlete-2d #paiva-2d-trim-ruler-status {grid-column:1/-1;
+  color:#bdced8;font-size:9px;line-height:1.3;}
+#paiva-athlete-2d .paiva-2d-playback-advanced {order:2;min-width:0;
+  margin-top:3px;border-top:1px solid #354f5f;}
+#paiva-athlete-2d .paiva-2d-playback-advanced summary {cursor:pointer;
+  padding:3px 0;font:750 9px system-ui;color:#a7bfcc;}
+#paiva-athlete-2d .paiva-2d-playback-advanced:not([open]) .paiva-2d-playback,
+#paiva-athlete-2d .paiva-2d-playback-advanced:not([open]) .paiva-2d-follow {display:none!important;}
+#paiva-athlete-2d .paiva-2d-playback-advanced .paiva-2d-follow {
+  margin:4px 0;font-size:10px;}
+#paiva-athlete-2d .paiva-2d-playback-advanced #paiva-2d-back-video {
+  display:block;margin:4px 0;padding:5px 8px;border:1px solid #5b7889;
+  border-radius:6px;background:#213745;color:#e1f0f5;font:750 10px system-ui;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-player-dock {display:flex;flex-direction:column;}
+#paiva-athlete-2d .paiva-2d-player-dock .paiva-2d-playback {order:0;}
 /* Recorte e arquivo ficam recolhidos na coluna estreita; abrem sob demanda. */
 #paiva-athlete-2d .paiva-2d-trimmer,
 #paiva-athlete-2d .paiva-2d-records {width:100%;min-width:0;border:1px solid #516d7e;
@@ -295,5 +337,10 @@
   #paiva-athlete-2d .paiva-2d-angle-palette small {width:100%;text-align:center;}
   #paiva-athlete-2d .paiva-2d-title-actions {gap:4px;}
   #paiva-athlete-2d #paiva-2d-fit,#paiva-athlete-2d #paiva-2d-wide {padding:6px 5px;font-size:9px;}
+  #paiva-athlete-2d .paiva-2d-trim-ruler {grid-template-columns:27px auto minmax(80px,1fr) auto;gap:5px;}
+  #paiva-athlete-2d .paiva-2d-trim-ruler-caption {display:none;}
+  #paiva-athlete-2d .paiva-2d-trim-ruler output {font-size:9px;}
+  #paiva-athlete-2d .paiva-2d-trim-ruler #paiva-2d-trim-ruler-save,
+  #paiva-athlete-2d .paiva-2d-trim-ruler #paiva-2d-camera-shot {grid-column:span 2;}
 }
 @media print {#paiva-athlete-2d {display:none!important;}}
