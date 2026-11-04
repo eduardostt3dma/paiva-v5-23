@@ -1,5 +1,5 @@
-/* PAIVA V5.24 — acabamento grafite e aço fosco, preservando as cores
-   funcionais dos ângulos e marcadores biomecânicos. */
+/* PAIVA V5.26 — acabamento grafite/aço sem alterar a marca registrada.
+   A logomarca e o nome institucional preservam suas cores originais. */
 :root {
   --accent:#bdcbd4;
   --txt:#f1f4f6;
@@ -13,9 +13,10 @@ body {
 }
 main {max-width:1480px}
 header {border-bottom-color:#465560 !important}
-header #logo {filter:grayscale(1) contrast(1.08);border-color:#9daab3 !important}
-.brand-kicker,.eyebrow {color:#cbd6dd !important}
-.brand-rule {background:linear-gradient(90deg,#a3b1bb,transparent) !important}
+header #logo {filter:none !important;border-color:#68645c !important}
+.brand-kicker {color:#f8d44e !important}
+.brand-rule {background:linear-gradient(90deg,#f4d24e,transparent) !important}
+.eyebrow {color:#cbd6dd !important}
 .card {border-color:#45525e;background:linear-gradient(150deg,#202b35,#111820 62%,#0d1318)}
 .client-first {border-color:#647480 !important;background:linear-gradient(145deg,#293641,#131d24) !important}
 .btn.primary,.primary,.mode button.active {
@@ -34,6 +35,17 @@ header #logo {filter:grayscale(1) contrast(1.08);border-color:#9daab3 !important
 #paiva-bike-project .paiva-prj-card[data-selected="true"] {border-color:#c4d4dc !important}
 body #paiva-bike-project {border-color:#667a87 !important;background:linear-gradient(140deg,#243440,#111b23) !important}
 .paiva-final-field input[aria-invalid="true"] {border:2px solid #e29f84 !important;background:#39251f !important}
+/* TT: as coordenadas reais dos pads são medidas diferentes da geometria do quadro. */
+#paiva-tt-coordinates[hidden] {display:none !important}
+#paiva-tt-coordinates {margin:0 0 17px;padding:15px;border:1px solid #ad9750;border-radius:12px;background:linear-gradient(145deg,#313023,#1b232a)}
+#paiva-tt-coordinates h3 {margin:0 0 8px;color:#f8d44e;font-size:15px}
+#paiva-tt-coordinates p {margin:0 0 12px;font-size:11px;line-height:1.6;color:#e1e5e8}
+.paiva-tt-pad-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.paiva-tt-pad-grid label {font-size:11px;font-weight:750;color:#edf2f5}
+.paiva-tt-pad-grid input {display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:11px 9px;background:#11171d;color:#f5f7f9;border:1px solid #8997a0;border-radius:9px;font-size:15px;font-weight:700}
+#paiva-tt-coordinates button {margin-top:12px;max-width:100%}
+#paiva-tt-coordinates button:disabled {opacity:.5;cursor:not-allowed}
+#paiva-tt-pad-status {margin:9px 0 0 !important;color:#f4d876 !important}
 #paiva-v524-nav {
   position:sticky;top:0;z-index:25;display:flex;gap:7px;overflow:auto;
   scrollbar-width:thin;padding:10px 0;margin:12px 0 -3px;

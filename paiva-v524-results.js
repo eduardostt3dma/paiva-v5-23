@@ -1,5 +1,5 @@
-/* PAIVA V5.24 — resultados por modalidade, sem duplicações na TT.
-   As referências são empíricas; o registro final depende da avaliação. */
+/* PAIVA V5.26 — referência de quadros Road/MTB separada de pads TT.
+   TT depende de medição profissional, não de uma curva Road por estatura. */
 (() => {
   'use strict';
 
@@ -45,12 +45,19 @@
 
     addRow(fragment, 'Altura do selim · centro do MC', saddleBB,
       'Referência LeMond: entreperna × 0,883. Medida do centro do movimento central até o topo do selim.');
-    addRow(fragment, 'Stack · quadro', stack,
-      'Referência exploratória por estatura; não equivale ao pad stack dos apoios.');
-    addRow(fragment, 'Reach · quadro', reach,
-      'Referência exploratória por estatura; não equivale ao alcance efetivo das mãos.');
 
-    if (mode !== 'tt') {
+    if (mode === 'tt') {
+      const padStack = number('paiva-tt-pad-stack', 200, 1200);
+      const padReach = number('paiva-tt-pad-reach', 100, 900);
+      addRow(fragment, 'Pad stack · apoio TT', padStack === null ? '—' : fmt(padStack) + ' mm',
+        'Coordenada vertical medida do centro do movimento central até o topo do apoio de antebraço. Não é o stack do quadro.');
+      addRow(fragment, 'Pad reach · apoio TT', padReach === null ? '—' : fmt(padReach) + ' mm',
+        'Coordenada horizontal medida do centro do movimento central até a borda posterior do apoio. Não é o reach do quadro.');
+    } else {
+      addRow(fragment, 'Stack · quadro', stack,
+        'Referência exploratória por estatura para a modalidade selecionada.');
+      addRow(fragment, 'Reach · quadro', reach,
+        'Referência exploratória por estatura para a modalidade selecionada.');
       addRow(fragment, 'Altura do selim · eixo do pedal', saddlePedal,
         'Regra alternativa de 109% da entreperna, medida a partir do eixo do pedal. Não confundir com a distância a partir do MC.');
       const handId = mode === 'mtb' ? 'finalNoseGrip' : 'finalNoseSTI';
@@ -65,7 +72,7 @@
     output.replaceChildren(fragment);
     const note = get('validation');
     if (note) note.textContent = mode === 'tt'
-      ? 'TT: apenas altura do selim, stack e reach nesta síntese. Para avaliar o encaixe aerodinâmico, use também pad stack e pad reach medidos nos apoios. A referência de 109% usa outro ponto inicial e não pode substituir diretamente a medida desde o MC.'
+      ? 'TT: a altura do selim é uma estimativa inicial; pad stack e pad reach são medidas reais dos apoios, informadas pelo avaliador. O stack e o reach do QUADRO TT devem ser obtidos na ficha específica do fabricante. Sem medição dos pads, o software não atribui números arbitrários à posição aerodinâmica.'
       : 'Referências exploratórias: a posição final deve ser confirmada na bicicleta. Top tube e mesa não equivalem ao alcance das mãos; registre a geometria real e as medidas finais.';
     if (typeof window.fillClientReport === 'function') window.fillClientReport();
   }
@@ -73,7 +80,7 @@
   function initialize() {
     if (!get('results')) return;
     const warning=document.querySelector('#clientReport .report-warning p');
-    if (warning) warning.textContent = 'Referências de pré-fit obtidas de um guia exploratório por estatura, com transições suavizadas. A altura do selim por 0,883 é medida desde o movimento central; a regra de 109% utiliza o eixo do pedal e não representa a mesma distância. Stack e reach do quadro não equivalem à posição das mãos ou dos apoios de TT. Os valores finais devem ser medidos e confirmados pelo avaliador em movimento.';
+    if (warning) warning.textContent = 'Road/MTB usam referências exploratórias por estatura. Para TT, o programa não converte a tabela Road: registra as coordenadas dos apoios de antebraço (pad stack e pad reach) medidas no fit e compara com a montagem específica da bicicleta. A altura do selim por 0,883 é medida desde o movimento central; a regra de 109% parte do eixo do pedal. Os valores finais devem ser medidos e confirmados pelo avaliador em movimento.';
     document.addEventListener('input', render);
     document.addEventListener('change', render);
     document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', render));

@@ -1,6 +1,7 @@
-PAIVA V5.25 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_25.txt.
-Esta revisao corrige a retencao dos angulos ao mover a rodinha do mouse.
-As melhorias da V5.24 tambem estao incluidas neste pacote completo.
+PAIVA V5.26 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_26.txt.
+Esta revisao restaura o amarelo da marca sem editar a imagem original e separa
+o protocolo TT de pad stack/reach das referencias Road/MTB de quadro.
+A correcao dos angulos da V5.25 permanece incluida neste pacote completo.
 As informações abaixo registram o histórico das revisões anteriores.
 
 EVOLUÇÃO DO RELATÓRIO DO CLIENTE — 04/11/2026:

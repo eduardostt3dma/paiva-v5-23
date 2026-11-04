@@ -170,6 +170,9 @@
     const bodyValues = () => Object.fromEntries(FIELDS.map(key =>
       [key, document.getElementById(key)?.value ?? '']));
     function originalReference(body) {
+      // Pad stack/reach NÃO são stack/reach do quadro. Uma TT nunca deve
+      // herdar a tabela Road ou usar as coordenadas dos pads como base do quadro.
+      if (mode === 'tt') return null;
       if (typeof globalThis.frameReference === 'function')
         return globalThis.frameReference(read(body.height,140,215),mode);
       const prefix = mode === 'mtb' ? 'mtb' : mode === 'tt' ? 'tt' : 'road';
@@ -195,8 +198,17 @@
     function render() {
       for (const btn of panel.querySelectorAll('[data-prj-profile]'))
         btn.setAttribute('aria-pressed',String(btn.dataset.prjProfile === profile));
-      const values = reportData();
       const results = id('results');
+      if (mode === 'tt') {
+        id('status').textContent = 'TT: a posição aerodinâmica exige pad stack e pad reach do atleta e faixa de regulagem dos apoios do modelo escolhido. Não existe conversão universal Road → TT por estatura.';
+        results.replaceChildren();
+        const info = document.createElement('p');
+        info.className = 'paiva-prj-footnote';
+        info.textContent = 'Informe as coordenadas dos pads no painel TT e compare as duas montagens no Comparador de Quadros. Stack e reach reais do quadro TT são dados do fabricante. Os perfis agressivo/intermediário/confortável desta simulação de quadro não são aplicados à TT.';
+        results.append(info);
+        return;
+      }
+      const values = reportData();
       if (values.some(v => v === null)) {
         const body = bodyValues();
         const missing = FIELDS.filter(key => body[key] === '').map(key => LABELS[key]);
@@ -285,8 +297,15 @@
         if (globalThis.PAIVA_ANTHRO_METHOD?.getMode?.() !== 'full') return null;
         switchMode();
         const candidates = reportData();
-        const rows = [{label:'Modalidade',value:MODES[mode]},
-          {label:'Perfil escolhido',value:PROFILES[profile].label}];
+        const rows = [{label:'Modalidade',value:MODES[mode]}];
+        if (mode !== 'tt') rows.push({label:'Perfil escolhido',value:PROFILES[profile].label});
+        if (mode === 'tt') {
+          const padStack = read(document.getElementById('paiva-tt-pad-stack')?.value,200,1200);
+          const padReach = read(document.getElementById('paiva-tt-pad-reach')?.value,100,900);
+          rows.push({label:'Protocolo TT',value:'Pad stack/reach são coordenadas dos apoios, não do quadro. Referência medida, sem conversão da geometria Road.'});
+          if (padStack !== null) rows.push({label:'Pad stack TT · medido',value:mm(padStack)});
+          if (padReach !== null) rows.push({label:'Pad reach TT · medido',value:mm(padReach)});
+        }
         if (candidates.every(Boolean)) {
           for (const value of candidates) rows.push({
             label:`${PROFILES[value.profile].label} · stack / reach estimados`,

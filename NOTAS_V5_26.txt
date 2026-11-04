@@ -1,0 +1,33 @@
+PAIVA BIKE FIT STUDIO — V5.26 — 04/11/2026
+
+1. MARCA REGISTRADA
+- O nome institucional PAIVA · BIKE FIT STUDIO voltou ao amarelo original.
+- Foi removido o filtro CSS que tornava a logomarca cinza na tela principal.
+- Arquivos de logomarca e icones nao foram editados ou recoloridos.
+- O visual do restante do software continua em grafite e aco fosco.
+
+2. TT / TRIATLO — DISTINCAO DE PROTOCOLOS
+- O pre-fit TT nao reaproveita a tabela empirica Road para informar stack/reach.
+- O TT exibe: altura de selim exploratoria, pad stack medido e pad reach medido.
+- Cadastre pad stack (centro do MC ate o topo do apoio de antebraco) e pad
+  reach (centro do MC ate a borda posterior do apoio) em milimetros.
+- Antes de medir os pads, seus dois resultados aparecem como travessao (—).
+- O Stack/Reach DO QUADRO TT deve vir da geometria da marca/modelo. Sao medidas
+  diferentes do pad stack/reach e nao existe uma conversao universal.
+- O botao 'Aplicar como referencia no comparador TT' copia os pads medidos
+  para os campos profissionais, sem alterar as medidas dos quadros A e B.
+- No simulador de perfis antropometricos, estimativas de QUADRO para TT foram
+  desabilitadas para impedir confusao com a posicao dos pads.
+- As medidas TT entram nas fichas locais e no relatorio; as medidas e a decisao
+  final dependem de avaliacao biomecanica e da faixa de ajuste do modelo real.
+
+3. ANGULOS 2D
+- Preservadas as correcoes de persistencia do V5.25 e os cinco giros da rodinha.
+- Nenhum arquivo de desenho/rastreamento dos angulos foi modificado nesta revisao.
+
+INSTALACAO GITHUB PAGES / ANDROID
+- Extraia o ZIP e envie TODOS os arquivos de dentro da pasta ao repositorio.
+- Espere a publicacao do GitHub Pages e reabra o aplicativo; uma nova chave de
+  cache offline forca a substituicao dos arquivos antigos. Se houver uma aba
+  aberta, feche-a e abra novamente apos publicar.
+- Seus registros locais de clientes nao sao apagados ao atualizar.
