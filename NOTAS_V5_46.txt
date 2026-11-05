@@ -1,0 +1,30 @@
+PAIVA V5.46 — CURVA AJUSTÁVEL E VULTO DE POSTURA OFFLINE
+
+1. CONTROLE DA CURVA (2D, TÚNEL E COMPARAÇÃO)
+   Clique em "Desenhar curva" ou "Recorte flexível". Na própria barra aparecem
+   Linha (espessura de 0,5 a 6 px) e Pontos (diâmetro de 2 a 20 px).
+   Os ajustes atualizam imediatamente as curvas existentes, sem apagar pontos.
+   Mantenha o recorte flexível opcional; os demais ângulos e ferramentas 2D continuam separados.
+
+2. VULTO DE POSTURA (COMPARAÇÃO LATERAL)
+   Carregue foto A e foto B, escolha "Lateral · Vulto de postura".
+   A foto B permanece inteira, com a foto A sobreposta de forma translúcida.
+   Ajuste a transparência e use "Alternar posições", "Salvar vulto" ou "Projetor".
+   Esta função não usa IA, recorte automático nem internet.
+   Foto idêntica em A e B aparece exatamente sobreposta — isso é esperado.
+   Prefira fotos do MESMO ciclista com câmera, distância, zoom e bicicleta fixos.
+
+3. COMPARAÇÃO FRONTAL E DEMAIS MÓDULOS
+   O reconhecimento automático pessoa+bicicleta continua na modalidade FRONTAL.
+   Os recursos de vídeo, conversor MP4, análise 2D, túnel e PDF foram preservados.
+   O vento permanece visual/ilustrativo: não mede CdA, watts nem arrasto real.
+
+4. ATUALIZAÇÃO GITHUB
+   Extraia o ZIP e envie TODOS os arquivos da pasta extraída à raiz do
+   repositório paiva-v5-23, substituindo arquivos de mesmo nome.
+   Não envie o ZIP inteiro como um único arquivo no repositório.
+   Mantenha guardado seu ZIP original V5.45 como cópia de segurança.
+   O service worker usa uma nova chave de cache. Se a página continuar antiga,
+   feche e reabra a aba após a publicação do GitHub Pages.
+
+© PAIVA · DESENVOLVIDO POR EDUARDO PAIVA

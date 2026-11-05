@@ -12,7 +12,19 @@
   color:#171c22;background:#ffe177}
 .paiva-spline-controls button:disabled{opacity:.4;cursor:not-allowed}
 .paiva-spline-controls button[hidden]{display:none!important}
+.paiva-spline-settings{display:inline-flex;align-items:center;gap:9px;
+  padding:4px 8px;border:1px solid #485e6c;border-radius:9px;
+  background:#1a2831;white-space:nowrap}
+.paiva-spline-settings[hidden]{display:none!important}
+.paiva-spline-settings label{display:inline-flex;align-items:center;gap:5px;
+  color:#d8e4eb;font:600 10px system-ui,sans-serif}
+.paiva-spline-settings input[type=range]{width:65px;min-width:45px;
+  accent-color:#f4d575;cursor:pointer}
+.paiva-spline-settings output{min-width:30px;color:#ffdc7b;
+  font:650 10px system-ui,sans-serif;font-variant-numeric:tabular-nums}
 #paiva-athlete-2d .paiva-spline-controls button{width:auto;min-height:33px;padding:7px 10px}
 @media(max-width:650px){.paiva-spline-controls{width:100%}
-  .paiva-spline-controls button{flex:1 1 auto}}
+  .paiva-spline-controls button{flex:1 1 auto}
+  .paiva-spline-settings{flex:1 1 auto;justify-content:space-around;gap:5px}
+  .paiva-spline-settings input[type=range]{width:58px}}
 @media print{.paiva-spline-controls{display:none!important}}

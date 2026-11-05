@@ -50,6 +50,10 @@
     controls.className='paiva-spline-controls';
     controls.innerHTML=
       '<button type="button" class="paiva-spline-toggle" aria-pressed="false">✎ Curva</button>'+
+      '<div class="paiva-spline-settings" hidden>'+
+      '<label title="Espessura do traço">Linha <input class="paiva-spline-width" type="range" min="0.5" max="6" step="0.5" value="2" aria-label="Espessura da linha"><output class="paiva-spline-width-value">2 px</output></label>'+
+      '<label title="Diâmetro das bolinhas ajustáveis">Pontos <input class="paiva-spline-size" type="range" min="2" max="20" step="1" value="10" aria-label="Diâmetro dos pontos"><output class="paiva-spline-size-value">10 px</output></label>'+
+      '</div>'+
       '<button type="button" class="paiva-spline-finish" disabled>'+
       (closeOnFinish?'✓ Fechar recorte':'✓ Concluir curva')+'</button>'+
       '<button type="button" class="paiva-spline-clear" disabled>✕ Limpar curvas</button>';
@@ -57,18 +61,25 @@
     const toggle=controls.querySelector('.paiva-spline-toggle');
     const finish=controls.querySelector('.paiva-spline-finish');
     const clear=controls.querySelector('.paiva-spline-clear');
+    const settings=controls.querySelector('.paiva-spline-settings');
+    const widthInput=controls.querySelector('.paiva-spline-width');
+    const sizeInput=controls.querySelector('.paiva-spline-size');
+    const widthOutput=controls.querySelector('.paiva-spline-width-value');
+    const sizeOutput=controls.querySelector('.paiva-spline-size-value');
     toggle.textContent=closeOnFinish?'✎ Recorte flexível':'✎ Desenhar curva';
     toggle.title='Clique na imagem para criar pontos; arraste as bolinhas para maleá-la';
     finish.title=closeOnFinish?
       'Fechar o contorno para o vento desviar da área desenhada':
       'Finalizar a curva sem fechar as duas extremidades';
     let enabled=false,current=null,paths=[],drag=null;
+    let strokeWidth=Number(widthInput.value),pointDiameter=Number(sizeInput.value);
     function updateUI(){
       toggle.setAttribute('aria-pressed',String(enabled));
       finish.disabled=!current||current.points.length<(closeOnFinish?3:2);
       clear.disabled=!current&&!paths.length;
       finish.hidden=!enabled;
       clear.hidden=!enabled||(!current&&!paths.length);
+      settings.hidden=!enabled;
       layer.style.pointerEvents=enabled?'auto':'none';
       layer.style.cursor=enabled?'crosshair':'default';
     }
@@ -91,14 +102,15 @@
         if(line.closed){
           ctx.fillStyle='rgba(72,198,226,.07)';ctx.fill();
         }
-        ctx.lineWidth=2.1;ctx.lineJoin='round';ctx.lineCap='round';
+        ctx.lineWidth=strokeWidth;ctx.lineJoin='round';ctx.lineCap='round';
         ctx.strokeStyle=closeOnFinish?'#5fe0ec':'#ffe37d';
         ctx.stroke();
         if(!enabled)continue;
         for(const p of line.points){
-          ctx.beginPath();ctx.arc(p.x,p.y,5.2,0,Math.PI*2);
+          ctx.beginPath();ctx.arc(p.x,p.y,pointDiameter/2,0,Math.PI*2);
           ctx.fillStyle='#101a22';ctx.fill();
-          ctx.lineWidth=2;ctx.strokeStyle='#f8f9f9';ctx.stroke();
+          ctx.lineWidth=Math.max(1,Math.min(2,pointDiameter*.175));
+          ctx.strokeStyle='#f8f9f9';ctx.stroke();
         }
       }
     }
@@ -173,6 +185,16 @@
     layer.addEventListener('pointercancel',end);
     toggle.addEventListener('click',()=>{
       enabled=!enabled;updateUI();paint();
+    });
+    widthInput.addEventListener('input',()=>{
+      strokeWidth=Number(widthInput.value)||2;
+      widthOutput.textContent=strokeWidth.toLocaleString('pt-BR')+' px';
+      paint();
+    });
+    sizeInput.addEventListener('input',()=>{
+      pointDiameter=Number(sizeInput.value)||10;
+      sizeOutput.textContent=pointDiameter+' px';
+      paint();
     });
     finish.addEventListener('click',()=>{
       if(!current||current.points.length<(closeOnFinish?3:2))return;

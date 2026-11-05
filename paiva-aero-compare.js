@@ -13,7 +13,15 @@
     return 'Posição B ocupa '+Math.abs(delta).toFixed(1).replace('.',',')+
       '% '+(delta<0?'MENOS':'MAIS')+' área projetada que A.';
   }
-  globalThis.PAIVA_AERO_COMPARE_MATH={differencePercent,resultLabel};
+  function blendPhotos(ctx,photoB,photoA,alpha){
+    // Modo lateral: sobreposição fotográfica offline, sem máscara nem IA.
+    ctx.drawImage(photoB,0,0);
+    ctx.save();
+    ctx.globalAlpha=Math.max(0,Math.min(1,alpha));
+    ctx.drawImage(photoA,0,0);
+    ctx.restore();
+  }
+  globalThis.PAIVA_AERO_COMPARE_MATH={differencePercent,resultLabel,blendPhotos};
   if(typeof document==='undefined')return;
 
   function panel(id,title){
@@ -42,7 +50,7 @@
     section.innerHTML=[
       '<div class="paiva-compare-heading">',
       '<div><span>PAIVA LAB · ANÁLISE FRONTAL</span><h2>AERO COMPARE</h2>',
-      '<p>Sobreposição de postura em vulto (lateral) e área projetada (frontal) com reconhecimento automático.</p></div>',
+      '<p>Vulto lateral por transparência, offline. A comparação frontal mantém o reconhecimento automático.</p></div>',
       '<div class="paiva-compare-top-actions">',
       '<button type="button" id="paiva-compare-fullscreen">⛶ Tela cheia · Projetor</button>',
       '<button type="button" id="paiva-compare-save">↓ Salvar comparação</button>',
@@ -71,18 +79,17 @@
       '</details>',
       '<section class="paiva-ghost" id="paiva-ghost">',
       '<div class="paiva-ghost-heading"><div><span>PAIVA LAB · ANTES × DEPOIS</span>',
-      '<h3>VULTO DE POSTURA</h3><p>Posição A translúcida sobre B. Veja com clareza o que mudou no corpo.</p></div>',
+      '<h3>VULTO DE POSTURA</h3><p>Foto A translúcida sobre B, como no Kinovea. Sem recorte e sem internet.</p></div>',
       '<div><button type="button" id="paiva-compare-ghost-fullscreen">⛶ Projetor</button>',
       '<button type="button" id="paiva-compare-ghost-save">↓ Salvar vulto</button></div></div>',
       '<div class="paiva-ghost-stage"><canvas id="paiva-compare-ghost-canvas" width="960" height="540" aria-label="Foto B com vulto translúcido da posição A"></canvas></div>',
       '<div class="paiva-ghost-controls">',
       '<label>Transparência do vulto <input id="paiva-compare-ghost-opacity" type="range" min="15" max="80" value="42" step="1"><output id="paiva-compare-ghost-opacity-value">42%</output></label>',
-      '<label><input id="paiva-compare-ghost-edges" type="checkbox" checked> Contornos A/B</label>',
       '<button type="button" id="paiva-compare-ghost-play">▶ Alternar posições</button>',
       '</div>',
       '<p class="paiva-ghost-status" id="paiva-compare-ghost-status" role="status">Abra A e B para comparar a postura.</p>',
       '</section>',
-      '<p class="paiva-compare-notice" id="paiva-compare-notice" role="status">Recorte automático por IA (pessoa + bicicleta). O modelo é baixado uma vez e processa as fotos neste dispositivo. Desenho manual continua opcional.</p>',
+      '<p class="paiva-compare-notice" id="paiva-compare-notice" role="status">O vulto lateral funciona offline por transparência. A análise frontal usa recorte automático por IA; o desenho manual continua opcional.</p>',
       '<p class="paiva-compare-disclaimer">A área em percentual só vale para fotos FRONTAIS padronizadas. O VULTO LATERAL mostra mudanças visuais de postura, sem medir arrasto ou ganhos aerodinâmicos. Distância, zoom, ângulo, posição da bicicleta e qualidade do recorte alteram a comparação. Fotos permanecem neste aparelho.</p>'
     ].join('');
     (document.getElementById('paiva-wind-simple')||athlete).after(section);
@@ -98,12 +105,6 @@
     const $=id=>document.getElementById('paiva-compare-'+id);
     const notice=text=>$('notice').textContent=text;
     const ghostCanvas=$('ghost-canvas'),ghostCtx=ghostCanvas.getContext('2d');
-    const ghostCutout=document.createElement('canvas');
-    ghostCutout.width=W;ghostCutout.height=H;
-    const ghostCutoutCtx=ghostCutout.getContext('2d');
-    const ghostSmall=document.createElement('canvas');
-    ghostSmall.width=MW;ghostSmall.height=MH;
-    const ghostSmallCtx=ghostSmall.getContext('2d');
     let ghostPlaying=false,ghostAnimationAlpha=null,ghostLastFrame=0;
     const frameDocument=document.createElement('canvas');
     frameDocument.width=MW;frameDocument.height=MH;
@@ -201,6 +202,12 @@
     }
     function analyse(slot){
       if(!slot.imageLoaded)return;
+      if($('view').value==='lateral'){
+        // No comparador lateral, NENHUM modelo externo é necessário.
+        // As fotos originais são sobrepostas, sem máscara semântica.
+        $(slot.id+'-status').textContent='✓ Foto pronta para vulto de postura offline.';
+        drawSlot(slot);refreshCompare();return;
+      }
       try{
         const manual=manualMask(slot);
         if(!manual&&slot.source==='auto'&&slot.contour){
@@ -268,7 +275,8 @@
       slot.ctx.clearRect(0,0,W,H);
       if(slot.imageLoaded)slot.ctx.drawImage(slot.base,0,0);
       else drawPlaceholder(slot.ctx,slot.id);
-      if(slot.contour)drawMask(slot,slot.id==='a'?[78,209,239]:[255,217,109]);
+      if($('view').value==='frontal'&&slot.contour)
+        drawMask(slot,slot.id==='a'?[78,209,239]:[255,217,109]);
       slot.ctx.fillStyle='rgba(8,18,25,.80)';
       slot.ctx.fillRect(12,12,167,39);
       slot.ctx.fillStyle=slot.id==='a'?'#67d5e8':'#f7d66b';
@@ -327,24 +335,6 @@
       g.putImageData(im,0,0);
       overlayCtx.drawImage(merged,0,0,W,H);
     }
-    function ghostMask(slot){
-      // Na segmentação semântica, isolar SOMENTE a pessoa: a bicicleta fica
-      // como referência fixa, igual à comparação translúcida do Kinovea.
-      return slot.personMask||slot.contour?.mask||null;
-    }
-    function drawGhostEdge(mask,rgb){
-      if(!ghostSmallCtx||!mask||mask.length!==MW*MH)return;
-      const edge=ghostSmallCtx.createImageData(MW,MH);
-      for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){
-        const i=y*MW+x;
-        if(!mask[i]||mask[i-1]&&mask[i+1]&&mask[i-MW]&&mask[i+MW])continue;
-        const p=i*4;
-        edge.data[p]=rgb[0];edge.data[p+1]=rgb[1];
-        edge.data[p+2]=rgb[2];edge.data[p+3]=225;
-      }
-      ghostSmallCtx.putImageData(edge,0,0);
-      ghostCtx.drawImage(ghostSmall,0,0,W,H);
-    }
     function renderGhost(){
       if(!ghostCtx)return;
       const a=slots.a,b=slots.b;
@@ -358,39 +348,9 @@
         $('ghost-status').textContent='Abra duas fotos do mesmo ciclista e bicicleta.';
         return;
       }
-      ghostCtx.drawImage(b.base,0,0);
-      const maskA=ghostMask(a),maskB=ghostMask(b);
-      if(!maskA||!maskB||maskA.length!==MW*MH||maskB.length!==MW*MH){
-        $('ghost-status').textContent='Aguardando o reconhecimento automático nas duas fotos.';
-        return;
-      }
       const compatible=Math.abs(a.aspect-b.aspect)<.025;
-      if(!compatible){
-        $('ghost-status').textContent='As proporções das fotos são diferentes. Use o mesmo enquadramento.';
-        return;
-      }
-      if(ghostCutoutCtx&&ghostSmallCtx){
-        ghostCutoutCtx.globalCompositeOperation='source-over';
-        ghostCutoutCtx.clearRect(0,0,W,H);
-        ghostCutoutCtx.drawImage(a.base,0,0);
-        const image=ghostSmallCtx.createImageData(MW,MH);
-        for(let i=0;i<maskA.length;i++)if(maskA[i]){
-          const p=i*4;image.data[p]=255;image.data[p+1]=255;
-          image.data[p+2]=255;image.data[p+3]=255;
-        }
-        ghostSmallCtx.putImageData(image,0,0);
-        ghostCutoutCtx.globalCompositeOperation='destination-in';
-        ghostCutoutCtx.drawImage(ghostSmall,0,0,W,H);
-        ghostCutoutCtx.globalCompositeOperation='source-over';
-        const opacity=ghostAnimationAlpha??(Number($('ghost-opacity').value)/100);
-        ghostCtx.globalAlpha=opacity;
-        ghostCtx.drawImage(ghostCutout,0,0);
-        ghostCtx.globalAlpha=1;
-      }
-      if($('ghost-edges').checked){
-        drawGhostEdge(maskA,[93,222,248]);
-        drawGhostEdge(maskB,[255,219,102]);
-      }
+      const opacity=ghostAnimationAlpha??(Number($('ghost-opacity').value)/100);
+      blendPhotos(ghostCtx,b.base,a.base,opacity);
       ghostCtx.fillStyle='rgba(7,18,25,.69)';
       ghostCtx.fillRect(12,12,233,28);
       ghostCtx.font='600 13px system-ui';
@@ -400,9 +360,11 @@
       ghostCtx.textAlign='right';ghostCtx.fillStyle='#ffe285';
       ghostCtx.fillText('DESENVOLVIDO POR EDUARDO PAIVA',W-16,H-12);
       ghostCtx.textAlign='left';
-      $('ghost-status').textContent=$('same-setup').checked?
-        'Azul: postura A anterior · Amarelo: B atual. Observe cabeça, tronco e braços.':
-        'Prévia visual: confirme mesma câmera, distância, zoom e bicicleta fixa antes de interpretar.';
+      $('ghost-status').textContent=!compatible?
+        'As fotos têm proporções diferentes: a sobreposição é apenas ilustrativa. Padronize o enquadramento.':
+        $('same-setup').checked?
+          'Foto A translúcida sobre B. Observe cabeça, tronco e braços.':
+          'Prévia offline: confirme mesma câmera, distância, zoom e bicicleta fixa antes de interpretar.';
     }
     function switchGhost(){
       ghostPlaying=!ghostPlaying;
@@ -423,7 +385,6 @@
       $('ghost-opacity-value').textContent=$('ghost-opacity').value+'%';
       if(!ghostPlaying)renderGhost();
     });
-    $('ghost-edges').addEventListener('change',renderGhost);
     $('ghost-play').addEventListener('click',switchGhost);
     $('ghost-fullscreen').addEventListener('click',async()=>{
       const stage=document.getElementById('paiva-ghost');
@@ -434,8 +395,8 @@
       }catch(error){notice('O navegador bloqueou a tela cheia. Tente F11.');}
     });
     $('ghost-save').addEventListener('click',()=>{
-      if(!slots.a?.contour||!slots.b?.contour){
-        notice('Abra A e B e aguarde o recorte antes de salvar o vulto.');return;
+      if(!slots.a?.imageLoaded||!slots.b?.imageLoaded){
+        notice('Abra as duas fotos antes de salvar o vulto.');return;
       }
       ghostCanvas.toBlob(blob=>{
         if(!blob){notice('Não foi possível salvar a imagem.');return;}
@@ -446,7 +407,23 @@
       },'image/png');
     });
     $('view').addEventListener('change',()=>{
-      if($('view').value!=='lateral'&&ghostPlaying)switchGhost();
+      const lateral=$('view').value==='lateral';
+      if(!lateral&&ghostPlaying)switchGhost();
+      if(lateral){
+        // Invalida respostas da IA iniciadas no modo frontal.
+        for(const slot of Object.values(slots)){
+          if(slot.pendingAi){slot.epoch++;slot.pendingAi=false;}
+          if(slot.imageLoaded)$(slot.id+'-status').textContent='✓ Foto pronta para vulto offline.';
+          drawSlot(slot);
+        }
+        notice('Vulto lateral offline: foto A transparente sobre B. Sem recorte ou internet.');
+      }else{
+        notice('Área frontal: IA local para pessoa + bicicleta. Desenho manual opcional.');
+        for(const slot of Object.values(slots)){
+          drawSlot(slot);
+          if(slot.imageLoaded&&!slot.contour)analyse(slot);
+        }
+      }
       refreshCompare();
     });
     $('same-setup').addEventListener('change',refreshCompare);
