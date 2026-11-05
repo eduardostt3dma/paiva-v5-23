@@ -1,0 +1,29 @@
+PAIVA BIKE FIT STUDIO V5.45 — VULTO DE POSTURA A/B
+
+NOVO: PAIVA LAB > AERO COMPARE > Tipo de comparacao
+
+  FRONTAL · Area projetada — compara area 2D entre duas fotos frontais.
+  LATERAL · Vulto de postura — mostra imagem B normal, com o ciclista da
+    imagem A sobreposto e translucido, como referencia da postura anterior.
+    A bicicleta na foto B permanece visivel e pode servir de referencia.
+
+Como usar o VULTO:
+  1. Abra o Aero Compare e selecione Lateral · Vulto de postura.
+  2. Carregue fotos A e B do MESMO lado, mesma camera, distancia, zoom,
+     angulo, enquadramento e posicao da bicicleta. Prefira o mesmo ponto
+     do ciclo do pedivela para comparar tronco/joelho.
+  3. Aguarde a IA reconhecer o corpo em A e B (internet na primeira vez).
+  4. Ajuste a transparencia do vulto. Contornos azuis = A, amarelos = B.
+  5. Use 'Alternar posicoes' e 'Projetor' para apresentar ao cliente.
+  6. Salve a imagem com 'Salvar vulto'.
+
+LIMITES: A transparencia mostra diferencas VISUAIS, nao realiza rastreamento
+anatômico automatico nem mede angulos sozinha. Na vista lateral nao exibimos
+porcentagem de area frontal, watts, CdA ou arrasto. O modulo 2D tradicional
+continua responsavel pelas medicoes angulares.
+
+Esta versao manteve os arquivos, o motor 2D, os conversores, a marca e todas
+as funcoes da V5.44. Nenhuma versao antiga foi sobrescrita na origem.
+
+INSTALACAO: extraia o ZIP e envie TODOS os arquivos extraidos pelo GitHub.
+Depois atualize o navegador com Ctrl+F5.

@@ -27,10 +27,11 @@
       throw Error('Modelo incompatível: faltam as categorias pessoa e bicicleta.');
 
     const raw=new Uint8Array(w*h);
+    const personMask=new Uint8Array(w*h);
     let person=0,bicycle=0;
     for(let i=0;i<classes.length;i++){
       const category=classes[i];
-      if(category===personId)person++;
+      if(category===personId){person++;personMask[i]=1;}
       if(category===bicycleId)bicycle++;
       raw[i]=selected.has(category)?1:0;
     }
@@ -49,7 +50,7 @@
       const neighbors=raw[i-1]+raw[i+1]+raw[i-w]+raw[i+w];
       if(neighbors>=3)mask[i]=1;
     }
-    return {width:w,height:h,mask,mode:'semantic',personPixels:person,
+    return {width:w,height:h,mask,personMask,mode:'semantic',personPixels:person,
       bicyclePixels:bicycle,percent:(person+bicycle)/(w*h)};
   }
 

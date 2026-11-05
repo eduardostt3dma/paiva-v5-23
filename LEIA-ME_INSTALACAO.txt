@@ -1,4 +1,4 @@
-PAIVA V5.44 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_44.txt.
+PAIVA V5.45 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_45.txt.
 TÚNEL DE VENTO MAIS PRÓXIMO DO ATLETA:
 - As ondas agora se aproximam mais da silhueta identificada.
 - O desvio começa perto do primeiro contato com a bicicleta, evitando
