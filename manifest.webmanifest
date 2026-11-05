@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "PAIVA Bike Fit Studio",
-  "short_name": "PAIVA Bike Fit",
-  "description": "Pré-Fit Antropométrico — PAIVA",
+  "name": "PAIVA Motion Studio",
+  "short_name": "PAIVA Motion",
+  "description": "Análise de Movimento 2D e Bike Fit — PAIVA",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

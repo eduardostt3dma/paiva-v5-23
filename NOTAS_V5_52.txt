@@ -1,0 +1,41 @@
+PAIVA MOTION STUDIO — V5.52
+================================
+
+IDENTIDADE E MOVIMENTO 2D
+- O nome principal agora é PAIVA Motion Studio.
+- O painel PAIVA Motion Signature acompanha movimentos em vídeo 2D.
+- Trajetórias de joelho, quadril, calcanhar e ombro ficaram finas,
+  discretas e retilíneas entre os pontos observados, sem ondas falsas.
+- Botões para salvar uma trajetória ANTES e outra DEPOIS de vídeos
+  diferentes, sobrepor joelho/quadril/calcanhar e exportar PNG.
+- Compare apenas imagens gravadas com câmera, zoom, distância e
+  enquadramento equivalentes. É uma comparação visual sem escala 3D.
+
+RECURSOS PRESERVADOS
+- Vídeo, webcam e fotografia; captura e exportação visual.
+- Correção manual de oito pontos, incluindo calcanhar e antepé.
+- Inclinação do pé em relação à horizontal da imagem.
+- Reprodução mais lenta no módulo de leitura (0,1x a 1x).
+- Módulo clássico Análise 2D preservado sem alterações em
+  athlete-2d.js e athlete-2d.css.
+- Antiga ilustração de vento guardada em painel recolhido e rotulada
+  como efeito VISUAL opcional, não como túnel aerodinâmico.
+
+LIMITAÇÕES IMPORTANTES
+- Esta ferramenta NÃO mede vento, arrasto, CdA ou potência.
+- A IA estima pontos projetados em 2D e pode perder o rastreio em
+  oclusões ou imagens escuras. A correção manual vale para o quadro
+  selecionado e não é rastreamento automático de marcador físico.
+- A comparação antes/depois não corrige perspectiva nem calibra
+  automaticamente escala ou variação de cadência.
+- Primeira utilização da IA requer internet para carregar o modelo.
+
+COMO INSTALAR PELO GITHUB
+1. Extraia todo o conteúdo do ZIP em uma pasta.
+2. Abra https://github.com/eduardostt3dma/paiva-v5-23/upload/main
+3. Envie TODOS os arquivos extraídos para a raiz do repositório
+   (incluindo index.html, arquivos JS/CSS e manifest.webmanifest).
+4. Confirme em "Commit changes" e aguarde o GitHub Pages atualizar.
+5. Abra https://eduardostt3dma.github.io/paiva-v5-23/ e teste no Chrome.
+
+NÃO suba o ZIP fechado: suba os arquivos de dentro dele.

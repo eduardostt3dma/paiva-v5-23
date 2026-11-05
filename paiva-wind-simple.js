@@ -1,4 +1,5 @@
-/* PAIVA AERO V5.50 — ondas opcionais + painel Motion Flow isolado.
+/* PAIVA MOTION STUDIO V5.52 — área de captura, assinatura biomecânica 2D.
+   Antigas ondas puramente ilustrativas ficam recolhidas como legado opcional.
    Painel independente, com autoria Eduardo Paiva. */
 (() => {
   'use strict';
@@ -70,10 +71,10 @@
     section.className='card paiva-wind-simple';
     section.id='paiva-wind-simple';
     section.innerHTML=[
-      '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
-      '<h2>TÚNEL DE VENTO</h2>',
-      '<p>Reconhecimento automático do ciclista e da bicicleta · vento visual independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.50</span></div>',
+      '<div class="aero-heading"><div><span>PAIVA · BIOMECHANICAL MOTION ANALYSIS</span>',
+      '<h2>PAIVA MOTION STUDIO</h2>',
+      '<p>Vídeo, fotografia e trajetórias reais de articulações em 2D. Interpretação biomecânica conduzida pelo profissional.</p></div>',
+      '<span class="aero-badge">V5.52</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
@@ -90,9 +91,9 @@
       '<span id="aero-detection-status" role="status" aria-live="polite">Aguardando foto ou vídeo.</span>',
       '<button type="button" id="aero-ai-retry" hidden>↻ Tentar IA novamente</button>',
       '</div>',
-      '<div class="aero-stage"><canvas id="aero-canvas" width="960" height="540" aria-label="Foto ou vídeo com ondas de vento ilustrativas atravessando a imagem"></canvas>',
+      '<div class="aero-stage"><canvas id="aero-canvas" width="960" height="540" aria-label="Foto ou vídeo de referência para análise de movimento 2D"></canvas>',
       '<video id="aero-source-video" muted playsinline hidden></video></div>',
-      '<p class="aero-guidance" id="aero-message" role="status" aria-live="polite">Abra uma foto ou vídeo. O vento inicia desligado; ative-o somente se desejar a animação ilustrativa.</p>',
+      '<p class="aero-guidance" id="aero-message" role="status" aria-live="polite">Abra uma foto ou vídeo de perfil. Em Motion Signature, use a leitura 2D e as trajetórias de joelho, quadril e calcanhar.</p>',
       '<details class="aero-advanced"><summary>✎ Recorte flexível (opcional)</summary><p class="aero-curve-hint">Clique nos pontos, arraste as bolinhas ou a linha e escolha ✓ Fechar recorte. Para retornar à IA, use ✕ Limpar curvas.</p></details>',
       '<div class="aero-measure">',
       '<button type="button" id="aero-trunk">📐 Medir tronco (2 pontos)</button>',
@@ -108,9 +109,9 @@
       '<button type="button" id="aero-stop-camera" hidden>■ Desligar câmera</button>',
       '<button type="button" id="aero-save">↓ Salvar imagem</button>',
       '</div>',
-      '<p class="aero-disclaimer">O reconhecimento automático utiliza um modelo de segmentação por IA processado no próprio dispositivo; no primeiro acesso, é preciso baixar o modelo. ',
-      'Fotos com oclusões, pouca luz ou bicicletas muito finas ainda podem falhar. ',
-      'As ondas são <strong>ilustrativas</strong>: não representam dinâmica real do ar, CdA, arrasto ou watts.</p>'
+      '<p class="aero-disclaimer">Motion Signature é análise <strong>2D experimental</strong> de trajetórias estimadas em foto/vídeo, não reconstrução 3D. ',
+      'Luz, oclusões, câmera e posicionamento anatômico interferem na leitura. ',
+      'A antiga animação de vento permanece opcional no painel de recursos legados: não é CFD e não mede CdA, arrasto ou watts.</p>'
     ].join('');
     athlete.after(section);
     // Comandos ANTES da imagem: permanecem acessíveis sem rolar até o final
@@ -118,10 +119,27 @@
     const stage=section.querySelector('.aero-stage');
     const controls=section.querySelector('.aero-controls');
     if(stage&&controls)stage.before(controls);
+    // Preserve o motor antigo sem apresentar a ilustração como um túnel real.
+    // As funções do player continuam na barra principal; apenas os ajustes de
+    // vento e segmentação passam a um painel explicitamente ilustrativo.
+    const legacy=document.createElement('details');
+    legacy.className='aero-legacy';
+    legacy.innerHTML='<summary>Efeito visual antigo · vento ilustrativo (opcional)</summary><div class="aero-legacy-content"><p>Recurso visual sem cálculo aerodinâmico. A análise de movimento está no Motion Signature.</p></div>';
+    const legacyContent=legacy.querySelector('.aero-legacy-content');
+    const legacyToolbar=document.createElement('div');legacyToolbar.className='aero-toolbar aero-legacy-toolbar';
+    for(const selector of ['#aero-wind','#aero-direction','.aero-strength','.aero-palette']){
+      const node=section.querySelector(selector);if(node)legacyToolbar.append(node);
+    }
+    legacyContent.append(legacyToolbar);
+    const detectionControls=section.querySelector('.aero-detection');
+    if(detectionControls)legacyContent.append(detectionControls);
+    for(const oldDetails of section.querySelectorAll(':scope > details.aero-advanced'))
+      legacyContent.append(oldDetails);
+    section.append(legacy);
     const compareJump=document.createElement('button');
     compareJump.type='button';
-    compareJump.textContent='▥ Comparar A/B frontal';
-    compareJump.title='Abrir comparação de área projetada na vista frontal';
+    compareJump.textContent='▥ Comparar silhuetas A/B';
+    compareJump.title='Abrir comparação visual da área projetada em vista frontal; não é CdA';
     compareJump.addEventListener('click',()=>{
       const comparison=document.getElementById('paiva-aero-compare');
       if(comparison)comparison.scrollIntoView({behavior:'smooth',block:'start'});
@@ -132,14 +150,14 @@
       const shortcut=document.createElement('button');
       shortcut.id='aero-open';
       shortcut.type='button';
-      shortcut.textContent='≈ Túnel visual';
+      shortcut.textContent='✧ Motion Studio';
       shortcut.addEventListener('click',()=>section.scrollIntoView({behavior:'smooth',block:'start'}));
       actions.prepend(shortcut);
     }
     const nav=document.getElementById('paiva-v524-nav');
     if(nav){
       const button=document.createElement('button');
-      button.type='button';button.textContent='Vento';
+      button.type='button';button.textContent='Motion Studio';
       button.addEventListener('click',()=>section.scrollIntoView({behavior:'smooth',block:'start'}));
       const pdf=[...nav.querySelectorAll('button')].find(b=>b.textContent==='PDF');
       if(pdf)nav.insertBefore(button,pdf);else nav.append(button);
@@ -158,7 +176,7 @@
     if(footer&&!footer.querySelector('.paiva-author-credit')){
       const credit=document.createElement('p');
       credit.className='paiva-author-credit';
-      credit.textContent='Idealizado e desenvolvido por Eduardo Paiva · PAIVA Bike Fit Studio';
+      credit.textContent='Idealizado e desenvolvido por Eduardo Paiva · PAIVA Motion Studio';
       footer.append(credit);
     }
 
@@ -204,8 +222,8 @@
     // fechado, tem prioridade para a área que o vento deve contornar.
     const curveTool=globalThis.PAIVA_SPLINE?.attach({
       host:section.querySelector('.aero-stage'),target:canvas,
-      toolbar:section.querySelector('.aero-toolbar'),
-      closeOnFinish:true,label:'Recorte do vento',
+      toolbar:legacyToolbar,
+      closeOnFinish:true,label:'Recorte visual ilustrativo',
       onChange:()=>{
         const previous=manualContour;
         const mask=curveTool?.getMask(320,180);
@@ -364,7 +382,7 @@
       }
       notify(playing?
         'Foto carregada. O reconhecimento do vento será tentado automaticamente.':
-        'Foto carregada sem vento. Abra o Motion Flow para ver os movimentos ou ligue o vento quando quiser.');
+        'Foto carregada. Abra Motion Signature para identificar ou marcar manualmente os oito pontos do ciclista.');
       render();
     }
     function airPath(){
@@ -505,7 +523,7 @@
         ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
         ctx.fillStyle='#f3f5f5';ctx.textAlign='center';
         ctx.font='600 26px "Segoe UI",Arial,sans-serif';
-        ctx.fillText('PAIVA AERO',W/2,H/2-38);
+        ctx.fillText('PAIVA MOTION STUDIO',W/2,H/2-38);
         ctx.fillStyle='#bdcedc';ctx.font='400 15px "Segoe UI",Arial,sans-serif';
         ctx.fillText('Abra uma foto ou vídeo para começar',W/2,H/2+2);
         ctx.textAlign='left';
@@ -523,7 +541,7 @@
       ctx.fillStyle='rgba(4,11,17,.64)';ctx.fillRect(12,12,242,26);
       ctx.fillStyle='#ffe05e';ctx.font='600 12px "Segoe UI",Arial,sans-serif';
       if('letterSpacing' in ctx)ctx.letterSpacing='1.3px';
-      ctx.fillText(playing?'PAIVA AERO · ONDA VISUAL':'PAIVA AERO · FOTO LIMPA',20,29);
+      ctx.fillText(playing?'PAIVA MOTION STUDIO · EFEITO ILUSTRATIVO':'PAIVA MOTION STUDIO · IMAGEM ORIGINAL',20,29);
       if('letterSpacing' in ctx)ctx.letterSpacing='0px';
       ctx.fillStyle='rgba(4,11,17,.62)';ctx.fillRect(12,H-32,W-24,23);
       ctx.fillStyle='#deedf7';ctx.font='400 10px "Segoe UI",Arial,sans-serif';
@@ -635,7 +653,7 @@
     });
     async function openWindVideo(file,label=file?.name){
       if(!(file instanceof Blob)||!file.size){
-        notify('Escolha primeiro um vídeo válido para abrir no Túnel de Vento.');
+        notify('Escolha primeiro um vídeo válido para abrir no Motion Studio.');
         return false;
       }
       stopVideo();videoURL=URL.createObjectURL(file);
@@ -647,7 +665,7 @@
       section.scrollIntoView({behavior:'smooth',block:'start'});
       try{
         await video.play();el('aero-play').textContent='⏸ Pausar vídeo';
-        notify('Vídeo '+String(label||'')+' carregado. O Motion Flow pode acompanhar os movimentos; vento opcional.');
+        notify('Vídeo '+String(label||'')+' carregado. Abra Motion Signature para acompanhar as articulações e comparar trajetórias.');
         return true;
       }catch(error){
         notify('O navegador não reproduziu este vídeo. Para Windows, tente MP4 H.264.');
@@ -808,7 +826,7 @@
         link.href=url;link.download='PAIVA_AERO_Onda_Visual.png';
         document.body.append(link);link.click();link.remove();
         setTimeout(()=>URL.revokeObjectURL(url),30000);
-        notify('Imagem com a onda de vento salva em PNG.');
+        notify('Imagem atual do Motion Studio salva em PNG.');
       },'image/png');
     });
     window.addEventListener('pagehide',stopVideo,{once:true});

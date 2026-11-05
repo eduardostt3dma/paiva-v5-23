@@ -41,7 +41,7 @@
         <div class="paiva-converter-finish" id="paiva-converter-finish" hidden>
           <a id="paiva-converter-download">Baixar MP4 convertido</a>
           <button type="button" id="paiva-converter-analyze">Abrir na Análise 2D</button>
-          <button type="button" id="paiva-converter-wind">Abrir no Túnel de Vento</button>
+          <button type="button" id="paiva-converter-wind">Abrir no Motion Studio</button>
         </div>
       </div>`;
     next.before(section);
@@ -231,15 +231,15 @@
       if(!converted)return;
       const app=globalThis.PAIVA_WIND_SIMPLE;
       if(!app?.openVideo){
-        status('Túnel de Vento indisponível. Atualize todos os arquivos do PAIVA.');
+        status('Motion Studio indisponível. Atualize todos os arquivos do PAIVA.');
         return;
       }
       try{
         const opened=await app.openVideo(converted,converted.name);
-        status(opened?'MP4 enviado ao Túnel de Vento. Você também pode baixá-lo.':
+        status(opened?'MP4 enviado ao Motion Studio. Você também pode baixá-lo.':
           'Vídeo carregado no Túnel, mas não reproduziu. Confira o codec.');
       }catch(error){
-        status('Falha ao abrir no Túnel de Vento: '+(error?.message||'vídeo indisponível'));
+        status('Falha ao abrir no Motion Studio: '+(error?.message||'vídeo indisponível'));
       }
     });
     window.addEventListener('pagehide',()=>{

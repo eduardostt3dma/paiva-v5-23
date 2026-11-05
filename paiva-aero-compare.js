@@ -1,4 +1,4 @@
-/* PAIVA AERO COMPARE — comparação de silhuetas em fotos frontais.
+/* PAIVA POSTURE COMPARE — comparação de silhuetas em fotos frontais.
    É geometria projetada 2D, NÃO túnel físico, CdA nem potência. */
 (() => {
   'use strict';
@@ -49,7 +49,7 @@
     section.id='paiva-aero-compare';
     section.innerHTML=[
       '<div class="paiva-compare-heading">',
-      '<div><span>PAIVA LAB · ANÁLISE FRONTAL</span><h2>AERO COMPARE</h2>',
+      '<div><span>PAIVA MOTION STUDIO · ANÁLISE FRONTAL</span><h2>POSTURE COMPARE</h2>',
       '<p>Vulto lateral por transparência, offline. A comparação frontal mantém o reconhecimento automático.</p></div>',
       '<div class="paiva-compare-top-actions">',
       '<button type="button" id="paiva-compare-fullscreen">⛶ Tela cheia · Projetor</button>',
@@ -454,7 +454,7 @@
       if(!ctx){notice('Seu navegador não conseguiu preparar o PNG.');return;}
       ctx.fillStyle='#101820';ctx.fillRect(0,0,1920,1660);
       ctx.fillStyle='#ffda54';ctx.font='bold 45px system-ui';
-      ctx.fillText('PAIVA AERO · COMPARAÇÃO FRONTAL',72,75);
+      ctx.fillText('PAIVA MOTION STUDIO · COMPARAÇÃO FRONTAL',72,75);
       ctx.fillStyle='#dae6ed';ctx.font='bold 28px system-ui';
       ctx.fillText('POSIÇÃO A',70,135);ctx.fillText('POSIÇÃO B',1000,135);
       for(const [slot,x] of [[slots.a,60],[slots.b,990]]){

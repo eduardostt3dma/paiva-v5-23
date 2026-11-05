@@ -1,4 +1,4 @@
-/* PAIVA MOTION FLOW V5.51 — correção manual das articulações no Aero.
+/* PAIVA MOTION SIGNATURE V5.52 — trajetórias 2D reais e comparação A/B.
    Estimativas de ângulos projetados em 2D; nunca ajuste biomecânico automático.
    Não altera ou reutiliza ferramentas, eventos ou medidas do módulo Análise 2D. */
 (() => {
@@ -55,9 +55,10 @@
       foot:reasonable(value(['heel','toe'],()=>footAngle(p.heel,p.toe)),0,90)};
   }
   const TRAILS={
-    knee:{label:'Joelho',color:'#55e8ff',maxJump:145},
-    hip:{label:'Quadril',color:'#ffe17c',maxJump:65},
-    shoulder:{label:'Ombro',color:'#c8b6ff',maxJump:65}
+    knee:{label:'Joelho',color:'#89dbea',maxJump:175},
+    hip:{label:'Quadril',color:'#b8c9d4',maxJump:75},
+    heel:{label:'Calcanhar',color:'#83e0c6',maxJump:245},
+    shoulder:{label:'Ombro',color:'#b6b5cf',maxJump:75}
   };
   function pushTrail(trails,key,p,time){
     if(!Object.hasOwn(TRAILS,key)||!visible(p)||!Number.isFinite(time))return false;
@@ -66,7 +67,7 @@
     if(previous&&(time-previous.t>1350||
       Math.hypot(x-previous.x,y-previous.y)>TRAILS[key].maxJump))list.length=0;
     list.push({x,y,t:time});
-    while(list.length>1&&(time-list[0].t>4200||list.length>20))list.shift();
+    while(list.length>1&&(time-list[0].t>7000||list.length>60))list.shift();
     return true;
   }
   // Núcleo puro disponível para testes automatizados, sem abrir navegador.
@@ -99,11 +100,11 @@
     const aero=document.getElementById('paiva-wind-simple');
     if(!aero||document.getElementById('paiva-aero-pose'))return false;
     const panel=document.createElement('details');
-    panel.id='paiva-aero-pose';panel.className='paiva-aero-pose';
+    panel.id='paiva-aero-pose';panel.className='paiva-aero-pose';panel.open=true;
     panel.innerHTML=`
-      <summary><span>✧ PAIVA MOTION FLOW</span><span class="pose-experimental">IA · TESTE</span></summary>
+      <summary><span>✧ PAIVA MOTION SIGNATURE</span><span class="pose-experimental">ANÁLISE 2D · BETA</span></summary>
       <div class="pose-interior">
-        <p class="pose-intro">Rastros fluidos acompanham joelho, quadril e ombro durante a pedalada. Os traços representam movimentos detectados na imagem original — não vento nem aerodinâmica.</p>
+        <p class="pose-intro">Assinatura visual da pedalada: linhas finas registram trajetórias observadas de joelho, quadril, calcanhar e ombro. A leitura vem do vídeo, não de uma simulação de vento.</p>
         <div class="pose-actions">
           <button type="button" id="pose-toggle">▶ Iniciar leitura IA</button>
           <button type="button" id="pose-manual-toggle" aria-pressed="false">✥ Corrigir pontos</button>
@@ -114,7 +115,7 @@
               <option value="1" selected>1×</option>
             </select>
           </label>
-          <label class="pose-trail-toggle"><input type="checkbox" id="pose-trails" checked> ≈ Mostrar rastros</label>
+          <label class="pose-trail-toggle"><input type="checkbox" id="pose-trails" checked> Mostrar trajetórias</label>
           <button type="button" id="pose-reset">↺ Reiniciar rastros</button>
           <button type="button" id="pose-export">↓ Salvar análise</button>
         </div>
@@ -128,11 +129,11 @@
             </select>
           </label>
           <button type="button" id="pose-manual-clear">↺ Restaurar pontos da IA</button>
-          <small>Vídeo pausado: arraste uma bolinha ou selecione a articulação e clique na posição correta. É possível marcar os seis pontos mesmo sem detecção da IA. O ajuste vale para este quadro; a IA volta a analisar outros quadros ao continuar.</small>
+          <small>Vídeo pausado: arraste uma bolinha ou selecione a articulação e clique na posição correta. É possível marcar todos os oito pontos mesmo sem detecção da IA. O ajuste vale para este quadro; a IA volta a analisar outros quadros ao continuar.</small>
         </div>
-        <p class="pose-status" id="pose-status" role="status" aria-live="polite">Abra uma foto ou vídeo no Aero e clique em Iniciar. Primeiro acesso exige internet.</p>
-        <div class="pose-canvas-wrap"><canvas id="pose-view" width="960" height="540" aria-label="Rastros de movimento do ciclista e ângulos aproximados identificados por IA"></canvas></div>
-        <p class="pose-legend"><span><i style="background:#55e8ff"></i>Joelho</span><span><i style="background:#ffe17c"></i>Quadril</span><span><i style="background:#c8b6ff"></i>Ombro</span></p>
+        <p class="pose-status" id="pose-status" role="status" aria-live="polite">Abra uma foto ou vídeo no Motion Studio e clique em Iniciar. Primeiro acesso exige internet.</p>
+        <div class="pose-canvas-wrap"><canvas id="pose-view" width="960" height="540" aria-label="Trajetórias biomecânicas 2D e ângulos aproximados identificados por IA"></canvas></div>
+        <p class="pose-legend"><span><i style="background:#89dbea"></i>Joelho</span><span><i style="background:#b8c9d4"></i>Quadril</span><span><i style="background:#83e0c6"></i>Calcanhar</span><span><i style="background:#b6b5cf"></i>Ombro</span></p>
         <div class="pose-stats" aria-live="polite">
           <div><span>Joelho · atual</span><strong id="pose-knee">—</strong></div>
           <div><span>Tronco · horizontal</span><strong id="pose-trunk">—</strong></div>
@@ -143,8 +144,23 @@
           <div class="pose-extreme"><span>Variação do tronco · nesta pedalada</span><strong id="pose-trunk-delta">—</strong></div>
           <div class="pose-foot"><span>Inclinação do pé · calcanhar ao antepé / solo</span><strong id="pose-foot">—</strong></div>
         </div>
+        <details class="pose-compare" id="pose-signature-compare">
+          <summary>▥ Comparar assinaturas de movimento · ANTES × DEPOIS</summary>
+          <div class="pose-compare-content">
+            <p>Para uma comparação útil, grave os dois vídeos de perfil com a mesma posição de câmera, distância, escala e cadência semelhante. Esta sobreposição é visual, não indica automaticamente melhora.</p>
+            <div class="pose-compare-actions">
+              <button type="button" id="pose-signature-before">① Guardar ANTES</button>
+              <button type="button" id="pose-signature-after">② Guardar DEPOIS</button>
+              <label>Articulação <select id="pose-signature-joint"><option value="knee">Joelho</option><option value="hip">Quadril</option><option value="heel">Calcanhar</option></select></label>
+              <button type="button" id="pose-signature-export" disabled>↓ Salvar comparação</button>
+            </div>
+            <p class="pose-compare-status" id="pose-signature-status" role="status" aria-live="polite">Reproduza alguns segundos do primeiro vídeo, guarde ANTES; depois carregue o segundo vídeo e guarde DEPOIS.</p>
+            <div class="pose-canvas-wrap"><canvas id="pose-signature-view" width="960" height="540" aria-label="Sobreposição 2D das trajetórias antes e depois"></canvas></div>
+            <p class="pose-compare-legend"><span><i style="background:#92d9ea"></i>ANTES</span><span><i style="background:#69dfc9"></i>DEPOIS</span><span>Trajetórias em coordenadas da imagem; sem calibração 3D.</span></p>
+          </div>
+        </details>
         <p class="pose-hint" id="pose-hint">Use vídeo de perfil e câmera fixa. Se um ponto fugir, clique em Corrigir pontos, reposicione-o manualmente e confira os ângulos. Se uma articulação estiver oculta, não inventamos graus.</p>
-        <p class="pose-disclaimer">⚠️ Teste exploratório: graus projetados em 2D, dependentes de câmera e visibilidade. A inclinação do pé é a linha calcanhar–frente do pé com a horizontal da imagem, não uma medida direta do tornozelo. Pontos estimados por IA não equivalem aos centros anatômicos palpados do bike fit, nem determinam posição ideal. Fotos e quadros são processados neste dispositivo; o modelo e os arquivos de execução precisam ser baixados na primeira utilização.</p>
+        <p class="pose-disclaimer">⚠️ Teste exploratório em 2D: ângulos e trajetórias dependem da câmera, escala, visibilidade e marcação anatômica. A inclinação do pé é a linha calcanhar–frente do pé com a horizontal da imagem, não uma medida direta do tornozelo. Não são reconstrução 3D, medidas de aerodinâmica nem diagnóstico. Fotos e quadros são processados no dispositivo; o modelo de IA precisa ser baixado na primeira utilização.</p>
       </div>`;
     aero.querySelector('.aero-measure')?.before(panel);
     if(!panel.isConnected)aero.append(panel);
@@ -154,10 +170,13 @@
     const rawCtx=raw.getContext('2d');
     if(!ctx||!rawCtx){el('pose-status').textContent='Canvas indisponível neste navegador.';return true;}
     let active=false,busy=false,lastSample=0,stopped=false,editing=false;
+    let sampleIntervalMs=220;
     let currentEpoch=null,lastVideoTime=null,side=null;
     let samples=0,minKnee=Infinity,maxKnee=-Infinity;
     let trunkSamples=0,minTrunk=Infinity,maxTrunk=-Infinity;
-    const trails={knee:[],hip:[],shoulder:[]};
+    const trails={knee:[],hip:[],heel:[],shoulder:[]};
+    const compareCanvas=el('pose-signature-view'),compareCtx=compareCanvas.getContext('2d');
+    const savedSignatures={before:null,after:null};
     let results=null,lastSource=null;
     let originalLandmarks=null,frameSlot=null;
     const correctedFrames=new Map();
@@ -194,6 +213,68 @@
     const fmt=x=>x===null||!Number.isFinite(x)?'—':x.toFixed(1).replace('.',',')+'°';
     const setText=(id,v)=>{el(id).textContent=v;};
     const status=message=>setText('pose-status',message);
+    function renderComparison(){
+      if(!compareCtx)return;
+      const c=compareCtx;
+      c.clearRect(0,0,W,H);c.fillStyle='#0b141c';c.fillRect(0,0,W,H);
+      c.save();c.strokeStyle='rgba(165,190,203,.1)';c.lineWidth=1;
+      for(let x=120;x<W;x+=120){c.beginPath();c.moveTo(x,0);c.lineTo(x,H);c.stroke();}
+      for(let y=90;y<H;y+=90){c.beginPath();c.moveTo(0,y);c.lineTo(W,y);c.stroke();}
+      c.restore();
+      const selected=el('pose-signature-joint').value;
+      for(const [key,color,tag] of [['before','#92d9ea','ANTES'],['after','#69dfc9','DEPOIS']]){
+        const path=savedSignatures[key]?.paths[selected];
+        if(!path||path.length<2)continue;
+        c.save();c.strokeStyle=color;c.fillStyle=color;c.lineWidth=1.65;
+        c.lineJoin='round';c.lineCap='round';c.beginPath();
+        path.forEach((p,i)=>{if(i===0)c.moveTo(p.x,p.y);else c.lineTo(p.x,p.y);});
+        c.stroke();
+        const p=path[path.length-1];c.beginPath();c.arc(p.x,p.y,3,0,Math.PI*2);c.fill();
+        c.font='700 12px system-ui';c.fillText(tag,clamp(p.x+9,8,W-68),clamp(p.y-8,24,H-13));
+        c.restore();
+      }
+      c.fillStyle='rgba(9,17,24,.82)';c.fillRect(12,12,440,29);
+      c.fillStyle='#d9e6ec';c.font='600 13px system-ui';
+      const joint=TRAILS[selected]?.label||'Articulação';
+      c.fillText('MOTION SIGNATURE · '+joint.toUpperCase()+' · 2D',22,31);
+      c.fillStyle='rgba(9,17,24,.8)';c.fillRect(12,H-31,W-24,23);
+      c.fillStyle='#b2c7d1';c.font='12px system-ui';
+      c.fillText('A/B: MESMO ENQUADRAMENTO E ESCALA · SEM CORREÇÃO AUTOMÁTICA DE CÂMERA',21,H-15);
+    }
+    function storeSignature(which){
+      const relevant=['knee','hip','heel'];
+      const paths=Object.fromEntries(relevant.map(key=>[key,trails[key].map(p=>({...p}))]));
+      const useful=relevant.filter(key=>paths[key].length>=5);
+      if(!lastSource||lastSource.mode==='photo'||useful.length<1){
+        setText('pose-signature-status','Abra um vídeo e deixe a IA registrar alguns segundos de trajetórias; depois guarde '+(which==='before'?'ANTES':'DEPOIS')+'.');
+        return;
+      }
+      savedSignatures[which]={paths,epoch:lastSource.epoch};
+      renderComparison();
+      el('pose-signature-export').disabled=!savedSignatures.before||!savedSignatures.after;
+      const both=!!savedSignatures.before&&!!savedSignatures.after;
+      setText('pose-signature-status',both?
+        (savedSignatures.before.epoch===savedSignatures.after.epoch?
+          'A e B guardados do mesmo vídeo. Para comparar posições antes/depois, carregue duas gravações diferentes.':
+          'ANTES e DEPOIS guardados. Escolha Joelho, Quadril ou Calcanhar para sobrepor trajetórias em 2D.'):
+        (which==='before'?'ANTES guardado. Agora abra a gravação DEPOIS e faça a leitura.':
+          'DEPOIS guardado. Agora abra a gravação ANTES e faça a leitura.'));
+    }
+    el('pose-signature-before').addEventListener('click',()=>storeSignature('before'));
+    el('pose-signature-after').addEventListener('click',()=>storeSignature('after'));
+    el('pose-signature-joint').addEventListener('change',renderComparison);
+    el('pose-signature-export').addEventListener('click',()=>{
+      if(!savedSignatures.before||!savedSignatures.after)return;
+      renderComparison();compareCanvas.toBlob(blob=>{
+        if(!blob)return;
+        const url=URL.createObjectURL(blob),a=document.createElement('a');
+        a.href=url;a.download='PAIVA_Motion_Signature_Comparacao_AB.png';
+        document.body.append(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),30000);
+        setText('pose-signature-status','Comparação visual 2D salva. Confira o alinhamento das duas gravações antes de interpretar.');
+      },'image/png');
+    });
+    renderComparison();
     function reset(){
       samples=0;minKnee=Infinity;maxKnee=-Infinity;
       trunkSamples=0;minTrunk=Infinity;maxTrunk=-Infinity;
@@ -208,27 +289,17 @@
         const points=trails[key];
         if(points.length<2)continue;
         ctx.strokeStyle=opts.color;
-        ctx.shadowColor=opts.color;ctx.shadowBlur=8;ctx.lineWidth=2.6;
+        ctx.shadowBlur=0;ctx.lineWidth=1.35;
         for(let i=1;i<points.length;i++){
           const previous=points[i-1],current=points[i];
-          ctx.globalAlpha=.13+.78*(i/points.length);
+          ctx.globalAlpha=.16+.76*(i/points.length);
           ctx.beginPath();
-          if(i===1)ctx.moveTo(previous.x,previous.y);
-          else{
-            const before=points[i-2];
-            ctx.moveTo((before.x+previous.x)*.5,(before.y+previous.y)*.5);
-          }
-          if(i===points.length-1){
-            ctx.quadraticCurveTo(previous.x,previous.y,current.x,current.y);
-          }else{
-            ctx.quadraticCurveTo(previous.x,previous.y,
-              (previous.x+current.x)*.5,(previous.y+current.y)*.5);
-          }
+          ctx.moveTo(previous.x,previous.y);ctx.lineTo(current.x,current.y);
           ctx.stroke();
         }
         const newest=points[points.length-1];
-        ctx.globalAlpha=1;ctx.shadowBlur=12;ctx.fillStyle=opts.color;
-        ctx.beginPath();ctx.arc(newest.x,newest.y,4.2,0,Math.PI*2);ctx.fill();
+        ctx.globalAlpha=1;ctx.fillStyle=opts.color;
+        ctx.beginPath();ctx.arc(newest.x,newest.y,2.9,0,Math.PI*2);ctx.fill();
       }
       ctx.restore();
     }
@@ -286,18 +357,18 @@
       if(lastSource)ctx.drawImage(raw,0,0);
       else{
         ctx.textAlign='center';ctx.fillStyle='#aebac5';ctx.font='18px system-ui';
-        ctx.fillText('Abra uma imagem ou vídeo no Aero para iniciar',W/2,H/2);
+        ctx.fillText('Abra uma foto ou vídeo no Motion Studio para iniciar',W/2,H/2);
         ctx.textAlign='left';
       }
       drawTrails();
       if(results)drawSkeleton(results);
       ctx.fillStyle='rgba(9,16,23,.76)';ctx.fillRect(12,12,250,31);
       ctx.fillStyle='#ffe476';ctx.font='600 14px system-ui';
-      ctx.fillText('PAIVA MOTION FLOW · LEITURA 2D',22,33);
+      ctx.fillText('PAIVA MOTION SIGNATURE · 2D',22,33);
       ctx.fillStyle='rgba(10,18,26,.8)';ctx.fillRect(12,H-32,W-24,24);
       ctx.fillStyle='#c8d3dc';ctx.font='12px system-ui';
       ctx.fillText(editing?'CORREÇÃO MANUAL · QUADRO PAUSADO · PONTOS EM VERDE = CORRIGIDOS':
-        'RASTROS DE PONTOS RECONHECIDOS · LEITURA EXPERIMENTAL',20,H-15);
+        'TRAJETÓRIAS DE ARTICULAÇÕES DETECTADAS · LEITURA EXPERIMENTAL',20,H-15);
     }
     function publish(data,source,record=true){
       ['knee','trunk','elbow','hip','foot'].forEach(k=>setText('pose-'+k,fmt(data?.[k]??null)));
@@ -327,7 +398,7 @@
       if(!aeroSource?.getAnalysisFrame)return;
       const source=aeroSource.getAnalysisFrame(rawCtx);
       if(!source){
-        if(!lastSource)status('Abra uma foto ou vídeo na área do Aero para iniciar a leitura.');
+        if(!lastSource)status('Abra uma foto ou vídeo no Motion Studio para iniciar a leitura.');
         return;
       }
       if(currentEpoch!==source.epoch){
@@ -338,6 +409,7 @@
       lastSource=source;lastVideoTime=source.videoTime;
       frameSlot=slotFor(source);
       busy=true;
+      const started=performance.now();
       try{
         const model=await getModel();
         if(!active||editing)return;
@@ -368,17 +440,23 @@
         active=false;
         el('pose-toggle').textContent='↻ Tentar novamente';
         status('IA indisponível: '+(error?.message||String(error))+'. Confira sua internet e tente outra vez.');
-      }finally{busy=false;}
+      }finally{
+        // Ajusta a cadência de análise ao desempenho do dispositivo:
+        // coleta mais quadros em um PC rápido, reduz carga em PCs modestos.
+        const elapsed=performance.now()-started;
+        sampleIntervalMs=clamp(elapsed*1.65,165,520);
+        busy=false;
+      }
     }
     function schedule(now){
       if(stopped)return;
-      if(active&&now-lastSample>=360){lastSample=now;void sample(now);}
+      if(active&&now-lastSample>=sampleIntervalMs){lastSample=now;void sample(now);}
       requestAnimationFrame(schedule);
     }
     el('pose-toggle').addEventListener('click',async()=>{
       if(editing){exitEditing();status('Correção deste quadro concluída. Clique novamente em Continuar leitura para acompanhar o vídeo.');return;}
       if(active){active=false;el('pose-toggle').textContent='▶ Continuar leitura';status('Leitura pausada.');return;}
-      if(!globalThis.PAIVA_WIND_SIMPLE?.getAnalysisFrame){status('Aguarde o Aero terminar de carregar.');return;}
+      if(!globalThis.PAIVA_WIND_SIMPLE?.getAnalysisFrame){status('Aguarde o Motion Studio terminar de carregar.');return;}
       const playingVideo=document.getElementById('aero-source-video');
       if(['video','camera'].includes(lastSource?.mode)&&playingVideo?.paused){
         try{await playingVideo.play();
