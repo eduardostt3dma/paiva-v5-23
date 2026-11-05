@@ -1,0 +1,42 @@
+PAIVA BIKE FIT STUDIO — V5.43 — VENTO JUNTO À BIKE + CORES + FONTE
+Idealizado e desenvolvido por Eduardo Paiva.
+
+1. CORREÇÃO DA ONDA VISUAL
+   A animação da V5.42 começava a se afastar cerca de 145 pixels antes
+   de chegar à silhueta e dependia muito do retângulo que contém o atleta.
+   As linhas, por isso, pareciam fugir para cima antes de passar pela bike.
+   Agora, o desvio é calculado mais perto do contorno:
+   - antecipa o fluxo em apenas uma curta faixa da imagem;
+   - aproxima a onda à borda LOCAL do atleta e da bicicleta;
+   - evita tratar espaços vazios como um bloco sólido completo;
+   - volta progressivamente à direção original após a passagem;
+   - continua ocultando ondas dentro da área marcada pelo recorte.
+   A animação NÃO é CFD e NÃO fornece CdA, watts nem arrasto real.
+
+2. NOVO AJUSTE DE PROXIMIDADE
+   Em "⚙ Ajustes finos", use "Vento próximo ao corpo" de 1 a 5.
+   O valor 4 é o novo padrão. O valor 5 aproxima ainda mais as ondas.
+
+3. VENTO DA FRENTE DA BICICLETA
+   Na foto lateral com ciclista olhando para a direita, o ar deve entrar
+   pela DIREITA e avançar para a ESQUERDA: esse é o novo sentido inicial.
+   Se a bike estiver olhando para esquerda, use o botão de direção para
+   inverter o fluxo. Na vista frontal, o vento continua ilustrativo em 2D.
+
+4. CORES PARA O PROJETOR
+   Um seletor de visual discreto permite:
+     Azul elétrico (inicial), Amarelo solar, Magenta e Verde laser.
+   As opções alteram apenas a cor desenhada das ondas e partículas;
+   não afetam medidas, marca, fotografias ou relatórios.
+
+5. TIPOGRAFIA
+   O texto PAIVA AERO · ONDA VISUAL ficou menor, leve e mais discreto.
+   Usamos fonte moderna do Windows, sem baixar arquivos de terceiros.
+   A assinatura Desenvolvido por Eduardo Paiva continua presente.
+   A logomarca original NÃO foi alterada.
+
+6. PRESERVAÇÃO E PUBLICAÇÃO
+   Nenhum arquivo da V5.42 foi removido. A/B frontal, 2D, ângulos,
+   rastreio, conversor MP4, TT, comparador, câmeras e PDF estão presentes.
+   Extraia o ZIP; envie TODOS os arquivos ao GitHub; Commit changes.
+   Abra novamente o app no navegador para receber a atualização do cache.

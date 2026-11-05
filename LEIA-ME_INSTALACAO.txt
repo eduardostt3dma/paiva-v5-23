@@ -1,4 +1,18 @@
-PAIVA V5.42 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_42.txt.
+PAIVA V5.43 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_43.txt.
+TÚNEL DE VENTO MAIS PRÓXIMO DO ATLETA:
+- As ondas agora se aproximam mais da silhueta identificada.
+- O desvio começa perto do primeiro contato com a bicicleta, evitando
+  a fuga exagerada da versão anterior.
+- Para foto lateral com ciclista olhando à DIREITA, o vento inicia
+  entrando da direita para esquerda (contra o deslocamento).
+- O botão de sentido continua permitindo a direção contrária.
+- Em ⚙ Ajustes finos, controle "Vento próximo ao corpo" (1 a 5).
+- Cores vibrantes: azul elétrico, amarelo solar, magenta, verde laser.
+- O nome "PAIVA AERO · ONDA VISUAL" na imagem ficou menor e elegante.
+- NENHUM arquivo ou função anterior foi apagado; a logo mantém suas cores.
+
+HISTÓRICO DA V5.42:
+PAIVA V5.42 — LEIA O ARQUIVO NOTAS_V5_42.txt.
 NOVO PAIVA AERO COMPARE — MODO PROJETOR:
 - Carregue uma foto frontal na POSIÇÃO A e outra na POSIÇÃO B.
 - O software tenta detectar ambas as silhuetas automaticamente.

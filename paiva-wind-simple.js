@@ -4,6 +4,12 @@
   'use strict';
   const W=960,H=540;
   const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+  const COLORS={
+    electric:{line:'#1de0ff',bright:'#bdffff',particle:'#35b8ff',wake:'#45cfff'},
+    sun:{line:'#ffe443',bright:'#fff9ae',particle:'#ffc431',wake:'#fbc25d'},
+    magenta:{line:'#ff4de8',bright:'#ffd0fb',particle:'#b68aff',wake:'#e87cdb'},
+    laser:{line:'#61ff79',bright:'#d8ffb5',particle:'#19dfa2',wake:'#60e9a2'}
+  };
   function wavePosition(x,y,ellipse,phase=0,intensity=3,direction=1){
     const rx=Math.max(35,ellipse.rx),ry=Math.max(28,ellipse.ry);
     const p=direction===1?x:W-x;
@@ -40,7 +46,7 @@
       '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
       '<h2>TÚNEL DE VENTO</h2>',
       '<p>O vento ilustrativo contorna a silhueta estimada do ciclista. Independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.42</span></div>',
+      '<span class="aero-badge">V5.43</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
@@ -51,8 +57,9 @@
       '<label>Reconhecer ciclista com <select id="aero-background"><option value="auto" selected>Foto comum · automático</option><option value="green">Fundo verde</option><option value="wall">Parede comum</option></select></label>',
       '<button type="button" id="aero-empty-capture" hidden>▣ Memorizar fundo vazio</button>',
       '<label class="aero-file" id="aero-empty-file-wrap" hidden>↑ Foto da parede vazia<input id="aero-empty-file" type="file" accept="image/png,image/jpeg,image/webp"></label>',
-      '<details class="aero-advanced"><summary>⚙ Sensibilidade</summary>',
-      '<label>Separação do fundo <input id="aero-threshold" type="range" min="12" max="100" value="36" step="2"></label></details>',
+      '<details class="aero-advanced"><summary>⚙ Ajustes finos</summary>',
+      '<label>Separação do fundo <input id="aero-threshold" type="range" min="12" max="100" value="36" step="2"></label>',
+      '<label>Vento próximo ao corpo <input id="aero-proximity" type="range" min="1" max="5" value="4" step="1"></label></details>',
       '<span id="aero-detection-status" role="status" aria-live="polite">Aguardando foto ou vídeo.</span>',
       '</div>',
       '<div class="aero-stage"><canvas id="aero-canvas" width="960" height="540" aria-label="Foto ou vídeo com ondas de vento ilustrativas atravessando a imagem"></canvas>',
@@ -66,8 +73,9 @@
       '</div>',
       '<div class="aero-toolbar aero-controls">',
       '<button type="button" id="aero-wind" class="aero-main">⏸ Pausar vento</button>',
-      '<button type="button" id="aero-direction">→ Vento para a direita</button>',
+      '<button type="button" id="aero-direction" title="A direção deve vir da frente da bike. Para ciclista olhando para direita, use vento para esquerda.">← Vento para a esquerda</button>',
       '<label class="aero-strength">Ondas <input type="range" id="aero-strength" min="1" max="5" step="1" value="3" aria-label="Intensidade visual das ondas de ar"><span>leve → forte</span></label>',
+      '<label class="aero-palette">Cor <select id="aero-wave-palette" aria-label="Cor ilustrativa das ondas de vento"><option value="electric" selected>Azul elétrico</option><option value="sun">Amarelo solar</option><option value="magenta">Magenta</option><option value="laser">Verde laser</option></select></label>',
       '<button type="button" id="aero-play" hidden>⏸ Pausar vídeo</button>',
       '<button type="button" id="aero-stop-camera" hidden>■ Desligar câmera</button>',
       '<button type="button" id="aero-save">↓ Salvar imagem</button>',
@@ -136,7 +144,10 @@
     const detectMiniCtx=detectMini.getContext('2d',{willReadFrequently:true});
     const maskCanvas=document.createElement('canvas');maskCanvas.width=320;maskCanvas.height=180;
     const maskCtx=maskCanvas.getContext('2d');
-    let mode='demo',videoURL=null,stream=null,playing=true,direction=1,phase=0;
+    // O ciclista padrão da vista lateral olha para a direita: vento contrário
+    // ao deslocamento entra pelo lado DIREITO e segue para a esquerda.
+    // O botão continua invertendo o sentido para outras fotografias.
+    let mode='demo',videoURL=null,stream=null,playing=true,direction=-1,phase=0;
     let visible=true,lastTime=0;
     let lastAnalysis=0,blankReference=null,detection=null,manualContour=null;
     let contentRoi={left:0,top:0,right:1,bottom:1};
@@ -162,6 +173,8 @@
     });
     const notify=message=>{el('aero-message').textContent=message;};
     const strength=()=>Number(el('aero-strength').value)||3;
+    const proximity=()=>Number(el('aero-proximity').value)||4;
+    const palette=()=>COLORS[el('aero-wave-palette').value]||COLORS.electric;
     function resetTrunk(){
       trunkPoints=[];measuringTrunk=false;
       el('aero-trunk-value').textContent='Ângulo do tronco: —';
@@ -253,38 +266,39 @@
       render();
     }
     function airPath(){
-      if(!ac||!playing)return;
+      if(!ac)return;
       ac.globalCompositeOperation='source-over';ac.globalAlpha=1;
       ac.clearRect(0,0,W,H);
       // Uma linha reta atravessando um atleta não identificado parece uma
       // simulação válida, mas não é. Sem detecção não desenhamos vento falso.
       if(mode!=='demo'&&!detection)return;
       const amount=strength();
-      ac.lineWidth=1.25;
-      ac.strokeStyle='#9bdfff';
-      ac.globalAlpha=.78;
+      const near=proximity(),colors=palette();
+      ac.lineWidth=1.65;
+      ac.strokeStyle=colors.line;
+      ac.globalAlpha=.93;
       ac.setLineDash([8+amount,16]);
       ac.lineDashOffset=-phase*direction;
       for(let y=15;y<H;y+=23){
         ac.beginPath();
         for(let x=-12;x<=W+12;x+=8){
           const shifted=globalThis.PAIVA_AERO_CONTOUR?.automaticWaveY(
-            x,y,detection,phase,amount,direction,W,H)??y;
+            x,y,detection,phase,amount,direction,W,H,near)??y;
           if(x===-12)ac.moveTo(x,shifted);else ac.lineTo(x,shifted);
         }
         ac.stroke();
       }
       ac.setLineDash([]);
       // Pequenas partículas deixam o movimento evidente mesmo em foto parada.
-      ac.globalAlpha=.8;
+      ac.globalAlpha=.9;
       for(let i=0;i<84;i++){
         const travel=(phase*(2+amount*.7)+i*71+i*i*9)%(W+80)-40;
         const x=direction===1?travel:W-travel;
         const y=(i*43+19)%(H-24)+12;
         const shifted=globalThis.PAIVA_AERO_CONTOUR?.automaticWaveY(
-          x,y,detection,phase,amount,direction,W,H)??y;
+          x,y,detection,phase,amount,direction,W,H,near)??y;
         ac.beginPath();ac.arc(x,shifted,i%5===0?2.1:1.15,0,Math.PI*2);
-        ac.fillStyle=i%3===0?'#c9f5ff':'#6bcaff';ac.fill();
+        ac.fillStyle=i%3===0?colors.bright:colors.particle;ac.fill();
       }
       // Oclusão por pixels DETECTADOS: o vento não atravessa a silhueta.
       if(detection){
@@ -297,7 +311,7 @@
     }
     function drawWake(){
       if(!detection)return;
-      const amount=strength();
+      const amount=strength(),colors=palette();
       const {width,height,bounds}=detection;
       const centerY=(bounds.top+bounds.bottom)*.5*H/height;
       const halfHeight=Math.max(30,(bounds.bottom-bounds.top)*.5*H/height);
@@ -315,7 +329,8 @@
               (amount/3);
           if(t===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
         }
-        ctx.strokeStyle=j%3===0?'rgba(194,242,255,.44)':'rgba(85,181,229,.24)';
+        ctx.strokeStyle=colors.wake;
+        ctx.globalAlpha=j%3===0?.45:.24;
         ctx.lineWidth=j%3===0?1.7:1.1;
         ctx.stroke();
       }
@@ -366,9 +381,10 @@
         const glow=ctx.createRadialGradient(W*.45,H*.47,8,W*.45,H*.47,700);
         glow.addColorStop(0,'#243a4b');glow.addColorStop(1,'#09131c');
         ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
-        ctx.fillStyle='#f3f5f5';ctx.textAlign='center';ctx.font='bold 29px system-ui';
+        ctx.fillStyle='#f3f5f5';ctx.textAlign='center';
+        ctx.font='600 26px "Segoe UI",Arial,sans-serif';
         ctx.fillText('PAIVA AERO',W/2,H/2-38);
-        ctx.fillStyle='#bdcedc';ctx.font='17px system-ui';
+        ctx.fillStyle='#bdcedc';ctx.font='400 15px "Segoe UI",Arial,sans-serif';
         ctx.fillText('Abra uma foto ou vídeo para começar',W/2,H/2+2);
         ctx.textAlign='left';
       }
@@ -379,15 +395,18 @@
         ctx.save();ctx.globalAlpha=.11;ctx.drawImage(maskCanvas,0,0,W,H);ctx.restore();
       }
       drawTrunk();
-      ctx.fillStyle='rgba(4,11,17,.75)';ctx.fillRect(10,10,330,36);
-      ctx.fillStyle='#ffe05e';ctx.font='bold 18px system-ui';
-      ctx.fillText('PAIVA AERO  ·  ONDA VISUAL',20,34);
-      ctx.fillStyle='rgba(4,11,17,.76)';ctx.fillRect(10,H-38,W-20,27);
-      ctx.fillStyle='#deedf7';ctx.font='12px system-ui';
-      ctx.fillText('VENTO ILUSTRATIVO  ·  NÃO MEDE ARRASTO, CdA OU WATTS',20,H-20);
+      // Título leve, com a identidade amarela preservada e sem cobrir o atleta.
+      ctx.fillStyle='rgba(4,11,17,.64)';ctx.fillRect(12,12,242,26);
+      ctx.fillStyle='#ffe05e';ctx.font='600 12px "Segoe UI",Arial,sans-serif';
+      if('letterSpacing' in ctx)ctx.letterSpacing='1.3px';
+      ctx.fillText('PAIVA AERO · ONDA VISUAL',20,29);
+      if('letterSpacing' in ctx)ctx.letterSpacing='0px';
+      ctx.fillStyle='rgba(4,11,17,.62)';ctx.fillRect(12,H-32,W-24,23);
+      ctx.fillStyle='#deedf7';ctx.font='400 10px "Segoe UI",Arial,sans-serif';
+      ctx.fillText('VENTO ILUSTRATIVO · NÃO MEDE ARRASTO, CdA OU WATTS',20,H-17);
       ctx.textAlign='right';ctx.fillStyle='rgba(255,226,115,.82)';
-      ctx.font='bold 10px system-ui';
-      ctx.fillText('DESENVOLVIDO POR EDUARDO PAIVA',W-18,34);
+      ctx.font='500 9px "Segoe UI",Arial,sans-serif';
+      ctx.fillText('DESENVOLVIDO POR EDUARDO PAIVA',W-18,29);
       ctx.textAlign='left';
     }
     function tick(now){
@@ -606,6 +625,8 @@
       render();
     });
     el('aero-strength').addEventListener('input',render);
+    el('aero-proximity').addEventListener('input',render);
+    el('aero-wave-palette').addEventListener('change',render);
     el('aero-play').addEventListener('click',async()=>{
       if(mode!=='video')return;
       if(video.paused){

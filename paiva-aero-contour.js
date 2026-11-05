@@ -65,6 +65,7 @@
     if(pixels<minCount*2||right<=left)return null;
     // Janela de colunas vizinhas reduz serrilhado e pequenos vazios.
     const smoothTop=new Float32Array(w),smoothBottom=new Float32Array(w);
+    const valid=new Uint8Array(w);
     for(let x=0;x<w;x++){
       let t=h,b=-1;
       for(let nx=Math.max(left,x-6);nx<=Math.min(right,x+6);nx++){
@@ -74,46 +75,59 @@
       }
       smoothTop[x]=t<h?t:highest;
       smoothBottom[x]=b>=0?b:lowest;
+      valid[x]=t<h&&b>=0?1:0;
     }
     return {mask:kept,width:w,height:h,pixels,top:smoothTop,bottom:smoothBottom,
-      bounds:{left,right,top:highest,bottom:lowest}};
+      valid,bounds:{left,right,top:highest,bottom:lowest}};
   }
   function automaticWaveY(x,y,contour,phase=0,intensity=3,direction=1,
-    canvasW=960,canvasH=540){
+    canvasW=960,canvasH=540,proximity=4){
     if(!contour)return y;
     const {width:w,height:h,bounds:b}=contour;
-    const imageX=clamp(Math.round(x*w/canvasW),0,w-1);
-    const localTop=contour.top[imageX]*canvasH/h;
-    const localBottom=contour.bottom[imageX]*canvasH/h;
+    if(!b)return y;
     const leading=(direction===1?b.left:b.right)*canvasW/w;
     const trailing=(direction===1?b.right:b.left)*canvasW/w;
     const progress=(x-leading)*(direction===1?1:-1);
     const span=Math.abs(trailing-leading);
-    const approach=145;
+    // Antes a curva começava 145 px antes da bike e se afastava do corpo
+    // usando 72% do limite GLOBAL. Agora aproxima até 36 px antes do
+    // obstáculo e usa o perfil LOCAL da silhueta em cada coluna.
+    const approach=36;
+    if(progress< -approach)return y;
     const approachUnit=clamp((progress+approach)/approach,0,1);
-    // Desvio contínuo: o ar começa a contornar ANTES de chegar ao ciclista,
-    // permanece fora do envelope detectado e volta depois da passagem.
     const entrance=approachUnit*approachUnit*(3-2*approachUnit);
     const after=progress-span;
-    const exit=after>0?Math.exp(-after/(165+intensity*12)):1;
+    const exit=after>0?Math.exp(-after/(105+intensity*9)):1;
     const influence=entrance*exit;
-    const padding=10+intensity*2;
-    const globalTop=b.top*canvasH/h,globalBottom=b.bottom*canvasH/h;
-    const globalCenter=(globalTop+globalBottom)/2;
-    const side=y<globalCenter?-1:1;
+    const padding=clamp(14-(clamp(proximity,1,5)-1)*3,2,14);
+    let imageX=clamp(Math.round(x*w/canvasW),b.left,b.right);
+    // Em intervalos vazios (ex.: entre a cabeça e o guidão), não use o
+    // retângulo global como obstáculo. Procure apenas uma borda próxima.
+    if(contour.valid&&!contour.valid[imageX]){
+      let nearest=-1;
+      for(let offset=1;offset<=8;offset++){
+        if(imageX-offset>=b.left&&contour.valid[imageX-offset]){
+          nearest=imageX-offset;break;
+        }
+        if(imageX+offset<=b.right&&contour.valid[imageX+offset]){
+          nearest=imageX+offset;break;
+        }
+      }
+      if(nearest>=0)imageX=nearest;
+    }
+    const localTop=contour.top[imageX]*canvasH/h;
+    const localBottom=contour.bottom[imageX]*canvasH/h;
+    const topEdge=localTop-padding,bottomEdge=localBottom+padding;
     let displacement=0;
-    if(y>globalTop-padding&&y<globalBottom+padding){
-      // O contorno local dá uma curva sutil; a borda global evita que
-      // linhas e partículas atravessem partes desconexas da bicicleta.
-      const topEdge=globalTop*.72+localTop*.28-padding;
-      const bottomEdge=globalBottom*.72+localBottom*.28+padding;
-      const spread=Math.abs(y-globalCenter)*.10;
-      const target=side<0?topEdge-spread:bottomEdge+spread;
+    if(y>topEdge&&y<bottomEdge&&
+      (!contour.valid||contour.valid[imageX])){
+      const target=(y-topEdge<=bottomEdge-y)?topEdge:bottomEdge;
       displacement=(target-y)*influence;
     }
+    const globalCenter=(b.top+b.bottom)*.5*canvasH/h;
     const wake=after>0?
-      Math.sin(after*.041-phase*.08)*12*intensity/3*
-        Math.exp(-after/260)*clamp(1-Math.abs(y-globalCenter)/(canvasH*.55),0,1):0;
+      Math.sin(after*.041-phase*.08)*7*intensity/3*
+        Math.exp(-after/210)*clamp(1-Math.abs(y-globalCenter)/(canvasH*.55),0,1):0;
     return y+displacement+wake;
   }
   globalThis.PAIVA_AERO_CONTOUR={contourFromSegmentation,automaticWaveY};
