@@ -1,4 +1,15 @@
-PAIVA V5.38 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_38.txt.
+PAIVA V5.39 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_39.txt.
+CORREÇÕES DO CABEÇALHO E DO CONVERSOR:
+- Cabeçalho: uma única inscrição PAIVA BIKE FIT STUDIO, maior e amarela;
+  logo abaixo, "Desenvolvido por Eduardo Paiva", sem repetir o nome.
+- Conversor de vídeos montado depois da bancada 2D ficar pronta, evitando
+  que apareça distante da análise ou perca o atalho de acesso.
+- Painel completo do conversor permanece imediatamente ANTES do 2D.
+- Atalho "Conversor MP4" continua acessível junto ao título do 2D.
+- Todos os recursos anteriores da V5.38 foram preservados integralmente.
+
+HISTÓRICO DA V5.38:
+PAIVA V5.38 — LEIA O ARQUIVO NOTAS_V5_38.txt.
 CONVERSOR, IDENTIDADE E VENTO:
 - Conversor de vídeos AVI/MOV/MKV/MP4 para MP4 preservado integralmente;
   botão de acesso direto na bancada 2D e painel logo antes dela.

@@ -8,7 +8,9 @@
     if(document.getElementById('paiva-video-converter'))return;
     // Mantém o conversor à vista, imediatamente antes da análise 2D,
     // mesmo quando a bancada de múltiplas câmeras também está instalada.
-    const next=document.getElementById('paiva-athlete-2d') || document.getElementById('paiva-multi-camera');
+    const next=document.getElementById('paiva-athlete-2d') ||
+      document.getElementById('paiva-multi-camera') ||
+      document.querySelector('main > footer');
     if(!next)return;
     const section=document.createElement('section');
     section.id='paiva-video-converter';section.className='card paiva-converter';
@@ -213,6 +215,12 @@
     });
     refresh();
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
-  else initialize();
+  // O athlete-2d.js cria a bancada em DOMContentLoaded. Com scripts deferidos,
+  // readyState='interactive' ainda é cedo: montar agora fazia o conversor cair
+  // antes das câmeras, longe do 2D, e o atalho ficava sem seu destino.
+  if(document.readyState==='complete')initialize();
+  else {
+    document.addEventListener('DOMContentLoaded',initialize,{once:true});
+    window.addEventListener('load',initialize,{once:true});
+  }
 })();

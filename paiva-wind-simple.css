@@ -30,8 +30,8 @@
 .aero-strength span{font-size:10px;color:#a8b9c5;font-weight:500}
 .aero-disclaimer{border-left:3px solid #e5c04c;background:#24231f;padding:10px 12px;color:#d9d2c0;font-size:11px;line-height:1.6;border-radius:0 8px 8px 0;margin:14px 0 0}
 #paiva-author-watermark{position:static;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-align:left;max-width:230px;margin-top:9px;padding:7px 0 0;border-top:1px solid rgba(245,207,80,.42);background:transparent;box-shadow:none}
-#paiva-author-watermark span{font-size:8px;font-weight:800;letter-spacing:.17em;color:rgba(255,222,100,.8)}
-#paiva-author-watermark strong{font-size:10px;font-weight:700;letter-spacing:.025em;color:rgba(240,244,247,.82)}
+#paiva-author-watermark strong{font-size:11px;font-weight:700;letter-spacing:.035em;color:rgba(240,244,247,.86)}
+main>header .brand-tag .brand-kicker{font-size:clamp(14px,1.4vw,19px);font-weight:900;letter-spacing:.085em;white-space:normal;line-height:1.15}
 .paiva-author-credit{margin:13px auto 0;padding-top:10px;border-top:1px solid #3d4149;font-size:11px;letter-spacing:.035em;color:#d8c88c;text-align:center}
 @media(max-width:650px){
   .aero-heading{gap:9px}

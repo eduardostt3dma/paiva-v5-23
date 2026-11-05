@@ -40,7 +40,7 @@
       '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
       '<h2>TÚNEL DE VENTO</h2>',
       '<p>O vento encontra a silhueta do ciclista e se desvia automaticamente. Independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.38</span></div>',
+      '<span class="aero-badge">V5.39</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
@@ -99,7 +99,7 @@
       const watermark=document.createElement('div');
       watermark.id='paiva-author-watermark';
       watermark.setAttribute('aria-label','Idealizado e desenvolvido por Eduardo Paiva');
-      watermark.innerHTML='<span>PAIVA · BIKE FIT STUDIO</span><strong>Desenvolvido por Eduardo Paiva</strong>';
+      watermark.innerHTML='<strong>Desenvolvido por Eduardo Paiva</strong>';
       const brand=document.querySelector('main > header .brand-tag');
       (brand||document.querySelector('main > header')||document.body).append(watermark);
     }

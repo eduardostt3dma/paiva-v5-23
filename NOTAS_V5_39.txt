@@ -1,0 +1,22 @@
+PAIVA BIKE FIT STUDIO — V5.39 — AJUSTES DE NAVEGAÇÃO E IDENTIDADE
+Idealizado e desenvolvido por Eduardo Paiva.
+
+CORRIGIDO:
+1) O cabeçalho mantém UMA inscrição PAIVA BIKE FIT STUDIO, em amarelo
+   e maior que antes. Logo abaixo fica somente:
+   "Desenvolvido por Eduardo Paiva".
+2) O conversor não espera um atalho aparecer por acaso: ele é iniciado
+   depois da montagem dos módulos, inclusive com fallback no carregamento.
+3) O painel CONVERSOR AVI / MOV / MP4 -> MP4 fica diretamente antes
+   da bancada 2D. O atalho "Conversor MP4" aponta para ele.
+4) Caso o 2D ainda não esteja na página, o conversor pode montar-se antes
+   do rodapé em vez de ficar invisível.
+
+NÃO REMOVIDO:
+Todas as funções da V5.38, inclusive conversão e recorte de vídeo,
+FFmpeg, análise 2D, câmeras, túnel visual, TT, relatórios, PDFs e
+logomarca registrada. Esta versão é um refinamento, não um redesenho.
+
+PUBLICAR:
+Descompactar o ZIP e enviar todos os arquivos de dentro ao GitHub.
+Atualizar a página no Windows ou Android; o cache PWA foi renovado.
