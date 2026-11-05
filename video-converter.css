@@ -1,6 +1,11 @@
 /* PAIVA · Conversor opcional de vídeo, com estilo discreto e seguro para celular. */
 #paiva-video-converter {background:linear-gradient(145deg,#1f303d,#111c25);
-  border:1px solid #586f7e;padding:16px;margin:18px 0;color:#e4eef4;}
+  border:1px solid #586f7e;padding:16px;margin:18px 0;color:#e4eef4;
+  scroll-margin-top:18px;}
+#paiva-open-video-converter {background:#202a33;color:#ffe16a;
+  border:1px solid #927c3b;border-radius:9px;padding:8px 11px;
+  font:700 11px system-ui,sans-serif;cursor:pointer;white-space:nowrap;}
+#paiva-open-video-converter:hover {background:#2b333b;}
 #paiva-video-converter [hidden] {display:none!important;}
 #paiva-video-converter .paiva-converter-heading {display:flex;gap:14px;
   justify-content:space-between;align-items:center;}

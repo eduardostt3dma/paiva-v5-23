@@ -63,24 +63,33 @@
     if(!contour)return y;
     const {width:w,height:h,bounds:b}=contour;
     const imageX=clamp(Math.round(x*w/canvasW),0,w-1);
-    const top=contour.top[imageX]*canvasH/h;
-    const bottom=contour.bottom[imageX]*canvasH/h;
+    const localTop=contour.top[imageX]*canvasH/h;
+    const localBottom=contour.bottom[imageX]*canvasH/h;
     const leading=(direction===1?b.left:b.right)*canvasW/w;
     const trailing=(direction===1?b.right:b.left)*canvasW/w;
-    const ahead=(direction===1?leading-x:x-leading);
-    const after=(direction===1?x-trailing:trailing-x);
-    const beforeFactor=ahead>0?clamp(1-ahead/120,0,1):1;
-    const afterFactor=after>0?Math.exp(-after/145):1;
-    const factor=beforeFactor*afterFactor;
-    const padding=12+intensity*2;
+    const progress=(x-leading)*(direction===1?1:-1);
+    const span=Math.abs(trailing-leading);
+    const approach=145;
+    const approachUnit=clamp((progress+approach)/approach,0,1);
+    // Desvio contínuo: o ar começa a contornar ANTES de chegar ao ciclista,
+    // permanece fora do envelope detectado e volta depois da passagem.
+    const entrance=approachUnit*approachUnit*(3-2*approachUnit);
+    const after=progress-span;
+    const exit=after>0?Math.exp(-after/(165+intensity*12)):1;
+    const influence=entrance*exit;
+    const padding=10+intensity*2;
     const globalTop=b.top*canvasH/h,globalBottom=b.bottom*canvasH/h;
     const globalCenter=(globalTop+globalBottom)/2;
     const side=y<globalCenter?-1:1;
     let displacement=0;
-    if(y>=globalTop-60&&y<=globalBottom+60){
-      const limit=side<0?top-padding:bottom+padding;
-      if((side<0&&y>limit)||(side>0&&y<limit))
-        displacement=(limit-y)*factor*.93;
+    if(y>globalTop-padding&&y<globalBottom+padding){
+      // O contorno local dá uma curva sutil; a borda global evita que
+      // linhas e partículas atravessem partes desconexas da bicicleta.
+      const topEdge=globalTop*.72+localTop*.28-padding;
+      const bottomEdge=globalBottom*.72+localBottom*.28+padding;
+      const spread=Math.abs(y-globalCenter)*.10;
+      const target=side<0?topEdge-spread:bottomEdge+spread;
+      displacement=(target-y)*influence;
     }
     const wake=after>0?
       Math.sin(after*.041-phase*.08)*12*intensity/3*

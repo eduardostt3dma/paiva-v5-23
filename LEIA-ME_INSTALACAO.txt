@@ -1,4 +1,19 @@
-PAIVA V5.37 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_37.txt.
+PAIVA V5.38 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_38.txt.
+CONVERSOR, IDENTIDADE E VENTO:
+- Conversor de vídeos AVI/MOV/MKV/MP4 para MP4 preservado integralmente;
+  botão de acesso direto na bancada 2D e painel logo antes dela.
+- Não confundir MP4 (vídeo) com MP3 (áudio).
+- Crédito "Desenvolvido por Eduardo Paiva" reposicionado sob o nome
+  do software no cabeçalho, sem sobrepor o botão Bloquear.
+- Vento só aparece sobre fotos/vídeos quando detecta a silhueta do atleta.
+  Se o reconhecimento falhar, o painel informa como corrigir o fundo.
+- Curvas do ar se iniciam antes do obstáculo e contornam o envelope
+  identificado, com retorno progressivo após o ciclista.
+- A representação segue ILUSTRATIVA; não mede CdA, watts ou arrasto.
+- Nenhum dos módulos anteriores foi removido. A marca segue intacta.
+
+HISTÓRICO DA V5.37:
+PAIVA V5.37 — LEIA O ARQUIVO NOTAS_V5_37.txt.
 MELHORIA 2D INSPIRADA NO FLUXO SIMPLES DO KINOVEA:
 - A última geometria angular agora é guardada também no projeto do vídeo.
 - Ao fechar e reabrir o mesmo vídeo/análise, os ângulos podem ser recuperados

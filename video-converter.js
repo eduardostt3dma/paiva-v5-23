@@ -6,7 +6,9 @@
   const KNOWN=/\.(avi|mov|mp4|m4v|mkv|wmv|mts|m2ts|mpg|mpeg|webm)$/i;
   function initialize() {
     if(document.getElementById('paiva-video-converter'))return;
-    const next=document.getElementById('paiva-multi-camera') || document.getElementById('paiva-athlete-2d');
+    // Mantém o conversor à vista, imediatamente antes da análise 2D,
+    // mesmo quando a bancada de múltiplas câmeras também está instalada.
+    const next=document.getElementById('paiva-athlete-2d') || document.getElementById('paiva-multi-camera');
     if(!next)return;
     const section=document.createElement('section');
     section.id='paiva-video-converter';section.className='card paiva-converter';
@@ -36,6 +38,22 @@
         </div>
       </div>`;
     next.before(section);
+    // Atalho permanente na própria bancada: o conversor nunca deve parecer
+    // ausente apenas porque ficou fora da janela de rolagem.
+    const titleActions=document.querySelector('#paiva-athlete-2d .paiva-2d-title-actions');
+    if(titleActions&&!document.getElementById('paiva-open-video-converter')){
+      const shortcut=document.createElement('button');
+      shortcut.type='button';
+      shortcut.id='paiva-open-video-converter';
+      shortcut.textContent='🎞 Conversor MP4';
+      shortcut.title='Abrir conversor de vídeos AVI, MOV, MKV e MP4';
+      shortcut.addEventListener('click',()=>{
+        section.scrollIntoView({behavior:'smooth',block:'start'});
+        const file=document.getElementById('paiva-converter-file');
+        if(file)file.focus({preventScroll:true});
+      });
+      titleActions.append(shortcut);
+    }
     const el=id=>document.getElementById('paiva-converter-'+id);
     const status=text=>el('status').textContent=text;
     let chosen=null,converted=null,downloadUrl=null,wasmBlobUrl=null,engine=null,busy=false,cancelled=false;

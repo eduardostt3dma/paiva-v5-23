@@ -29,7 +29,7 @@
 .aero-strength input{width:90px;accent-color:#f4d044}
 .aero-strength span{font-size:10px;color:#a8b9c5;font-weight:500}
 .aero-disclaimer{border-left:3px solid #e5c04c;background:#24231f;padding:10px 12px;color:#d9d2c0;font-size:11px;line-height:1.6;border-radius:0 8px 8px 0;margin:14px 0 0}
-#paiva-author-watermark{position:fixed;right:13px;bottom:12px;z-index:8;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-align:right;max-width:260px;padding:7px 10px;border-radius:8px;background:rgba(5,10,15,.5);border-right:2px solid rgba(245,207,80,.7);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+#paiva-author-watermark{position:static;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-align:left;max-width:230px;margin-top:9px;padding:7px 0 0;border-top:1px solid rgba(245,207,80,.42);background:transparent;box-shadow:none}
 #paiva-author-watermark span{font-size:8px;font-weight:800;letter-spacing:.17em;color:rgba(255,222,100,.8)}
 #paiva-author-watermark strong{font-size:10px;font-weight:700;letter-spacing:.025em;color:rgba(240,244,247,.82)}
 .paiva-author-credit{margin:13px auto 0;padding-top:10px;border-top:1px solid #3d4149;font-size:11px;letter-spacing:.035em;color:#d8c88c;text-align:center}
@@ -38,7 +38,7 @@
   .aero-toolbar button,.aero-file{flex:1 1 145px}
   .aero-strength{width:100%;justify-content:center}
   .aero-detection{align-items:flex-start;flex-direction:column}
-  #paiva-author-watermark{padding:5px 7px;right:6px;bottom:7px;opacity:.55}
+  #paiva-author-watermark{margin-top:7px;padding-top:5px;max-width:230px;opacity:.88}
   #paiva-author-watermark span{font-size:7px}
   #paiva-author-watermark strong{font-size:8px}
 }

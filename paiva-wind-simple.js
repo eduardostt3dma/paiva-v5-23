@@ -40,7 +40,7 @@
       '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
       '<h2>TÚNEL DE VENTO</h2>',
       '<p>O vento encontra a silhueta do ciclista e se desvia automaticamente. Independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.36</span></div>',
+      '<span class="aero-badge">V5.38</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
@@ -93,14 +93,15 @@
       const pdf=[...nav.querySelectorAll('button')].find(b=>b.textContent==='PDF');
       if(pdf)nav.insertBefore(button,pdf);else nav.append(button);
     }
-    // Assinatura discreta em TODAS as telas, preservando integralmente
-    // as cores da logomarca registrada e sem cobrir os controles.
+    // Assinatura discreta junto à identidade do aplicativo. Posicionamento
+    // no fluxo do cabeçalho evita sobrepor o botão flutuante "Bloquear".
     if(!document.getElementById('paiva-author-watermark')){
       const watermark=document.createElement('div');
       watermark.id='paiva-author-watermark';
       watermark.setAttribute('aria-label','Idealizado e desenvolvido por Eduardo Paiva');
       watermark.innerHTML='<span>PAIVA · BIKE FIT STUDIO</span><strong>Desenvolvido por Eduardo Paiva</strong>';
-      document.body.append(watermark);
+      const brand=document.querySelector('main > header .brand-tag');
+      (brand||document.querySelector('main > header')||document.body).append(watermark);
     }
     const footer=document.querySelector('main > footer');
     if(footer&&!footer.querySelector('.paiva-author-credit')){
@@ -212,14 +213,17 @@
       mode='photo';
       resetTrunk();
       identifySilhouette();
-      notify(detection?'Silhueta reconhecida automaticamente. O vento está se desviando do atleta.':
-        'Foto carregada. Para reconhecer o atleta, use fundo verde ou parede comum com imagem vazia.');
+      notify(detection?'Silhueta reconhecida. O vento contorna automaticamente o espaço do ciclista.':
+        'Foto carregada, mas sem silhueta confiável. O vento ficará suspenso até reconhecer o atleta. Use fundo verde ou foto da parede vazia.');
       render();
     }
     function airPath(){
       if(!ac||!playing)return;
       ac.globalCompositeOperation='source-over';ac.globalAlpha=1;
       ac.clearRect(0,0,W,H);
+      // Uma linha reta atravessando um atleta não identificado parece uma
+      // simulação válida, mas não é. Sem detecção não desenhamos vento falso.
+      if(mode!=='demo'&&!detection)return;
       const amount=strength();
       ac.lineWidth=1.25;
       ac.strokeStyle='#9bdfff';
@@ -333,7 +337,7 @@
         ctx.fillText('Abra uma foto ou vídeo para começar',W/2,H/2+2);
         ctx.textAlign='left';
       }
-      // Brisa leve permanente não depende de fundo verde nem segmentação.
+      // Com imagem real, as linhas só aparecem se a silhueta foi reconhecida.
       airPath();ctx.drawImage(air,0,0);
       drawWake();
       if(detection){

@@ -1,0 +1,37 @@
+PAIVA BIKE FIT STUDIO — V5.38 — REVISÃO SEM REMOÇÕES
+Idealizado e desenvolvido por Eduardo Paiva.
+
+1. CONVERSOR:
+   - O conversor de vídeo NUNCA foi removido da versão anterior.
+   - Nesta atualização, ele volta a ser facilmente encontrado logo
+     antes da análise 2D, com botão "Conversor MP4" na bancada.
+   - Arquivos do motor FFmpeg, recurso de recorte temporal e envio
+     do vídeo convertido diretamente para o 2D foram mantidos.
+   - MP4 é vídeo; MP3 é áudio e não substitui a conversão necessária.
+
+2. MARCA / ASSINATURA:
+   - "Desenvolvido por Eduardo Paiva" aparece sob a identificação
+     PAIVA BIKE FIT STUDIO, no cabeçalho. Nunca atrás de "Bloquear".
+   - Logotipo registrado, cores e demais créditos intactos.
+
+3. TÚNEL VISUAL DE VENTO:
+   - A animação de uma imagem de ciclista para se a silhueta não for
+     identificada; não finge que há uma medida automática.
+   - Quando detecta a silhueta, as linhas começam o desvio antes
+     do atleta, contornam o envelope detectado e retornam depois.
+   - Fundo verde OU parede comum com fundo vazio continuam disponíveis.
+   - Foto, vídeo, câmera e quadro vindo do 2D permanecem.
+   - Sem CFD, força de arrasto, watts ou CdA: efeito EXPLORATÓRIO.
+
+4. PRESERVAÇÃO:
+   - Todas as ferramentas anteriores continuam nos arquivos do site,
+     incluindo TT, pré-fit, comparador, relatórios, 2D e múltiplas câmeras.
+   - Instalação: EXTRAIR o ZIP e enviar TODOS os arquivos extraídos
+     ao GitHub, não o ZIP fechado.
+   - Recarregue o site após o envio para atualizar o cache offline.
+
+TESTE:
+   Abra o 2D > "Conversor MP4". Verifique se abre o painel.
+   Confira a assinatura próxima à marca, longe de "Bloquear".
+   Abra no vento uma foto com fundo verde e observe o contorno.
+   Abra outra sem fundo válido: o vento deve esperar reconhecimento.
