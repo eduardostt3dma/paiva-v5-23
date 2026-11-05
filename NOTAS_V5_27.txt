@@ -1,0 +1,33 @@
+PAIVA BIKE FIT STUDIO — V5.27 — 04/11/2026
+
+CORRECAO DA ANALISE ANGULAR 2D
+- Encontrada uma falha no caminho de restauracao dos quadros: quando um
+  instante antigo tinha apenas um ponto ou uma linha, o motor podia carregar
+  essas marcacoes e substituir a geometria angular que estava em andamento.
+- O ultimo angulo agora permanece ancorado mesmo com marcacoes de outros
+  tipos no quadro, inclusive durante pelo menos tres giros da rodinha.
+- O aplicativo preserva a linha, os tres pontos e a leitura anterior; quando
+  os pontos sao herdados, eles ficam marcados em laranja e o grau aparece
+  como aproximado (referencia provisoria), para NAO simular medicao nova.
+- Se o quadro possui um angulo medido e salvo manualmente, essa geometria
+  continua tendo prioridade sobre a referencia provisoria.
+- Exclusoes intencionais sao respeitadas, inclusive quando se apaga um
+  angulo mas permanecem pontos ou linhas na mesma foto.
+- Uma falha do decodificador durante o movimento fino nao deve apagar a
+  ultima referencia visual.
+- Testes automatizados exercitaram cinco giros consecutivos, retorno a
+  quadros que tinham apenas ponto/linha, restauracao de quadro medido e
+  exclusoes explicitas. O teste final da rodinha precisa ser feito no
+  navegador e com o video real do profissional.
+
+MANTIDO DA V5.26
+- Nome PAIVA · BIKE FIT STUDIO amarelo e logomarca em cores originais.
+- TT usa pad stack/reach medidos, separados de stack/reach do quadro.
+- Fichas locais, PDF, comparador, webcams, suporte offline e demais modulos
+  seguem incluidos no pacote.
+
+COMO ATUALIZAR NO ANDROID / GITHUB PAGES
+- Extraia o ZIP e envie TODOS os arquivos extraidos ao repositorio GitHub.
+- Aguarde o commit/publicacao; feche o aplicativo instalado e abra de novo.
+- A chave de cache offline foi renovada para buscar o arquivo 2D corrigido.
+- As fichas do cliente nao sao apagadas por esta atualizacao.

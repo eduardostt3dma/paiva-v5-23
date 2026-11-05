@@ -1,7 +1,7 @@
-PAIVA V5.26 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_26.txt.
-Esta revisao restaura o amarelo da marca sem editar a imagem original e separa
-o protocolo TT de pad stack/reach das referencias Road/MTB de quadro.
-A correcao dos angulos da V5.25 permanece incluida neste pacote completo.
+PAIVA V5.27 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_27.txt.
+Esta revisao corrige um caso real de desaparecimento do angulo na rodinha:
+um quadro com apenas ponto ou linha nao substitui mais a referencia angular.
+As correcoes da marca amarela e do protocolo TT da V5.26 seguem incluidas.
 As informações abaixo registram o histórico das revisões anteriores.
 
 EVOLUÇÃO DO RELATÓRIO DO CLIENTE — 04/11/2026:

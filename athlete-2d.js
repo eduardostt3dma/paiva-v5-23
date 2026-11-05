@@ -443,19 +443,36 @@
       ...(item.lastReadings?{lastReadings:{...item.lastReadings}}:{}),
       points:item.points.map(p=>({x:p.x,y:p.y}))}));
     // Guarda a última geometria válida independentemente dos arquivos por
-    // instante. A rodinha deve preservar os ângulos durante 5 quadros ou mais,
-    // inclusive se algum instante antigo tiver sido salvo sem marcações.
-    // Isto é uma REFERÊNCIA visual: não inventa medições em quadros não revistos.
+    // instante. Uma ficha antiga pode conter só um ponto/linha: ela não deve
+    // substituir e apagar o ângulo que está sendo acompanhado com a rodinha.
+    // A referência retida fica sinalizada para conferência, nunca vira
+    // automaticamente uma nova medição válida.
     let wheelAnchor=null;
+    const isAngular=item=>item?.kind==='angle'||item?.kind==='full8';
     function rememberWheelAnchor(){
       if(!stillFromVideo||!hasFileVideo()||!annotations.length)return;
       const steps=wheelAnchor?.source===recordedUrl?wheelAnchor.steps:0;
-      wheelAnchor={source:recordedUrl,marks:cloneAnnotations(annotations),steps};
+      const marks=cloneAnnotations(annotations);
+      // BUG V5.26: um quadro restaurado com APENAS ponto/linha substituía a
+      // âncora completa. No giro seguinte, o ângulo tinha sumido de vez.
+      // Manter o último ângulo, mesmo quando o quadro tem outras marcações.
+      if(!marks.some(isAngular)&&wheelAnchor?.source===recordedUrl){
+        marks.push(...cloneAnnotations(wheelAnchor.marks.filter(isAngular)));
+      }
+      wheelAnchor={source:recordedUrl,marks,steps};
     }
     function recoverWheelAnchor(){
-      if(annotations.length||wheelAnchor?.source!==recordedUrl||!wheelAnchor.marks.length)return false;
-      annotations=cloneAnnotations(wheelAnchor.marks);
-      fineUncertain=annotations.flatMap((item,i)=>item.points.map((_,j)=>({item:i,point:j})));
+      if(wheelAnchor?.source!==recordedUrl||!wheelAnchor.marks.length)return false;
+      // Não sobrepor uma medida já existente no quadro.
+      if(annotations.some(isAngular))return false;
+      const carried=annotations.length?
+        wheelAnchor.marks.filter(isAngular):wheelAnchor.marks;
+      if(!carried.length)return false;
+      const start=annotations.length;
+      annotations.push(...cloneAnnotations(carried));
+      // Os pontos provisórios do quadro seguinte são marcados em laranja;
+      // o grau mostrado continua sendo a última geometria, não a leitura real.
+      fineUncertain.push(...carried.flatMap((item,i)=>item.points.map((_,j)=>({item:start+i,point:j}))));
       return true;
     }
     function advanceWheelAnchor(){
@@ -525,6 +542,8 @@
       }
       timelineFrames.set(key,{time:slot?.entry.time??time,source,
         cleared:source==='manual'&&annotations.length===0,
+        angularCleared:source==='manual'&&!annotations.some(isAngular)&&
+          slot?.entry?.angularCleared===true,
         annotations:cloneAnnotations(annotations),trails:clonePaths(),
         uncertain:fineUncertain.map(p=>({item:p.item,point:p.point}))});
       shownFrameKey=key;
@@ -547,9 +566,10 @@
       // acabou de desenhar. Uma exclusão explícita nova tem flag `cleared`.
       const usable=!!entry?.annotations?.length;
       const explicitlyCleared=entry?.cleared===true;
+      const angularCleared=entry?.angularCleared===true;
       if(entry&&(usable||explicitlyCleared)){
         annotations=cloneAnnotations(entry.annotations);
-        if(explicitlyCleared)wheelAnchor=null;
+        if(explicitlyCleared||angularCleared)wheelAnchor=null;
         singlePointTrails.clear();
         if(entry.trails)for(const trail of entry.trails){
           if(Number.isInteger(trail.index)&&annotations[trail.index]?.kind==='point'&&Array.isArray(trail.path))
@@ -562,10 +582,12 @@
       fineTrails.clear();
       // Sem medição salva neste instante, manter a última geometria visível
       // e sinalizar que os pontos precisam ser conferidos. O ângulo não some.
-      if(!annotations.length&&!explicitlyCleared)recoverWheelAnchor();
       fineUncertain=usable?(entry.uncertain||[]).map(p=>({...p})):
         annotations.flatMap((item,i)=>
           item.points.map((_,j)=>({item:i,point:j})));
+      // Mesmo quando o quadro salvo possui uma LINHA ou um PONTO, o ângulo
+      // anterior precisa seguir visível. Uma exclusão explícita é respeitada.
+      if(!explicitlyCleared&&!angularCleared)recoverWheelAnchor();
       if(!preservePeak)finePeak=null;
       shownFrameKey=slot?.key??frameKey(time);
       if(paint){render();updateCameraControls();}
@@ -630,6 +652,7 @@
           }
           imported.set(frameKey(entry.time),{time:entry.time,
             source:entry.source==='tracking'?'tracking':'manual',
+            angularCleared:entry.angularCleared===true,
             annotations:cloneAnnotations(entry.annotations),trails:Array.isArray(entry.trails)?entry.trails:[],
             uncertain:Array.isArray(entry.uncertain)?entry.uncertain.filter(p=>
               Number.isInteger(p.item)&&Number.isInteger(p.point)&&p.item>=0&&p.item<entry.annotations.length&&
@@ -1235,12 +1258,22 @@
       const kind=annotations[index].kind;
       lastDeletedAnnotation={index,item:annotations[index]};
       annotations.splice(index,1);
+      // Excluir um ângulo com pontos/linhas restantes também é exclusão
+      // explícita; a referência da rodinha não pode ressuscitar esse ângulo.
+      if(kind==='angle'||kind==='full8')wheelAnchor=null;
       selectedIndex=-1;draft=[];angleSequence=[];full8Sequence=[];activeDrag=null;activeDraw=null;
       updateFull8Guide();
       fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;
       byId('fine-readout').textContent='Marcação excluída · Desfazer restaura';
       closeDeleteMenu();
       rememberTimelineFrame(0);
+      if((kind==='angle'||kind==='full8')&&timelineIdentity&&stillFromVideo){
+        const slot=timelineSlot(video.currentTime);
+        if(slot?.entry){
+          slot.entry.angularCleared=!annotations.some(isAngular);
+          scheduleTimelinePersist(0);
+        }
+      }
       render();updateCameraControls();schedulePhotoSave();
       const type=kind==='full8'?'Análise completa':kind==='angle'?'Ângulo':kind==='point'?'Ponto':'Linha';
       message(`${type} excluído. Clique em “Desfazer” para recuperar se precisar.`);
@@ -2300,6 +2333,13 @@
         if(finePending>=5)return;
         finePending++;
         fineSequence=fineSequence.catch(()=>{}).then(()=>fineStepFrame(direction)).catch(error=>{
+          // Nem mesmo um erro do decodificador deve apagar a referência visual.
+          if(stillFromVideo&&hasFileVideo()){
+            recoverWheelAnchor();
+            fineUncertain=annotations.flatMap((item,i)=>isAngular(item)?
+              item.points.map((_,j)=>({item:i,point:j})):[]);
+            render();
+          }
           message(`Não foi possível seguir os pontos neste quadro: ${error?.message||'erro no vídeo'}. Corrija o marcador ou altere o FPS.`);
         }).finally(()=>{finePending--;});
         return;
