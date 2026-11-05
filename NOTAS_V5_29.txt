@@ -1,0 +1,28 @@
+PAIVA BIKE FIT STUDIO — V5.29 — CLASSIFICACAO DO ARCO PLANTAR
+
+MUDANCA DE CAMPO ANTROPOMETRICO
+- "Altura do arco plantar" deixou de solicitar um numero em milimetros.
+- Agora selecione um perfil observado: Nao avaliado; Baixo (arco
+  rebaixado); Medio (intermediario); Alto (arco elevado).
+- A avaliacao e uma observacao do arco com os pes apoiados; a escolha nao
+  equivale a diagnostico de pe plano ou pe cavo.
+- A postura do pe (neutro/pronado/supinado) continua em campo separado,
+  porque o perfil do arco e a postura nao sao sinonimos.
+- O perfil aparece na ficha do cliente, na impressao e no PDF.
+- Medidas numericas antigas do arco sao mantidas apenas como historico,
+  sem conversao automatica para baixo/medio/alto. Quando houver valor
+  antigo, o relatorio o identifica explicitamente como "valor antigo".
+
+O QUE FOI PRESERVADO
+- Logotipo registrado sem modificacao de cor ou arquivo.
+- Titulo institucional amarelo; identidade visual, videos e cadastro.
+- Rastreio, marcacoes e persistencia dos angulos 2D V5.27.
+- Pre-fit TT V5.28: antropometria + faixas oficiais dos pads e do selim,
+  sem prometer posicao TT exata a partir da estatura ou geometria Road.
+- Comparador de quadros, registros locais e funcionamento offline.
+
+INSTALACAO NO ANDROID / GITHUB
+- Extraia o arquivo ZIP antes de publicar.
+- Suba TODOS os arquivos extraidos para a raiz do repositorio GitHub.
+- Aguarde a publicacao, feche o aplicativo instalado e abra de novo.
+- O cache offline sera atualizado sem excluir os atendimentos locais.

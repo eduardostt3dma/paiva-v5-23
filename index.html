@@ -423,7 +423,6 @@ const fields=[['height','Estatura',180,'Do chão até o topo da cabeça.'],['ins
 const extraAnthro=[
  ['bodyWeight','Peso corporal','kg','0.1','Ex.: 72,5','Peso aferido na avaliação.'],
  ['ischialWidth','Distância entre tuberosidades isquiáticas','mm','1','Ex.: 120','Distância entre centros das impressões das tuberosidades isquiáticas, conforme o protocolo de medição. Não equivale diretamente à largura do selim.'],
- ['plantarArchHeight','Altura do arco plantar','mm','0.1','Ex.: 25','Altura do arco longitudinal medial, registrada com protocolo e condição de carga padronizados.'],
  ['wellsReach','Flexibilidade — Banco de Wells (sentar e alcançar)','cm','0.1','Ex.: 24,5','Registrar a distância alcançada no teste de sentar e alcançar, em centímetros. Informar o protocolo utilizado; a posição do zero varia conforme o banco. Não interpretar como diagnóstico isolado.']
 ];
 extraAnthro.forEach(([id,label,unit,step,placeholder,help])=>{
@@ -432,8 +431,29 @@ extraAnthro.forEach(([id,label,unit,step,placeholder,help])=>{
  const inp=document.createElement('input');inp.id=id;inp.type='number';inp.inputMode='decimal';inp.step=step;inp.min='0';inp.placeholder=placeholder;inp.setAttribute('aria-label',label+' em '+unit);
  inp.title=help;box.append(lab,inp);$('fields').append(box);
 });
+// Campo antigo preservado apenas para não perder os números já salvos em
+// fichas anteriores. O cadastro atual usa uma categoria observacional.
+const oldArch=document.createElement('input');oldArch.id='plantarArchHeight';oldArch.type='hidden';
+$('fields').append(oldArch);
+const archBox=document.createElement('div');archBox.className='field';
+archBox.style.gridTemplateColumns='minmax(0,1fr) minmax(145px,1fr)';
+const archLabel=document.createElement('label');archLabel.htmlFor='plantarArchProfile';
+archLabel.textContent='Arco plantar · classificação observada';
+const archSelect=document.createElement('select');archSelect.id='plantarArchProfile';
+archSelect.setAttribute('aria-label','Arco plantar observado');
+[['','Não avaliado'],['baixo','Baixo (arco rebaixado)'],
+ ['medio','Médio (intermediário)'],['alto','Alto (arco elevado)']].forEach(([value,label])=>{
+  const opt=document.createElement('option');opt.value=value;opt.textContent=label;archSelect.append(opt);
+});
+archSelect.style.cssText='min-width:0;width:100%;background:#0b1016;color:#f4f6f8;border:1px solid #60717d;border-radius:10px;padding:10px;font-size:13px';
+archBox.append(archLabel,archSelect);$('fields').append(archBox);
+const archNote=document.createElement('p');
+archNote.className='wells-protocol-note';
+archNote.style.cssText='grid-column:1/-1;font-size:11px;line-height:1.55;color:#b1bcc6;padding:9px 12px;border:1px solid #36404a;border-radius:10px;margin:4px 0';
+archNote.textContent='Arco plantar: classifique baixo, médio ou alto na avaliação com apoio dos pés. É uma descrição observada, não diagnóstico de pé plano/cavo. Arco e pronação/supinação são características diferentes.';
+$('fields').append(archNote);
 const postureBox=document.createElement('div');postureBox.className='field';
-const postureLabel=document.createElement('label');postureLabel.htmlFor='footPosture';postureLabel.textContent='Classificação observada do pé';
+const postureLabel=document.createElement('label');postureLabel.htmlFor='footPosture';postureLabel.textContent='Postura observada do pé (separada do arco)';
 const postureSelect=document.createElement('select');postureSelect.id='footPosture';postureSelect.setAttribute('aria-label','Classificação observada do pé');
 [['','Não avaliado'],['neutro','Neutro'],['pronado','Pronado'],['supinado','Supinado']].forEach(([value,label])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=label;postureSelect.append(opt)});
 postureBox.append(postureLabel,postureSelect);$('fields').append(postureBox);$('fields').insertAdjacentHTML('beforeend','<div class="wells-protocol-note" style="grid-column:1/-1;font-size:12px;line-height:1.5;color:#b1bcc6;padding:9px 12px;border:1px solid #36404a;border-radius:10px;margin-top:4px">Banco de Wells: registre o alcance em cm conforme a escala do equipamento. O ponto zero e a interpretação variam entre protocolos; use sempre o mesmo procedimento nas reavaliações.</div>');
@@ -482,7 +502,9 @@ const v=id=>{const el=document.getElementById(id);return el&&el.value!==''?el.va
 const reportMeasure=(id,unit)=>{const el=document.getElementById(id);return el&&el.value.trim()!==''?el.value.trim().replace('.',',')+' '+unit:'Não informado'};
 document.getElementById('reportClient').innerHTML=pairs([['Nome',val('clientName')],['Nascimento',val('clientBirth')],['Sexo',sex],['E-mail',val('clientEmail')],['Telefone',val('clientPhone')],['Avaliação',val('evalDate')]]);
 document.getElementById('reportBike').innerHTML=pairs([['Modalidade',mode==='road'?'Road / Speed':mode==='mtb'?'MTB':'TT'],['Marca',val('bikeBrand')],['Modelo',val('bikeModel')],['Quadro',val('bikeSize')],['Pedivela instalado',val('crankLength')==='Não informado'?'Não informado':val('crankLength')+' mm']]);
-document.getElementById('reportBody').innerHTML=pairs([['Estatura',v('height')],['Esterno (altura ao solo)',v('sternumHeight')],['Entrepernas',v('inseam')],['Tronco líquido (esterno − entrepernas)',v('torso')],['Leitura superior do braço (acrômio)',v('armUpper')],['Leitura inferior do braço (palma)',v('armLower')],['Braço líquido (superior − inferior)',v('arm')],['Ombros',v('shoulder')],['Comprimento do pé (medida registrada)',v('foot')],['Calcanhar → linha do metatarso',v('metatarsal')],['Peso corporal',reportMeasure('bodyWeight','kg')],['Distância entre ísquios',reportMeasure('ischialWidth','mm')],['Altura do arco plantar',reportMeasure('plantarArchHeight','mm')],['Banco de Wells — alcance',reportMeasure('wellsReach','cm')],['Classificação observada do pé',({neutro:'Neutro',pronado:'Pronado',supinado:'Supinado'})[document.getElementById('footPosture')?.value]||'Não avaliado']]);
+const archProfile=({baixo:'Baixo (rebaixado)',medio:'Médio (intermediário)',alto:'Alto (elevado)'})[document.getElementById('plantarArchProfile')?.value]||'Não avaliado';
+const oldArchValue=document.getElementById('plantarArchHeight')?.value?.trim();
+document.getElementById('reportBody').innerHTML=pairs([['Estatura',v('height')],['Esterno (altura ao solo)',v('sternumHeight')],['Entrepernas',v('inseam')],['Tronco líquido (esterno − entrepernas)',v('torso')],['Leitura superior do braço (acrômio)',v('armUpper')],['Leitura inferior do braço (palma)',v('armLower')],['Braço líquido (superior − inferior)',v('arm')],['Ombros',v('shoulder')],['Comprimento do pé (medida registrada)',v('foot')],['Calcanhar → linha do metatarso',v('metatarsal')],['Peso corporal',reportMeasure('bodyWeight','kg')],['Distância entre ísquios',reportMeasure('ischialWidth','mm')],['Arco plantar · perfil observado',archProfile],...(oldArchValue?[['Arco plantar · valor antigo informado',reportMeasure('plantarArchHeight','mm')]]:[]),['Banco de Wells — alcance',reportMeasure('wellsReach','cm')],['Postura do pé (observada)',({neutro:'Neutro',pronado:'Pronado',supinado:'Supinado'})[document.getElementById('footPosture')?.value]||'Não avaliado']]);
 document.getElementById('reportResults').innerHTML='<p style="font-size:11px;line-height:1.45"><strong>Referências preliminares:</strong> não substituem a avaliação dinâmica. Stack e reach ilustrativos são pontos exploratórios de triagem; as medidas finais registradas pelo avaliador aparecem separadamente.</p>'+document.getElementById('results').innerHTML;
 document.getElementById('printDate').textContent='Emissão: '+new Date().toLocaleDateString('pt-BR');
 }

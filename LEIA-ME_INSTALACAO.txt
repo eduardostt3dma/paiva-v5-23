@@ -1,7 +1,7 @@
-PAIVA V5.28 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_28.txt.
-Esta revisao inclui triagem TT sem simulador, usando faixas reais de geometria
-de modelos identificados em catalogos de fabricante, sem confundir ajustes
-possiveis da bike com o fit ideal do cliente. O 2D V5.27 segue preservado.
+PAIVA V5.29 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_29.txt.
+Esta revisao troca a entrada numerica do arco plantar por categorias
+observacionais (baixo, medio, alto, nao avaliado), inclusive nas fichas
+e relatorios. Preserva a triagem TT V5.28 e os angulos 2D da V5.27.
 As informações abaixo registram o histórico das revisões anteriores.
 
 EVOLUÇÃO DO RELATÓRIO DO CLIENTE — 04/11/2026:
