@@ -1,0 +1,54 @@
+PAIVA BIKE FIT STUDIO — V5.31 — CORRECAO DE EXCLUSAO 2D E PE/SOLO
+
+PROBLEMA ENCONTRADO
+- Um ponto ou angulo excluido do quadro atual ainda existia no historico
+  de outros quadros salvos. Quando o usuario girava a rodinha, a marca
+  podia voltar a aparecer. A ancora de persistencia visual tambem precisava
+  respeitar o pedido de exclusao.
+
+CORRECAO
+- Cada marcacao nova recebe uma identidade propria que acompanha o rastreio.
+- Excluir retira essa identidade de todos os quadros ja registrados para
+  o mesmo video. Linhas e angulos nao relacionados continuam preservados.
+- No rastreio de ponto, dois comandos ficam explicitos: "So trajeto"
+  apaga apenas a trilha, enquanto "Excluir ponto" remove o marcador
+  selecionado e todas suas ocorrencias salvas.
+- Reindexacao das trajetorias e avisos de ponto perdido evita que trilhas
+  de uma marca excluida fiquem anexadas ao ponto seguinte.
+- A memoria da rodinha ignora marcas excluidas; o rastreio nao consegue
+  reutiliza-las em um quadro novo.
+- Os identificadores de exclusao ficam no projeto salvo e no backup JSON.
+- Desfazer imediatamente restaura os quadros anteriores, se necessario.
+- Projetos de versoes anteriores, sem identificador, sao aceitos e recebem
+  identificacao de compatibilidade por tipo e posicao na lista. Ao excluir
+  uma marcacao antiga, confira as demais ocorrencias e mantenha backup.
+- A exclusao interrompe um rastreio/seek em andamento para impedir que uma
+  resposta atrasada recoloque a marcacao.
+
+ANGULOS
+- A conta do angulo anatomico de tres pontos permanece em graus reais.
+- A inclinacao do PE em relacao ao solo no boneco de 8 pontos foi corrigida
+  para manter o sinal: positiva se o metatarso esta acima do calcanhar,
+  negativa se abaixo (na imagem). Anteriormente usava o valor absoluto.
+- O angulo incerto de rastreio continua identificado por aproximacao;
+  nao considerar um marcador perdido como nova medida exata.
+- Rastreio por textura nao garante 100% de precisao biomecanica. A medicao
+  dinamica deve ser conferida pelo profissional nos quadros de interesse.
+
+VERIFICACOES
+- Testes automatizados de exclusao multi-quadro, Desfazer, historico
+  antigo, preservacao de outros pontos/angulos e sinal positivo/negativo.
+- Logotipo registrado preservado byte a byte.
+- Pre-fit TT V5.30, arco plantar V5.29, fichas, PDF e PWA preservados.
+
+COMO TESTAR
+- Abra um video MP4/MOV, capture e marque um angulo e um ponto de rastro.
+- Gire 5 quadros, selecione o ponto e clique "X Excluir".
+- Volte e avance os quadros: esse ponto nao deve reaparecer, o angulo sim.
+- Clique Desfazer sem trocar o quadro para verificar a restauracao.
+- Feche e reabra o mesmo video para confirmar a exclusao salva.
+
+INSTALACAO
+- Extraia o ZIP e publique todos os arquivos na raiz do repositorio
+  GitHub, inclusive paiva-2d-history.js, athlete-2d.js e sw.js.
+- Feche e reabra a PWA para carregar o cache V5.31.

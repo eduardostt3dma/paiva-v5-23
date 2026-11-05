@@ -1,9 +1,9 @@
-PAIVA V5.30 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_30.txt.
-Esta revisao permite iniciar um pre-fit TT mesmo sem bicicleta nem stack/reach.
-Mostra tamanho inicial de busca por estatura + entrepernas segundo uma tabela
-especifica de fabricante (exemplo Trek) e top tube efetivo de referencia.
-Tambem permite registrar top tube/seat tube de TT antiga. Mantem o catalogo
-avancado de pad stack/reach como opcional. Arco plantar da V5.29 preservado.
+PAIVA V5.31 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_31.txt.
+Esta revisao corrige a EXCLUSAO das marcacoes 2D rastreadas: excluir
+uma marca retira as ocorrencias vinculadas nos quadros salvos e bloqueia
+sua recriacao pela ancora de rolagem. Desfazer restaura o historico.
+O angulo pe/solo passa a exibir inclinacao positiva E negativa.
+Mantidos pre-fit TT sem bicicleta V5.30, arco plantar V5.29 e a marca.
 As informações abaixo registram o histórico das revisões anteriores.
 
 EVOLUÇÃO DO RELATÓRIO DO CLIENTE — 04/11/2026:
