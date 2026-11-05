@@ -1,0 +1,27 @@
+PAIVA BIKE FIT STUDIO — V5.37 — ÂNGULOS PERSISTENTES NO PROJETO
+Desenvolvido por Eduardo Paiva.
+
+NOVIDADES:
+1. O último ângulo marcado não depende mais apenas da memória temporária
+   da rodinha do mouse: a referência fica registrada na análise do vídeo.
+2. Ao reabrir o mesmo vídeo e sua análise no navegador, ou importar um JSON
+   exportado nesta versão, a referência pode ser restaurada.
+3. Marcas de vídeos diferentes nunca são compartilhadas.
+4. Excluir uma das marcações deixa as outras intactas; exclusões continuam
+   registradas nos quadros e não devem reaparecer após voltar/avançar.
+5. Ângulos carregados de outro instante são sempre PROVISÓRIOS. Confira
+   os pontos laranja, ajuste as articulações e valide a leitura.
+
+TESTE SUGERIDO NO WINDOWS:
+1. Recarregue o site depois de enviar os arquivos e abra um vídeo local.
+2. Pause e marque dois ângulos; gire 5 vezes para frente e 5 para trás.
+3. Corrija um ponto no novo quadro e retorne ao anterior.
+4. Exclua só um dos dois ângulos e repita os giros.
+5. Use 'Baixar análises (.json)', reabra o vídeo e importe esse JSON.
+6. Confirme que o ângulo restante pode reaparecer como referência provisória
+   e que o ângulo excluído não voltou.
+
+O instalador Kinovea enviado pelo Eduardo foi analisado sem execução.
+Este módulo é implementação independente; não incorpora seu código.
+O restante do PAIVA V5.36 (incluindo PAIVA AERO, TT e marca registrada)
+foi preservado.

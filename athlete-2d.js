@@ -151,7 +151,7 @@
         <p><strong>Ponto de trajetória:</strong> escolha “PONTO · RASTRO” e clique em qualquer referência visível. Não é necessário escolher “quadril” nem “calcanhar”. Em “↗ Traçar ponto”, escolha um intervalo curto para desenhar o caminho sobre o atleta. Não exibimos medidas horizontais/verticais: a finalidade é ver a trajetória. Distâncias reais exigirão calibração posterior.</p>
         <p><strong>Rastreio ON/OFF:</strong> marque ou selecione um Ângulo, Linha ou Ponto na imagem e clique em “Rastreio ON/OFF” para ativar ou desativar o acompanhamento desta marcação. Uma linha tem duas pontas, um ângulo tem três pontos e um ponto isolado tem um; cada ferramenta respeita a escolha.</p>
         <p><strong>Análises guardadas pelo tempo:</strong> ao concluir as marcações, o aplicativo registra o instante do vídeo e o desenho. Ao voltar com a régua ou a rodinha ao mesmo quadro, a análise reaparece para continuar editando. Fotos e a lista de instantes são armazenadas neste navegador. O MP4 original e os recortes continuam arquivos de vídeo limpos: as marcações ficam no projeto local salvo separadamente, não são incorporadas aos pixels do MP4 nesta versão.</p>
-        <p><strong>Não perder o ângulo nem a correção:</strong> se o rastreador perder um ponto, o ângulo permanece visível na última posição conhecida, com os marcadores incertos em laranja. Corrija-os manualmente antes de interpretar o valor. Ao voltar a um quadro já corrigido, o programa restaura exatamente os pontos que você deixou naquele instante, sem substituir sua medição pela estimativa automática. Em quadros novos, o desenho anterior continua visível apenas como referência provisória, até você ajustá-lo.</p>
+        <p><strong>Não perder o ângulo nem a correção:</strong> se o rastreador perder um ponto, o ângulo permanece visível na última posição conhecida, com os marcadores incertos em laranja. Corrija-os manualmente antes de interpretar o valor. Ao voltar a um quadro já corrigido, o programa restaura exatamente os pontos que você deixou naquele instante, sem substituir sua medição pela estimativa automática. Em quadros novos, o desenho anterior continua visível apenas como referência provisória, até você ajustá-lo. A referência angular é guardada com o projeto para reaparecer ao reabrir o mesmo vídeo.</p>
         <p><strong>Rastreio fino (estilo de trabalho do Kinovea):</strong> congele o quadro próximo ao pedivela em 178°–180° e marque trocânter, côndilo e maléolo; opcionalmente, marque calcanhar e quadril. Com “Seguir pontos por quadro” ativado, gire a rodinha ou use ◀/▶ para mover somente UM quadro e atualizar cada marcador. Se uma referência escapar, ela permanece na posição anterior, sinalizada para corrigir: arraste o ponto diretamente na foto e continue com a rodinha. Não há necessidade de percorrer uma volta inteira. Em “Ajustes do rastreio” escolha o tamanho do alvo e a área de busca em pixels; a visualização das janelas é opcional. Os três marcos do ângulo são rastreados separadamente, mas exigem conferência visual. O método é implementação independente, não código do Kinovea.</p>
         <p><strong>Cursor e exclusão:</strong> sobre qualquer ponto, ângulo ou linha, o cursor permanece em cruz. Clique com o botão DIREITO sobre uma marcação para abrir “Excluir”, ou selecione a marcação e use “✕ Excluir” ao lado de Rastreio ON/OFF. Ao excluir uma marcação rastreada, o sistema remove o mesmo rastro dos quadros salvos do vídeo, sem trazer o ponto de volta ao girar a rodinha. “Desfazer” recupera o registro removido. Fora da marcação, o botão direito controla pausa/play.</p>
         <p><strong>Rastrear um ponto isolado:</strong> escolha “PONTO · RASTRO”, marque um ponto onde desejar, ligue o rastreio e use a rodinha do mouse para acompanhá-lo e desenhar o pequeno trajeto, mesmo sem ângulo desenhado. Se perder a referência, arraste-o de volta e continue.</p>
@@ -377,7 +377,7 @@
         <label>Busca (px) <select id="paiva-2d-fine-search"><option value="12">12</option><option value="22" selected>22</option><option value="32">32</option><option value="42">42</option></select></label>
         <label><input type="checkbox" id="paiva-2d-fine-boxes" /> Mostrar janelas</label>
       </details>
-      <small id="paiva-2d-fine-readout">Marque o ângulo e gire a rodinha. A referência permanece visível por pelo menos 5 movimentos, mesmo se o rastreio perder contraste.</small>
+      <small id="paiva-2d-fine-readout">📌 Ângulo preservado entre quadros e ao reabrir a análise. Pontos laranja = posição provisória; confirme antes de medir.</small>
     </div>`;
     section.querySelector('.paiva-2d-player-dock').hidden=true;
 
@@ -460,10 +460,17 @@
     // Guarda a última geometria válida independentemente dos arquivos por
     // instante. Uma ficha antiga pode conter só um ponto/linha: ela não deve
     // substituir e apagar o ângulo que está sendo acompanhado com a rodinha.
+    // A última referência angular também é salva no projeto do vídeo, de
+    // modo que reabrir a análise não a faça desaparecer.
     // A referência retida fica sinalizada para conferência, nunca vira
     // automaticamente uma nova medição válida.
     let wheelAnchor=null;
     const isAngular=item=>item?.kind==='angle'||item?.kind==='full8';
+    function projectHeldAngles(){
+      return wheelAnchor?.source===recordedUrl?
+        cloneAnnotations(wheelAnchor.marks.filter(item=>
+          isAngular(item)&&!deletedMarkIds.has(item.uid))):[];
+    }
     function rememberWheelAnchor(){
       if(!stillFromVideo||!hasFileVideo()||!annotations.length)return;
       const steps=wheelAnchor?.source===recordedUrl?wheelAnchor.steps:0;
@@ -525,7 +532,8 @@
       const identity=timelineIdentity,name=timelineFileName,size=timelineVideoSize;
       const frames=[...timelineFrames.values()].sort((a,b)=>a.time-b.time);
       const blob=new Blob([JSON.stringify({version:1,videoName:name,
-        videoSize:size,deletedMarkIds:[...deletedMarkIds],frames})],{type:'application/json'});
+        videoSize:size,deletedMarkIds:[...deletedMarkIds],
+        heldAngles:projectHeldAngles(),frames})],{type:'application/json'});
       timelineWriteChain=timelineWriteChain.catch(()=>{}).then(()=>records().save({
         id:identity,kind:'analise',name:`PAIVA_Analise_${name.replace(/\.[^.]+$/,'')}.json`,
         description:`Marcações automáticas por instante · ${frames.length} quadros`,blob
@@ -640,6 +648,15 @@
           deletedMarkIds.add(uid);
           globalThis.PAIVA_2D_HISTORY?.removeFromFrames(timelineFrames,uid);
         }
+        // V5.37: restaura os ângulos fixados somente no vídeo correspondente.
+        // Os pontos recuperados são referências provisórias até conferência.
+        const held=Array.isArray(data.heldAngles)?data.heldAngles:[];
+        const safeHeld=held.filter(item=>isAngular(item)&&
+          Array.isArray(item.points)&&item.points.length===(item.kind==='angle'?3:8)&&
+          item.points.every(p=>Number.isFinite(p?.x)&&Number.isFinite(p?.y))&&
+          !deletedMarkIds.has(item.uid)).slice(0,40);
+        if(safeHeld.length)wheelAnchor={source:recordedUrl,
+          marks:cloneAnnotations(safeHeld),steps:0};
         if(!canvas.hidden&&stillFromVideo)restoreTimelineFrame(video.currentTime,false);
         if(timelineFrames.size)message(`${timelineFrames.size} instante(s) de análise recuperados neste vídeo. Volte à régua para rever as marcações.`);
       }catch(error){console.warn('PAIVA: histórico 2D não pôde ser recuperado',error);}
@@ -649,7 +666,8 @@
       if(stillFromVideo&&!canvas.hidden&&!timelineSlot(video.currentTime))rememberTimelineFrame(0,'tracking');
       const frames=[...timelineFrames.values()].sort((a,b)=>a.time-b.time);
       const blob=new Blob([JSON.stringify({version:1,videoName:timelineFileName,
-        videoSize:timelineVideoSize,deletedMarkIds:[...deletedMarkIds],frames})],{type:'application/json'});
+        videoSize:timelineVideoSize,deletedMarkIds:[...deletedMarkIds],
+        heldAngles:projectHeldAngles(),frames})],{type:'application/json'});
       const url=URL.createObjectURL(blob),link=document.createElement('a');
       link.href=url;link.download=`PAIVA_Analise_${timelineFileName.replace(/\.[^.]+$/,'')}.json`;
       document.body.append(link);link.click();link.remove();
@@ -693,6 +711,14 @@
           deletedMarkIds.add(uid);
           globalThis.PAIVA_2D_HISTORY?.removeFromFrames(timelineFrames,uid);
         }
+        wheelAnchor=null;
+        const held=Array.isArray(data.heldAngles)?data.heldAngles:[];
+        const safeHeld=held.filter(item=>isAngular(item)&&
+          Array.isArray(item.points)&&item.points.length===(item.kind==='angle'?3:8)&&
+          item.points.every(p=>Number.isFinite(p?.x)&&Number.isFinite(p?.y))&&
+          !deletedMarkIds.has(item.uid)).slice(0,40);
+        if(safeHeld.length)wheelAnchor={source:recordedUrl,
+          marks:cloneAnnotations(safeHeld),steps:0};
         persistTimelineNow();
         if(stillFromVideo&&!canvas.hidden){restoreTimelineFrame(video.currentTime,true);}
         message(`${imported.size} instante(s) de análise importados. Volte com a régua aos tempos marcados.`);
@@ -1308,7 +1334,8 @@
         wheelAnchor.marks=wheelAnchor.marks.filter(item=>item.uid!==uid);
         if(!wheelAnchor.marks.length)wheelAnchor=null;
       }
-      if(kind==='angle'||kind==='full8')wheelAnchor=null;
+      // Se houver outros ângulos, preservá-los. Excluir um único ângulo não
+      // deve desmontar todas as referências do projeto.
       selectedIndex=-1;draft=[];angleSequence=[];full8Sequence=[];activeDrag=null;activeDraw=null;
       updateFull8Guide();
       fineTrails.clear();singlePointTrails.clear();fineUncertain=[];finePeak=null;

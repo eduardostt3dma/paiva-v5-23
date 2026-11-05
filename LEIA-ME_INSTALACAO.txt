@@ -1,4 +1,17 @@
-PAIVA V5.36 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_36.txt.
+PAIVA V5.37 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_37.txt.
+MELHORIA 2D INSPIRADA NO FLUXO SIMPLES DO KINOVEA:
+- A última geometria angular agora é guardada também no projeto do vídeo.
+- Ao fechar e reabrir o mesmo vídeo/análise, os ângulos podem ser recuperados
+  como referência provisória em outros quadros, sem repetir o desenho.
+- A exclusão de um ângulo não elimina as referências de outros ângulos.
+- A referência não é transportada para um vídeo diferente.
+- Pontos laranja e sinal de aproximação significam: conferência necessária.
+- Mantidos o rastreio independente dos pontos e os ajustes quadro a quadro.
+- Não copia código nem bibliotecas do Kinovea.
+- O novo cache da PWA permite receber o 2D atualizado após publicar os arquivos.
+
+HISTÓRICO DA V5.36:
+PAIVA V5.36 — LEIA O ARQUIVO NOTAS_V5_36.txt.
 AGORA O VENTO DESVIA AUTOMATICAMENTE DA SILHUETA DETECTADA.
 Sem arrastar área nem contorno na foto.
 - Com fundo VERDE liso: reconhecimento automático sem outras etapas.
