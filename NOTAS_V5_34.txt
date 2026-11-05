@@ -1,0 +1,57 @@
+PAIVA BIKE FIT STUDIO — V5.34 — PAIVA AERO · DUAS FORMAS DE FUNDO
+05/11/2026
+
+ADICIONADO
+- Módulo túnel de vento permanece em painel INDEPENDENTE do 2D.
+- Captura da própria webcam, reprodução de vídeo local ou imagem estática.
+- Leitura em tempo real da proporção de pixels dentro da região delimitada,
+  com atualização aproximada de 3 vezes por segundo (quando há vídeo rodando).
+- Verde liso: isolamento dos pixels não verdes por diferença cromática.
+- Parede comum: SUBTRAÇÃO DE FUNDO, que exige fotografia prévia do cenário
+  completamente vazio, com câmera e iluminação rigorosamente fixas.
+- Delimitação da região de análise com dois cliques; mesma região usada A/B.
+- Máscara turquesa mostra os pixels classificados como ciclista/objetos.
+- Vistas FRONTAL e LATERAL disponíveis, com identificação no PNG exportado.
+- Posições A/B salvas ao capturar quadros; comparador exige mesmo plano,
+  mesmo recorte e confirmação do enquadramento e escala.
+- Ajuste manual de sensibilidade e alternativa de contorno manual original.
+- Mantida a identidade registrada da marca, o pré-fit TT e a bancada 2D.
+
+TESTE COM FUNDO VERDE
+1. Abra Túnel visual e escolha Vista frontal OU Lateral.
+2. Ponha uma cortina/tecido verde liso atrás da bicicleta, sem roupa verde.
+3. Ligue a câmera no próprio Túnel (ou abra vídeo/foto).
+4. Escolha Fundo: Verde liso; delimite a região com 2 cliques.
+5. Clique Ler silhueta ao vivo; a máscara turquesa indica os pixels retidos.
+6. Guarde o quadro em A, modifique a postura, guarde B, confira a comparação.
+
+TESTE COM PAREDE COMUM
+1. Posicione a câmera e ILUMINAÇÃO sem tocar neles durante toda a sessão.
+2. Com a bicicleta e o ciclista AUSENTES, capture a parede vazia, ou envie
+   uma foto dessa mesma parede vazia, no mesmo enquadramento.
+3. Selecione Parede comum, delimite uma região fixa e posicione o ciclista.
+4. Ligue leitura ao vivo ou guarde quadros A/B. Ajuste sensibilidade.
+5. Se pessoas, sombras, reflexos ou luzes se moverem, reinicie a referência.
+
+IMPORTANTÍSSIMO SOBRE A VALIDADE
+- A leitura automática conta pixels diferentes do fundo dentro da região
+  escolhida. Não sabe distinguir anatomicamente o ciclista de outros objetos.
+- Um tecido verde facilita muito o recorte. Roupa verde, iluminação ruim,
+  sombras, paredes irregulares e câmera móvel prejudicam o resultado.
+- A vista LATERAL mede apenas a ocupação lateral da imagem, não área frontal.
+- A vista FRONTAL aproxima a projeção da silhueta no plano da imagem, mas
+  não entrega área real em m² sem calibração métrica e geometria da câmera.
+- Percentual de pixels, contorno e linhas gráficas NÃO são CFD, CdA, watts,
+  energia economizada, diferença comprovada de arrasto ou pressão do ar.
+- A/B só compara com câmera, zoom, escala, iluminação e região idênticos.
+- Para desempenho real, é preciso avaliar também potência, conforto,
+  estabilidade de postura e, se desejado, instrumentos de aerodinâmica.
+- Testes unitários são preliminares; validar em webcam física do estúdio.
+
+FUNDAMENTAÇÃO
+Bioracer Aero (fabricante):
+https://bioracermotion.com/en/bioracer-aero
+Bioracer Aero — treinamento da postura:
+https://bioracermotion.com/en/training-mode
+NASA Glenn — drag equation:
+https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/drag-equation/

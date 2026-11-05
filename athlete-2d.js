@@ -3093,7 +3093,12 @@
   windStyle.rel='stylesheet';
   windStyle.href='./paiva-wind-visual.css';
   document.head.append(windStyle);
+  const segmentationScript=document.createElement('script');
+  segmentationScript.src='./paiva-wind-segmentation.js';
+  segmentationScript.async=false;
+  document.head.append(segmentationScript);
   const windScript=document.createElement('script');
   windScript.src='./paiva-wind-visual.js';
+  windScript.async=false;
   document.head.append(windScript);
 })();

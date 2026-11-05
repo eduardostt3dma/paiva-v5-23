@@ -1,4 +1,13 @@
-PAIVA V5.33 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_33.txt.
+PAIVA V5.34 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_34.txt.
+Túnel independente com webcam/vídeo próprios e leitura AUTOMÁTICA de pixels.
+Dois fundos: (1) verde liso; (2) parede comum + foto vazia, com câmera imóvel.
+As vistas FRONTAL e LATERAL são diferentes e o programa não as mistura.
+Modo manual e todas as funções TT/2D anteriores continuam disponíveis.
+Envie TODOS os arquivos extraídos ao GitHub, inclusive o novo
+paiva-wind-segmentation.js.
+
+HISTÓRICO DA V5.33:
+PAIVA V5.33 — LEIA O ARQUIVO NOTAS_V5_33.txt.
 Novo "TÚNEL DE VENTO VISUAL" experimental: captura foto do 2D ou importa foto,
 desenha envelope manual, anima linhas de ar ILUSTRATIVAS e compara duas
 posições apenas com mesmo enquadramento. NÃO mede CdA, arrasto ou watts.

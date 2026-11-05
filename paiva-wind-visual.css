@@ -24,6 +24,17 @@
 .wind-camera input{accent-color:#f2cd48;margin-top:2px}
 .wind-difference{background:#20252d;border-left:3px solid var(--wind-yellow);padding:12px;font-size:12px;border-radius:6px;margin:9px 0 12px;line-height:1.55;color:#f4f4f0}
 .wind-warning{border:1px solid #555047;background:#24231e;border-radius:10px;color:#dfd4ba;font-size:11px;padding:12px;line-height:1.75;margin:15px 0 0}
+.wind-studio{margin:12px 0;padding:12px 14px;background:linear-gradient(145deg,#141c26,#10171f);border:1px solid #394b5c;border-radius:13px}
+.wind-studio-heading{color:#ffdd56;font-size:10px;font-weight:850;letter-spacing:.14em;margin:0 0 8px}
+.wind-studio .wind-actions{margin:7px 0;gap:10px}
+.wind-studio small{display:block;font-size:11px;line-height:1.5;color:#a9bdc9;margin:6px 0 0}
+.wind-studio input[type=range]{width:min(125px,25vw);accent-color:#ffe054;vertical-align:middle}
+.wind-studio output{display:inline-block;min-width:24px;text-align:right;font-variant-numeric:tabular-nums}
+.wind-live-status{margin:7px 0 0;border-left:2px solid #58ced7;background:#11212b;padding:8px 10px;font-size:12px;line-height:1.5;color:#bfe5ec}
+.paiva-wind-visual[data-analysis=auto] #wind-close,
+.paiva-wind-visual[data-analysis=auto] #wind-undo,
+.paiva-wind-visual[data-analysis=auto] #wind-clear{display:none}
+.paiva-wind-visual[data-analysis=manual] #wind-auto-run{opacity:.85}
 @media(max-width:650px){
   .wind-header{flex-direction:column}
   .wind-comparison{grid-template-columns:1fr}
