@@ -1,4 +1,4 @@
-/* PAIVA AERO V5.44 — recorte semântico no dispositivo.
+/* PAIVA AERO V5.47 — recorte semântico no dispositivo.
    DeepLab V3 / MediaPipe reconhece PESSOA e BICICLETA separadamente.
    O modelo é carregado sob demanda; nenhuma foto é enviada para um servidor.
    O vento permanece uma visualização ilustrativa, nunca CFD ou CdA. */
@@ -6,8 +6,8 @@
   'use strict';
 
   const MODEL='https://storage.googleapis.com/mediapipe-models/image_segmenter/deeplab_v3/float32/1/deeplab_v3.tflite';
-  const PACKAGE='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/vision_bundle.mjs';
-  const WASM='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm';
+  const PACKAGE='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/vision_bundle.mjs';
+  const WASM='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/wasm';
   const target=/^(person|people|human|bicycle|bike)$/i;
   let pending=null,segmenter=null;
 
@@ -69,7 +69,15 @@
         if(!segmenter.getLabels().some(s=>String(s).toLowerCase()==='bicycle'))
           throw Error('O modelo instalado não reconhece bicicletas.');
         return segmenter;
-      })().catch(error=>{pending=null;segmenter=null;throw error;});
+      })().catch(error=>{
+        pending=null;segmenter=null;
+        const details=String(error?.message||error);
+        if(/failed to fetch|dynamically imported module|networkerror|importing a module script|load failed/i.test(details)){
+          console.warn('PAIVA: falha ao carregar biblioteca de IA.',error);
+          throw Error('Biblioteca de IA indisponível. Confira sua conexão e tente novamente. O vulto lateral funciona offline.');
+        }
+        throw error;
+      });
     }
     return pending;
   }

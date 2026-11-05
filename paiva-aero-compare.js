@@ -56,8 +56,8 @@
       '<button type="button" id="paiva-compare-save">↓ Salvar comparação</button>',
       '</div></div>',
       '<div class="paiva-compare-view-selector">',
-      '<label>Tipo de comparação <select id="paiva-compare-view"><option value="frontal">Frontal · Área projetada</option><option value="lateral">Lateral · Vulto de postura</option></select></label>',
-      '<span id="paiva-compare-view-note">Na vista frontal, compare a área ocupada no mesmo enquadramento.</span>',
+      '<label>Tipo de comparação <select id="paiva-compare-view"><option value="lateral" selected>Lateral · Vulto de postura</option><option value="frontal">Frontal · Área projetada</option></select></label>',
+      '<span id="paiva-compare-view-note">Vulto por transparência, sem IA e sem internet.</span>',
       '</div>',
       '<div class="paiva-compare-grid">',
       panel('a','ANTES'),panel('b','DEPOIS'),
@@ -166,7 +166,8 @@
       ctx.font='600 26px system-ui';
       ctx.fillText('POSIÇÃO '+label.toUpperCase(),W/2,H/2-16);
       ctx.font='16px system-ui';
-      ctx.fillText('Abra uma foto frontal para começar',W/2,H/2+16);
+      ctx.fillText($('view').value==='lateral'?'Abra uma foto lateral para começar':
+        'Abra uma foto frontal para começar',W/2,H/2+16);
       ctx.textAlign='left';
     }
     function dimensions(source){

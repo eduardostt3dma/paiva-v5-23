@@ -1,0 +1,28 @@
+PAIVA V5.47 — RECONHECIMENTO DE IA CORRIGIDO + VULTO OFFLINE
+
+1. CORREÇÃO DA IA
+   Corrigidas as duas referências MediaPipe para @mediapipe/tasks-vision@0.10.32
+   (módulo vision_bundle.mjs e WASM). A versão antiga 0.10.22 dava erro
+   "Failed to fetch dynamically imported module" em alguns navegadores.
+   Em falhas de rede, o app apresenta mensagem curta e permite usar o
+   comparador lateral sem depender de IA.
+
+2. COMPARAÇÃO POR PADRÃO
+   O comparador abre agora em "Lateral · Vulto de postura".
+   Carregue as fotos A e B, ajuste a transparência, salve ou apresente no projetor.
+   Não é necessário reconhecimento por IA nem desenhar contornos.
+   Para medir área projetada frontal, selecione "Frontal · Área projetada".
+   Nesse modo, o reconhecimento automático continua disponível.
+
+3. CONTINUIDADE DA V5.46
+   Mantidos os controles Linha (espessura) e Pontos (diâmetro) nas curvas.
+   Os módulos existentes (2D, vídeo, conversor, pré-fit, vento, PDF, cadastro)
+   foram preservados. Consulte NOTAS_V5_46.txt para as funções anteriores.
+
+4. ATUALIZAÇÃO NO GITHUB
+   Extraia o ZIP, envie todos os ARQUIVOS extraídos para a raiz do repositório
+   paiva-v5-23 e confirme o commit. Guarde o ZIP anterior como backup.
+   Depois da publicação do GitHub Pages, feche e reabra o navegador.
+   Se a tela ainda mostrar V5.46, force uma atualização (Ctrl+Shift+R no Windows).
+
+© PAIVA · DESENVOLVIDO POR EDUARDO PAIVA

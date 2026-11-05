@@ -46,7 +46,7 @@
       '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
       '<h2>TÚNEL DE VENTO</h2>',
       '<p>Reconhecimento automático do ciclista e da bicicleta · vento visual independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.46</span></div>',
+      '<span class="aero-badge">V5.47</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
