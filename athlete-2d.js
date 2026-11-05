@@ -3086,4 +3086,14 @@
   // que todos os scripts deferidos estejam prontos ao montar a bancada 2D.
   if (document.readyState==='complete') initialize();
   else document.addEventListener('DOMContentLoaded',initialize,{once:true});
+
+  // Módulo optativo V5.33: fica fora do motor angular/rastreio e não muda
+  // suas marcações nem os estados dos vídeos.
+  const windStyle=document.createElement('link');
+  windStyle.rel='stylesheet';
+  windStyle.href='./paiva-wind-visual.css';
+  document.head.append(windStyle);
+  const windScript=document.createElement('script');
+  windScript.src='./paiva-wind-visual.js';
+  document.head.append(windScript);
 })();

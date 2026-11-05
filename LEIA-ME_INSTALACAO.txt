@@ -1,4 +1,12 @@
-PAIVA V5.32 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_32.txt.
+PAIVA V5.33 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_33.txt.
+Novo "TÚNEL DE VENTO VISUAL" experimental: captura foto do 2D ou importa foto,
+desenha envelope manual, anima linhas de ar ILUSTRATIVAS e compara duas
+posições apenas com mesmo enquadramento. NÃO mede CdA, arrasto ou watts.
+O módulo usa arquivos paiva-wind-visual.js e paiva-wind-visual.css; envie
+TODOS os arquivos extraídos ao GitHub, inclusive esses dois.
+
+HISTÓRICO DA V5.32:
+PAIVA V5.32 — LEIA O ARQUIVO NOTAS_V5_32.txt.
 Esta revisao torna a triagem TT sem bicicleta mais simples e verificavel:
 mostra separadamente tamanhos e top tubes de dois catalogos oficiais
 especificos (Trek Speed Concept SLR e Canyon Speedmax CF 8 Di2).

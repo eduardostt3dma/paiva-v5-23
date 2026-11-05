@@ -1,0 +1,32 @@
+/* PAIVA LAB V5.33 — Módulo ótico experimental isolado do rastreio 2D. */
+.paiva-wind-visual{margin-top:18px;--wind-yellow:#ffdd56;max-width:100%;min-width:0}
+.wind-header{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:15px}
+.wind-header span:not(.wind-stamp){font-size:10px;letter-spacing:.16em;font-weight:800;color:var(--wind-yellow)}
+.wind-header h2{margin:4px 0 5px;font-size:clamp(19px,2.3vw,26px);letter-spacing:.02em}
+.wind-header p{font-size:12px;color:#acbac5;margin:0;line-height:1.55}
+.wind-stamp{white-space:nowrap;font-size:10px;color:var(--wind-yellow);background:#242a28;border:1px solid #736c3c;border-radius:99px;padding:8px 10px}
+.wind-actions,.wind-slots{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0}
+.paiva-wind-visual button,.wind-upload{display:inline-flex;align-items:center;justify-content:center;border:1px solid #55636e;border-radius:10px;color:#f5f5f5;background:#202a33;font-size:12px;line-height:1.3;font-family:inherit;font-weight:650;padding:10px 13px;cursor:pointer}
+.paiva-wind-visual button:hover,.wind-upload:hover{border-color:var(--wind-yellow);filter:brightness(1.13)}
+.paiva-wind-visual button.active{background:#f6d24d;border-color:#f6d24d;color:#171a1f}
+.wind-upload input{display:none}
+.wind-actions label:not(.wind-upload){display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#d6e3ed}
+.wind-actions select{background:#141d26;border:1px solid #55636e;border-radius:7px;padding:9px 11px;color:#fff}
+.wind-workspace{background:#070d14;border:1px solid #4a5962;border-radius:13px;overflow:hidden}
+#wind-canvas{display:block;max-width:100%;width:100%;height:auto;cursor:crosshair;touch-action:manipulation}
+#wind-message{margin:0;padding:10px 12px;min-height:42px;background:#111d27;color:#c9d8e4;font-size:12px;line-height:1.5}
+.wind-comparison{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.wind-comparison>div{background:#161d24;border:1px solid #414b55;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.wind-comparison span{font-size:10px;letter-spacing:.12em;font-weight:850;color:#a7bdc9}
+.wind-comparison strong{font-size:clamp(16px,2vw,21px);color:var(--wind-yellow)}
+.wind-comparison small{font-size:11px;color:#b0bdc9}
+.wind-camera{display:flex;align-items:flex-start;gap:8px;margin:13px 0 7px;color:#e4eaf0;font-size:12px;line-height:1.45}
+.wind-camera input{accent-color:#f2cd48;margin-top:2px}
+.wind-difference{background:#20252d;border-left:3px solid var(--wind-yellow);padding:12px;font-size:12px;border-radius:6px;margin:9px 0 12px;line-height:1.55;color:#f4f4f0}
+.wind-warning{border:1px solid #555047;background:#24231e;border-radius:10px;color:#dfd4ba;font-size:11px;padding:12px;line-height:1.75;margin:15px 0 0}
+@media(max-width:650px){
+  .wind-header{flex-direction:column}
+  .wind-comparison{grid-template-columns:1fr}
+  .wind-actions button,.wind-upload{flex:1}
+}
+@media print{.paiva-wind-visual{display:none!important}}

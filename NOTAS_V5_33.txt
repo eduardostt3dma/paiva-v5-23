@@ -1,0 +1,39 @@
+PAIVA BIKE FIT STUDIO — V5.33 (túnel de vento VISUAL experimental)
+05/11/2026
+
+O que foi acrescentado
+- Aba "Vento" e botão "≈ Túnel visual" dentro da bancada 2D.
+- Capturar imagem atual do módulo 2D ou abrir uma fotografia diretamente.
+- Posições A e B: desenhar manualmente um polígono em torno do envelope
+  externo do atleta e bicicleta; fechar, desfazer ou apagar seus pontos.
+- Fluxo gráfico animado que contorna o envelope. NÃO resolve equações de
+  dinâmica dos fluidos nem prevê turbulência, pressão, velocidade ou arrasto.
+- Indicador "x% do quadro" = área do POLÍGONO desenhado / área da imagem.
+  Inclui espaços vazios internos do contorno; não é segmentação corporal.
+- Comparação A/B só liberada para a mesma vista com confirmação explícita
+  de enquadramento e escala idênticos.
+- Salvar PNG de cada composição com aviso de simulação visual.
+- Cache offline atualizado, mantendo logomarca e cores da V5.32 intactos.
+
+Como testar
+1. Abra o app no Windows, acesse Análise 2D, importe foto/vídeo.
+2. Clique "≈ Túnel visual"; deixe selecionada a posição A.
+3. Use "Trazer quadro do 2D", marque pontos ao redor do envelope e Fechar.
+4. Escolha B e repita com a segunda posição, sem mudar a câmera nem zoom.
+5. Marque a confirmação de enquadramento para liberar comparação.
+6. Clique "Salvar imagem PNG" para exportar a visualização.
+
+Limites técnicos (importantes para clientes)
+- Vista lateral: perfil lateral, NÃO área frontal.
+- Vista frontal: contorno frontal APROXIMADO em pixels, sem área real em m².
+- Imagem/contorno menor NÃO implica menor CdA ou menor resistência ao ar.
+- Sem sensores ou CFD, este recurso é VISUAL e educativo.
+- Não inclui movimento real do ar ou mapa de pressão. Não serve para laudo
+  de ganhos aerodinâmicos nem para afirmar redução de watts.
+- Compatibilidade de câmera e uso em hardware real ainda dependem de teste.
+
+Fontes conceituais:
+NASA Glenn, Drag Equation:
+https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/drag-equation/
+NASA Glenn, Shape Effects on Drag:
+https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/shape-effects-on-drag/
