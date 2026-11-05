@@ -1,4 +1,4 @@
-/* PAIVA AERO V5.49 — leitura experimental das articulações, exclusiva do Aero.
+/* PAIVA MOTION FLOW V5.50 — trajetórias e ângulos, exclusivo do Aero.
    Estimativas de ângulos projetados em 2D; nunca ajuste biomecânico automático.
    Não altera ou reutiliza ferramentas, eventos ou medidas do módulo Análise 2D. */
 (() => {
@@ -46,8 +46,23 @@
       elbow:reasonable(value(['shoulder','elbow','wrist'],()=>angle3(p.shoulder,p.elbow,p.wrist)),15,180),
       hip:reasonable(value(['shoulder','hip','knee'],()=>angle3(p.shoulder,p.hip,p.knee)),15,180)};
   }
+  const TRAILS={
+    knee:{label:'Joelho',color:'#55e8ff',maxJump:145},
+    hip:{label:'Quadril',color:'#ffe17c',maxJump:65},
+    shoulder:{label:'Ombro',color:'#c8b6ff',maxJump:65}
+  };
+  function pushTrail(trails,key,p,time){
+    if(!Object.hasOwn(TRAILS,key)||!visible(p)||!Number.isFinite(time))return false;
+    const list=trails[key],x=p.x*W,y=p.y*H;
+    const previous=list[list.length-1];
+    if(previous&&(time-previous.t>1350||
+      Math.hypot(x-previous.x,y-previous.y)>TRAILS[key].maxJump))list.length=0;
+    list.push({x,y,t:time});
+    while(list.length>1&&(time-list[0].t>4200||list.length>20))list.shift();
+    return true;
+  }
   // Núcleo puro disponível para testes automatizados, sem abrir navegador.
-  globalThis.PAIVA_AERO_POSE_MATH={angle3,trunkAngle,chooseSide,measure,confidence};
+  globalThis.PAIVA_AERO_POSE_MATH={angle3,trunkAngle,chooseSide,measure,confidence,pushTrail};
   if(typeof document==='undefined')return;
 
   const PACKAGE='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/vision_bundle.mjs';
@@ -78,16 +93,18 @@
     const panel=document.createElement('details');
     panel.id='paiva-aero-pose';panel.className='paiva-aero-pose';
     panel.innerHTML=`
-      <summary><span>✧ IA · LEITURA DE ÂNGULOS</span><span class="pose-experimental">EXPERIMENTAL</span></summary>
+      <summary><span>✧ PAIVA MOTION FLOW</span><span class="pose-experimental">IA · TESTE</span></summary>
       <div class="pose-interior">
-        <p class="pose-intro">O Aero identifica pontos do corpo sobre a imagem original e calcula ângulos visuais em 2D. Opcional, sem interferir nas ferramentas da Análise 2D.</p>
+        <p class="pose-intro">Rastros fluidos acompanham joelho, quadril e ombro durante a pedalada. Os traços representam movimentos detectados na imagem original — não vento nem aerodinâmica.</p>
         <div class="pose-actions">
           <button type="button" id="pose-toggle">▶ Iniciar leitura IA</button>
-          <button type="button" id="pose-reset">↺ Zerar extremos</button>
+          <label class="pose-trail-toggle"><input type="checkbox" id="pose-trails" checked> ≈ Mostrar rastros</label>
+          <button type="button" id="pose-reset">↺ Reiniciar rastros</button>
           <button type="button" id="pose-export">↓ Salvar análise</button>
         </div>
         <p class="pose-status" id="pose-status" role="status" aria-live="polite">Abra uma foto ou vídeo no Aero e clique em Iniciar. Primeiro acesso exige internet.</p>
-        <div class="pose-canvas-wrap"><canvas id="pose-view" width="960" height="540" aria-label="Foto do ciclista com pontos e ângulos aproximados identificados por IA"></canvas></div>
+        <div class="pose-canvas-wrap"><canvas id="pose-view" width="960" height="540" aria-label="Rastros de movimento do ciclista e ângulos aproximados identificados por IA"></canvas></div>
+        <p class="pose-legend"><span><i style="background:#55e8ff"></i>Joelho</span><span><i style="background:#ffe17c"></i>Quadril</span><span><i style="background:#c8b6ff"></i>Ombro</span></p>
         <div class="pose-stats" aria-live="polite">
           <div><span>Joelho · atual</span><strong id="pose-knee">—</strong></div>
           <div><span>Tronco · horizontal</span><strong id="pose-trunk">—</strong></div>
@@ -95,8 +112,9 @@
           <div><span>Quadril · 2D</span><strong id="pose-hip">—</strong></div>
           <div class="pose-extreme"><span>Extensão observada · maior ângulo de joelho</span><strong id="pose-extension">—</strong></div>
           <div class="pose-extreme"><span>Flexão observada · menor ângulo de joelho</span><strong id="pose-flexion">—</strong></div>
+          <div class="pose-extreme"><span>Variação do tronco · nesta pedalada</span><strong id="pose-trunk-delta">—</strong></div>
         </div>
-        <p class="pose-hint" id="pose-hint">Vista lateral, câmera fixa e ciclo completo de pedalada. Extremos aparecem somente após leituras válidas de vídeo. Se um ponto estiver oculto, exibimos —.</p>
+        <p class="pose-hint" id="pose-hint">Use vídeo de perfil e câmera fixa. Os rastros são trajetórias dos pontos detectados; pequenas oscilações também podem vir de erros da IA. Se uma articulação estiver oculta, não inventamos graus.</p>
         <p class="pose-disclaimer">⚠️ Teste exploratório: graus projetados em 2D, dependentes de câmera e visibilidade. Pontos estimados por IA não equivalem aos centros anatômicos palpados do bike fit, nem determinam posição ideal. Fotos e quadros são processados neste dispositivo; o modelo e os arquivos de execução precisam ser baixados na primeira utilização.</p>
       </div>`;
     aero.querySelector('.aero-measure')?.before(panel);
@@ -109,14 +127,49 @@
     let active=false,busy=false,lastSample=0,stopped=false;
     let currentEpoch=null,lastVideoTime=null,side=null;
     let samples=0,minKnee=Infinity,maxKnee=-Infinity;
-    let latest=null,results=null,lastSource=null;
+    let trunkSamples=0,minTrunk=Infinity,maxTrunk=-Infinity;
+    const trails={knee:[],hip:[],shoulder:[]};
+    let results=null,lastSource=null;
     const fmt=x=>x===null||!Number.isFinite(x)?'—':x.toFixed(1).replace('.',',')+'°';
     const setText=(id,v)=>{el(id).textContent=v;};
     const status=message=>setText('pose-status',message);
     function reset(){
       samples=0;minKnee=Infinity;maxKnee=-Infinity;
-      latest=null;results=null;lastVideoTime=null;side=null;
-      ['knee','trunk','elbow','hip','extension','flexion'].forEach(k=>setText('pose-'+k,'—'));
+      trunkSamples=0;minTrunk=Infinity;maxTrunk=-Infinity;
+      Object.values(trails).forEach(list=>{list.length=0;});
+      results=null;lastVideoTime=null;side=null;
+      ['knee','trunk','elbow','hip','extension','flexion','trunk-delta'].forEach(k=>setText('pose-'+k,'—'));
+    }
+    function drawTrails(){
+      if(!el('pose-trails').checked)return;
+      ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+      for(const [key,opts] of Object.entries(TRAILS)){
+        const points=trails[key];
+        if(points.length<2)continue;
+        ctx.strokeStyle=opts.color;
+        ctx.shadowColor=opts.color;ctx.shadowBlur=8;ctx.lineWidth=2.6;
+        for(let i=1;i<points.length;i++){
+          const previous=points[i-1],current=points[i];
+          ctx.globalAlpha=.13+.78*(i/points.length);
+          ctx.beginPath();
+          if(i===1)ctx.moveTo(previous.x,previous.y);
+          else{
+            const before=points[i-2];
+            ctx.moveTo((before.x+previous.x)*.5,(before.y+previous.y)*.5);
+          }
+          if(i===points.length-1){
+            ctx.quadraticCurveTo(previous.x,previous.y,current.x,current.y);
+          }else{
+            ctx.quadraticCurveTo(previous.x,previous.y,
+              (previous.x+current.x)*.5,(previous.y+current.y)*.5);
+          }
+          ctx.stroke();
+        }
+        const newest=points[points.length-1];
+        ctx.globalAlpha=1;ctx.shadowBlur=12;ctx.fillStyle=opts.color;
+        ctx.beginPath();ctx.arc(newest.x,newest.y,4.2,0,Math.PI*2);ctx.fill();
+      }
+      ctx.restore();
     }
     function drawLabel(x,y,text,color){
       if(!text||text==='—')return;
@@ -165,18 +218,19 @@
         ctx.fillText('Abra uma imagem ou vídeo no Aero para iniciar',W/2,H/2);
         ctx.textAlign='left';
       }
+      drawTrails();
       if(results)drawSkeleton(results);
       ctx.fillStyle='rgba(9,16,23,.76)';ctx.fillRect(12,12,250,31);
       ctx.fillStyle='#ffe476';ctx.font='600 14px system-ui';
-      ctx.fillText('PAIVA AERO · LEITURA 2D',22,33);
+      ctx.fillText('PAIVA MOTION FLOW · LEITURA 2D',22,33);
       ctx.fillStyle='rgba(10,18,26,.8)';ctx.fillRect(12,H-32,W-24,24);
       ctx.fillStyle='#c8d3dc';ctx.font='12px system-ui';
-      ctx.fillText('ÂNGULOS ESTIMADOS POR IA · APENAS DEMONSTRATIVO',20,H-15);
+      ctx.fillText('RASTROS DE PONTOS RECONHECIDOS · LEITURA EXPERIMENTAL',20,H-15);
     }
     function publish(data,source){
       ['knee','trunk','elbow','hip'].forEach(k=>setText('pose-'+k,fmt(data?.[k]??null)));
       if(source?.mode==='photo'){
-        setText('pose-extension','—');setText('pose-flexion','—');
+        setText('pose-extension','—');setText('pose-flexion','—');setText('pose-trunk-delta','—');
         el('pose-hint').textContent='Foto: somente os ângulos visíveis neste instante. Para extensão e flexão observadas, abra um vídeo lateral da pedalada.';
       }else{
         if(data?.knee!==null&&data?.knee!==undefined){
@@ -185,9 +239,14 @@
         }
         setText('pose-extension',samples>=5?fmt(maxKnee):'—');
         setText('pose-flexion',samples>=5?fmt(minKnee):'—');
+        if(data?.trunk!==null&&data?.trunk!==undefined){
+          minTrunk=Math.min(minTrunk,data.trunk);maxTrunk=Math.max(maxTrunk,data.trunk);
+          trunkSamples++;
+        }
+        setText('pose-trunk-delta',trunkSamples>=5?fmt(maxTrunk-minTrunk):'—');
         el('pose-hint').textContent=samples<5?
-          'Aguarde ao menos cinco leituras válidas. Os extremos exigem uma pedalada completa e boa visibilidade.':
-          'Extremos observados nesta sessão ('+samples+' quadros válidos); não são metas ou referências de ajuste.';
+          'Aguarde cinco quadros válidos. Rastros e extremos exigem pedalada em vídeo, com câmera fixa.':
+          'Ângulos e rastros observados ('+samples+' quadros válidos). Oscilações podem incluir imprecisão do rastreador; não são metas de ajuste.';
       }
     }
     async function sample(now){
@@ -216,6 +275,11 @@
           if(side&&newSide!==side){reset();}
           side=newSide;
           results=measure(landmarks,side);
+          if(source.mode!=='photo'&&source.playing){
+            for(const key of Object.keys(TRAILS)){
+              pushTrail(trails,key,results.points[key],now);
+            }
+          }
           publish(results,source);
           const valid=['knee','trunk','elbow','hip'].filter(k=>results[k]!==null);
           status(valid.length?'● '+valid.length+' leituras visíveis · lado '+(side==='left'?'esquerdo':'direito')+
@@ -233,7 +297,7 @@
     }
     function schedule(now){
       if(stopped)return;
-      if(active&&now-lastSample>=460){lastSample=now;void sample(now);}
+      if(active&&now-lastSample>=360){lastSample=now;void sample(now);}
       requestAnimationFrame(schedule);
     }
     el('pose-toggle').addEventListener('click',async()=>{
@@ -245,7 +309,9 @@
       try{await getModel();if(active){status('Modelo pronto. Buscando articulações no Aero…');lastSample=0;}}
       catch(error){active=false;el('pose-toggle').textContent='↻ Tentar novamente';status('Modelo de articulações não carregou: '+(error?.message||error));}
     });
-    el('pose-reset').addEventListener('click',()=>{reset();draw();status('Histórico de extensão/flexão reiniciado.');});
+    el('pose-reset').addEventListener('click',()=>{reset();draw();status('Rastros e ângulos extremos reiniciados.');});
+    el('pose-trails').addEventListener('change',()=>{draw();status(el('pose-trails').checked?
+      'Rastros visíveis: acompanham pontos reais do movimento.':'Rastros ocultos. Ângulos continuam visíveis.');});
     el('pose-export').addEventListener('click',()=>{
       if(!lastSource){status('Primeiro carregue uma imagem e inicie a leitura.');return;}
       const saved=document.createElement('canvas');saved.width=W;saved.height=H+108;
@@ -256,14 +322,14 @@
       c.fillText('Joelho '+el('pose-knee').textContent+'   Tronco '+el('pose-trunk').textContent+
         '   Cotovelo '+el('pose-elbow').textContent+'   Quadril '+el('pose-hip').textContent,20,H+32);
       c.font='15px system-ui';c.fillStyle='#ffe277';
-      c.fillText('Extensão observada '+el('pose-extension').textContent+
-        '   Flexão observada '+el('pose-flexion').textContent,20,H+63);
+      c.fillText('Extensão '+el('pose-extension').textContent+'   Flexão '+el('pose-flexion').textContent+
+        '   Variação do tronco '+el('pose-trunk-delta').textContent,20,H+63);
       c.fillStyle='#a9b8c5';c.font='12px system-ui';
       c.fillText('ESTIMATIVAS 2D EXPERIMENTAIS · NÃO RECOMENDAM AJUSTES · Eduardo Paiva',20,H+90);
       saved.toBlob(blob=>{
         if(!blob)return;
         const url=URL.createObjectURL(blob),a=document.createElement('a');
-        a.href=url;a.download='PAIVA_AERO_Angulos_IA_Experimental.png';
+        a.href=url;a.download='PAIVA_Motion_Flow_Experimental.png';
         document.body.append(a);a.click();a.remove();
         setTimeout(()=>URL.revokeObjectURL(url),30000);
         status('Imagem demonstrativa salva. Use os graus somente como estimativas 2D.');

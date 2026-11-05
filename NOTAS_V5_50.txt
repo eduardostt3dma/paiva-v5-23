@@ -1,0 +1,45 @@
+PAIVA BIKE FIT STUDIO — V5.50
+PAIVA MOTION FLOW · Rastros de movimento + Aero adaptativo
+
+NOVIDADES
+1. O Túnel de Vento abre com vento DESLIGADO por padrão.
+   Botão «≈ Ligar vento» exibe ondas somente quando solicitado;
+   «✕ Desligar vento» retorna à foto limpa. O efeito anterior foi mantido.
+   Com vento desligado, o reconhecimento de recorte do vento fica em espera,
+   poupando processamento enquanto a leitura de articulações é utilizada.
+2. Os controles do Aero ficam acima da imagem, com barra fixa dentro do
+   próprio módulo em monitores maiores.
+3. Imagem do Aero e camada de recorte flexível encolhem JUNTAS com o espaço
+   vertical da janela, evitando que a tela ocupe o monitor inteiro.
+   A tela principal do Túnel de Vento NÃO FOI RETIRADA. O carregamento foi
+   reforçado para aguardar o painel 2D existir antes de montar o Aero.
+4. O painel de IA do Aero agora se chama «PAIVA MOTION FLOW».
+   Traça rastros suaves de joelho, quadril e ombro detectados no vídeo,
+   identificados por três cores discretas. Existe tecla para ocultar/mostrar
+   os rastros sem desligar a leitura dos ângulos.
+5. Acrescenta «Variação do tronco» observada em graus durante a sessão,
+   além dos ângulos instantâneos e extremos observados do joelho da V5.49.
+6. «Reiniciar rastros» limpa trilhas e extremos; «Salvar análise» exporta PNG.
+
+CONTINUIDADE E SEGURANÇA
+- Todo o software da V5.49 foi copiado antes desta mudança.
+- Arquivos da ferramenta Análise 2D (athlete-2d.js e athlete-2d.css) intactos.
+- Vídeo, conversor, cadastro, antropometria, comparador A/B, curva maleável,
+  PDF e dados da versão anterior continuam presentes.
+- O comportamento original do vento segue disponível no mesmo botão.
+
+CUIDADOS IMPORTANTES
+- Rastros representam trajetórias de pontos estimados pela IA; são observações
+  2D, sujeitas a erros, oclusão e movimento da câmera.
+- A «Variação do tronco» é a diferença entre o máximo e o mínimo observado
+  na sessão; não mede qualidade, estabilidade clínica ou posição ideal.
+- Uma câmera fixa lateral, boa luz e um vídeo contínuo são essenciais.
+- A primeira ativação da IA exige conexão para baixar modelo e executáveis;
+  o processamento da foto acontece localmente.
+- Ventos são puramente ilustrativos. Não há CFD, CdA, watts ou arrasto real.
+- Os números desta experiência não substituem a medição de bike fit.
+
+INSTALAÇÃO NO WINDOWS OU ANDROID
+Descompactar o ZIP, enviar todos os arquivos da pasta raiz ao repositório
+GitHub Pages já usado e confirmar «Commit changes».
+No PC, recarregar com Ctrl+Shift+R para retirar a versão antiga do cache.

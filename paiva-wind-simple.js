@@ -1,4 +1,4 @@
-/* PAIVA AERO V5.49 — ondas visuais fluidas + leitura experimental isolada.
+/* PAIVA AERO V5.50 — ondas opcionais + painel Motion Flow isolado.
    Painel independente, com autoria Eduardo Paiva. */
 (() => {
   'use strict';
@@ -64,7 +64,8 @@
 
   function init(){
     const athlete=document.getElementById('paiva-athlete-2d');
-    if(!athlete||document.getElementById('paiva-wind-simple'))return;
+    if(document.getElementById('paiva-wind-simple'))return true;
+    if(!athlete)return false;
     const section=document.createElement('section');
     section.className='card paiva-wind-simple';
     section.id='paiva-wind-simple';
@@ -72,7 +73,7 @@
       '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
       '<h2>TÚNEL DE VENTO</h2>',
       '<p>Reconhecimento automático do ciclista e da bicicleta · vento visual independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.49</span></div>',
+      '<span class="aero-badge">V5.50</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
@@ -91,7 +92,7 @@
       '</div>',
       '<div class="aero-stage"><canvas id="aero-canvas" width="960" height="540" aria-label="Foto ou vídeo com ondas de vento ilustrativas atravessando a imagem"></canvas>',
       '<video id="aero-source-video" muted playsinline hidden></video></div>',
-      '<p class="aero-guidance" id="aero-message" role="status" aria-live="polite">Abra uma foto ou vídeo: a IA tentará reconhecer automaticamente pessoa e bicicleta. Primeira utilização precisa de internet.</p>',
+      '<p class="aero-guidance" id="aero-message" role="status" aria-live="polite">Abra uma foto ou vídeo. O vento inicia desligado; ative-o somente se desejar a animação ilustrativa.</p>',
       '<details class="aero-advanced"><summary>✎ Recorte flexível (opcional)</summary><p class="aero-curve-hint">Clique nos pontos, arraste as bolinhas ou a linha e escolha ✓ Fechar recorte. Para retornar à IA, use ✕ Limpar curvas.</p></details>',
       '<div class="aero-measure">',
       '<button type="button" id="aero-trunk">📐 Medir tronco (2 pontos)</button>',
@@ -99,7 +100,7 @@
       '<small>Somente vista lateral: clique no acrômio/ombro e depois no trocânter maior/quadril. Ângulo relativo à horizontal da foto.</small></div>',
       '</div>',
       '<div class="aero-toolbar aero-controls">',
-      '<button type="button" id="aero-wind" class="aero-main">⏸ Pausar vento</button>',
+      '<button type="button" id="aero-wind" class="aero-main" aria-pressed="false">≈ Ligar vento</button>',
       '<button type="button" id="aero-direction" title="A direção deve vir da frente da bike. Para ciclista olhando para direita, use vento para esquerda.">← Vento para a esquerda</button>',
       '<label class="aero-strength">Ondas <input type="range" id="aero-strength" min="1" max="5" step="1" value="3" aria-label="Intensidade visual das ondas de ar"><span>leve → forte</span></label>',
       '<label class="aero-palette">Cor <select id="aero-wave-palette" aria-label="Cor ilustrativa das ondas de vento"><option value="electric" selected>Azul elétrico</option><option value="sun">Amarelo solar</option><option value="magenta">Magenta</option><option value="laser">Verde laser</option></select></label>',
@@ -112,6 +113,11 @@
       'As ondas são <strong>ilustrativas</strong>: não representam dinâmica real do ar, CdA, arrasto ou watts.</p>'
     ].join('');
     athlete.after(section);
+    // Comandos ANTES da imagem: permanecem acessíveis sem rolar até o final
+    // do canvas. O painel todo encolhe junto para manter recorte e coordenadas.
+    const stage=section.querySelector('.aero-stage');
+    const controls=section.querySelector('.aero-controls');
+    if(stage&&controls)stage.before(controls);
     const compareJump=document.createElement('button');
     compareJump.type='button';
     compareJump.textContent='▥ Comparar A/B frontal';
@@ -158,7 +164,7 @@
 
     const el=id=>document.getElementById(id);
     const canvas=el('aero-canvas'),ctx=canvas.getContext('2d');
-    if(!ctx){el('aero-message').textContent='Seu navegador não permite esta animação.';return;}
+    if(!ctx){el('aero-message').textContent='Seu navegador não permite esta animação.';return true;}
     const air=document.createElement('canvas');air.width=W;air.height=H;
     const ac=air.getContext('2d');
     const still=document.createElement('canvas');still.width=W;still.height=H;
@@ -185,7 +191,8 @@
     // O ciclista padrão da vista lateral olha para a direita: vento contrário
     // ao deslocamento entra pelo lado DIREITO e segue para a esquerda.
     // O botão continua invertendo o sentido para outras fotografias.
-    let mode='demo',videoURL=null,stream=null,playing=true,direction=-1,phase=0;
+    // A foto abre limpa. O vento é um efeito visual OPCIONAL, desligado.
+    let mode='demo',videoURL=null,stream=null,playing=false,direction=-1,phase=0;
     let visible=true,lastTime=0;
     let lastAnalysis=0,blankReference=null,detection=null,manualContour=null;
     let imageEpoch=0,aiBusy=false,aiPending=false,aiFailed=false;
@@ -350,10 +357,14 @@
       // O recorte de uma foto anterior não pode ser aplicado à nova pessoa.
       manualContour=null;curveTool?.reset();
       resetTrunk();
-      identifySilhouette();
-      notify(backgroundMode()==='auto'&&!manualContour?
-        'Foto carregada. Reconhecimento de pessoa e bicicleta em andamento; o vento aparece após a análise.':
-        'Foto carregada. Confira se o contorno corresponde ao atleta e à bicicleta.');
+      if(playing)identifySilhouette();
+      else{
+        el('aero-detection-status').textContent='Vento desligado · recorte visual em espera.';
+        el('aero-detection-status').dataset.detected='false';
+      }
+      notify(playing?
+        'Foto carregada. O reconhecimento do vento será tentado automaticamente.':
+        'Foto carregada sem vento. Abra o Motion Flow para ver os movimentos ou ligue o vento quando quiser.');
       render();
     }
     function airPath(){
@@ -500,21 +511,25 @@
         ctx.textAlign='left';
       }
       // Com imagem real, as linhas só aparecem se a silhueta foi reconhecida.
-      airPath();ctx.drawImage(air,0,0);
-      drawWake();
-      if(detection){
-        ctx.save();ctx.globalAlpha=.11;ctx.drawImage(maskCanvas,0,0,W,H);ctx.restore();
+      if(playing){
+        airPath();ctx.drawImage(air,0,0);
+        drawWake();
+        if(detection){
+          ctx.save();ctx.globalAlpha=.11;ctx.drawImage(maskCanvas,0,0,W,H);ctx.restore();
+        }
       }
       drawTrunk();
       // Título leve, com a identidade amarela preservada e sem cobrir o atleta.
       ctx.fillStyle='rgba(4,11,17,.64)';ctx.fillRect(12,12,242,26);
       ctx.fillStyle='#ffe05e';ctx.font='600 12px "Segoe UI",Arial,sans-serif';
       if('letterSpacing' in ctx)ctx.letterSpacing='1.3px';
-      ctx.fillText('PAIVA AERO · ONDA VISUAL',20,29);
+      ctx.fillText(playing?'PAIVA AERO · ONDA VISUAL':'PAIVA AERO · FOTO LIMPA',20,29);
       if('letterSpacing' in ctx)ctx.letterSpacing='0px';
       ctx.fillStyle='rgba(4,11,17,.62)';ctx.fillRect(12,H-32,W-24,23);
       ctx.fillStyle='#deedf7';ctx.font='400 10px "Segoe UI",Arial,sans-serif';
-      ctx.fillText('VENTO ILUSTRATIVO · NÃO MEDE ARRASTO, CdA OU WATTS',20,H-17);
+      ctx.fillText(playing?
+        'VENTO ILUSTRATIVO · NÃO MEDE ARRASTO, CdA OU WATTS':
+        'VENTO DESLIGADO · EXPLORE O MOTION FLOW PARA OBSERVAR O MOVIMENTO',20,H-17);
       ctx.textAlign='right';ctx.fillStyle='rgba(255,226,115,.82)';
       ctx.font='500 9px "Segoe UI",Arial,sans-serif';
       ctx.fillText('DESENVOLVIDO POR EDUARDO PAIVA',W-18,29);
@@ -523,7 +538,7 @@
     function tick(now){
       if(now-lastTime>32){
         if(visible&&!document.hidden){
-          if((mode==='video'||mode==='camera')&&
+          if(playing&&(mode==='video'||mode==='camera')&&
             video.readyState>=2&&!video.paused&&
             now-lastAnalysis>=(backgroundMode()==='auto'?800:260)){
             identifySilhouette();
@@ -632,7 +647,7 @@
       section.scrollIntoView({behavior:'smooth',block:'start'});
       try{
         await video.play();el('aero-play').textContent='⏸ Pausar vídeo';
-        notify('Vídeo '+String(label||'')+' carregado. O reconhecimento do atleta será tentado automaticamente.');
+        notify('Vídeo '+String(label||'')+' carregado. O Motion Flow pode acompanhar os movimentos; vento opcional.');
         return true;
       }catch(error){
         notify('O navegador não reproduziu este vídeo. Para Windows, tente MP4 H.264.');
@@ -756,8 +771,11 @@
     });
     el('aero-wind').addEventListener('click',()=>{
       playing=!playing;
-      el('aero-wind').textContent=playing?'⏸ Pausar vento':'▶ Soltar vento';
-      notify(playing?'Onda de vento ativada.':'Onda pausada para observar a imagem.');
+      el('aero-wind').textContent=playing?'✕ Desligar vento':'≈ Ligar vento';
+      el('aero-wind').setAttribute('aria-pressed',String(playing));
+      if(playing&&!detection&&mode!=='demo')identifySilhouette();
+      notify(playing?'Ondas visuais ativadas. São ilustrativas.':
+        'Ondas removidas. Foto livre para observar os movimentos.');
       render();
     });
     el('aero-direction').addEventListener('click',()=>{
@@ -795,7 +813,15 @@
     });
     window.addEventListener('pagehide',stopVideo,{once:true});
     render();requestAnimationFrame(tick);
+    return true;
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
-  else setTimeout(init,0);
+  // Evita perder a bancada caso a análise 2D ainda esteja sendo montada quando
+  // o script chegar ao navegador (rede lenta, cache antigo ou celular).
+  function boot(){
+    if(init())return;
+    const observer=new MutationObserver(()=>{if(init())observer.disconnect();});
+    observer.observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else setTimeout(boot,0);
 })();
