@@ -1,0 +1,49 @@
+PAIVA BIKE FIT STUDIO — V5.36 — RECONHECIMENTO AUTOMÁTICO DO CICLISTA
+05/11/2026
+
+PRIORIDADE DE EDUARDO PAIVA
+"O vento tem que passar naturalmente e desviar do atleta. Não sou eu que
+vou desviar o vento. Depois vemos o que extrair de medida."
+
+NOVO
+- O painel do vento continua SEPARADO da bancada 2D e conserva a marca.
+- Não é mais necessário desenhar oval ou arrastar região no ciclista.
+- O contorno é inferido dos pixels do fundo removido:
+  * VERDE liso (padrão): detecta automaticamente nas fotos e nos vídeos;
+  * PAREDE comum: usa foto ou captura anterior do cenário completamente VAZIO.
+- O efeito de ondas usa o perfil superior/inferior da silhueta real detectada.
+- As linhas são apagadas dentro da máscara do atleta, parecendo desviar
+  ao chegar na frente dele. Partículas e ondas continuam animadas.
+- Webcam e vídeos atualizam o recorte repetidamente quando estão rodando.
+- Somente quando a imagem fornece contraste suficiente aparece a indicação
+  "Ciclista reconhecido" (sem mostrar números falsos).
+- A opção de inverter direção e de ajustar a força VISUAL foi mantida.
+- Marca d'água discreta sempre visível no site:
+  "Desenvolvido por Eduardo Paiva".
+- O rodapé inclui autoria completa:
+  "Idealizado e desenvolvido por Eduardo Paiva · PAIVA Bike Fit Studio".
+- O PNG de vento também recebe o crédito de autoria.
+- A marca registrada e sua cor foram preservadas. TT e 2D intocados.
+
+COMO TESTAR COM VERDE
+1. Coloque tecido verde liso e iluminado ATRÁS do ciclista/bicicleta.
+2. Abra Vento e foto, vídeo ou Webcam. Já vem em "Fundo verde".
+3. Quando aparecer "Ciclista reconhecido", o vento contorna os pixels.
+4. Ajuste apenas sentido e intensidade do efeito gráfico.
+
+COMO TESTAR COM PAREDE
+1. Selecione "Parede comum".
+2. Com câmera IMÓVEL, capture a parede SEM ciclista/bicicleta ou envie
+   uma foto do fundo vazio obtida do mesmo lugar.
+3. Coloque o ciclista e deixe o vídeo correr; o fundo é subtraído.
+4. Confira se só o ciclista ficou realçado; sombras e luzes podem atrapalhar.
+
+LIMITES
+- Não há inferência corporal independente de fundo. Para foto comum com
+  cenário complexo é necessário um modelo de segmentação treinado, que
+  ainda não faz parte deste pacote offline.
+- O método detecta silhueta visual com contraste, não entende anatomia.
+- As linhas/ondas são uma animação guiada pelo contorno. NÃO são CFD,
+  turbulência física, pressão do ar nem resultados aerodinâmicos.
+- A medição quantitativa fica para uma fase posterior, a pedido do autor.
+- Compatibilidade e qualidade visual dependem de teste em câmera real.

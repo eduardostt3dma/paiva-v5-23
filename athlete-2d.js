@@ -3093,6 +3093,14 @@
   windStyle.rel='stylesheet';
   windStyle.href='./paiva-wind-simple.css';
   document.head.append(windStyle);
+  const silhouetteScript=document.createElement('script');
+  silhouetteScript.src='./paiva-wind-segmentation.js';
+  silhouetteScript.async=false;
+  document.head.append(silhouetteScript);
+  const contourScript=document.createElement('script');
+  contourScript.src='./paiva-aero-contour.js';
+  contourScript.async=false;
+  document.head.append(contourScript);
   const windScript=document.createElement('script');
   windScript.src='./paiva-wind-simple.js';
   windScript.async=false;

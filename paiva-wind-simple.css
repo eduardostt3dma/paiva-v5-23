@@ -11,16 +11,35 @@
 .paiva-wind-simple button.aero-main{background:linear-gradient(140deg,#ffdc5a,#eebd30);border:1px solid #ffde55;color:#161916}
 .aero-file input{display:none}
 .aero-stage{background:#0b141c;border:1px solid #445664;border-radius:14px;overflow:hidden;box-shadow:0 12px 35px #0009}
-#aero-canvas{width:100%;max-width:100%;height:auto;display:block;cursor:crosshair;touch-action:none}
+#aero-canvas{width:100%;max-width:100%;height:auto;display:block;cursor:default;touch-action:manipulation}
+.aero-detection{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:11px 0 13px;padding:10px 12px;border:1px solid #4b5a63;border-radius:12px;background:#141d26;font-size:11px}
+.aero-detection>label:first-child{display:flex;align-items:center;gap:8px;font-weight:750;color:#dee5ec}
+.aero-detection select{background:#202a34;border:1px solid #58636c;border-radius:8px;padding:9px;color:#fff;font:inherit}
+.aero-detection button,.aero-detection .aero-file{min-height:35px;padding:7px 11px}
+.aero-detection #aero-detection-status{display:inline-flex;align-items:center;gap:5px;color:#b9ccd7;line-height:1.4}
+.aero-detection #aero-detection-status[data-detected=true]{color:#70e4b1;font-weight:750}
+.aero-advanced summary{cursor:pointer;color:#e7d48a;font-weight:750;list-style:none}
+.aero-advanced label{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:11px}
+.aero-advanced input{max-width:120px;accent-color:#ffe15e}
+/* A medição anatômica fica preparada para fase posterior, fora desta UI. */
+.aero-measure{display:none!important}
 .aero-guidance{color:#d9eaf3;background:#162530;border:1px solid #304d5c;border-radius:9px;margin:9px 0;padding:10px 12px;font-size:12px;line-height:1.45;min-height:38px}
 .aero-controls{align-items:center}
 .aero-strength{display:flex;align-items:center;gap:8px;font-size:12px;color:#e5e7ed;font-weight:700;padding:2px 5px}
 .aero-strength input{width:90px;accent-color:#f4d044}
 .aero-strength span{font-size:10px;color:#a8b9c5;font-weight:500}
 .aero-disclaimer{border-left:3px solid #e5c04c;background:#24231f;padding:10px 12px;color:#d9d2c0;font-size:11px;line-height:1.6;border-radius:0 8px 8px 0;margin:14px 0 0}
+#paiva-author-watermark{position:fixed;right:13px;bottom:12px;z-index:8;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-align:right;max-width:260px;padding:7px 10px;border-radius:8px;background:rgba(5,10,15,.5);border-right:2px solid rgba(245,207,80,.7);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+#paiva-author-watermark span{font-size:8px;font-weight:800;letter-spacing:.17em;color:rgba(255,222,100,.8)}
+#paiva-author-watermark strong{font-size:10px;font-weight:700;letter-spacing:.025em;color:rgba(240,244,247,.82)}
+.paiva-author-credit{margin:13px auto 0;padding-top:10px;border-top:1px solid #3d4149;font-size:11px;letter-spacing:.035em;color:#d8c88c;text-align:center}
 @media(max-width:650px){
   .aero-heading{gap:9px}
   .aero-toolbar button,.aero-file{flex:1 1 145px}
   .aero-strength{width:100%;justify-content:center}
+  .aero-detection{align-items:flex-start;flex-direction:column}
+  #paiva-author-watermark{padding:5px 7px;right:6px;bottom:7px;opacity:.55}
+  #paiva-author-watermark span{font-size:7px}
+  #paiva-author-watermark strong{font-size:8px}
 }
-@media print{.paiva-wind-simple{display:none!important}}
+@media print{.paiva-wind-simple,#paiva-author-watermark{display:none!important}}

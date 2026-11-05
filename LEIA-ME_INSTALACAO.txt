@@ -1,4 +1,16 @@
-PAIVA V5.35 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_35.txt.
+PAIVA V5.36 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_36.txt.
+AGORA O VENTO DESVIA AUTOMATICAMENTE DA SILHUETA DETECTADA.
+Sem arrastar área nem contorno na foto.
+- Com fundo VERDE liso: reconhecimento automático sem outras etapas.
+- Com parede COMUM: memorizar uma vez o fundo VAZIO, sem mudar a câmera.
+- Abra imagem, vídeo ou webcam; ondas se ajustam ao contorno detectado.
+- Não calcula forças físicas de vento, watts ou CdA.
+- Marca d'água e crédito "Desenvolvido por Eduardo Paiva" no software.
+Envie TODOS os arquivos extraídos para o GitHub, inclusive
+paiva-wind-segmentation.js e paiva-aero-contour.js.
+
+HISTÓRICO DA V5.35:
+PAIVA V5.35 — LEIA O ARQUIVO NOTAS_V5_35.txt.
 O túnel de vento passou a ser um painel SIMPLES e VISUAL:
 - Abra uma foto, vídeo, webcam ou quadro do 2D;
 - Ondas de ar animadas aparecem sem calibrar fundos nem preencher tabelas;
