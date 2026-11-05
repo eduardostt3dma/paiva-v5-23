@@ -11,6 +11,15 @@
 #paiva-aero-pose .pose-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;}
 #paiva-aero-pose .pose-actions button{font:650 12px Inter,'Segoe UI',system-ui,sans-serif;padding:9px 12px;border-radius:9px;border:1px solid #536473;background:#222c36;color:#f1f5f7;cursor:pointer;}
 #paiva-aero-pose .pose-actions button:hover{border-color:#eec35a;}
+#paiva-aero-pose #pose-manual-toggle[aria-pressed="true"]{background:#1b5554;border-color:#59d9cc;color:#dffffa;}
+#paiva-aero-pose .pose-manual-controls{display:flex;align-items:center;flex-wrap:wrap;gap:9px;padding:11px 12px;margin:9px 0;background:#10272b;border:1px solid #376869;border-radius:10px;}
+#paiva-aero-pose .pose-manual-controls[hidden]{display:none;}
+#paiva-aero-pose .pose-manual-controls label{display:flex;align-items:center;gap:8px;color:#e3f9f6;font-size:12px;font-weight:650;}
+#paiva-aero-pose .pose-manual-controls select{padding:7px 8px;color:#e9f4f6;background:#18252d;border:1px solid #598489;border-radius:7px;font:inherit;}
+#paiva-aero-pose .pose-actions #pose-speed{border:1px solid #536473;border-radius:7px;background:#14232e;color:#f4f7fa;padding:6px 5px;max-width:96px;}
+#paiva-aero-pose .pose-manual-controls button{border:1px solid #548085;background:#183b40;color:#e4faf8;border-radius:7px;padding:8px 10px;cursor:pointer;}
+#paiva-aero-pose .pose-manual-controls small{flex-basis:100%;line-height:1.5;color:#b5d8d6;font-size:11px;}
+#paiva-aero-pose canvas.pose-editing{cursor:crosshair;touch-action:none;}
 #paiva-aero-pose #pose-toggle{background:#d4af53;color:#0b151e;border-color:#f5cd67;}
 #paiva-aero-pose .pose-trail-toggle{display:inline-flex;align-items:center;gap:7px;
   font:650 12px Inter,'Segoe UI',system-ui,sans-serif;cursor:pointer;padding:9px 12px;
@@ -30,6 +39,8 @@
 #paiva-aero-pose .pose-stats strong{display:block;color:#e3f5ff;font-size:24px;font-weight:740;font-variant-numeric:tabular-nums;letter-spacing:-.03em;}
 #paiva-aero-pose .pose-stats>div.pose-extreme{grid-column:span 2;background:#18222b;border-color:#53606d;}
 #paiva-aero-pose .pose-stats .pose-extreme strong{color:#ffdb79;}
+#paiva-aero-pose .pose-stats>div.pose-foot{grid-column:span 2;border-color:#376869;}
+#paiva-aero-pose .pose-stats .pose-foot strong{color:#96ece2;}
 #paiva-aero-pose .pose-disclaimer{border-left:2px solid #9d804a;background:#141d26;padding:10px 12px;border-radius:0 8px 8px 0;margin-bottom:0;}
-@media(max-width:640px){#paiva-aero-pose>summary{padding:13px 11px;gap:7px;font-size:11px}#paiva-aero-pose .pose-experimental{font-size:8px;letter-spacing:.06em}#paiva-aero-pose .pose-interior{padding:0 10px 15px}#paiva-aero-pose .pose-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#paiva-aero-pose .pose-stats>div.pose-extreme{grid-column:span 1}#paiva-aero-pose .pose-stats strong{font-size:20px}#paiva-aero-pose .pose-actions button{padding:9px 8px;font-size:11px}#paiva-aero-pose .pose-trail-toggle{font-size:11px}}
+@media(max-width:640px){#paiva-aero-pose>summary{padding:13px 11px;gap:7px;font-size:11px}#paiva-aero-pose .pose-experimental{font-size:8px;letter-spacing:.06em}#paiva-aero-pose .pose-interior{padding:0 10px 15px}#paiva-aero-pose .pose-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#paiva-aero-pose .pose-stats>div.pose-extreme,#paiva-aero-pose .pose-stats>div.pose-foot{grid-column:span 1}#paiva-aero-pose .pose-stats strong{font-size:20px}#paiva-aero-pose .pose-actions button{padding:9px 8px;font-size:11px}#paiva-aero-pose .pose-trail-toggle{font-size:11px}}
 @media print{#paiva-aero-pose{display:none!important}}

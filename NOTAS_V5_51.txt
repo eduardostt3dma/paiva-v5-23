@@ -1,0 +1,54 @@
+PAIVA BIKE FIT STUDIO — V5.51
+PAIVA MOTION FLOW · Correção manual, calcanhar e câmera lenta
+
+NOVIDADES NO PAIVA MOTION FLOW (AERO)
+1. "Corrigir pontos" pausa a leitura automática e o vídeo importado.
+   Você pode arrastar qualquer marcador reconhecido pela IA ou escolher
+   a articulação na lista e clicar onde ela realmente está.
+2. É possível começar uma marcação inteiramente manual quando a IA não
+   encontrar o atleta, sem precisar de marcadores infravermelhos.
+3. Oito referências anatômicas por lado: ombro, cotovelo, punho, quadril,
+   joelho, tornozelo, calcanhar e frente do pé/metatarso.
+4. Novo indicador: inclinação do pé em relação à horizontal da imagem,
+   formada pela linha calcanhar–frente do pé. NÃO é medição direta de
+   flexão do tornozelo ou inclinação da tíbia.
+5. Velocidade do vídeo no Aero: 0,1×, 0,25×, 0,5×, 0,75× ou 1×.
+   A velocidade menor facilita a revisão, mas não acrescenta quadros a
+   um vídeo já gravado nem melhora a nitidez original.
+6. Os pontos corrigidos ficam verdes no quadro. Você pode restaurar os
+   pontos originais da IA ou salvar um PNG com a imagem corrigida.
+7. A escolha automática do lado do corpo fica mais estável quando as
+   duas pernas têm pontuações de confiança muito parecidas.
+
+COMO USAR
+- Abra o Aero, carregue foto ou vídeo e abra "PAIVA MOTION FLOW".
+- Para leitura automática, clique em "Iniciar leitura IA".
+- Para corrigir manualmente, clique "Corrigir pontos", selecione a
+  articulação e clique/arraste o marcador até o local anatômico.
+- Use "Concluir correção". O ajuste é exclusivo daquele quadro e fica
+  nesta sessão do navegador. Ao retomar a reprodução, novos quadros
+  serão analisados automaticamente. Salve a foto para guardar a correção.
+- Para velocidade reduzida, escolha 0,5× ou 0,25× na barra do Motion Flow.
+- Na "Análise 2D" tradicional, a velocidade já existe no painel
+  "Reprodução · velocidade · quadros", incluindo 0,1× e avanço por quadro.
+
+CONTINUIDADE
+- O módulo Análise 2D tradicional (athlete-2d.js e athlete-2d.css)
+  não foi modificado nesta versão.
+- Todas as funções de cadastro, pré-fit, comparador, vídeo, PDF,
+  vento opcional e outros recursos da V5.50 permanecem disponíveis.
+- O "vento" continua desligado por padrão; linhas novas de vento não
+  fazem parte desta atualização.
+
+LIMITES DA ANÁLISE
+- O Motion Flow é análise de imagem 2D, não reconstrução 3D.
+- Marcadores anatômicos da IA são aproximações visuais; confira os
+  pontos manualmente. A observação de um único quadro não representa
+  o ciclo inteiro da pedalada.
+- A primeira carga do modelo de IA requer conexão; correção manual é
+  independente da detecção automática.
+
+INSTALAÇÃO
+- Descompacte o ZIP e envie os arquivos de sua raiz ao repositório
+  GitHub Pages que já utiliza. Não reenvie antes de testar o ZIP local.
+- No Windows, use Ctrl+Shift+R após confirmar a publicação.
