@@ -1,0 +1,38 @@
+PAIVA BIKE FIT STUDIO — V5.49
+Leitura de ângulos por IA no Aero (TESTE EXPERIMENTAL)
+
+NOVIDADES
+- Novo painel independente «IA · LEITURA DE ÂNGULOS» dentro do Túnel de Vento.
+- Lê a imagem ORIGINAL, sem as ondas visuais por cima.
+- Estima joelho (quadril–joelho–tornozelo), tronco contra horizontal,
+  cotovelo (ombro–cotovelo–punho), quadril (ombro–quadril–joelho).
+- Em vídeo, acompanha o maior e o menor ângulo de joelho observados,
+  com no mínimo cinco quadros válidos, zeráveis por botão.
+- Desenha referências anatômicas e graus diretamente na imagem; exporta PNG.
+- Somente mediante ativação; não roda quando o painel está fechado.
+- Processa quadros localmente com MediaPipe Pose Landmarker; necessita internet
+  para baixar o modelo e o código na primeira utilização.
+- Ocultação ou baixa confiança de articulações produz «—»; não inventa graus.
+
+PROTEÇÃO DO TRABALHO ANTERIOR
+- Análise 2D NÃO ALTERADA: seus arquivos JS e CSS são idênticos aos da V5.48.
+- Módulos de ondas, recorte, comparador A/B, vídeo e relatórios preservados.
+- Apenas o motor do Aero passa a fornecer uma cópia de quadro original, SOMENTE
+  para leitura pelo painel experimental. Não altera imagem do vento.
+- Versão anterior mantida intacta para eventual retorno.
+
+LIMITAÇÕES TÉCNICAS IMPORTANTES
+- São apenas ângulos de projeção 2D estimados por uma rede neural, sem
+  calibração anatômica ou validação para bike fit profissional.
+- Um modelo de pose não localiza exatamente o trocânter maior ou o côndilo
+  femoral lateral. Pontos ocultos, roupa, movimento e câmera mudam os valores.
+- «Extensão observada» = maior ângulo do joelho lido nesta sessão de vídeo;
+  «flexão observada» = menor ângulo lido. Não são metas de ajuste nem
+  equivalentes à medição profissional do fitter.
+- Para avaliar, use câmera FIXA lateral com toda a pedalada visível. Não use
+  os valores para prescrever posições, laudos ou medidas definitivas.
+- Este módulo não realiza CFD, CdA, cálculo de potência ou eficiência aerodinâmica.
+
+INSTALAÇÃO
+Extraia o ZIP, envie TODOS os arquivos da pasta raiz ao GitHub e confirme
+Commit changes. Atualize a página forçando Ctrl+Shift+R no Windows.

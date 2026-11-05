@@ -1,4 +1,4 @@
-/* PAIVA AERO V5.48 — ondas visuais fluidas + inclinação de tronco em 2D.
+/* PAIVA AERO V5.49 — ondas visuais fluidas + leitura experimental isolada.
    Painel independente, com autoria Eduardo Paiva. */
 (() => {
   'use strict';
@@ -72,7 +72,7 @@
       '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
       '<h2>TÚNEL DE VENTO</h2>',
       '<p>Reconhecimento automático do ciclista e da bicicleta · vento visual independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.48</span></div>',
+      '<span class="aero-badge">V5.49</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
@@ -645,7 +645,25 @@
       await openWindVideo(file,file.name);
       input.value='';
     });
-    globalThis.PAIVA_WIND_SIMPLE={openVideo:openWindVideo};
+    // Acesso SOMENTE de leitura aos quadros originais do Aero para a análise
+    // experimental. Não lê a imagem com vento nem interfere no módulo 2D.
+    function getAnalysisFrame(targetCtx){
+      if(!targetCtx||mode==='demo')return null;
+      const width=targetCtx.canvas.width,height=targetCtx.canvas.height;
+      const source=mode==='photo'?still:video;
+      const dims=sourceDims(source);
+      if(!(dims.width>0&&dims.height>0)||
+        (mode!=='photo'&&video.readyState<2))return null;
+      targetCtx.clearRect(0,0,width,height);
+      targetCtx.fillStyle='#0b131c';targetCtx.fillRect(0,0,width,height);
+      const ratio=Math.min(width/dims.width,height/dims.height);
+      targetCtx.drawImage(source,(width-dims.width*ratio)/2,
+        (height-dims.height*ratio)/2,dims.width*ratio,dims.height*ratio);
+      return {mode,epoch:imageEpoch,
+        videoTime:mode==='photo'?null:video.currentTime,
+        playing:mode==='photo'?false:!video.paused};
+    }
+    globalThis.PAIVA_WIND_SIMPLE={openVideo:openWindVideo,getAnalysisFrame};
     el('aero-webcam').addEventListener('click',async()=>{
       if(!navigator.mediaDevices?.getUserMedia){
         notify('Webcam exige HTTPS e permissão do navegador.');return;
