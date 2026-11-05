@@ -1,4 +1,15 @@
-PAIVA V5.34 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_34.txt.
+PAIVA V5.35 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_35.txt.
+O túnel de vento passou a ser um painel SIMPLES e VISUAL:
+- Abra uma foto, vídeo, webcam ou quadro do 2D;
+- Ondas de ar animadas aparecem sem calibrar fundos nem preencher tabelas;
+- ARRaste na foto para indicar a região do ciclista e da bicicleta;
+- Alterne o sentido e intensidade do desenho visual; salve PNG.
+Não fornece medidas físicas de vento, CdA ou watts.
+O painel é separado das ferramentas angulares e preserva a logomarca.
+Carregue TODOS os arquivos extraídos no GitHub; não envie só o ZIP.
+
+HISTÓRICO DA V5.34 (painel automático substituído na interface atual):
+PAIVA V5.34 — LEIA O ARQUIVO NOTAS_V5_34.txt.
 Túnel independente com webcam/vídeo próprios e leitura AUTOMÁTICA de pixels.
 Dois fundos: (1) verde liso; (2) parede comum + foto vazia, com câmera imóvel.
 As vistas FRONTAL e LATERAL são diferentes e o programa não as mistura.

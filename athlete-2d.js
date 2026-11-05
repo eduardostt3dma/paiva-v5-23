@@ -3087,18 +3087,14 @@
   if (document.readyState==='complete') initialize();
   else document.addEventListener('DOMContentLoaded',initialize,{once:true});
 
-  // Módulo optativo V5.33: fica fora do motor angular/rastreio e não muda
-  // suas marcações nem os estados dos vídeos.
+  // PAIVA AERO V5.35: painel visual simplificado, independente do 2D.
+  // Carrega somente os controles de onda visual; não interfere no rastreio.
   const windStyle=document.createElement('link');
   windStyle.rel='stylesheet';
-  windStyle.href='./paiva-wind-visual.css';
+  windStyle.href='./paiva-wind-simple.css';
   document.head.append(windStyle);
-  const segmentationScript=document.createElement('script');
-  segmentationScript.src='./paiva-wind-segmentation.js';
-  segmentationScript.async=false;
-  document.head.append(segmentationScript);
   const windScript=document.createElement('script');
-  windScript.src='./paiva-wind-visual.js';
+  windScript.src='./paiva-wind-simple.js';
   windScript.async=false;
   document.head.append(windScript);
 })();

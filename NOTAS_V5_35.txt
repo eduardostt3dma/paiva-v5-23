@@ -1,0 +1,36 @@
+PAIVA BIKE FIT STUDIO — V5.35 — TÚNEL DE VENTO SIMPLES
+05/11/2026
+
+PEDIDO DE EDUARDO PAIVA
+"Ficou confuso. Vamos fazer algo simples e bem legal: colocar o túnel
+de vento para passar pelo atleta e ver a onda. Já temos uma base."
+
+RESPOSTA NA V5.35
+- Retirado da INTERFACE o painel complexo da V5.34 (fundo verde, fundo
+  vazio, sensibilidade, região técnica e comparação de pixels A/B).
+- Inserido um painel visual independente com foto, vídeo, webcam ou
+  captura do quadro exibido no 2D.
+- Linhas de ar azuladas animadas, partículas móveis, desvio arredondado
+  ao redor do envelope do atleta e onda visual suave a jusante.
+- O enquadramento da região do ciclista é feito com um único gesto:
+  clique e ARRASTE no canvas, abrangendo atleta e bicicleta.
+- Direção esquerda/direita, intensidade visual e pausar/retomar a onda.
+- Para vídeo, reprodução/pausa próprios. Para webcam, ligar/desligar.
+- Salvar imagem PNG da cena com o efeito e aviso de que não mede arrasto.
+- Mantida identidade visual registrada e painel 2D independente,
+  sem interferir no rastreamento e nas ferramentas angulares.
+- TT e demais ferramentas mantidas da V5.34.
+
+USO
+1. Abra a página do PAIVA no Windows e role até Túnel de Vento (ou
+   clique "Vento" no menu).
+2. Abra uma foto, vídeo, webcam ou escolha "Usar quadro do 2D".
+3. As ondas começam imediatamente. Arraste na imagem um retângulo
+   envolvendo o atleta; o vento desvia do envelope aproximado.
+4. Ajuste Direção e Ondas (leve/forte). Salve PNG, se desejar.
+
+ATENÇÃO
+Esta é uma VISUALIZAÇÃO ARTÍSTICA. Não calcula fluxo aerodinâmico,
+CdA, pressão, watts, área frontal ou qualquer previsão de desempenho.
+O envelope é aproximado pelo gesto do mouse, não por segmentação automática.
+Validação visual em navegador real/webcam continua necessária.
