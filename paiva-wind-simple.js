@@ -45,8 +45,8 @@
     section.innerHTML=[
       '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
       '<h2>TÚNEL DE VENTO</h2>',
-      '<p>O vento ilustrativo contorna a silhueta estimada do ciclista. Independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.43</span></div>',
+      '<p>Reconhecimento automático do ciclista e da bicicleta · vento visual independente do 2D.</p></div>',
+      '<span class="aero-badge">V5.44</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
@@ -54,18 +54,19 @@
       '<button type="button" id="aero-capture">▣ Usar quadro do 2D</button>',
       '</div>',
       '<div class="aero-detection">',
-      '<label>Reconhecer ciclista com <select id="aero-background"><option value="auto" selected>Foto comum · automático</option><option value="green">Fundo verde</option><option value="wall">Parede comum</option></select></label>',
+      '<label>Reconhecimento <select id="aero-background"><option value="auto" selected>IA · pessoa + bicicleta</option><option value="contrast">Contraste antigo · experimental</option><option value="green">Fundo verde</option><option value="wall">Parede comum</option></select></label>',
       '<button type="button" id="aero-empty-capture" hidden>▣ Memorizar fundo vazio</button>',
       '<label class="aero-file" id="aero-empty-file-wrap" hidden>↑ Foto da parede vazia<input id="aero-empty-file" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<details class="aero-advanced"><summary>⚙ Ajustes finos</summary>',
-      '<label>Separação do fundo <input id="aero-threshold" type="range" min="12" max="100" value="36" step="2"></label>',
+      '<label>Separação do fundo (sem IA) <input id="aero-threshold" type="range" min="12" max="100" value="36" step="2"></label>',
       '<label>Vento próximo ao corpo <input id="aero-proximity" type="range" min="1" max="5" value="4" step="1"></label></details>',
       '<span id="aero-detection-status" role="status" aria-live="polite">Aguardando foto ou vídeo.</span>',
+      '<button type="button" id="aero-ai-retry" hidden>↻ Tentar IA novamente</button>',
       '</div>',
       '<div class="aero-stage"><canvas id="aero-canvas" width="960" height="540" aria-label="Foto ou vídeo com ondas de vento ilustrativas atravessando a imagem"></canvas>',
       '<video id="aero-source-video" muted playsinline hidden></video></div>',
-      '<p class="aero-guidance" id="aero-message" role="status" aria-live="polite">Abra uma foto ou vídeo. Para fundo simples, o PAIVA tentará separar o atleta automaticamente.</p>',
-      '<p class="aero-curve-hint">Opcional: ✎ Recorte flexível → clique em pontos ao redor do atleta → puxe as bolinhas ou a própria linha → ✓ Fechar recorte. Para voltar ao automático, use ✕ Limpar curvas.</p>',
+      '<p class="aero-guidance" id="aero-message" role="status" aria-live="polite">Abra uma foto ou vídeo: a IA tentará reconhecer automaticamente pessoa e bicicleta. Primeira utilização precisa de internet.</p>',
+      '<details class="aero-advanced"><summary>✎ Recorte flexível (opcional)</summary><p class="aero-curve-hint">Clique nos pontos, arraste as bolinhas ou a linha e escolha ✓ Fechar recorte. Para retornar à IA, use ✕ Limpar curvas.</p></details>',
       '<div class="aero-measure">',
       '<button type="button" id="aero-trunk">📐 Medir tronco (2 pontos)</button>',
       '<div><strong id="aero-trunk-value">Ângulo do tronco: —</strong>',
@@ -80,10 +81,9 @@
       '<button type="button" id="aero-stop-camera" hidden>■ Desligar câmera</button>',
       '<button type="button" id="aero-save">↓ Salvar imagem</button>',
       '</div>',
-      '<p class="aero-disclaimer">Em foto comum, a separação da silhueta é uma ESTIMATIVA por contraste do fundo; não é reconhecimento anatômico por IA. ',
-      'Para maior nitidez, use fundo verde ou compare com uma imagem da parede vazia. ',
-      'Roupa verde, sombras, iluminação variável ou câmera móvel podem prejudicar a detecção. ',
-      'As ondas continuam <strong>ilustrativas</strong>: não representam dinâmica real do ar, CdA, arrasto ou watts.</p>'
+      '<p class="aero-disclaimer">O reconhecimento automático utiliza um modelo de segmentação por IA processado no próprio dispositivo; no primeiro acesso, é preciso baixar o modelo. ',
+      'Fotos com oclusões, pouca luz ou bicicletas muito finas ainda podem falhar. ',
+      'As ondas são <strong>ilustrativas</strong>: não representam dinâmica real do ar, CdA, arrasto ou watts.</p>'
     ].join('');
     athlete.after(section);
     const compareJump=document.createElement('button');
@@ -150,6 +150,7 @@
     let mode='demo',videoURL=null,stream=null,playing=true,direction=-1,phase=0;
     let visible=true,lastTime=0;
     let lastAnalysis=0,blankReference=null,detection=null,manualContour=null;
+    let imageEpoch=0,aiBusy=false,aiPending=false,aiFailed=false;
     let contentRoi={left:0,top:0,right:1,bottom:1};
     let ellipse={cx:W*.53,cy:H*.53,rx:W*.32,ry:H*.35};
     let pointerStart=null,dragging=false;
@@ -198,6 +199,60 @@
     }
     const backgroundMode=()=>el('aero-background').value;
     const sensitivity=()=>Number(el('aero-threshold').value)||36;
+    function setRecognition(contour,source){
+      if(!contour)throw Error('O recorte não encontrou uma silhueta suficiente.');
+      detection=contour;
+      const tinted=maskCtx.createImageData(320,180);
+      for(let i=0;i<contour.mask.length;i++){
+        if(!contour.mask[i])continue;
+        const p=i*4;
+        tinted.data[p]=81;tinted.data[p+1]=220;
+        tinted.data[p+2]=242;tinted.data[p+3]=255;
+      }
+      maskCtx.putImageData(tinted,0,0);
+      el('aero-detection-status').textContent=source;
+      el('aero-detection-status').dataset.detected='true';
+      el('aero-ai-retry').hidden=true;
+      render();
+    }
+    function noteRecognitionFailure(message){
+      detection=null;
+      maskCtx.clearRect(0,0,320,180);
+      el('aero-detection-status').textContent=message;
+      el('aero-detection-status').dataset.detected='false';
+      render();
+    }
+    function semanticRecognition(){
+      if(aiFailed||mode==='demo')return;
+      if(aiBusy){aiPending=true;return;}
+      const pixels=currentPixels();
+      if(!pixels){noteRecognitionFailure('Aguardando imagem válida para a IA.');return;}
+      const ai=globalThis.PAIVA_WIND_AI;
+      if(!ai){noteRecognitionFailure('Módulo de IA não carregou. Atualize a página.');return;}
+      aiBusy=true;
+      const currentEpoch=imageEpoch;
+      el('aero-detection-status').textContent='⏳ IA reconhecendo ciclista e bicicleta…';
+      el('aero-detection-status').dataset.detected='false';
+      // A foto é analisada localmente. A importação baixa APENAS código e
+      // modelo público; não há upload da foto para o provedor.
+      ai.segment(detectMini).then(mask=>{
+        if(currentEpoch!==imageEpoch||backgroundMode()!=='auto'||manualContour)return;
+        const contour=globalThis.PAIVA_AERO_CONTOUR?.contourFromSegmentation(mask);
+        setRecognition(contour,mask.bicyclePixels>0?
+          '● IA: pessoa + bicicleta reconhecidas':
+          '● IA: pessoa reconhecida · bicicleta parcialmente visível');
+        notify('O vento visual agora acompanha o contorno identificado automaticamente pela IA.');
+      }).catch(error=>{
+        if(currentEpoch!==imageEpoch||backgroundMode()!=='auto'||manualContour)return;
+        aiFailed=true;
+        noteRecognitionFailure('IA não reconheceu: '+String(error.message||error));
+        el('aero-ai-retry').hidden=false;
+        notify('Não vou inventar um contorno: confira a foto ou tente a IA novamente. Fundo verde e parede vazia continuam disponíveis.');
+      }).finally(()=>{
+        aiBusy=false;
+        if(aiPending){aiPending=false;identifySilhouette();}
+      });
+    }
     function currentPixels(){
       if(mode==='demo'||!detectMiniCtx||!detectBaseCtx)return null;
       if(mode==='photo'){
@@ -211,6 +266,9 @@
       return detectMiniCtx.getImageData(0,0,320,180);
     }
     function identifySilhouette(){
+      if(!manualContour&&backgroundMode()==='auto'){
+        semanticRecognition();return;
+      }
       try{
         let contour=manualContour;
         if(!contour){
@@ -218,31 +276,20 @@
           if(!pixels){detection=null;return;}
           const segmentation=globalThis.PAIVA_WIND_SEGMENT?.segmentPixels(
             pixels,blankReference,
-            {mode:backgroundMode(),threshold:sensitivity(),roi:contentRoi});
+            {mode:backgroundMode()==='contrast'?'auto':backgroundMode(),
+              threshold:sensitivity(),roi:contentRoi});
           if(!segmentation)throw new Error('O módulo visual ainda não carregou completamente.');
           if(segmentation.warning)throw new Error(segmentation.warning);
           contour=globalThis.PAIVA_AERO_CONTOUR?.contourFromSegmentation(segmentation);
         }
         if(!contour)throw new Error('Silhueta pouco definida. Use fundo uniforme, sem roupas da mesma cor.');
-        detection=contour;
-        const tinted=maskCtx.createImageData(320,180);
-        for(let i=0;i<contour.mask.length;i++){
-          if(!contour.mask[i])continue;
-          const p=i*4;
-          tinted.data[p]=81;tinted.data[p+1]=220;
-          tinted.data[p+2]=242;tinted.data[p+3]=255;
-        }
-        maskCtx.putImageData(tinted,0,0);
-        el('aero-detection-status').textContent=manualContour?
+        setRecognition(contour,manualContour?
           '● Recorte flexível manual · área escolhida por você':
-          backgroundMode()==='auto'?
-          '● Contorno estimado da foto · confira a silhueta':
-          '● Ciclista destacado do fundo · ondas desviando automaticamente';
-        el('aero-detection-status').dataset.detected='true';
+          backgroundMode()==='contrast'?
+          '● Contraste experimental · confira o contorno':
+          '● Contorno separado do fundo · confira o resultado');
       }catch(error){
-        detection=null;
-        el('aero-detection-status').textContent=error.message;
-        el('aero-detection-status').dataset.detected='false';
+        noteRecognitionFailure(error.message);
       }
     }
     function stopVideo(){
@@ -259,10 +306,14 @@
       stopVideo();
       if(!drawFitted(sc,source)){notify('Não foi possível ler esta imagem.');return;}
       mode='photo';
+      imageEpoch++;aiFailed=false;detection=null;
+      // O recorte de uma foto anterior não pode ser aplicado à nova pessoa.
+      manualContour=null;curveTool?.reset();
       resetTrunk();
       identifySilhouette();
-      notify(detection?'Contorno visual estimado. Confira se corresponde ao atleta; o vento permanece ilustrativo.':
-        'Foto carregada, mas sem contorno confiável. Ajuste Sensibilidade ou use fundo verde/parede vazia.');
+      notify(backgroundMode()==='auto'&&!manualContour?
+        'Foto carregada. Reconhecimento de pessoa e bicicleta em andamento; o vento aparece após a análise.':
+        'Foto carregada. Confira se o contorno corresponde ao atleta e à bicicleta.');
       render();
     }
     function airPath(){
@@ -413,7 +464,8 @@
       if(now-lastTime>32){
         if(visible&&!document.hidden){
           if((mode==='video'||mode==='camera')&&
-            video.readyState>=2&&!video.paused&&now-lastAnalysis>=260){
+            video.readyState>=2&&!video.paused&&
+            now-lastAnalysis>=(backgroundMode()==='auto'?800:260)){
             identifySilhouette();
             lastAnalysis=now;
           }
@@ -512,7 +564,8 @@
         return false;
       }
       stopVideo();videoURL=URL.createObjectURL(file);
-      detection=null;blankReference=null;
+      imageEpoch++;aiFailed=false;detection=null;blankReference=null;
+      manualContour=null;curveTool?.reset();
       el('aero-detection-status').textContent='Aguardando reconhecimento no vídeo.';
       video.src=videoURL;video.loop=true;mode='video';resetTrunk();
       el('aero-play').hidden=false;el('aero-stop-camera').hidden=true;
@@ -538,7 +591,8 @@
         notify('Webcam exige HTTPS e permissão do navegador.');return;
       }
       stopVideo();
-      detection=null;blankReference=null;
+      imageEpoch++;aiFailed=false;detection=null;blankReference=null;
+      manualContour=null;curveTool?.reset();
       try{
         stream=await navigator.mediaDevices.getUserMedia({
           video:{width:{ideal:1280},height:{ideal:720}},audio:false});
@@ -565,6 +619,8 @@
       }else notify('Primeiro abra uma foto ou vídeo no módulo 2D, ou escolha Abrir foto aqui.');
     });
     el('aero-background').addEventListener('change',()=>{
+      imageEpoch++;aiFailed=false;detection=null;
+      el('aero-ai-retry').hidden=true;
       const wall=backgroundMode()==='wall';
       el('aero-empty-capture').hidden=!wall;
       el('aero-empty-file-wrap').hidden=!wall;
@@ -573,8 +629,16 @@
         'Parede comum: capture primeiro o fundo VAZIO. Não mova a câmera, a iluminação nem os objetos depois.':
         backgroundMode()==='green'?
         'Fundo verde selecionado. O contorno será separado pela cor do fundo.':
-        'Foto comum: tentativa de contorno por contraste com os cantos. Confira a silhueta antes de interpretar o vento.');
+        backgroundMode()==='contrast'?
+        'Contraste experimental antigo. Confira com cuidado: sombras e objetos podem ser confundidos com atleta.':
+        'IA selecionada: o modelo reconhecerá pessoa e bicicleta automaticamente. A primeira análise exige internet.');
       render();
+    });
+    el('aero-ai-retry').addEventListener('click',()=>{
+      aiFailed=false;imageEpoch++;
+      el('aero-ai-retry').hidden=true;
+      identifySilhouette();
+      notify('Nova tentativa de reconhecimento por IA iniciada.');
     });
     el('aero-threshold').addEventListener('change',()=>{
       identifySilhouette();

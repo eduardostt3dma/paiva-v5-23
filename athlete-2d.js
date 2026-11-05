@@ -3139,6 +3139,10 @@
   const silhouetteScript=document.createElement('script');
   silhouetteScript.src='./paiva-wind-segmentation.js';
   silhouetteScript.async=false;
+  const aiScript=document.createElement('script');
+  aiScript.src='./paiva-wind-ai.js';
+  aiScript.async=false;
+  document.head.append(aiScript);
   document.head.append(silhouetteScript);
   const contourScript=document.createElement('script');
   contourScript.src='./paiva-aero-contour.js';

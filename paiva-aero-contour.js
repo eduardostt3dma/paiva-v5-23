@@ -89,17 +89,16 @@
     const trailing=(direction===1?b.right:b.left)*canvasW/w;
     const progress=(x-leading)*(direction===1?1:-1);
     const span=Math.abs(trailing-leading);
-    // Antes a curva começava 145 px antes da bike e se afastava do corpo
-    // usando 72% do limite GLOBAL. Agora aproxima até 36 px antes do
-    // obstáculo e usa o perfil LOCAL da silhueta em cada coluna.
-    const approach=36;
+    // Frente da bicicleta: só curvar quando a linha chega perto do
+    // obstáculo. Um deslocamento longo ANTES da roda parecia vento caindo.
+    const approach=16;
     if(progress< -approach)return y;
     const approachUnit=clamp((progress+approach)/approach,0,1);
     const entrance=approachUnit*approachUnit*(3-2*approachUnit);
     const after=progress-span;
     const exit=after>0?Math.exp(-after/(105+intensity*9)):1;
     const influence=entrance*exit;
-    const padding=clamp(14-(clamp(proximity,1,5)-1)*3,2,14);
+    const padding=clamp(10-(clamp(proximity,1,5)-1)*2,2,10);
     let imageX=clamp(Math.round(x*w/canvasW),b.left,b.right);
     // Em intervalos vazios (ex.: entre a cabeça e o guidão), não use o
     // retângulo global como obstáculo. Procure apenas uma borda próxima.
@@ -122,11 +121,15 @@
     if(y>topEdge&&y<bottomEdge&&
       (!contour.valid||contour.valid[imageX])){
       const target=(y-topEdge<=bottomEdge-y)?topEdge:bottomEdge;
-      displacement=(target-y)*influence;
+      // Não tentar transportar uma linha inteira até a outra extremidade
+      // do corpo: a área interna fica oclusa pela máscara da IA. Borda
+      // próxima + pequeno desvio = onda visual estável, quase horizontal.
+      const maximal=8+clamp(intensity,1,5)*1.8;
+      displacement=clamp(target-y,-maximal,maximal)*influence;
     }
     const globalCenter=(b.top+b.bottom)*.5*canvasH/h;
     const wake=after>0?
-      Math.sin(after*.041-phase*.08)*7*intensity/3*
+      Math.sin(after*.041-phase*.08)*3*intensity/3*
         Math.exp(-after/210)*clamp(1-Math.abs(y-globalCenter)/(canvasH*.55),0,1):0;
     return y+displacement+wake;
   }

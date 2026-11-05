@@ -92,7 +92,7 @@
     const panel=document.createElement('section');
     panel.className='card paiva-sessions';panel.id='paiva-attendimentos';
     panel.innerHTML=`
-      <div class="paiva-sessions-title"><div><span>ARQUIVO LOCAL · PAIVA V5.43</span>
+      <div class="paiva-sessions-title"><div><span>ARQUIVO LOCAL · PAIVA V5.44</span>
         <h2>Atendimentos</h2></div><span class="paiva-sessions-indicator" id="paiva-session-current">Ficha nova</span></div>
       <div class="paiva-sessions-actions">
         <button type="button" id="paiva-session-save" class="btn primary">Salvar ficha</button>

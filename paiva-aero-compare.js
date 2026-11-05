@@ -42,7 +42,7 @@
     section.innerHTML=[
       '<div class="paiva-compare-heading">',
       '<div><span>PAIVA LAB · ANÁLISE FRONTAL</span><h2>AERO COMPARE</h2>',
-      '<p>Duas posições, mesmo enquadramento. Compare a área VISUAL ocupada pela silhueta.</p></div>',
+      '<p>IA reconhece ciclista e bicicleta nas duas posições. Compare a área frontal projetada no mesmo enquadramento.</p></div>',
       '<div class="paiva-compare-top-actions">',
       '<button type="button" id="paiva-compare-fullscreen">⛶ Tela cheia · Projetor</button>',
       '<button type="button" id="paiva-compare-save">↓ Salvar comparação</button>',
@@ -65,7 +65,7 @@
       '<p><b class="paiva-compare-blue">Azul = A</b> · <b class="paiva-compare-yellow">Amarelo = B</b> · branco = área comum</p>',
       '<canvas id="paiva-compare-overlay" width="960" height="540" aria-label="Áreas frontais sobrepostas"></canvas>',
       '</details>',
-      '<p class="paiva-compare-notice" id="paiva-compare-notice" role="status">A estimativa automática usa contraste de pixels. Quando falhar, clique em Recorte flexível e feche a curva ao redor do atleta.</p>',
+      '<p class="paiva-compare-notice" id="paiva-compare-notice" role="status">Recorte automático por IA (pessoa + bicicleta). O modelo é baixado uma vez e processa as fotos neste dispositivo. Desenho manual continua opcional.</p>',
       '<p class="paiva-compare-disclaimer">É uma comparação de área projetada na FOTO, em percentual relativo. NÃO é medida física de CdA, watts, arrasto ou ganho de velocidade. A perspectiva, distância, roupa, posição da bicicleta e qualidade do recorte podem alterar o resultado. Fotos permanecem neste aparelho.</p>'
     ].join('');
     (document.getElementById('paiva-wind-simple')||athlete).after(section);
@@ -94,8 +94,11 @@
       maskCanvas.width=MW;maskCanvas.height=MH;
       const maskCtx=maskCanvas.getContext('2d');
       if(!ctx||!baseCtx||!maskCtx)continue;
-      const slot={id,canvas,ctx,base,baseCtx,maskCanvas,maskCtx,
-        imageLoaded:false,aspect:null,contour:null,source:'',tool:null};
+      const mini=document.createElement('canvas');mini.width=MW;mini.height=MH;
+      const miniCtx=mini.getContext('2d');
+      const slot={id,canvas,ctx,base,baseCtx,maskCanvas,maskCtx,mini,miniCtx,
+        imageLoaded:false,aspect:null,contour:null,source:'',tool:null,
+        epoch:0,pendingAi:false};
       slots[id]=slot;
       slot.tool=globalThis.PAIVA_SPLINE?.attach({
         host:canvas.parentElement,target:canvas,toolbar:$(id+'-tools'),
@@ -150,7 +153,9 @@
         $(slot.id+'-status').textContent='Não foi possível obter o quadro da foto/vídeo.';
         return;
       }
-      slot.imageLoaded=false;slot.contour=null;slot.tool?.reset();
+      slot.epoch++;
+      slot.imageLoaded=false;slot.contour=null;slot.source='';
+      slot.pendingAi=false;slot.tool?.reset();
       slot.aspect=size.width/size.height;
       slot.baseCtx.fillStyle='#111a22';slot.baseCtx.fillRect(0,0,W,H);
       const scale=Math.min(W/size.width,H/size.height);
@@ -158,6 +163,8 @@
       slot.roi={left:(W-width)/2/W,top:(H-height)/2/H,
         right:(W+width)/2/W,bottom:(H+height)/2/H};
       slot.baseCtx.drawImage(source,(W-width)/2,(H-height)/2,width,height);
+      slot.miniCtx.clearRect(0,0,MW,MH);
+      slot.miniCtx.drawImage(slot.base,0,0,MW,MH);
       slot.imageLoaded=true;
       analyse(slot);
     }
@@ -175,26 +182,43 @@
           // continua visível sem recalcular pixels a cada movimento.
           drawSlot(slot);refreshCompare();return;
         }
-        let contour=manual;
-        if(!contour){
-          if(!globalThis.PAIVA_WIND_SEGMENT||!globalThis.PAIVA_AERO_CONTOUR)
-            throw new Error('Aguarde o carregamento da análise visual.');
-          miniCtx.clearRect(0,0,MW,MH);
-          miniCtx.drawImage(slot.base,0,0,MW,MH);
-          const pixels=miniCtx.getImageData(0,0,MW,MH);
-          const seg=globalThis.PAIVA_WIND_SEGMENT.segmentPixels(pixels,null,{
-            mode:'auto',threshold:36,roi:slot.roi});
-          if(seg.warning)throw new Error(seg.warning);
-          contour=globalThis.PAIVA_AERO_CONTOUR.contourFromSegmentation(seg);
-          if(!contour)throw new Error('Não consegui isolar a silhueta automaticamente.');
+        if(manual){
+          slot.epoch++;
+          slot.pendingAi=false;
+          slot.contour=manual;slot.source='manual';
+          $(slot.id+'-status').textContent='✓ Recorte flexível manual fechado.';
+          drawSlot(slot);refreshCompare();return;
         }
-        slot.contour=contour;slot.source=manual?'manual':'auto';
-        $(slot.id+'-status').textContent=manual?
-          '✓ Recorte flexível manual fechado.':'✓ Silhueta aproximada por contraste. Confira o contorno.';
+        if(slot.pendingAi)return;
+        const ai=globalThis.PAIVA_WIND_AI;
+        if(!ai)throw Error('Modelo de IA ainda não carregou. Atualize o app.');
+        // Token impede que a resposta atrasada de A/B sobrescreva nova foto.
+        const epoch=++slot.epoch;
+        slot.pendingAi=true;
+        slot.contour=null;slot.source='';
+        $(slot.id+'-status').textContent='⏳ Reconhecendo ciclista e bicicleta com IA…';
+        ai.segment(slot.mini).then(seg=>{
+          if(slot.epoch!==epoch||!slot.imageLoaded||manualMask(slot))return;
+          const contour=globalThis.PAIVA_AERO_CONTOUR?.contourFromSegmentation(seg);
+          if(!contour)throw Error('IA não encontrou contorno válido.');
+          slot.contour=contour;slot.source='auto';
+          $(slot.id+'-status').textContent=seg.bicyclePixels>0?
+            '✓ IA: ciclista e bicicleta identificados.':
+            '✓ IA: ciclista identificado; bicicleta pouco visível.';
+          drawSlot(slot);refreshCompare();
+        }).catch(error=>{
+          if(slot.epoch!==epoch)return;
+          slot.contour=null;slot.source='';
+          $(slot.id+'-status').textContent='IA não reconheceu: '+String(error.message||error)+
+            ' · Tente uma foto frontal nítida ou recorte flexível.';
+          drawSlot(slot);refreshCompare();
+        }).finally(()=>{
+          if(slot.epoch===epoch)slot.pendingAi=false;
+        });
       }catch(error){
         slot.contour=null;
         $(slot.id+'-status').textContent=String(error?.message||'Contorno indisponível')+
-          ' Use ✎ Recorte flexível.';
+          ' Abra nova foto ou use ✎ Recorte flexível.';
       }
       drawSlot(slot);
       refreshCompare();

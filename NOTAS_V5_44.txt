@@ -1,0 +1,33 @@
+PAIVA BIKE FIT STUDIO — V5.44 — IA DO CICLISTA + COMPARACAO A/B
+
+1. TUNEL DE VENTO: reconhecimento automatico de pessoa E bicicleta com
+   MediaPipe DeepLab V3. A IA substitui a deteccao por contraste como padrao.
+   Nao e mais necessario contornar manualmente a foto antes da analise.
+   O recorte flexivel continua disponivel como opcao.
+
+2. VENTO VISUAL: o desvio agora comeca junto a frente da bicicleta e a
+   curvatura vertical foi limitada. O vento NAO e uma simulacao fisica de
+   forcas de arrasto ou turbulencia e nao produz CdA ou watts.
+
+3. AERO COMPARE A/B: recorte automatico semantico nas duas fotos FRONTAIS.
+   A medida percentual e AREA PROJETADA EM PIXELS. E util para comparar duas
+   posicoes com EXATAMENTE mesma camera, distancia, zoom e enquadramento.
+   Nao e area fisica em metros quadrados nem predicao de ganho aerodinamico.
+
+4. INTERNET: a primeira vez que usar a IA, o navegador precisa baixar a
+   biblioteca e o modelo MediaPipe. Depois, o cache HTTP pode permitir
+   reutilizacao, dependendo do navegador; offline nao e garantido.
+   As fotos nao sao enviadas ao Google; o processamento ocorre no dispositivo.
+   Se o modelo nao carregar, o app mostrara o erro. Reabra a foto ou use
+   'Tentar IA novamente'; as opcoes de fundo verde, parede vazia e contraste
+   experimental permanecem disponiveis.
+
+5. SEGURANCA E CONTINUIDADE: todos os arquivos e modulos anteriores foram
+   mantidos, inclusive conversor MP4, 2D, TT, relatorios, spline e marcas.
+
+6. INSTALACAO: EXTRAIA o ZIP no Windows. No GitHub, envie OS ARQUIVOS
+   EXTRAIDOS, NAO O ARQUIVO ZIP. Use a pasta do repositorio paiva-v5-23.
+   Aguarde o GitHub Pages atualizar; no navegador pressione Ctrl+F5.
+
+7. TESTE EM FOTO REAL: por depender de modelo externo e qualidade da imagem,
+   este modulo exige confirmacao em uso real antes de interpretar resultados.
