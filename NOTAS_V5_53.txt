@@ -1,0 +1,48 @@
+PAIVA MOTION STUDIO — V5.53
+================================
+
+RASTREAMENTO E CORREÇÃO DE PONTOS
+- Controle Estabilidade no Motion Signature: Firme (padrão),
+  Equilibrada ou Movimento rápido.
+- Filtro temporal suaviza pequenas oscilações e rejeita saltos
+  que ultrapassam limites próprios de quadril, joelho, tornozelo,
+  calcanhar, metatarso, ombro, cotovelo e punho.
+- Depois de uma rejeição, um círculo vazado marca apenas a
+  última posição confiável. Sem ponto confiável, não mostramos
+  um ângulo falso daquele quadro.
+- O lado corporal não alterna mais sozinho durante o mesmo vídeo;
+  é possível escolher Esquerdo ou Direito manualmente.
+- Avançar ou voltar muitos quadros reinicia o filtro e os rastros.
+
+CORREÇÃO MANUAL MAIS LIMPA
+- O nome do ponto selecionado aparece afastado da articulação,
+  conectado por uma haste fina (linha-guia).
+- Nova opção para esconder a etiqueta enquanto move o ponto.
+- Graus saíram da frente das articulações; os valores continuam
+  visíveis nos cartões abaixo da imagem.
+
+LIMITAÇÕES E DICAS PARA CAPTURA
+- Este recurso segue usando estimativa de pose 2D por webcam ou vídeo;
+  não é um rastreador físico de marcadores reflexivos.
+- Fita colorida e marcadores de alto contraste podem facilitar sua
+  conferência visual, mas o algoritmo atual NÃO lê cores específicas
+  nem trava automaticamente em um adesivo.
+- Fundo homogêneo, boa luz, câmera fixa e vista lateral reduzem perdas.
+- Filtrar tremor modifica levemente ângulos extremos; revise quadros
+  críticos manualmente antes de concluir um bike fit.
+
+BASE PRESERVADA
+- Todas as funções e arquivos do módulo clássico Análise 2D foram
+  mantidos. Esta atualização só acrescenta refinamentos ao módulo
+  Motion Signature e a identificação visual da versão V5.53.
+- A chave de atualização do cache offline foi renovada; depois que o
+  novo Service Worker assumir, a versão antiga é descartada.
+- A V5.52 tinha os recursos de comparação ANTES x DEPOIS, vídeo lento
+  e desenho 2D; eles continuam nesta versão.
+
+ENVIO PARA GITHUB
+1. Extraia este ZIP no computador.
+2. Abra https://github.com/eduardostt3dma/paiva-v5-23/upload/main
+3. Envie os arquivos extraídos (não o ZIP fechado).
+4. Clique em Commit changes e aguarde a publicação.
+5. Teste https://eduardostt3dma.github.io/paiva-v5-23/
