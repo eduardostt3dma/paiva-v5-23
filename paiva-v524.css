@@ -37,6 +37,18 @@ body #paiva-bike-project {border-color:#667a87 !important;background:linear-grad
 .paiva-final-field input[aria-invalid="true"] {border:2px solid #e29f84 !important;background:#39251f !important}
 /* TT: as coordenadas reais dos pads são medidas diferentes da geometria do quadro. */
 #paiva-tt-coordinates[hidden] {display:none !important}
+#paiva-tt-pad-details[hidden],#paiva-tt-simple[hidden],#paiva-tt-old-fields[hidden],
+#paiva-tt-simple-result[hidden],#paiva-tt-simple-old-summary[hidden] {display:none !important}
+#paiva-tt-simple {padding:15px 14px;margin:0 0 14px;border:1px solid #aa9451;
+  border-radius:12px;background:linear-gradient(145deg,#303022,#19252c)}
+#paiva-tt-simple .paiva-tt-catalog-warning {color:#cad6dc;border-top:1px solid #64717a;padding-top:9px}
+#paiva-tt-simple .paiva-tt-catalog-alert {padding:8px;background:#2e2b20;color:#f4dc9c}
+#paiva-tt-simple .paiva-tt-catalog-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+#paiva-tt-simple .paiva-tt-catalog-grid>div:last-child {grid-column:1/-1}
+#paiva-tt-simple select {display:block;box-sizing:border-box;width:100%;
+  margin:7px 0 13px;padding:11px 9px;background:#131d24;color:#f8f9f9;
+  border:1px solid #ab9554;border-radius:9px}
+#paiva-tt-simple a {color:#f8d44e;font-size:11px}
 #paiva-tt-coordinates {margin:0 0 17px;padding:15px;border:1px solid #ad9750;border-radius:12px;background:linear-gradient(145deg,#313023,#1b232a)}
 #paiva-tt-coordinates h3 {margin:0 0 8px;color:#f8d44e;font-size:15px}
 #paiva-tt-coordinates p {margin:0 0 12px;font-size:11px;line-height:1.6;color:#e1e5e8}

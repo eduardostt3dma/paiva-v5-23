@@ -38,6 +38,7 @@
     return low!==null&&high!==null&&low<=high?[low,high]:undefined;
   };
   function getEstimate(){
+    if(window.PAIVA_TT_SIMPLE && !window.PAIVA_TT_SIMPLE.isCatalogMode())return null;
     const height=read('height',140,215);
     if(height===null)return null;
     if(el('paiva-tt-model')?.value==='manual'){
@@ -67,7 +68,8 @@
   }
   function render(){
     const panel=el('paiva-tt-catalog');if(!panel)return;
-    panel.hidden=document.querySelector('[data-mode].active')?.dataset.mode!=='tt';
+    panel.hidden=document.querySelector('[data-mode].active')?.dataset.mode!=='tt'||
+      (window.PAIVA_TT_SIMPLE&&!window.PAIVA_TT_SIMPLE.isCatalogMode());
     const result=el('paiva-tt-catalog-result');
     if(!result||panel.hidden)return;
     const manual=el('paiva-tt-model')?.value==='manual';
@@ -153,7 +155,9 @@
       'pode ajudar na avaliação dinâmica, mas não convertemos medidas STI/Road ',
       'diretamente em apoios TT. Para outras marcas, consulte a ficha específica.</p>'
     ].join('');
-    host.insertAdjacentElement('afterbegin',container);
+    const simple=el('paiva-tt-simple');
+    if(simple)simple.after(container);
+    else host.insertAdjacentElement('afterbegin',container);
     el('paiva-tt-model').addEventListener('change',render);
     container.querySelectorAll('input').forEach(input=>
       input.addEventListener('input',()=>{
@@ -164,6 +168,9 @@
       button.addEventListener('click',render));
     document.addEventListener('input',event=>{
       if(['height','inseam','torso','arm'].includes(event.target?.id))render();
+    });
+    document.addEventListener('change',event=>{
+      if(event.target?.id==='paiva-tt-path')render();
     });
     render();
   }

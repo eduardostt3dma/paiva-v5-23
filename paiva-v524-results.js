@@ -47,6 +47,25 @@
       'Referência LeMond: entreperna × 0,883. Medida do centro do movimento central até o topo do selim.');
 
     if (mode === 'tt') {
+      const simpleMode = window.PAIVA_TT_SIMPLE&&!window.PAIVA_TT_SIMPLE.isCatalogMode();
+      if (simpleMode) {
+        const screening=window.PAIVA_TT_SIMPLE.getEstimate();
+        const candidates=screening.candidates||[];
+        addRow(fragment,'Tamanho TT para pesquisar · referência Trek',
+          candidates.length?candidates.map(item=>item.size).join(' ou '):'—',
+          screening.status+' Tabela específica da Trek Speed Concept SLR; não representa tamanho universal.');
+        addRow(fragment,'Top tube efetivo · referência Trek',
+          candidates.length?candidates.map(item=>item.size+': '+fmt(item.topTube)+' cm').join(' | '):'—',
+          'Valor publicado da geometria desse modelo; não é a distância até os pads nem o top tube ideal do cliente.');
+        if (get('paiva-tt-path')?.value === 'old') {
+          const oldTop=number('paiva-tt-old-top-tube',35,75);
+          const oldSeat=number('paiva-tt-old-seat-tube',25,75);
+          addRow(fragment,'TT antiga · top tube informado',oldTop===null?'—':fmt(oldTop)+' cm',
+            'Medida registrada pelo avaliador; sem conversão automática para tamanho ou pad reach.');
+          addRow(fragment,'TT antiga · seat tube informado',oldSeat===null?'—':fmt(oldSeat)+' cm',
+            'Medida opcional de quadro; não garante compatibilidade de cockpit/apoios.');
+        }
+      } else {
       const padStack = number('paiva-tt-pad-stack', 200, 1200);
       const padReach = number('paiva-tt-pad-reach', 100, 900);
       const catalog = window.PAIVA_TT_REFERENCE?.getEstimate?.();
@@ -62,6 +81,7 @@
         padReach === null
           ? 'FAIXA DE AJUSTE de ' + source + '. Não é a coordenada ideal do ciclista. Conferir convenção da borda posterior do pad.'
           : 'Medida real do centro do movimento central à borda posterior do apoio. Não é o reach do quadro.');
+      }
     } else {
       addRow(fragment, 'Stack · quadro', stack,
         'Referência exploratória por estatura para a modalidade selecionada.');
@@ -81,7 +101,9 @@
     output.replaceChildren(fragment);
     const note = get('validation');
     if (note) note.textContent = mode === 'tt'
-      ? 'TT sem simulador: os números mostrados sem medição são LIMITES MECÂNICOS de regulagem do modelo de exemplo, NÃO alvos calculados pela antropometria. O selim é estimado pelo cavalo, e o stack/reach do quadro constam separadamente na ficha oficial. Quando houver pad medido, a medida real substitui a faixa nesta síntese.'
+      ? (window.PAIVA_TT_SIMPLE&&!window.PAIVA_TT_SIMPLE.isCatalogMode()
+        ? 'TT sem bicicleta: tamanho e top tube são uma TRIAGEM ANTROPOMÉTRICA da tabela de um fabricante (Trek Speed Concept SLR). Não são medidas ideais universais. Uma TT antiga pode ser registrada por top tube e seat tube, mas isso não define os pads.'
+        : 'TT com catálogo: os números não medidos são LIMITES MECÂNICOS de regulagem do modelo identificado, não alvos do atleta. Uma medida real dos pads substitui o exemplo.')
       : 'Referências exploratórias: a posição final deve ser confirmada na bicicleta. Top tube e mesa não equivalem ao alcance das mãos; registre a geometria real e as medidas finais.';
     if (typeof window.fillClientReport === 'function') window.fillClientReport();
   }
@@ -89,7 +111,7 @@
   function initialize() {
     if (!get('results')) return;
     const warning=document.querySelector('#clientReport .report-warning p');
-    if (warning) warning.textContent = 'Road/MTB usam referências exploratórias por estatura. Para TT sem simulador, a ficha oficial de um modelo identificado permite verificar somente a faixa de regulagem possível dos apoios e selim; essas faixas não predizem pad stack/reach ideais por estatura. Quando medidos no fit, os valores dos pads substituem os exemplos de catálogo. A altura do selim por 0,883 parte do movimento central; 109% parte do eixo do pedal. Validar tudo no ajuste dinâmico.';
+    if (warning) warning.textContent = 'Road/MTB usam referências exploratórias por estatura. Para TT sem bicicleta, o tamanho e o top tube vêm de uma tabela específica de fabricante, cruzando estatura e entrepernas; isso não estima pad stack/reach individual. Top tube/seat tube de uma TT antiga são registros descritivos, sem previsão de compatibilidade. Com uma ficha de modelo, os intervalos dos pads são apenas limites de regulagem. A altura do selim por 0,883 parte do movimento central; 109% parte do eixo do pedal. Validar tudo no ajuste dinâmico.';
     document.addEventListener('input', render);
     document.addEventListener('change', render);
     document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', render));

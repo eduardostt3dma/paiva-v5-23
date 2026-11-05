@@ -39,23 +39,33 @@
     const panel = el('paiva-tt-coordinates');
     if (!panel) return;
     panel.hidden = !isTT;
+    const padDetails=el('paiva-tt-pad-details');
+    if(padDetails)padDetails.hidden=!isTT||
+      (window.PAIVA_TT_SIMPLE&&!window.PAIVA_TT_SIMPLE.isCatalogMode());
     const geometryNote = document.querySelector('.layout .disclaimer');
     if (geometryNote) geometryNote.textContent = isTT
-      ? 'TT: quando os pads não foram medidos, a imagem mostra apenas a FAIXA DE REGULAGEM de um modelo identificado. Esses números NÃO representam a posição individual do atleta; quadro e apoios são medidas diferentes.'
+      ? (window.PAIVA_TT_SIMPLE&&!window.PAIVA_TT_SIMPLE.isCatalogMode()
+        ? 'TT sem bicicleta: usamos antropometria e tamanhos de UM catálogo identificado como triagem. O desenho não apresenta stack/reach do quadro nem coordenadas de pads não medidos.'
+        : 'TT com catálogo: a imagem mostra faixa de regulagem de um modelo identificado, ou coordenadas dos pads realmente medidas. Nunca interpretar a faixa como posição ideal.')
       : 'Pré-fit Road/MTB: stack/reach do quadro são referências exploratórias de triagem por estatura, não um ajuste individual validado. Confira a geometria real e a avaliação dinâmica.';
     const legend = document.querySelector('.diagram-legend span:first-child');
     if (legend?.lastChild?.nodeType === 3) legend.lastChild.nodeValue = isTT
-      ? ' Medidas ou faixas identificadas dos apoios TT' : ' Medidas de geometria do quadro';
+      ? ' Apoios TT: apenas medidas reais ou faixas publicadas por modelo' : ' Medidas de geometria do quadro';
     if (!isTT) return;
 
-    const {stack,reach,catalog,stackText,reachText} = displayValues();
+    const {stack,reach,catalog,stackText:realStackText,reachText:realReachText}=displayValues();
+    const noBike=window.PAIVA_TT_SIMPLE&&!window.PAIVA_TT_SIMPLE.isCatalogMode();
+    const stackText=noBike?'—':realStackText;
+    const reachText=noBike?'—':realReachText;
     if (el('ttStackValue').textContent !== stackText) el('ttStackValue').textContent = stackText;
     if (el('ttReachValue').textContent !== reachText) el('ttReachValue').textContent = reachText;
     const photo = el('ttPhotoPanel');
     const labels = photo?.querySelectorAll('.photo-data span');
     if (labels?.length >= 2) {
-      labels[0].textContent = reach === null ? 'PAD REACH · FAIXA' : 'PAD REACH · MEDIDO';
-      labels[1].textContent = stack === null ? 'PAD STACK · FAIXA' : 'PAD STACK · MEDIDO';
+      labels[0].textContent = noBike ? 'PAD REACH · SEM MEDIÇÃO' :
+        reach === null ? 'PAD REACH · FAIXA' : 'PAD REACH · MEDIDO';
+      labels[1].textContent = noBike ? 'PAD STACK · SEM MEDIÇÃO' :
+        stack === null ? 'PAD STACK · FAIXA' : 'PAD STACK · MEDIDO';
     }
 
     const complete = stack !== null && reach !== null;
@@ -104,14 +114,17 @@
       if (event.target?.id === 'height' || event.target?.id === 'inseam') render();
     });
     document.addEventListener('change',event=>{
-      if(event.target?.id==='paiva-tt-model')render();
+      if(['paiva-tt-model','paiva-tt-path'].includes(event.target?.id))render();
     });
     // O pré-fit antigo repinta todos os cartões (inclusive os ocultos) em cada
     // input. Um observador restitui o valor medido sem permitir que reapareça a
     // antiga estimativa TT de quadro; só escreve quando o conteúdo difere.
     const observer = new MutationObserver(() => {
       if (mode() !== 'tt') return;
-      const {stackText,reachText}=displayValues();
+      const current=displayValues();
+      const noBike=window.PAIVA_TT_SIMPLE&&!window.PAIVA_TT_SIMPLE.isCatalogMode();
+      const stackText=noBike?'—':current.stackText;
+      const reachText=noBike?'—':current.reachText;
       if (el('ttStackValue').textContent !== stackText || el('ttReachValue').textContent !== reachText)
         render();
     });

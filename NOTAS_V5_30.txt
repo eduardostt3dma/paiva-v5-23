@@ -1,0 +1,44 @@
+PAIVA BIKE FIT STUDIO — V5.30 — TT SEM BICICLETA / SEM STACK-REACH
+
+NOVO CAMINHO SIMPLES PARA O CLIENTE
+- Selecione TT. O primeiro caminho e "Nao tem bicicleta · usar antropometria".
+- Informe somente estatura e entrepernas. O programa cruza esses dados com
+  a tabela de tamanhos publicamente divulgada para a Trek Speed Concept SLR.
+- O resultado indica tamanho(s) inicial(is) DE BUSCA desse modelo e o
+  respectivo top tube efetivo em centimetros. Sao DADOS DE UM FABRICANTE,
+  nao formula de TT universal nem medida ideal calculada para o cliente.
+- Na fronteira entre tamanhos, o programa apresenta os dois para comparar.
+- Se estatura e entrepernas nao cabem simultaneamente em nenhum tamanho,
+  ele informa que nao existe coincidencia, sem inventar um tamanho.
+- A estimativa de altura de selim por entrepernas x 0,883 a partir do MC
+  permanece para uso preliminar. Ela exige ajuste dinamico.
+- Nenhum pad stack/reach e calculado artificialmente sem bike/simulador.
+
+TT ANTIGA, SEM FICHA DE GEOMETRIA
+- Caminho "TT antiga · tenho so medidas simples".
+- Permite registrar top tube EFETIVO e seat tube (em cm).
+- Essas medidas nao sao convertidas em pad reach nem usadas para aprovar
+  a compatibilidade do cockpit/apoios com o cliente.
+
+TT COM CATALOGO
+- Mantem o caminho da V5.28: modelos especificos Canyon ou entrada manual
+  das faixas de pad stack/reach publicadas ou efetivamente medidas.
+- Este caminho e independente da triagem sem bicicleta.
+- Os controles avancados de pads ficam escondidos quando nao sao necessarios.
+
+REFERENCIA PRIMARIA DA TRIAGEM SEM BICICLETA
+- Trek Speed Concept SLR, tabela de tamanho do ciclista, entrepernas e
+  geometria do tubo superior efetivo:
+  https://www.trekbikes.com/us/en_US/bikes/road-bikes/triathlon-bikes/speed-concept/f/F231/speed-concept-slr-9/35757/
+- Confira ano e ficha exata antes da recomendacao de compra. Outros
+  fabricantes ou geracoes podem ter proporcoes e nomes de tamanho distintos.
+
+PRESERVADO
+- Logotipo registrado e titulo institucional amarelo, sem alteracao.
+- Arco plantar qualitativo da V5.29; fichas locais, PDF e backup.
+- Angulos 2D V5.27 com persistencia visual na rodinha.
+- Road/MTB e comparador de quadros sem substituicao de suas formulas.
+
+ATUALIZACAO ANDROID
+- Extraia o ZIP, envie todos os arquivos soltos para a raiz do GitHub.
+- Aguarde a publicacao e reinicie o aplicativo para atualizar o cache.

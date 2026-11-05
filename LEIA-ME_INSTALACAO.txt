@@ -1,7 +1,9 @@
-PAIVA V5.29 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_29.txt.
-Esta revisao troca a entrada numerica do arco plantar por categorias
-observacionais (baixo, medio, alto, nao avaliado), inclusive nas fichas
-e relatorios. Preserva a triagem TT V5.28 e os angulos 2D da V5.27.
+PAIVA V5.30 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_30.txt.
+Esta revisao permite iniciar um pre-fit TT mesmo sem bicicleta nem stack/reach.
+Mostra tamanho inicial de busca por estatura + entrepernas segundo uma tabela
+especifica de fabricante (exemplo Trek) e top tube efetivo de referencia.
+Tambem permite registrar top tube/seat tube de TT antiga. Mantem o catalogo
+avancado de pad stack/reach como opcional. Arco plantar da V5.29 preservado.
 As informações abaixo registram o histórico das revisões anteriores.
 
 EVOLUÇÃO DO RELATÓRIO DO CLIENTE — 04/11/2026:
