@@ -1,0 +1,30 @@
+PAIVA V5.48 — VENTO VISUAL EM ONDAS FLUIDAS
+
+1. TÚNEL DE VENTO
+   - Linhas curvas com suavização em duas direções, sem degraus bruscos.
+   - Ondulação suave com movimento contínuo e intensidade ajustável.
+   - Dois desenhos sobrepostos: fluxo discreto e reflexos luminosos móveis.
+   - Partículas acompanham a mesma curva do fluxo.
+   - Oclusão do ciclista e bicicleta com borda levemente suavizada.
+   - Este processamento de borda é feito ao reconhecer a imagem, não a cada
+     quadro de animação, para reduzir o custo no dispositivo.
+   - Ondas posteriores ao ciclista com entrada gradual.
+
+2. PRESERVAÇÃO
+   Reconhecimento automático, recorte flexível, cores, direção do vento,
+   controle de intensidade, ângulo do tronco, foto, vídeo e webcam preservados.
+   Comparador A/B com vulto offline, conversor de vídeo, 2D, PDF, pré-fit e
+   demais módulos preservados. Guarde a V5.47 como backup.
+
+3. LIMITAÇÃO IMPORTANTE
+   Este vento é um recurso GRÁFICO ILUSTRATIVO, não uma simulação física de
+   dinâmica dos fluidos (CFD), e não mede arrasto, CdA ou watts. Um recorte
+   incompleto da IA pode provocar pequenos artefatos visuais.
+
+4. INSTALAÇÃO GITHUB PAGES
+   Extraia o ZIP e envie TODOS os arquivos extraídos para a raiz do repositório.
+   Não envie só o ZIP nem apague outros conteúdos do repositório.
+   Após o commit, recarregue o site. Se aparecer uma versão anterior,
+   aguarde a publicação e pressione Ctrl+Shift+R no Windows.
+
+© PAIVA · DESENVOLVIDO POR EDUARDO PAIVA

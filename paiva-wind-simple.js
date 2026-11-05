@@ -1,4 +1,4 @@
-/* PAIVA AERO V5.36 — vento ilustrativo + inclinação de tronco em 2D.
+/* PAIVA AERO V5.48 — ondas visuais fluidas + inclinação de tronco em 2D.
    Painel independente, com autoria Eduardo Paiva. */
 (() => {
   'use strict';
@@ -25,6 +25,31 @@
         Math.exp(-tail/(rx*1.7))*(.5+intensity*.13):0;
     return y+bend+wake;
   }
+  // Suavização em dois sentidos: elimina degraus do contorno por pixels sem
+  // deslocar toda a onda para trás. Não é um cálculo de escoamento físico.
+  function smoothWindSamples(values,blend=.22){
+    const count=values?.length||0;
+    const result=new Float32Array(count);
+    if(!count)return result;
+    const weight=clamp(blend,.05,1);
+    let previous=values[0];
+    for(let i=0;i<count;i++){
+      previous+=weight*(values[i]-previous);
+      result[i]=previous;
+    }
+    previous=result[count-1];
+    for(let i=count-2;i>=0;i--){
+      previous+=weight*(result[i]-previous);
+      result[i]=previous;
+    }
+    return result;
+  }
+  function windRipple(x,phase,intensity,lane,direction){
+    const shifted=x-direction*phase*(2.8+intensity*.22);
+    const amplitude=1.4+clamp(intensity,1,5)*1.05;
+    return amplitude*(.72*Math.sin(shifted*.019+lane*.47)+
+      .28*Math.sin(shifted*.042-lane*.61));
+  }
   // Ombro/acrômio -> quadril/trocânter, em vista lateral.
   // Retorna a inclinação aguda relativa à horizontal da imagem.
   function trunkInclination(shoulder,hip){
@@ -33,7 +58,8 @@
     const dx=Math.abs(shoulder.x-hip.x),dy=Math.abs(shoulder.y-hip.y);
     return Math.hypot(dx,dy)<12?null:Math.atan2(dy,dx)*180/Math.PI;
   }
-  globalThis.PAIVA_WIND_SIMPLE_MATH={wavePosition,trunkInclination};
+  globalThis.PAIVA_WIND_SIMPLE_MATH={wavePosition,trunkInclination,
+    smoothWindSamples,windRipple};
   if(typeof document==='undefined')return;
 
   function init(){
@@ -46,7 +72,7 @@
       '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
       '<h2>TÚNEL DE VENTO</h2>',
       '<p>Reconhecimento automático do ciclista e da bicicleta · vento visual independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.47</span></div>',
+      '<span class="aero-badge">V5.48</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
@@ -144,6 +170,18 @@
     const detectMiniCtx=detectMini.getContext('2d',{willReadFrequently:true});
     const maskCanvas=document.createElement('canvas');maskCanvas.width=320;maskCanvas.height=180;
     const maskCtx=maskCanvas.getContext('2d');
+    // Oclusão suavizada UMA VEZ por reconhecimento. Evita bordas quadradas
+    // no contato com o ciclista sem processar blur a cada quadro do vento.
+    const windCutout=document.createElement('canvas');windCutout.width=W;windCutout.height=H;
+    const windCutoutCtx=windCutout.getContext('2d');
+    function updateWindCutout(){
+      if(!windCutoutCtx)return;
+      windCutoutCtx.clearRect(0,0,W,H);
+      windCutoutCtx.save();
+      windCutoutCtx.filter='blur(2.5px)';
+      windCutoutCtx.drawImage(maskCanvas,0,0,W,H);
+      windCutoutCtx.restore();
+    }
     // O ciclista padrão da vista lateral olha para a direita: vento contrário
     // ao deslocamento entra pelo lado DIREITO e segue para a esquerda.
     // O botão continua invertendo o sentido para outras fotografias.
@@ -210,6 +248,7 @@
         tinted.data[p+2]=242;tinted.data[p+3]=255;
       }
       maskCtx.putImageData(tinted,0,0);
+      updateWindCutout();
       el('aero-detection-status').textContent=source;
       el('aero-detection-status').dataset.detected='true';
       el('aero-ai-retry').hidden=true;
@@ -218,6 +257,7 @@
     function noteRecognitionFailure(message){
       detection=null;
       maskCtx.clearRect(0,0,320,180);
+      windCutoutCtx?.clearRect(0,0,W,H);
       el('aero-detection-status').textContent=message;
       el('aero-detection-status').dataset.detected='false';
       render();
@@ -323,39 +363,57 @@
       // Uma linha reta atravessando um atleta não identificado parece uma
       // simulação válida, mas não é. Sem detecção não desenhamos vento falso.
       if(mode!=='demo'&&!detection)return;
-      const amount=strength();
-      const near=proximity(),colors=palette();
-      ac.lineWidth=1.65;
-      ac.strokeStyle=colors.line;
-      ac.globalAlpha=.93;
-      ac.setLineDash([8+amount,16]);
-      ac.lineDashOffset=-phase*direction;
-      for(let y=15;y<H;y+=23){
-        ac.beginPath();
-        for(let x=-12;x<=W+12;x+=8){
-          const shifted=globalThis.PAIVA_AERO_CONTOUR?.automaticWaveY(
-            x,y,detection,phase,amount,direction,W,H,near)??y;
-          if(x===-12)ac.moveTo(x,shifted);else ac.lineTo(x,shifted);
+      const amount=strength(),near=proximity(),colors=palette();
+      const startX=-24,step=7,count=Math.ceil((W+48)/step)+1;
+      const lines=[];
+      function traceFlow(samples){
+        ac.beginPath();ac.moveTo(startX,samples[0]);
+        for(let i=1;i<samples.length-1;i++){
+          const x=startX+i*step;
+          ac.quadraticCurveTo(x,samples[i],x+step*.5,
+            (samples[i]+samples[i+1])*.5);
         }
+        ac.lineTo(startX+(samples.length-1)*step,samples[samples.length-1]);
+      }
+      ac.lineCap='round';ac.lineJoin='round';
+      for(let lane=0,y=15;y<H;lane++,y+=23){
+        const raw=new Float32Array(count);
+        for(let i=0;i<count;i++){
+          const x=startX+i*step;
+          const guided=globalThis.PAIVA_AERO_CONTOUR?.automaticWaveY(
+            x,y,detection,phase,amount,direction,W,H,near)??y;
+          raw[i]=guided+windRipple(x,phase,amount,lane,direction);
+        }
+        const flowing=smoothWindSamples(raw,.22);
+        lines.push(flowing);
+        // Fundo contínuo discreto: uma corrente suave, sem quinas.
+        traceFlow(flowing);ac.setLineDash([]);
+        ac.lineWidth=2.6;ac.strokeStyle=colors.line;ac.globalAlpha=.23;
+        ac.stroke();
+        // Reflexos compridos e móveis sobre a mesma curva. Pontas redondas.
+        traceFlow(flowing);ac.setLineDash([42+amount*5,18]);
+        ac.lineDashOffset=-phase*direction*1.7;
+        ac.lineWidth=1.35;ac.strokeStyle=colors.bright;ac.globalAlpha=.82;
         ac.stroke();
       }
-      ac.setLineDash([]);
-      // Pequenas partículas deixam o movimento evidente mesmo em foto parada.
-      ac.globalAlpha=.9;
-      for(let i=0;i<84;i++){
-        const travel=(phase*(2+amount*.7)+i*71+i*i*9)%(W+80)-40;
+      ac.setLineDash([]);ac.lineDashOffset=0;
+      // As partículas seguem as MESMAS curvas: não caem em linha reta.
+      ac.globalAlpha=.78;
+      for(let i=0;i<76;i++){
+        const travel=(phase*(2.2+amount*.72)+i*73+i*i*7)%(W+96)-48;
         const x=direction===1?travel:W-travel;
-        const y=(i*43+19)%(H-24)+12;
-        const shifted=globalThis.PAIVA_AERO_CONTOUR?.automaticWaveY(
-          x,y,detection,phase,amount,direction,W,H,near)??y;
-        ac.beginPath();ac.arc(x,shifted,i%5===0?2.1:1.15,0,Math.PI*2);
+        const samples=lines[i%lines.length];
+        const index=clamp((x-startX)/step,0,samples.length-1.001);
+        const lower=Math.floor(index),fraction=index-lower;
+        const y=samples[lower]*(1-fraction)+samples[lower+1]*fraction;
+        ac.beginPath();ac.arc(x,y,i%6===0?1.9:1.05,0,Math.PI*2);
         ac.fillStyle=i%3===0?colors.bright:colors.particle;ac.fill();
       }
       // Oclusão por pixels DETECTADOS: o vento não atravessa a silhueta.
       if(detection){
         ac.globalCompositeOperation='destination-out';
         ac.globalAlpha=1;
-        ac.drawImage(maskCanvas,0,0,W,H);
+        ac.drawImage(windCutoutCtx?windCutout:maskCanvas,0,0,W,H);
       }
       ac.globalCompositeOperation='source-over';
       ac.globalAlpha=1;
@@ -367,6 +425,7 @@
       const centerY=(bounds.top+bounds.bottom)*.5*H/height;
       const halfHeight=Math.max(30,(bounds.bottom-bounds.top)*.5*H/height);
       ctx.save();
+      ctx.lineCap='round';ctx.lineJoin='round';
       for(let j=0;j<9;j++){
         const origin=(direction===1?bounds.right:bounds.left)*W/width;
         const lane=(j-4)*halfHeight*.12;
@@ -375,14 +434,15 @@
           const x=origin+direction*t;
           if(x<-20||x>W+20)break;
           const decay=Math.exp(-t/350);
-          const y=centerY+lane+
-            Math.sin(t*.043-phase*.095+j*.6)*halfHeight*.16*decay*
-              (amount/3);
+          const easeIn=1-Math.exp(-t/27);
+          const wave=(Math.sin(t*.027-phase*.09+j*.62)*.13+
+            Math.sin(t*.053-phase*.13+j*.38)*.035)*halfHeight;
+          const y=centerY+lane+wave*easeIn*decay*(amount/3);
           if(t===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
         }
         ctx.strokeStyle=colors.wake;
-        ctx.globalAlpha=j%3===0?.45:.24;
-        ctx.lineWidth=j%3===0?1.7:1.1;
+        ctx.globalAlpha=j%3===0?.42:.21;
+        ctx.lineWidth=j%3===0?1.55:1.05;
         ctx.stroke();
       }
       ctx.restore();
