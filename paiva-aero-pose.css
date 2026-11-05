@@ -1,4 +1,4 @@
-/* PAIVA V5.52 — Motion Signature, linhas técnicas 2D e comparação A/B. */
+/* PAIVA V5.53 — Motion Signature, filtro temporal e etiquetas afastadas. */
 #paiva-aero-pose{margin:17px 0 19px;background:linear-gradient(135deg,#171f29,#0c121a);border:1px solid #4a5867;border-radius:15px;overflow:hidden;color:#e8eef4;font-family:Inter,'Segoe UI',system-ui,sans-serif;}
 #paiva-aero-pose>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;list-style:none;cursor:pointer;font-size:13px;font-weight:750;letter-spacing:.035em;color:#f5f7f9;}
 #paiva-aero-pose>summary::-webkit-details-marker{display:none;}
@@ -16,7 +16,7 @@
 #paiva-aero-pose .pose-manual-controls[hidden]{display:none;}
 #paiva-aero-pose .pose-manual-controls label{display:flex;align-items:center;gap:8px;color:#e3f9f6;font-size:12px;font-weight:650;}
 #paiva-aero-pose .pose-manual-controls select{padding:7px 8px;color:#e9f4f6;background:#18252d;border:1px solid #598489;border-radius:7px;font:inherit;}
-#paiva-aero-pose .pose-actions #pose-speed{border:1px solid #536473;border-radius:7px;background:#14232e;color:#f4f7fa;padding:6px 5px;max-width:96px;}
+#paiva-aero-pose .pose-actions select{border:1px solid #536473;border-radius:7px;background:#14232e;color:#f4f7fa;padding:6px 5px;max-width:174px;font:inherit;}
 #paiva-aero-pose .pose-manual-controls button{border:1px solid #548085;background:#183b40;color:#e4faf8;border-radius:7px;padding:8px 10px;cursor:pointer;}
 #paiva-aero-pose .pose-manual-controls small{flex-basis:100%;line-height:1.5;color:#b5d8d6;font-size:11px;}
 #paiva-aero-pose canvas.pose-editing{cursor:crosshair;touch-action:none;}

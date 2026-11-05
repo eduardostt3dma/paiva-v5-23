@@ -1,4 +1,4 @@
-/* PAIVA MOTION SIGNATURE V5.52 — trajetórias 2D reais e comparação A/B.
+/* PAIVA MOTION SIGNATURE V5.53 — trajetórias 2D estabilizadas e etiquetas externas.
    Estimativas de ângulos projetados em 2D; nunca ajuste biomecânico automático.
    Não altera ou reutiliza ferramentas, eventos ou medidas do módulo Análise 2D. */
 (() => {
@@ -30,6 +30,59 @@
     left:{shoulder:11,elbow:13,wrist:15,hip:23,knee:25,ankle:27,heel:29,toe:31},
     right:{shoulder:12,elbow:14,wrist:16,hip:24,knee:26,ankle:28,heel:30,toe:32}
   };
+  // Limites espaciais de deslocamento por quadro (em um vídeo normalizado
+  // para 960x540). Cada ponto tem mobilidade diferente: quadril/ombro ficam
+  // mais estáveis, enquanto joelho, tornozelo e pé se movimentam mais.
+  const POINT_MOTION={shoulder:40,elbow:95,wrist:115,hip:42,knee:100,
+    ankle:155,heel:155,toe:165};
+  function stabilizeLandmarks(points,poseSide,time,mode,history,ghosts){
+    const indices=ANATOMY[poseSide];if(!indices)return points;
+    const output=points.slice();
+    const setting={stable:{blend:.24,jump:1},balanced:{blend:.43,jump:1.22},
+      responsive:{blend:.67,jump:1.55}}[mode]||{blend:.24,jump:1};
+    for(const [joint,index] of Object.entries(indices)){
+      const current=points[index],previous=history[joint];
+      if(!visible(current)||current.x<0||current.x>1||current.y<0||current.y>1){
+        if(previous&&time-previous.t<650)
+          ghosts[joint]={x:previous.x,y:previous.y};
+        else delete ghosts[joint];
+        continue;
+      }
+      if(!previous||!Number.isFinite(time-previous.t)||time-previous.t>1050){
+        history[joint]={x:current.x,y:current.y,t:time};
+        delete ghosts[joint];continue;
+      }
+      const dt=Math.max(32,time-previous.t);
+      const distance=Math.hypot((current.x-previous.x)*W,(current.y-previous.y)*H);
+      const threshold=POINT_MOTION[joint]*(.48+dt/260)*setting.jump;
+      if(distance>threshold){
+        const candidate=previous.candidate;
+        const nearby=candidate&&Math.hypot((current.x-candidate.x)*W,
+          (current.y-candidate.y)*H)<38;
+        previous.candidate={x:current.x,y:current.y};
+        previous.candidateCount=nearby?(previous.candidateCount||1)+1:1;
+        if(previous.candidateCount<3){
+          // Sem inventar ângulo: conserva só um círculo vazado no último
+          // local confiável; a medida deste quadro fica indisponível.
+          ghosts[joint]={x:previous.x,y:previous.y};
+          output[index]={...current,x:previous.x,y:previous.y,visibility:0,presence:0};
+          continue;
+        }
+        // Mudança persistente, troca de câmera ou busca de nova referência:
+        // volta a rastrear, sem prolongar a trajetória anterior.
+        history[joint]={x:current.x,y:current.y,t:time,reacquired:true};
+        delete ghosts[joint];continue;
+      }
+      const alpha=clamp(setting.blend+distance/Math.max(1,threshold)*.27,
+        setting.blend,.86);
+      const x=previous.x+(current.x-previous.x)*alpha;
+      const y=previous.y+(current.y-previous.y)*alpha;
+      history[joint]={x,y,t:time};
+      output[index]={...current,x,y};
+      delete ghosts[joint];
+    }
+    return output;
+  }
   function chooseSide(points,previous){
     const score=name=>{
       const p=ANATOMY[name];
@@ -71,7 +124,8 @@
     return true;
   }
   // Núcleo puro disponível para testes automatizados, sem abrir navegador.
-  globalThis.PAIVA_AERO_POSE_MATH={angle3,trunkAngle,footAngle,chooseSide,measure,confidence,pushTrail};
+  globalThis.PAIVA_AERO_POSE_MATH={angle3,trunkAngle,footAngle,chooseSide,measure,
+    confidence,pushTrail,stabilizeLandmarks};
   if(typeof document==='undefined')return;
 
   const PACKAGE='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/vision_bundle.mjs';
@@ -108,6 +162,19 @@
         <div class="pose-actions">
           <button type="button" id="pose-toggle">▶ Iniciar leitura IA</button>
           <button type="button" id="pose-manual-toggle" aria-pressed="false">✥ Corrigir pontos</button>
+          <label class="pose-trail-toggle" for="pose-stability">Estabilidade
+            <select id="pose-stability" aria-label="Intensidade da estabilização dos pontos">
+              <option value="stable" selected>Firme</option>
+              <option value="balanced">Equilibrada</option>
+              <option value="responsive">Movimento rápido</option>
+            </select>
+          </label>
+          <label class="pose-trail-toggle" for="pose-side">Lado rastreado
+            <select id="pose-side" aria-label="Selecionar a lateral do corpo rastreada">
+              <option value="auto" selected>Auto · fixar por vídeo</option>
+              <option value="left">Esquerdo</option><option value="right">Direito</option>
+            </select>
+          </label>
           <label class="pose-trail-toggle" for="pose-speed">Velocidade do vídeo
             <select id="pose-speed" aria-label="Velocidade da reprodução do vídeo no Motion Flow">
               <option value="0.1">0,1×</option><option value="0.25">0,25×</option>
@@ -129,7 +196,8 @@
             </select>
           </label>
           <button type="button" id="pose-manual-clear">↺ Restaurar pontos da IA</button>
-          <small>Vídeo pausado: arraste uma bolinha ou selecione a articulação e clique na posição correta. É possível marcar todos os oito pontos mesmo sem detecção da IA. O ajuste vale para este quadro; a IA volta a analisar outros quadros ao continuar.</small>
+          <label class="pose-trail-toggle"><input type="checkbox" id="pose-manual-labels" checked> Nome externo com linha-guia</label>
+          <small>Vídeo pausado: arraste uma bolinha ou selecione a articulação e clique na posição correta. O nome fica afastado da marcação e pode ser ocultado acima. É possível marcar os oito pontos mesmo sem detecção da IA. O ajuste vale só para este quadro.</small>
         </div>
         <p class="pose-status" id="pose-status" role="status" aria-live="polite">Abra uma foto ou vídeo no Motion Studio e clique em Iniciar. Primeiro acesso exige internet.</p>
         <div class="pose-canvas-wrap"><canvas id="pose-view" width="960" height="540" aria-label="Trajetórias biomecânicas 2D e ângulos aproximados identificados por IA"></canvas></div>
@@ -159,8 +227,8 @@
             <p class="pose-compare-legend"><span><i style="background:#92d9ea"></i>ANTES</span><span><i style="background:#69dfc9"></i>DEPOIS</span><span>Trajetórias em coordenadas da imagem; sem calibração 3D.</span></p>
           </div>
         </details>
-        <p class="pose-hint" id="pose-hint">Use vídeo de perfil e câmera fixa. Se um ponto fugir, clique em Corrigir pontos, reposicione-o manualmente e confira os ângulos. Se uma articulação estiver oculta, não inventamos graus.</p>
-        <p class="pose-disclaimer">⚠️ Teste exploratório em 2D: ângulos e trajetórias dependem da câmera, escala, visibilidade e marcação anatômica. A inclinação do pé é a linha calcanhar–frente do pé com a horizontal da imagem, não uma medida direta do tornozelo. Não são reconstrução 3D, medidas de aerodinâmica nem diagnóstico. Fotos e quadros são processados no dispositivo; o modelo de IA precisa ser baixado na primeira utilização.</p>
+        <p class="pose-hint" id="pose-hint">Use vídeo de perfil e câmera fixa. Ajuste Estabilidade para filtrar saltos e selecione o lado corporal quando a IA confundir as pernas. Círculos vazados indicam uma posição anterior: o ângulo não é calculado sem detecção confiável.</p>
+        <p class="pose-disclaimer">⚠️ Teste exploratório em 2D: o filtro reduz tremores e descarta saltos improváveis, mas não prende fisicamente os pontos ao atleta. A estabilização pode suavizar ângulos extremos. A inclinação do pé é a linha calcanhar–frente do pé com a horizontal da imagem, não uma medida direta do tornozelo. Não são reconstrução 3D, medidas de aerodinâmica nem diagnóstico. Fotos e quadros são processados no dispositivo; o modelo de IA precisa ser baixado na primeira utilização.</p>
       </div>`;
     aero.querySelector('.aero-measure')?.before(panel);
     if(!panel.isConnected)aero.append(panel);
@@ -171,7 +239,7 @@
     if(!ctx||!rawCtx){el('pose-status').textContent='Canvas indisponível neste navegador.';return true;}
     let active=false,busy=false,lastSample=0,stopped=false,editing=false;
     let sampleIntervalMs=220;
-    let currentEpoch=null,lastVideoTime=null,side=null;
+    let currentEpoch=null,lastVideoTime=null,side=null,lastTrackVideoTime=null;
     let samples=0,minKnee=Infinity,maxKnee=-Infinity;
     let trunkSamples=0,minTrunk=Infinity,maxTrunk=-Infinity;
     const trails={knee:[],hip:[],heel:[],shoulder:[]};
@@ -180,6 +248,7 @@
     let results=null,lastSource=null;
     let originalLandmarks=null,frameSlot=null;
     const correctedFrames=new Map();
+    const trackHistory={},ghosts={};
     const JOINT_NAMES={shoulder:'Ombro',elbow:'Cotovelo',wrist:'Punho',hip:'Quadril',knee:'Joelho',ankle:'Tornozelo',heel:'Calcanhar',toe:'Metatarso'};
     function slotFor(source){
       return source?.mode==='photo'?'foto':
@@ -279,7 +348,9 @@
       samples=0;minKnee=Infinity;maxKnee=-Infinity;
       trunkSamples=0;minTrunk=Infinity;maxTrunk=-Infinity;
       Object.values(trails).forEach(list=>{list.length=0;});
-      results=null;lastVideoTime=null;side=null;
+      for(const key of Object.keys(trackHistory))delete trackHistory[key];
+      for(const key of Object.keys(ghosts))delete ghosts[key];
+      results=null;lastVideoTime=null;lastTrackVideoTime=null;side=null;
       ['knee','trunk','elbow','hip','foot','extension','flexion','trunk-delta'].forEach(k=>setText('pose-'+k,'—'));
     }
     function drawTrails(){
@@ -303,12 +374,33 @@
       }
       ctx.restore();
     }
-    function drawLabel(x,y,text,color){
-      if(!text||text==='—')return;
-      ctx.save();ctx.font='700 18px "Segoe UI",system-ui,sans-serif';
-      const left=clamp(x+12,8,W-90),top=clamp(y-22,12,H-34);
-      ctx.fillStyle='rgba(7,15,21,.86)';ctx.fillRect(left-6,top-5,ctx.measureText(text).width+12,26);
-      ctx.fillStyle=color;ctx.fillText(text,left,top+14);ctx.restore();
+    function drawPointCallout(x,y,name,color){
+      if(!name)return;
+      ctx.save();ctx.font='700 15px "Segoe UI",system-ui,sans-serif';
+      const width=ctx.measureText(name).width+23;
+      // Não encobrir o ponto anatômico: etiqueta afastada e conectada por
+      // haste fina. Quando o atleta está à direita, a haste sai à esquerda.
+      const toRight=x<W*.55,offset=toRight?1:-1;
+      const left=clamp(x+(toRight?132:-132-width),14,W-width-14);
+      const top=clamp(y-76,45,H-49);
+      const attachX=toRight?left:left+width;
+      ctx.strokeStyle=color;ctx.lineWidth=1.25;ctx.globalAlpha=.87;
+      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+offset*36,y-28);
+      ctx.lineTo(attachX,top+15);ctx.stroke();
+      ctx.globalAlpha=1;ctx.fillStyle='rgba(7,15,21,.94)';
+      ctx.fillRect(left,top,width,30);
+      ctx.strokeStyle=color;ctx.strokeRect(left+.5,top+.5,width-1,29);
+      ctx.fillStyle=color;ctx.fillText(name,left+11,top+20);
+      ctx.restore();
+    }
+    function drawGhosts(){
+      if(editing)return;
+      ctx.save();ctx.lineWidth=2;ctx.strokeStyle='#93d0e4';
+      ctx.setLineDash([3,4]);
+      for(const p of Object.values(ghosts)){
+        ctx.beginPath();ctx.arc(p.x*W,p.y*H,7,0,Math.PI*2);ctx.stroke();
+      }
+      ctx.restore();
     }
     const coords=p=>[p.x*W,p.y*H];
     function drawSkeleton(data){
@@ -334,27 +426,18 @@
         if(editing&&el('pose-manual-joint').value===key){
           ctx.beginPath();ctx.arc(x,y,11,0,Math.PI*2);
           ctx.strokeStyle='#69f0df';ctx.lineWidth=2;ctx.stroke();
-          drawLabel(x,y,JOINT_NAMES[key],'#69f0df');
+          if(el('pose-manual-labels').checked)
+            drawPointCallout(x,y,JOINT_NAMES[key],'#69f0df');
         }
       }
-      if(data.knee!==null&&visible(p.knee)){
-        const [x,y]=coords(p.knee);drawLabel(x,y,fmt(data.knee),'#ffe578');
-      }
-      if(data.trunk!==null&&visible(p.hip)){
-        const [x,y]=coords(p.hip);drawLabel(x,y,fmt(data.trunk),'#66e9ff');
-      }
-      if(data.elbow!==null&&visible(p.elbow)){
-        const [x,y]=coords(p.elbow);drawLabel(x,y,fmt(data.elbow),'#d4ffa5');
-      }
-      if(data.foot!==null&&visible(p.heel)){
-        const [x,y]=coords(p.heel);drawLabel(x,y,fmt(data.foot),'#a6f4dc');
-      }
+      // Graus são exibidos nos cartões abaixo do vídeo, deixando as
+      // articulações desobstruídas durante a correção manual.
       ctx.restore();
     }
     function draw(){
       ctx.clearRect(0,0,W,H);
       ctx.fillStyle='#0b131b';ctx.fillRect(0,0,W,H);
-      if(lastSource)ctx.drawImage(raw,0,0);
+      if(lastSource||currentEpoch!==null)ctx.drawImage(raw,0,0);
       else{
         ctx.textAlign='center';ctx.fillStyle='#aebac5';ctx.font='18px system-ui';
         ctx.fillText('Abra uma foto ou vídeo no Motion Studio para iniciar',W/2,H/2);
@@ -362,6 +445,7 @@
       }
       drawTrails();
       if(results)drawSkeleton(results);
+      drawGhosts();
       ctx.fillStyle='rgba(9,16,23,.76)';ctx.fillRect(12,12,250,31);
       ctx.fillStyle='#ffe476';ctx.font='600 14px system-ui';
       ctx.fillText('PAIVA MOTION SIGNATURE · 2D',22,33);
@@ -404,6 +488,12 @@
       if(currentEpoch!==source.epoch){
         currentEpoch=source.epoch;reset();correctedFrames.clear();originalLandmarks=null;
       }
+      // Pular vários segundos ou voltar o vídeo invalida a estimativa de
+      // velocidade e as trajetórias anteriores; retomar num quadro novo.
+      if(Number.isFinite(source.videoTime)&&lastTrackVideoTime!==null&&
+         (source.videoTime<lastTrackVideoTime-.05||
+          source.videoTime-lastTrackVideoTime>1.5))reset();
+      if(Number.isFinite(source.videoTime))lastTrackVideoTime=source.videoTime;
       if(source.mode==='photo'&&lastSource?.mode==='photo'&&lastSource.epoch===source.epoch)return;
       if(source.mode!=='photo'&&source.videoTime===lastVideoTime)return;
       lastSource=source;lastVideoTime=source.videoTime;
@@ -417,21 +507,28 @@
         const detection=model.detectForVideo(raw,Math.max(now,performance.now()));
         const landmarks=detection.landmarks?.[0];
         if(landmarks?.length>=33){
-          const newSide=chooseSide(landmarks,side);
-          if(side&&newSide!==side){reset();correctedFrames.clear();}
-          side=newSide;
-          originalLandmarks=landmarks;
-          results=correctedMeasurement(landmarks,side,frameSlot);
+          const selectedSide=el('pose-side').value;
+          side=selectedSide==='auto'?(side||chooseSide(landmarks,null)):selectedSide;
+          const trackingTime=Number.isFinite(source.videoTime)?source.videoTime*1000:now;
+          const stableLandmarks=stabilizeLandmarks(landmarks,side,trackingTime,
+            el('pose-stability').value,trackHistory,ghosts);
+          originalLandmarks=stableLandmarks;
+          results=correctedMeasurement(stableLandmarks,side,frameSlot);
           if(source.mode!=='photo'&&source.playing){
             for(const key of Object.keys(TRAILS)){
-              pushTrail(trails,key,results.points[key],now);
+              if(trackHistory[key]?.reacquired){trails[key].length=0;
+                delete trackHistory[key].reacquired;}
+              pushTrail(trails,key,results.points[key],trackingTime);
             }
           }
           publish(results,source);
           const valid=['knee','trunk','elbow','hip','foot'].filter(k=>results[k]!==null);
           status(valid.length?'● '+valid.length+' leituras visíveis · lado '+(side==='left'?'esquerdo':'direito')+
-            ' · pontos claros em amarelo.':'Articulações ocultas ou fora do enquadramento: sem estimativa confiável.');
+            (Object.keys(ghosts).length?' · círculo vazado = referência anterior, sem medida':'')+
+            ' · modo '+el('pose-stability').selectedOptions[0].textContent+'.':
+            'Articulações ocultas ou instáveis: sem estimativa confiável.');
         }else{
+          for(const key of Object.keys(ghosts))delete ghosts[key];
           originalLandmarks=null;results=null;publish(null,source);
           status('Não identifiquei uma pessoa com pontos suficientemente visíveis neste quadro.');
         }
@@ -466,19 +563,27 @@
       active=true;
       el('pose-toggle').textContent='⏸ Pausar leitura';
       status('⏳ Carregando modelo de articulações neste dispositivo…');
-      try{await getModel();if(active){status('Modelo pronto. Buscando articulações no Aero…');lastSample=0;}}
+      try{await getModel();if(active){status('Modelo pronto. Buscando articulações no Motion Studio…');lastSample=0;}}
       catch(error){active=false;el('pose-toggle').textContent='↻ Tentar novamente';status('Modelo de articulações não carregou: '+(error?.message||error));}
     });
+    for(const settingId of ['pose-stability','pose-side']){
+      el(settingId).addEventListener('change',()=>{
+        reset();lastSource=null;originalLandmarks=null;correctedFrames.clear();
+        status(settingId==='pose-side'?'Lado corporal alterado. A leitura começa uma nova trajetória.':
+          'Filtro de estabilidade alterado. Iniciando uma nova trajetória.');
+        draw();
+      });
+    }
     el('pose-manual-toggle').addEventListener('click',()=>{
       if(editing){exitEditing();status('Correção manual concluída. A imagem corrigida pode ser salva. Continue a leitura para outros quadros.');draw();return;}
       // Se a IA não reconhecer o atleta, o profissional ainda pode colocar
       // os seis marcos manualmente sobre a imagem importada no Aero.
       if(!results||!originalLandmarks){
         const source=globalThis.PAIVA_WIND_SIMPLE?.getAnalysisFrame?.(rawCtx);
-        if(!source){status('Primeiro abra uma foto ou vídeo no Aero para marcar os pontos.');return;}
+        if(!source){status('Primeiro abra uma foto ou vídeo no Motion Studio para marcar os pontos.');return;}
         if(currentEpoch!==source.epoch){correctedFrames.clear();currentEpoch=source.epoch;reset();}
         lastSource=source;lastVideoTime=source.videoTime;frameSlot=slotFor(source);
-        side='left';
+        side=el('pose-side').value==='right'?'right':'left';
         originalLandmarks=Array.from({length:33},()=>({x:0,y:0,visibility:0,presence:0}));
         results=measure(originalLandmarks,side);
       }
@@ -499,7 +604,7 @@
       canvas.classList.add('pose-editing');publish(results,lastSource,false);draw();
       status('Correção ativa: arraste um ponto ou selecione a articulação e clique onde ela realmente está.');
     });
-    let draggingJoint=null;
+    let draggingJoint=null,explicitSelected=false;
     function coordinateFromPointer(event){
       const rect=canvas.getBoundingClientRect();
       return {x:clamp((event.clientX-rect.left)/rect.width,0,1),
@@ -527,7 +632,10 @@
       if(!editing||event.button!==0)return;
       event.preventDefault();
       const p=coordinateFromPointer(event);
-      draggingJoint=nearestJoint(p)||el('pose-manual-joint').value;
+      // Quem escolheu uma articulação no menu deve poder marcar exatamente
+      // aquela, mesmo que outra bolinha esteja a menos de 24 pixels.
+      draggingJoint=(explicitSelected?el('pose-manual-joint').value:null)||
+        nearestJoint(p)||el('pose-manual-joint').value;
       el('pose-manual-joint').value=draggingJoint;
       try{canvas.setPointerCapture(event.pointerId);}catch(_){}
       moveJoint(draggingJoint,p);
@@ -537,8 +645,11 @@
       event.preventDefault();moveJoint(draggingJoint,coordinateFromPointer(event));
     });
     for(const name of ['pointerup','pointercancel','lostpointercapture'])
-      canvas.addEventListener(name,()=>{draggingJoint=null;});
-    el('pose-manual-joint').addEventListener('change',()=>{if(editing)draw();});
+      canvas.addEventListener(name,()=>{draggingJoint=null;explicitSelected=false;});
+    el('pose-manual-joint').addEventListener('change',()=>{
+      explicitSelected=true;if(editing)draw();
+    });
+    el('pose-manual-labels').addEventListener('change',()=>{if(editing)draw();});
     el('pose-manual-clear').addEventListener('click',()=>{
       if(!frameSlot)return;
       correctedFrames.delete(frameSlot);
