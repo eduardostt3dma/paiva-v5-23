@@ -1,0 +1,37 @@
+PAIVA BIKE FIT STUDIO — V5.42 — AERO COMPARE + MODO PROJETOR
+Idealizado e desenvolvido por Eduardo Paiva.
+
+NOVO MÓDULO: AERO COMPARE — COMPARAÇÃO FRONTAL
+1. Carregue uma foto do ciclista visto de FRENTE na Posição A.
+2. Carregue outra foto frontal na Posição B (após ajustar a postura).
+3. O algoritmo tentará identificar a silhueta por contraste da imagem.
+   Isso é apenas uma aproximação de pixels e pode falhar em fundo complexo.
+4. Quando falhar, utilize "Recorte flexível" na imagem correspondente:
+   clique ao redor do atleta, ajuste a linha e "Fechar recorte".
+5. Confirme a repetibilidade: mesma câmera, distância, zoom, orientação,
+   altura, enquadramento e posição da bicicleta.
+6. Quando houver contornos e confirmação, será exibida a diferença
+   PERCENTUAL da área de pixels entre as silhuetas A e B.
+7. "Sobrepor contornos" mostra em cores as regiões A, B e comuns.
+8. "Tela cheia · Projetor" expande a apresentação; no Windows é
+   possível usar também F11 quando o navegador não autorizar tela cheia.
+9. "Salvar comparação" gera um PNG com A/B, valor e autoria.
+
+IMPORTANTE: O resultado representa área PROJETADA NA FOTO, não
+área frontal física validada. Não calcula coeficiente de arrasto,
+CdA, watts, potência, tempo de prova, economia ou eficiência aerodinâmica.
+Mesmo a silhueta menor não garante posição mais veloz ou confortável.
+Fotos e cálculos permanecem no aparelho, sem envio ao GitHub.
+
+PRESERVAÇÃO:
+- Nenhum arquivo da V5.41 foi removido.
+- 2D, ângulos, rastreio, curvas flexíveis, câmeras, conversor MP4,
+  túnel visual, cadastro, TT, comparador de quadros, PDF e marca intactos.
+- Reconhecimento em fotos que não são 16:9 agora usa cantos do conteúdo
+  real da imagem, evitando confundir faixas escuras com o fundo.
+- O cache da PWA recebe atualização para os dois novos arquivos.
+
+PUBLICAÇÃO NO GITHUB:
+- Extrair o ZIP numa pasta.
+- Enviar TODOS os arquivos extraídos para o repositório.
+- Commit changes e reabrir o app depois da atualização.

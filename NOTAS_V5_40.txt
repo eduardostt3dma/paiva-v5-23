@@ -1,0 +1,37 @@
+PAIVA BIKE FIT STUDIO — V5.40 — CONVERSOR DISCRETO E TÚNEL MAIS UTILIZÁVEL
+Idealizado e desenvolvido por Eduardo Paiva.
+
+1. CONVERSOR MP4
+   Na bancada de Análise 2D, clique "Conversor MP4".
+   O painel agora fica oculto por padrão e é aberto sob demanda.
+   Após converter o arquivo, escolha:
+   - Baixar MP4 convertido;
+   - Abrir na Análise 2D;
+   - Abrir no Túnel de Vento.
+   O MP4 passa diretamente de um módulo ao outro no próprio navegador.
+   Arquivo original, recorte temporal e FFmpeg foram preservados.
+
+2. TÚNEL DE VENTO EM FOTOS COMUNS
+   O comportamento que parava de mostrar vento quando não havia fundo
+   verde deixou de ser obrigatório para fotos com fundo simples.
+   Primeira opção: "Foto comum · automático".
+   A foto é segmentada por DIFERENÇA DE COR em relação às bordas.
+   Em fundo uniforme, pode gerar um contorno aproximado do ciclista.
+   Em foto complexa, iluminação irregular ou roupa parecida com o
+   fundo, a detecção pode falhar; o software deixa isso explícito.
+   "Fundo verde" e "Parede comum + foto vazia" continuam disponíveis.
+   Vento é ilustração 2D, não cálculo real de dinâmica dos fluidos.
+
+3. PRESERVAÇÃO
+   Nenhum arquivo ou recurso da V5.39 foi removido.
+   Cadastro, antropometria, TT, comparação, relatórios, ângulos,
+   rastreio, câmeras, conversão e marca registrada permanecem.
+
+TESTAR NO WINDOWS:
+   1. Abra o 2D e clique "Conversor MP4".
+   2. Converta um vídeo, clique "Abrir no Túnel de Vento".
+   3. No túnel, abra uma foto com fundo escuro/uniforme.
+   4. Confira o status "Contorno estimado da foto".
+   5. Pause e solte o vento para verificar a animação.
+   6. Caso a foto não separe bem o ciclista, use Fundo verde
+      ou Parede comum com captura da parede sem atleta.

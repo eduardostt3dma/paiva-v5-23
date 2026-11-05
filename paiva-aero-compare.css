@@ -1,0 +1,81 @@
+/* PAIVA AERO Compare: comparador frontal, visualização preparada para projetor. */
+.paiva-aero-compare{margin-top:20px;min-width:0;scroll-margin-top:16px}
+.paiva-compare-heading{display:flex;justify-content:space-between;align-items:flex-start;
+  gap:16px;margin-bottom:13px}
+.paiva-compare-heading>div:first-child>span{display:block;font-size:10px;
+  font-weight:850;color:#ffdf61;letter-spacing:.17em}
+.paiva-compare-heading h2{font-size:clamp(24px,3vw,35px);
+  letter-spacing:.045em;margin:5px 0 4px;color:#f2f4f6}
+.paiva-compare-heading p{font-size:12px;color:#c7d3dc;line-height:1.45;margin:0}
+.paiva-compare-top-actions,.paiva-compare-card-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.paiva-aero-compare button,.paiva-compare-photo{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:#25313d;color:#e8f0f6;border:1px solid #627583;
+  border-radius:9px;min-height:36px;padding:8px 11px;cursor:pointer;
+  font:750 11px system-ui,sans-serif;text-align:center}
+.paiva-aero-compare button:hover,.paiva-compare-photo:hover{border-color:#ffdc60;background:#303c47}
+.paiva-compare-photo input{display:none}
+.paiva-compare-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.paiva-compare-card{min-width:0;border:1px solid #3c5663;background:#15212b;
+  border-radius:15px;overflow:hidden;padding:12px}
+.paiva-compare-card[data-position=b]{border-color:#685b40}
+.paiva-compare-card-heading{display:flex;justify-content:space-between;align-items:center;
+  gap:8px;margin:0 0 10px}
+.paiva-compare-card-heading strong{color:#67d5e8;letter-spacing:.085em;font-size:13px}
+.paiva-compare-card[data-position=b] .paiva-compare-card-heading strong{color:#f7d66b}
+.paiva-compare-card-heading span{font-size:10px;letter-spacing:.15em;font-weight:800;color:#bdccd5}
+.paiva-compare-card-actions{margin-bottom:10px}
+.paiva-compare-card-actions .paiva-spline-controls{width:auto}
+.paiva-compare-card-actions .paiva-spline-controls button{min-height:35px}
+.paiva-compare-stage{position:relative;overflow:hidden;border-radius:10px;
+  background:#0c1520;border:1px solid #344a59}
+.paiva-compare-stage>canvas{display:block;width:100%;height:auto;max-width:100%}
+.paiva-compare-card-status{margin:9px 0 0;min-height:24px;color:#c4d5dd;
+  line-height:1.45;font:500 11px system-ui,sans-serif}
+.paiva-compare-check{margin:14px 0;padding:12px 14px;background:#1c2a32;
+  border:1px solid #3e5763;border-radius:10px}
+.paiva-compare-check label{display:flex;align-items:flex-start;gap:10px;
+  font-size:12px;font-weight:650;color:#e2eaf0;line-height:1.5;cursor:pointer}
+.paiva-compare-check input{margin-top:2px;width:17px;height:17px;accent-color:#ffda5c}
+.paiva-compare-metrics{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(150px,1fr);
+  gap:22px;align-items:center;padding:20px 24px;background:#0e1b24;
+  border:1px solid #5a7483;border-radius:15px;margin:10px 0 14px}
+.paiva-compare-metrics>div:first-child>span{display:block;
+  letter-spacing:.11em;font:850 10px system-ui,sans-serif;color:#a3c9d9}
+.paiva-compare-metrics output{display:block;line-height:1.15;margin:6px 0;
+  font-size:clamp(48px,6.5vw,85px);font-weight:900;font-variant-numeric:tabular-nums;
+  letter-spacing:-.055em;color:#f6df83}
+.paiva-compare-metrics output[data-result=lower]{color:#82e4b4}
+.paiva-compare-metrics output[data-result=higher]{color:#ffbb91}
+.paiva-compare-metrics strong{display:block;font-size:13px;line-height:1.45;color:#f2f4f5}
+.paiva-compare-mini-metrics{display:flex;flex-direction:column;gap:11px;
+  color:#c4d7e1;font-size:12px;font-weight:700}
+.paiva-compare-overlay{border-radius:12px;border:1px solid #3e5966;
+  background:#15212b;padding:12px;margin:0 0 12px}
+.paiva-compare-overlay summary{cursor:pointer;font-size:13px;font-weight:800;color:#dce7ef}
+.paiva-compare-overlay p{font-size:11px;color:#c5d6de}
+.paiva-compare-blue{color:#67d5e8}.paiva-compare-yellow{color:#f7d66b}
+.paiva-compare-overlay canvas{display:block;width:100%;max-width:960px;height:auto;
+  border-radius:10px;border:1px solid #344654;margin:8px auto}
+.paiva-compare-notice{font:650 12px system-ui,sans-serif;color:#d4e5ee;
+  background:#192b35;border:1px solid #3b5867;border-radius:9px;padding:10px;margin:0 0 8px}
+.paiva-compare-disclaimer{border-left:3px solid #f7d66b;background:#292820;
+  border-radius:0 8px 8px 0;padding:10px 13px;color:#e7e1d2;
+  font:500 11px/1.6 system-ui,sans-serif;margin:0}
+#paiva-aero-compare:fullscreen{box-sizing:border-box;overflow:auto;width:100vw;height:100vh;
+  max-width:none;border-radius:0;background:#101a22;padding:22px 30px;color:#fff}
+#paiva-aero-compare:fullscreen .paiva-compare-metrics output{font-size:clamp(64px,8vw,110px)}
+#paiva-aero-compare:fullscreen .paiva-compare-heading h2{font-size:42px}
+#paiva-aero-compare:fullscreen .paiva-compare-card{padding:12px}
+@media(max-width:780px){
+  .paiva-compare-heading{flex-direction:column}
+  .paiva-compare-grid{grid-template-columns:1fr}
+  .paiva-compare-metrics{grid-template-columns:1fr;gap:12px;padding:16px}
+  .paiva-compare-mini-metrics{flex-direction:row;flex-wrap:wrap;justify-content:space-between}
+}
+@media(max-width:470px){
+  .paiva-compare-top-actions{width:100%}
+  .paiva-compare-top-actions button{flex:1 1 auto}
+  .paiva-compare-card-actions .paiva-spline-controls{width:100%}
+}
+@media print{.paiva-aero-compare{display:none!important}}

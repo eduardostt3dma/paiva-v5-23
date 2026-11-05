@@ -128,6 +128,7 @@
         <p><strong>Boneco pronto · 8 pontos:</strong> ao clicar no botão azul, aparece um boneco articulado inteiro na foto ou no quadro congelado. Arraste uma linha para mover o conjunto, ou uma bolinha para acertar cada plug refletivo. Use Espelhar ou −/+ para adaptar as proporções. “Encaixar refletores” procura pequenos pontos brilhantes próximos das bolinhas e ativa uma tentativa adicional de rastrear esses reflexos quadro a quadro. NÃO identifica articulações por IA: confira cada encaixe, corrija os laranjas e não confunda brilhos na bike com marcadores anatômicos. A alternativa “Marcar 8 um a um” continua disponível. O joelho usa quadril, côndilo e maléolo. O pé usa somente calcanhar e metatarso contra a horizontal do solo, sem usar a tíbia. Mesmo com falha no rastreio, os últimos valores continuam visíveis como referência provisória.</p>
         <p><strong>Ângulo suplementar:</strong> clique diretamente na etiqueta “A 35°”, por exemplo, para alternar entre 35° e 145° (180° − 35°). A geometria das hastes não muda, somente a convenção mostrada. Confirme qual convenção está usando no laudo.</p>
         <p><strong>Linha:</strong> clique e arraste de uma extremidade até a outra. Depois, “Ajustar pontos” permite puxar as pontas ou mover a reta inteira pelo centro. Sem calibração métrica, não é uma régua em milímetros.</p>
+        <p><strong>Desenhar curva:</strong> o botão “✎ Desenhar curva” abre uma camada independente. Clique em diversos pontos da imagem, arraste as bolinhas para deixar o contorno maleável e escolha “Concluir curva”. Você pode desenhar outras curvas sem apagar as anteriores, ou voltar aos ângulos desligando “Desenhar curva”. A foto PNG exportada inclui essas curvas; elas são uma anotação visual, não um rastreio anatômico.</p>
         <p><strong>Alinhamento ao solo:</strong> segure Shift enquanto desenha ou move uma ponta para deixá-la exatamente na mesma altura da referência (linha horizontal de 0°). Isso vale também para qualquer haste de um ângulo de três pontos: a outra haste permanece livre para medir a inclinação real do pé. Shift nunca força a vertical nem um ângulo de 90°.</p>
         <p><strong>Excluir vários registros:</strong> abra “Fotos, vídeos e análises salvos”, marque os arquivos desejados ou “Selecionar tudo” e clique em “Excluir selecionados”. Uma confirmação evita exclusões acidentais. Essa limpeza é definitiva neste navegador; baixe antes as análises que queira conservar.</p>
         <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. No quadro de vídeo capturado, a nova opção “Seguir pontos por quadro” tenta deslocar os marcadores automaticamente; quando um ponto se perder, corrija-o com o mouse. Com essa opção desligada, as marcações permanecem fixas.</p>
@@ -391,6 +392,13 @@
       byId('status').textContent = 'Este navegador não permite desenhar nesta ferramenta 2D.';
       return;
     }
+    // Curva maleável em camada independente: não modifica os ângulos,
+    // marcadores, rastreio nem o histórico dos pontos do bike fit.
+    const curveLayer=globalThis.PAIVA_SPLINE?.attach({
+      host:canvas.parentElement,target:canvas,
+      toolbar:section.querySelector('.paiva-2d-title-actions'),
+      closeOnFinish:false,label:'Curva 2D'
+    });
     const original = document.createElement('canvas');
     const originalCtx = original.getContext('2d');
     if (!originalCtx) return;
@@ -3078,7 +3086,15 @@
     });
     byId('save').addEventListener('click',() => {
       if (!photoLoaded) {message('Carregue uma fotografia antes de salvar.');return;}
-      canvas.toBlob(blob => {
+      // A foto exportada inclui a camada de curvas sem alterar o quadro base
+      // nem destruir qualquer marcação angular existente.
+      const exportCanvas=document.createElement('canvas');
+      exportCanvas.width=canvas.width;exportCanvas.height=canvas.height;
+      const exportCtx=exportCanvas.getContext('2d');
+      if(!exportCtx){message('Não foi possível preparar a imagem.');return;}
+      exportCtx.drawImage(canvas,0,0);
+      if(curveLayer?.canvas)exportCtx.drawImage(curveLayer.canvas,0,0,canvas.width,canvas.height);
+      exportCanvas.toBlob(blob => {
         if (!blob) {message('Não foi possível gerar a imagem.');return;}
         const uri=URL.createObjectURL(blob);
         const link=document.createElement('a');

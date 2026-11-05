@@ -1,0 +1,18 @@
+/* Curva maleável PAIVA: uma camada independente sobre o 2D e o túnel. */
+.paiva-spline-host{position:relative}
+.paiva-spline-layer{position:absolute;z-index:7;display:block;max-width:none;
+  pointer-events:none;touch-action:none;background:transparent;cursor:crosshair}
+.paiva-spline-controls{display:inline-flex;align-items:center;flex-wrap:wrap;
+  gap:5px;min-width:0}
+.paiva-spline-controls button{display:inline-flex;align-items:center;
+  justify-content:center;min-height:32px;border-radius:9px;border:1px solid #637b8b;
+  background:#202c36;color:#eff3f5;padding:6px 9px;
+  font:700 11px system-ui,sans-serif;cursor:pointer}
+.paiva-spline-controls button[aria-pressed="true"]{border-color:#ffe177;
+  color:#171c22;background:#ffe177}
+.paiva-spline-controls button:disabled{opacity:.4;cursor:not-allowed}
+.paiva-spline-controls button[hidden]{display:none!important}
+#paiva-athlete-2d .paiva-spline-controls button{width:auto;min-height:33px;padding:7px 10px}
+@media(max-width:650px){.paiva-spline-controls{width:100%}
+  .paiva-spline-controls button{flex:1 1 auto}}
+@media print{.paiva-spline-controls{display:none!important}}

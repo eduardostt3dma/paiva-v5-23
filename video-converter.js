@@ -13,11 +13,15 @@
       document.querySelector('main > footer');
     if(!next)return;
     const section=document.createElement('section');
-    section.id='paiva-video-converter';section.className='card paiva-converter';
+    section.id='paiva-video-converter';section.className='card paiva-converter paiva-converter-compact';
+    section.hidden=true;
     section.innerHTML=`
       <div class="paiva-converter-heading">
         <div><span>BIBLIOTECA DE VÍDEOS</span><h2>CONVERSOR AVI / MOV / MP4 → MP4</h2></div>
-        <button type="button" id="paiva-converter-help" aria-label="Como funciona a conversão" aria-expanded="false">?</button>
+        <div class="paiva-converter-header-actions">
+          <button type="button" id="paiva-converter-help" aria-label="Como funciona a conversão" aria-expanded="false">?</button>
+          <button type="button" id="paiva-converter-close" title="Fechar conversor">✕ Fechar</button>
+        </div>
       </div>
       <div id="paiva-converter-explain" hidden>
         <p>MP4 compatível abre diretamente nos visores e na Análise Angular 2D. Se o vídeo antigo não reproduzir, escolha-o aqui e converta para MP4 com H.264. A conversão ocorre no próprio computador, sem upload.</p>
@@ -37,6 +41,7 @@
         <div class="paiva-converter-finish" id="paiva-converter-finish" hidden>
           <a id="paiva-converter-download">Baixar MP4 convertido</a>
           <button type="button" id="paiva-converter-analyze">Abrir na Análise 2D</button>
+          <button type="button" id="paiva-converter-wind">Abrir no Túnel de Vento</button>
         </div>
       </div>`;
     next.before(section);
@@ -49,15 +54,29 @@
       shortcut.id='paiva-open-video-converter';
       shortcut.textContent='🎞 Conversor MP4';
       shortcut.title='Abrir conversor de vídeos AVI, MOV, MKV e MP4';
+      shortcut.setAttribute('aria-expanded','false');
+      shortcut.setAttribute('aria-controls','paiva-video-converter');
       shortcut.addEventListener('click',()=>{
-        section.scrollIntoView({behavior:'smooth',block:'start'});
-        const file=document.getElementById('paiva-converter-file');
-        if(file)file.focus({preventScroll:true});
+        section.hidden=!section.hidden;
+        shortcut.setAttribute('aria-expanded',String(!section.hidden));
+        if(!section.hidden){
+          section.scrollIntoView({behavior:'smooth',block:'start'});
+          const file=document.getElementById('paiva-converter-file');
+          if(file)file.focus({preventScroll:true});
+        }
       });
       titleActions.append(shortcut);
     }
     const el=id=>document.getElementById('paiva-converter-'+id);
     const status=text=>el('status').textContent=text;
+    el('close').addEventListener('click',()=>{
+      section.hidden=true;
+      const shortcut=document.getElementById('paiva-open-video-converter');
+      if(shortcut){
+        shortcut.setAttribute('aria-expanded','false');
+        shortcut.focus({preventScroll:true});
+      }
+    });
     let chosen=null,converted=null,downloadUrl=null,wasmBlobUrl=null,engine=null,busy=false,cancelled=false;
     let libraryPromise=null,lastLog='';
 
@@ -207,6 +226,21 @@
       const app=globalThis.PAIVA_ATHLETE_2D;
       if(!app?.openVideo){status('Análise 2D não encontrada. Atualize todos os arquivos do PAIVA.');return;}
       app.openVideo(converted,converted.name);
+    });
+    el('wind').addEventListener('click',async()=>{
+      if(!converted)return;
+      const app=globalThis.PAIVA_WIND_SIMPLE;
+      if(!app?.openVideo){
+        status('Túnel de Vento indisponível. Atualize todos os arquivos do PAIVA.');
+        return;
+      }
+      try{
+        const opened=await app.openVideo(converted,converted.name);
+        status(opened?'MP4 enviado ao Túnel de Vento. Você também pode baixá-lo.':
+          'Vídeo carregado no Túnel, mas não reproduziu. Confira o codec.');
+      }catch(error){
+        status('Falha ao abrir no Túnel de Vento: '+(error?.message||'vídeo indisponível'));
+      }
     });
     window.addEventListener('pagehide',()=>{
       cancelled=true;if(engine)try{engine.terminate();}catch(_){}

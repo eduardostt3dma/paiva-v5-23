@@ -39,8 +39,8 @@
     section.innerHTML=[
       '<div class="aero-heading"><div><span>PAIVA LAB · VISUAL</span>',
       '<h2>TÚNEL DE VENTO</h2>',
-      '<p>O vento encontra a silhueta do ciclista e se desvia automaticamente. Independente do 2D.</p></div>',
-      '<span class="aero-badge">V5.39</span></div>',
+      '<p>O vento ilustrativo contorna a silhueta estimada do ciclista. Independente do 2D.</p></div>',
+      '<span class="aero-badge">V5.42</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',
@@ -48,16 +48,17 @@
       '<button type="button" id="aero-capture">▣ Usar quadro do 2D</button>',
       '</div>',
       '<div class="aero-detection">',
-      '<label>Reconhecer ciclista com <select id="aero-background"><option value="green">Fundo verde</option><option value="wall">Parede comum</option></select></label>',
+      '<label>Reconhecer ciclista com <select id="aero-background"><option value="auto" selected>Foto comum · automático</option><option value="green">Fundo verde</option><option value="wall">Parede comum</option></select></label>',
       '<button type="button" id="aero-empty-capture" hidden>▣ Memorizar fundo vazio</button>',
       '<label class="aero-file" id="aero-empty-file-wrap" hidden>↑ Foto da parede vazia<input id="aero-empty-file" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<details class="aero-advanced"><summary>⚙ Sensibilidade</summary>',
       '<label>Separação do fundo <input id="aero-threshold" type="range" min="12" max="100" value="36" step="2"></label></details>',
-      '<span id="aero-detection-status" role="status" aria-live="polite">Aguardando imagem com fundo verde.</span>',
+      '<span id="aero-detection-status" role="status" aria-live="polite">Aguardando foto ou vídeo.</span>',
       '</div>',
       '<div class="aero-stage"><canvas id="aero-canvas" width="960" height="540" aria-label="Foto ou vídeo com ondas de vento ilustrativas atravessando a imagem"></canvas>',
       '<video id="aero-source-video" muted playsinline hidden></video></div>',
-      '<p class="aero-guidance" id="aero-message" role="status" aria-live="polite">Abra uma foto ou vídeo com fundo verde. O vento irá contornar a silhueta reconhecida automaticamente.</p>',
+      '<p class="aero-guidance" id="aero-message" role="status" aria-live="polite">Abra uma foto ou vídeo. Para fundo simples, o PAIVA tentará separar o atleta automaticamente.</p>',
+      '<p class="aero-curve-hint">Opcional: ✎ Recorte flexível → clique em pontos ao redor do atleta → puxe as bolinhas ou a própria linha → ✓ Fechar recorte. Para voltar ao automático, use ✕ Limpar curvas.</p>',
       '<div class="aero-measure">',
       '<button type="button" id="aero-trunk">📐 Medir tronco (2 pontos)</button>',
       '<div><strong id="aero-trunk-value">Ângulo do tronco: —</strong>',
@@ -71,11 +72,21 @@
       '<button type="button" id="aero-stop-camera" hidden>■ Desligar câmera</button>',
       '<button type="button" id="aero-save">↓ Salvar imagem</button>',
       '</div>',
-      '<p class="aero-disclaimer">O ciclista é identificado automaticamente pelos pixels separados do fundo verde ou da imagem da parede vazia. ',
+      '<p class="aero-disclaimer">Em foto comum, a separação da silhueta é uma ESTIMATIVA por contraste do fundo; não é reconhecimento anatômico por IA. ',
+      'Para maior nitidez, use fundo verde ou compare com uma imagem da parede vazia. ',
       'Roupa verde, sombras, iluminação variável ou câmera móvel podem prejudicar a detecção. ',
       'As ondas continuam <strong>ilustrativas</strong>: não representam dinâmica real do ar, CdA, arrasto ou watts.</p>'
     ].join('');
     athlete.after(section);
+    const compareJump=document.createElement('button');
+    compareJump.type='button';
+    compareJump.textContent='▥ Comparar A/B frontal';
+    compareJump.title='Abrir comparação de área projetada na vista frontal';
+    compareJump.addEventListener('click',()=>{
+      const comparison=document.getElementById('paiva-aero-compare');
+      if(comparison)comparison.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    section.querySelector('.aero-toolbar')?.append(compareJump);
     const actions=athlete.querySelector('.paiva-2d-title-actions');
     if(actions){
       const shortcut=document.createElement('button');
@@ -127,11 +138,28 @@
     const maskCtx=maskCanvas.getContext('2d');
     let mode='demo',videoURL=null,stream=null,playing=true,direction=1,phase=0;
     let visible=true,lastTime=0;
-    let lastAnalysis=0,blankReference=null,detection=null;
+    let lastAnalysis=0,blankReference=null,detection=null,manualContour=null;
     let contentRoi={left:0,top:0,right:1,bottom:1};
     let ellipse={cx:W*.53,cy:H*.53,rx:W*.32,ry:H*.35};
     let pointerStart=null,dragging=false;
     let trunkPoints=[],measuringTrunk=false;
+    // O automático segue como padrão. Um contorno manual opcional, quando
+    // fechado, tem prioridade para a área que o vento deve contornar.
+    const curveTool=globalThis.PAIVA_SPLINE?.attach({
+      host:section.querySelector('.aero-stage'),target:canvas,
+      toolbar:section.querySelector('.aero-toolbar'),
+      closeOnFinish:true,label:'Recorte do vento',
+      onChange:()=>{
+        const previous=manualContour;
+        const mask=curveTool?.getMask(320,180);
+        manualContour=mask?
+          globalThis.PAIVA_AERO_CONTOUR?.contourFromSegmentation(mask):null;
+        if(previous||manualContour){
+          if(mode!=='demo')identifySilhouette();
+          render();
+        }
+      }
+    });
     const notify=message=>{el('aero-message').textContent=message;};
     const strength=()=>Number(el('aero-strength').value)||3;
     function resetTrunk(){
@@ -170,15 +198,18 @@
       return detectMiniCtx.getImageData(0,0,320,180);
     }
     function identifySilhouette(){
-      const pixels=currentPixels();
-      if(!pixels){detection=null;return;}
       try{
-        const segmentation=globalThis.PAIVA_WIND_SEGMENT?.segmentPixels(
-          pixels,blankReference,
-          {mode:backgroundMode(),threshold:sensitivity(),roi:contentRoi});
-        if(!segmentation)throw new Error('O módulo visual ainda não carregou completamente.');
-        if(segmentation.warning)throw new Error(segmentation.warning);
-        const contour=globalThis.PAIVA_AERO_CONTOUR?.contourFromSegmentation(segmentation);
+        let contour=manualContour;
+        if(!contour){
+          const pixels=currentPixels();
+          if(!pixels){detection=null;return;}
+          const segmentation=globalThis.PAIVA_WIND_SEGMENT?.segmentPixels(
+            pixels,blankReference,
+            {mode:backgroundMode(),threshold:sensitivity(),roi:contentRoi});
+          if(!segmentation)throw new Error('O módulo visual ainda não carregou completamente.');
+          if(segmentation.warning)throw new Error(segmentation.warning);
+          contour=globalThis.PAIVA_AERO_CONTOUR?.contourFromSegmentation(segmentation);
+        }
         if(!contour)throw new Error('Silhueta pouco definida. Use fundo uniforme, sem roupas da mesma cor.');
         detection=contour;
         const tinted=maskCtx.createImageData(320,180);
@@ -189,7 +220,11 @@
           tinted.data[p+2]=242;tinted.data[p+3]=255;
         }
         maskCtx.putImageData(tinted,0,0);
-        el('aero-detection-status').textContent='● Ciclista reconhecido · ondas desviando automaticamente';
+        el('aero-detection-status').textContent=manualContour?
+          '● Recorte flexível manual · área escolhida por você':
+          backgroundMode()==='auto'?
+          '● Contorno estimado da foto · confira a silhueta':
+          '● Ciclista destacado do fundo · ondas desviando automaticamente';
         el('aero-detection-status').dataset.detected='true';
       }catch(error){
         detection=null;
@@ -213,8 +248,8 @@
       mode='photo';
       resetTrunk();
       identifySilhouette();
-      notify(detection?'Silhueta reconhecida. O vento contorna automaticamente o espaço do ciclista.':
-        'Foto carregada, mas sem silhueta confiável. O vento ficará suspenso até reconhecer o atleta. Use fundo verde ou foto da parede vazia.');
+      notify(detection?'Contorno visual estimado. Confira se corresponde ao atleta; o vento permanece ilustrativo.':
+        'Foto carregada, mas sem contorno confiável. Ajuste Sensibilidade ou use fundo verde/parede vazia.');
       render();
     }
     function airPath(){
@@ -452,20 +487,33 @@
       image.onerror=()=>{URL.revokeObjectURL(url);input.value='';notify('Não foi possível abrir esta foto.');};
       image.src=url;
     });
-    el('aero-video-file').addEventListener('change',async event=>{
-      const input=event.target,file=input.files?.[0];
-      if(!file)return;
+    async function openWindVideo(file,label=file?.name){
+      if(!(file instanceof Blob)||!file.size){
+        notify('Escolha primeiro um vídeo válido para abrir no Túnel de Vento.');
+        return false;
+      }
       stopVideo();videoURL=URL.createObjectURL(file);
       detection=null;blankReference=null;
       el('aero-detection-status').textContent='Aguardando reconhecimento no vídeo.';
       video.src=videoURL;video.loop=true;mode='video';resetTrunk();
       el('aero-play').hidden=false;el('aero-stop-camera').hidden=true;
+      section.scrollIntoView({behavior:'smooth',block:'start'});
       try{
         await video.play();el('aero-play').textContent='⏸ Pausar vídeo';
-        notify('Vídeo carregado. Com fundo verde, o vento reconhecerá a silhueta automaticamente.');
-      }catch(error){notify('O navegador não reproduziu este vídeo. Para Windows, tente MP4 H.264.');}
+        notify('Vídeo '+String(label||'')+' carregado. O reconhecimento do atleta será tentado automaticamente.');
+        return true;
+      }catch(error){
+        notify('O navegador não reproduziu este vídeo. Para Windows, tente MP4 H.264.');
+        return false;
+      }
+    }
+    el('aero-video-file').addEventListener('change',async event=>{
+      const input=event.target,file=input.files?.[0];
+      if(!file)return;
+      await openWindVideo(file,file.name);
       input.value='';
     });
+    globalThis.PAIVA_WIND_SIMPLE={openVideo:openWindVideo};
     el('aero-webcam').addEventListener('click',async()=>{
       if(!navigator.mediaDevices?.getUserMedia){
         notify('Webcam exige HTTPS e permissão do navegador.');return;
@@ -504,7 +552,9 @@
       if(mode!=='demo')identifySilhouette();
       notify(wall?
         'Parede comum: capture primeiro o fundo VAZIO. Não mova a câmera, a iluminação nem os objetos depois.':
-        'Fundo verde selecionado. O contorno será identificado sem clique sobre o atleta.');
+        backgroundMode()==='green'?
+        'Fundo verde selecionado. O contorno será separado pela cor do fundo.':
+        'Foto comum: tentativa de contorno por contraste com os cantos. Confira a silhueta antes de interpretar o vento.');
       render();
     });
     el('aero-threshold').addEventListener('change',()=>{
@@ -565,7 +615,13 @@
     });
     el('aero-save').addEventListener('click',()=>{
       render();
-      canvas.toBlob(blob=>{
+      const saved=document.createElement('canvas');
+      saved.width=W;saved.height=H;
+      const savedCtx=saved.getContext('2d');
+      if(!savedCtx){notify('Não foi possível salvar a imagem.');return;}
+      savedCtx.drawImage(canvas,0,0);
+      if(curveTool?.canvas)savedCtx.drawImage(curveTool.canvas,0,0,W,H);
+      saved.toBlob(blob=>{
         if(!blob){notify('Não foi possível salvar a imagem.');return;}
         const url=URL.createObjectURL(blob),link=document.createElement('a');
         link.href=url;link.download='PAIVA_AERO_Onda_Visual.png';

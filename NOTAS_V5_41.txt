@@ -1,0 +1,49 @@
+PAIVA BIKE FIT STUDIO — V5.41 — CURVA FLEXÍVEL NO 2D E NO TÚNEL
+Idealizado e desenvolvido por Eduardo Paiva.
+
+1. NOVA FERRAMENTA "DESENHAR CURVA" NA ANÁLISE 2D
+   - Ative o comando no cabeçalho da análise.
+   - Clique ao longo da região que deseja desenhar.
+   - Arraste os pontos ou a própria linha para deformar suavemente a curva.
+   - Clique "Concluir curva". Você pode criar outras curvas.
+   - A curva permanece visível ao desativar a ferramenta, e é incluída
+     quando você utiliza "Salvar PNG" na análise.
+   - Esta camada gráfica não altera ângulos, históricos ou rastreio.
+   - Os desenhos desta nova ferramenta NÃO são incorporados aos arquivos
+     de projeto/histórico; guarde o PNG para preservar o desenho.
+
+2. NOVA FERRAMENTA "RECORTE FLEXÍVEL" NO TÚNEL DE VENTO
+   - Abra uma foto, vídeo ou quadro do 2D.
+   - Por padrão, o aplicativo tenta separar o atleta automaticamente.
+   - Se quiser escolher o contorno, ative "Recorte flexível".
+   - Clique em pontos ao redor da silhueta e arraste os pontos OU a linha.
+   - Clique "Fechar recorte". O contorno fechado funciona como obstáculo
+     opcional para as ondas visuais do vento.
+   - "Limpar curvas" restaura o reconhecimento automático. A opção
+     de fundo verde e a comparação com parede vazia permanecem.
+   - A curva é incluída no PNG ao usar "Salvar imagem".
+   - Este recorte representa apenas o desenho 2D; não mede força do vento,
+     área frontal real, watts, CdA, arrasto ou turbulência física.
+
+3. CONVERSOR E INTEGRIDADE DOS RECURSOS
+   - Conversor AVI/MOV/MP4 preservado em botão compacto na análise 2D.
+   - Depois da conversão, oferece "Abrir na Análise 2D" e
+     "Abrir no Túnel de Vento", além de "Baixar MP4 convertido".
+   - Logo, cor institucional, cadastro, TT, comparador, ângulos, rastreio,
+     câmera, PDF e todos os arquivos anteriores foram mantidos.
+   - Cache da PWA recebe nova identidade para carregar scripts recentes.
+
+4. COMO PUBLICAR
+   - No Windows, extraia este ZIP em uma pasta.
+   - Abra o GitHub na tela "Upload files" do repositório.
+   - Arraste TODOS os arquivos de dentro da pasta extraída (não o ZIP)
+     e clique "Commit changes".
+   - Atualize a página do aplicativo no Windows; se estiver aberto há
+     muito tempo, feche a aba e abra novamente para atualizar o cache.
+
+5. TESTES RECOMENDADOS
+   - Testar curvas com mouse em fotos laterais e frontais.
+   - Conferir recorte manual e automático em foto simples.
+   - Pausar e soltar vento após fechar ou limpar uma curva.
+   - Salvar um PNG em cada módulo e conferir a curva na imagem.
+   - Converter um arquivo pequeno e abrir nos dois módulos.

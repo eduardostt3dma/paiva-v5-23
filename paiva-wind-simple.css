@@ -24,6 +24,7 @@
 /* A medição anatômica fica preparada para fase posterior, fora desta UI. */
 .aero-measure{display:none!important}
 .aero-guidance{color:#d9eaf3;background:#162530;border:1px solid #304d5c;border-radius:9px;margin:9px 0;padding:10px 12px;font-size:12px;line-height:1.45;min-height:38px}
+.aero-curve-hint{font-size:10px;color:#c4ced8;line-height:1.5;margin:5px 0 12px}
 .aero-controls{align-items:center}
 .aero-strength{display:flex;align-items:center;gap:8px;font-size:12px;color:#e5e7ed;font-weight:700;padding:2px 5px}
 .aero-strength input{width:90px;accent-color:#f4d044}

@@ -9,12 +9,15 @@
     const visited=new Uint8Array(w*h),kept=new Uint8Array(w*h);
     const queue=new Int32Array(w*h);
     const minCount=Math.max(18,Math.ceil(w*h*.0008));
+    const centralCandidates=[];
     for(let start=0;start<source.length;start++){
       if(!source[start]||visited[start])continue;
       let head=0,tail=1;
+      let sumX=0,sumY=0;
       queue[0]=start;visited[start]=1;
       while(head<tail){
         const index=queue[head++],x=index%w,y=Math.floor(index/w);
+        sumX+=x;sumY+=y;
         const left=index-1,right=index+1,up=index-w,down=index+w;
         if(x>0&&source[left]&&!visited[left]){
           visited[left]=1;queue[tail++]=left;
@@ -29,7 +32,24 @@
           visited[down]=1;queue[tail++]=down;
         }
       }
-      if(tail>=minCount)for(let i=0;i<tail;i++)kept[queue[i]]=1;
+      if(tail>=minCount){
+        if(result.mode==='auto'){
+          centralCandidates.push({indices:queue.slice(0,tail),size:tail,
+            x:sumX/tail,y:sumY/tail});
+        }else for(let i=0;i<tail;i++)kept[queue[i]]=1;
+      }
+    }
+    if(result.mode==='auto'&&centralCandidates.length){
+      // Em fotos comuns, luminosos, logos e objetos periféricos podem ter
+      // mais contraste que o ciclista. Priorizar agrupamentos centrais sem
+      // declarar que essa seleção equivale a reconhecimento anatômico.
+      const score=item=>item.size*Math.exp(-Math.pow((item.x-w*.5)/(w*.19),2));
+      const anchor=centralCandidates.reduce((best,item)=>
+        !best||score(item)>score(best)?item:best,null);
+      for(const item of centralCandidates){
+        if(Math.abs(item.x-anchor.x)>w*.17)continue;
+        for(const index of item.indices)kept[index]=1;
+      }
     }
     const top=new Float32Array(w),bottom=new Float32Array(w);
     top.fill(NaN);bottom.fill(NaN);

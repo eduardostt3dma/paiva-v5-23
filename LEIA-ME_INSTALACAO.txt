@@ -1,4 +1,44 @@
-PAIVA V5.39 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_39.txt.
+PAIVA V5.42 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_42.txt.
+NOVO PAIVA AERO COMPARE — MODO PROJETOR:
+- Carregue uma foto frontal na POSIÇÃO A e outra na POSIÇÃO B.
+- O software tenta detectar ambas as silhuetas automaticamente.
+- Se o fundo confundir a análise, use Recorte flexível nos dois quadros.
+- Confirme que as imagens têm mesma câmera, distância, zoom,
+  ângulo e enquadramento para habilitar a comparação percentual.
+- A medição compara PIXELS OCUPADOS pelo contorno, não CdA nem watts.
+- Use o botão "Tela cheia · Projetor" para apresentar em telão.
+- Confira a sobreposição A/B e exporte o resumo em PNG.
+- Pode usar também "Quadro do 2D" para obter uma posição.
+- Logomarca registrada e módulos anteriores foram preservados.
+
+HISTÓRICO DA V5.41:
+PAIVA V5.41 — LEIA O ARQUIVO NOTAS_V5_41.txt.
+CURVAS FLEXÍVEIS NO 2D E NO TÚNEL DE VENTO:
+- Clique em "Desenhar curva" no 2D ou "Recorte flexível" no túnel.
+- Toque em alguns pontos da imagem. Arraste as bolinhas OU a própria
+  linha entre os pontos para ajustar a curva, como um traçado maleável.
+- No 2D, clique "Concluir curva" para manter um desenho fino na imagem.
+- No túnel, clique "Fechar recorte". O vento visual passa a contornar
+  esse recorte; "Limpar curvas" devolve a separação automática.
+- A curva concluída também entra no PNG salvo pelo botão da ferramenta.
+- O recorte é OPCIONAL: o reconhecimento automático permanece o padrão.
+- É uma simulação VISUAL, não estima arrasto, CdA, watts ou fluxo físico.
+- Nenhum arquivo anterior ou recurso existente foi removido.
+
+HISTÓRICO DA V5.40:
+PAIVA V5.40 — LEIA O ARQUIVO NOTAS_V5_40.txt.
+CONVERSOR COMPACTO + ENVIO AO TÚNEL + FOTOS COMUNS:
+- O botão "Conversor MP4" no 2D abre um painel compacto sob demanda.
+- A antiga tela grande fica recolhida, sem remover as funções.
+- Depois de converter, há três opções: Baixar MP4, Abrir no 2D e
+  Abrir no Túnel de Vento, com passagem direta do mesmo arquivo local.
+- O túnel passa a oferecer "Foto comum · automático" como primeira opção.
+  É uma separação aproximada de pixels por contraste do fundo, sem IA
+  anatômica; fundos complexos ainda podem exigir fundo verde/parede vazia.
+- A opção de pausar vento e as demais funções foram mantidas.
+
+HISTÓRICO DA V5.39:
+PAIVA V5.39 — LEIA O ARQUIVO NOTAS_V5_39.txt.
 CORREÇÕES DO CABEÇALHO E DO CONVERSOR:
 - Cabeçalho: uma única inscrição PAIVA BIKE FIT STUDIO, maior e amarela;
   logo abaixo, "Desenvolvido por Eduardo Paiva", sem repetir o nome.

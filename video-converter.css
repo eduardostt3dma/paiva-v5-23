@@ -2,6 +2,12 @@
 #paiva-video-converter {background:linear-gradient(145deg,#1f303d,#111c25);
   border:1px solid #586f7e;padding:16px;margin:18px 0;color:#e4eef4;
   scroll-margin-top:18px;}
+#paiva-video-converter[hidden] {display:none!important;}
+#paiva-video-converter.paiva-converter-compact {max-width:690px;padding:13px 15px;margin:12px 0;}
+#paiva-video-converter .paiva-converter-header-actions {display:flex;gap:7px;align-items:center;}
+#paiva-converter-close {min-height:32px;border-radius:9px;background:#23313c;
+  border:1px solid #667a88;color:#e8f2f8;padding:7px 10px;
+  font:700 11px system-ui,sans-serif;cursor:pointer;}
 #paiva-open-video-converter {background:#202a33;color:#ffe16a;
   border:1px solid #927c3b;border-radius:9px;padding:8px 11px;
   font:700 11px system-ui,sans-serif;cursor:pointer;white-space:nowrap;}
@@ -29,6 +35,7 @@
 #paiva-video-converter .paiva-converter-actions,
 #paiva-video-converter .paiva-converter-finish {display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:11px 0;}
+#paiva-video-converter .paiva-converter-finish {grid-template-columns:repeat(3,minmax(0,1fr));}
 #paiva-video-converter .paiva-converter-actions button,
 #paiva-video-converter .paiva-converter-finish button,
 #paiva-video-converter .paiva-converter-finish a {border-radius:9px;
