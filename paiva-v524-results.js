@@ -51,12 +51,21 @@
       if (simpleMode) {
         const screening=window.PAIVA_TT_SIMPLE.getEstimate();
         const candidates=screening.candidates||[];
-        addRow(fragment,'Tamanho TT para pesquisar · referência Trek',
+        addRow(fragment,'Tamanho para pesquisar · Trek Speed Concept SLR',
           candidates.length?candidates.map(item=>item.size).join(' ou '):'—',
-          screening.status+' Tabela específica da Trek Speed Concept SLR; não representa tamanho universal.');
-        addRow(fragment,'Top tube efetivo · referência Trek',
+          screening.status+' Critério oficial de estatura + entrepernas; não representa tamanho universal.');
+        addRow(fragment,'Top tube efetivo · catálogo Trek',
           candidates.length?candidates.map(item=>item.size+': '+fmt(item.topTube)+' cm').join(' | '):'—',
-          'Valor publicado da geometria desse modelo; não é a distância até os pads nem o top tube ideal do cliente.');
+          'Seat tube Trek: '+(candidates.length?candidates.map(item=>item.size+': '+fmt(item.seatTube)+' cm').join(' | '):'—')+
+          '. São dimensões publicadas desse quadro, NÃO alvo antropométrico nem pad reach.');
+        const canyon=screening.canyonCandidates||[];
+        addRow(fragment,'Tamanho para pesquisar · Canyon Speedmax CF 8 Di2',
+          canyon.length?canyon.map(item=>item.size).join(' ou '):'—',
+          screening.canyonStatus+' Critério oficial deste modelo: estatura.');
+        addRow(fragment,'Top tube · catálogo Canyon',
+          canyon.length?canyon.map(item=>item.size+': '+fmt(item.topTube)+' cm').join(' | '):'—',
+          'Seat tube Canyon: '+(canyon.length?canyon.map(item=>item.size+': '+fmt(item.seatTube)+' cm').join(' | '):'—')+
+          '. Ficha 4455; não comparar este top tube diretamente como alcance dos pads.');
         if (get('paiva-tt-path')?.value === 'old') {
           const oldTop=number('paiva-tt-old-top-tube',35,75);
           const oldSeat=number('paiva-tt-old-seat-tube',25,75);
@@ -102,7 +111,7 @@
     const note = get('validation');
     if (note) note.textContent = mode === 'tt'
       ? (window.PAIVA_TT_SIMPLE&&!window.PAIVA_TT_SIMPLE.isCatalogMode()
-        ? 'TT sem bicicleta: tamanho e top tube são uma TRIAGEM ANTROPOMÉTRICA da tabela de um fabricante (Trek Speed Concept SLR). Não são medidas ideais universais. Uma TT antiga pode ser registrada por top tube e seat tube, mas isso não define os pads.'
+        ? 'TT sem bicicleta: dois exemplos INDEPENDENTES e documentados de catálogo (Trek Speed Concept SLR e Canyon Speedmax CF 8 Di2). Tamanhos e top tubes NÃO são medidas ideais universais. A TT antiga pode ser registrada por top tube/seat tube, sem inferir alcance dos pads.'
         : 'TT com catálogo: os números não medidos são LIMITES MECÂNICOS de regulagem do modelo identificado, não alvos do atleta. Uma medida real dos pads substitui o exemplo.')
       : 'Referências exploratórias: a posição final deve ser confirmada na bicicleta. Top tube e mesa não equivalem ao alcance das mãos; registre a geometria real e as medidas finais.';
     if (typeof window.fillClientReport === 'function') window.fillClientReport();
@@ -111,7 +120,7 @@
   function initialize() {
     if (!get('results')) return;
     const warning=document.querySelector('#clientReport .report-warning p');
-    if (warning) warning.textContent = 'Road/MTB usam referências exploratórias por estatura. Para TT sem bicicleta, o tamanho e o top tube vêm de uma tabela específica de fabricante, cruzando estatura e entrepernas; isso não estima pad stack/reach individual. Top tube/seat tube de uma TT antiga são registros descritivos, sem previsão de compatibilidade. Com uma ficha de modelo, os intervalos dos pads são apenas limites de regulagem. A altura do selim por 0,883 parte do movimento central; 109% parte do eixo do pedal. Validar tudo no ajuste dinâmico.';
+    if (warning) warning.textContent = 'Road/MTB usam referências exploratórias por estatura. Para TT sem bicicleta, são exibidos separadamente dois catálogos identificados: Trek Speed Concept SLR (estatura + entrepernas) e Canyon Speedmax CF 8 Di2 (estatura). Os top tubes e seat tubes desses modelos são dimensões publicadas, NÃO medidas ideais calculadas para o atleta ou equivalentes a pad reach. TT antiga: medidas registradas pelo avaliador sem previsão de compatibilidade. Faixas de pads do catálogo avançado são limites de regulagem, não fit validado. A altura do selim por 0,883 parte do movimento central; 109% parte do eixo do pedal. Validar tudo no ajuste dinâmico.';
     document.addEventListener('input', render);
     document.addEventListener('change', render);
     document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', render));

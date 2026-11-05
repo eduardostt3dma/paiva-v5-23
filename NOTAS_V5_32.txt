@@ -1,0 +1,55 @@
+PAIVA BIKE FIT STUDIO — V5.32 — TRIAGEM TT SIMPLES, COM DADOS REAIS
+
+PRINCIPIO TECNICO
+- Sem simulador, TT e sem posicao dinamica validada, nao e possivel
+  deduzir com confianca pad stack/reach IDEAL apenas da antropometria.
+- O modulo nao inventa essa medida. Ele consulta duas tabelas de
+  fabricantes IDENTIFICADOS como ponto de partida para PESQUISA DE MODELOS.
+- Top tube e seat tube sao medidas publicadas de quadro (dados reais),
+  nao comprimento ideal ou certificacao de compatibilidade com o atleta.
+
+MODO "NAO TEM BICICLETA"
+- Basta preencher a estatura. A Canyon usa estatura para sugerir os
+  tamanhos DA SPEEDMAX CF 8 Di2, ficha 4455.
+- Trek Speed Concept SLR cruza estatura + entrepernas e so apresenta
+  tamanho quando ambas cabem simultaneamente na tabela oficial.
+- Se houver fronteira entre dois tamanhos, exibe os dois sem decidir sozinho.
+- Mostra o top tube e seat tube publicados para o(s) tamanho(s) identificado(s)
+  EM CADA MARCA SEPARADAMENTE, em centimetros.
+- Exemplo apenas para teste: 180 cm de estatura e 83 cm de entrepernas:
+  Trek Speed Concept SLR tamanho G, top tube efetivo 54,1 cm;
+  Canyon Speedmax CF 8 Di2 tamanho M, top tube 51,1 cm.
+- Esses dois numeros distintos nao formam uma faixa de fit individual;
+  servem para mostrar que geometria depende do modelo.
+- A altura de selim por entrepernas x 0,883 desde o centro do MC permanece
+  como uma estimativa INICIAL que exige ajuste dinamico.
+- Tronco e bracos permanecem coletados para a avaliacao do bike fitter,
+  mas nao recebem coeficientes nao validados para gerar alcance TT.
+
+MODO "TT ANTIGA"
+- Registra top tube efetivo e seat tube do quadro trazido pelo cliente
+  sem exigir stack/reach ou identificacao de uma marca.
+- Essas medidas nao sao convertidas em reach dos pads.
+
+MODO "TENHO MODELO E CATALOGO"
+- Mantem a avaliacao avancada existente de faixas de regulagem dos pads.
+- Modelos diferentes ou anos diferentes exigem a sua ficha especifica.
+
+FONTES PRIMARIAS (verifique ano/versao antes da compra)
+- Trek Speed Concept SLR, sizing por altura e cavalo, coluna E
+  "Effective top tube", coluna A "Seat tube":
+  https://www.trekbikes.com/us/en_US/bikes/road-bikes/triathlon-bikes/speed-concept/f/F231/speed-concept-slr-9/35757/
+- Canyon Speedmax CF 8 Di2, geometria ficha 4455, linhas
+  "Body Height", "Top Tube Length", "Seat Tube Length":
+  https://www.canyon.com/en-de/productpdf/geometry/?pid=4455
+
+PRESERVADO
+- Marca registrada sem mudanca de cor e titulo institucional amarelo.
+- 2D com exclusao persistente de ponto da V5.31 e suporte a projetos antigos.
+- Antropometria, arco plantar, banco de Wells, Road/MTB, fichas e PDF.
+- Sem acesso automatico a sites: as referencias fixas foram verificadas
+  em tabelas oficiais, e o modo "Outro modelo" usa dados digitados.
+
+INSTALACAO
+- Extraia o ZIP, envie TODOS os arquivos para a raiz do GitHub.
+- Feche e reabra o app instalado para carregar o novo cache.
