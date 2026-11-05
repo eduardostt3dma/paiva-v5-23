@@ -1,7 +1,7 @@
-PAIVA V5.27 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_27.txt.
-Esta revisao corrige um caso real de desaparecimento do angulo na rodinha:
-um quadro com apenas ponto ou linha nao substitui mais a referencia angular.
-As correcoes da marca amarela e do protocolo TT da V5.26 seguem incluidas.
+PAIVA V5.28 — LEIA PRIMEIRO O ARQUIVO NOTAS_V5_28.txt.
+Esta revisao inclui triagem TT sem simulador, usando faixas reais de geometria
+de modelos identificados em catalogos de fabricante, sem confundir ajustes
+possiveis da bike com o fit ideal do cliente. O 2D V5.27 segue preservado.
 As informações abaixo registram o histórico das revisões anteriores.
 
 EVOLUÇÃO DO RELATÓRIO DO CLIENTE — 04/11/2026:

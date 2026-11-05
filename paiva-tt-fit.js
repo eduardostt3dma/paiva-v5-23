@@ -1,5 +1,5 @@
-/* PAIVA V5.26 — TT profissional: coordenadas dos apoios independentes do quadro.
-   Não converter a referência Road por estatura para prescrever uma TT. */
+/* PAIVA V5.28 — TT: coordenadas medidas OU limites reais de catálogo.
+   Nunca apresentar centro da regulagem como posição individual ideal. */
 (() => {
   'use strict';
   const el = id => document.getElementById(id);
@@ -11,6 +11,15 @@
   };
   const mm = value => value === null ? '—' :
     value.toLocaleString('pt-BR', {maximumFractionDigits:1}) + ' mm';
+  function displayValues() {
+    const stack = measured('paiva-tt-pad-stack', 200, 1200);
+    const reach = measured('paiva-tt-pad-reach', 100, 900);
+    const catalog = window.PAIVA_TT_REFERENCE?.getEstimate?.();
+    const band = pair => pair ? pair[0] + '–' + pair[1] + ' mm' : '—';
+    return {stack,reach,catalog,
+      stackText:stack === null ? band(catalog?.padStack) : mm(stack),
+      reachText:reach === null ? band(catalog?.padReach) : mm(reach)};
+  }
 
   function syncReportPreview() {
     if (mode() !== 'tt') return;
@@ -32,17 +41,22 @@
     panel.hidden = !isTT;
     const geometryNote = document.querySelector('.layout .disclaimer');
     if (geometryNote) geometryNote.textContent = isTT
-      ? 'TT: a imagem apresenta PAD STACK e PAD REACH medidos nos apoios. Stack/reach do quadro TT devem ser consultados na geometria do modelo; não são as mesmas grandezas e não resultam de uma conversão Road.'
+      ? 'TT: quando os pads não foram medidos, a imagem mostra apenas a FAIXA DE REGULAGEM de um modelo identificado. Esses números NÃO representam a posição individual do atleta; quadro e apoios são medidas diferentes.'
       : 'Pré-fit Road/MTB: stack/reach do quadro são referências exploratórias de triagem por estatura, não um ajuste individual validado. Confira a geometria real e a avaliação dinâmica.';
     const legend = document.querySelector('.diagram-legend span:first-child');
     if (legend?.lastChild?.nodeType === 3) legend.lastChild.nodeValue = isTT
-      ? ' Coordenadas reais dos apoios TT' : ' Medidas de geometria do quadro';
+      ? ' Medidas ou faixas identificadas dos apoios TT' : ' Medidas de geometria do quadro';
     if (!isTT) return;
 
-    const stack = measured('paiva-tt-pad-stack', 200, 1200);
-    const reach = measured('paiva-tt-pad-reach', 100, 900);
-    if (el('ttStackValue').textContent !== mm(stack)) el('ttStackValue').textContent = mm(stack);
-    if (el('ttReachValue').textContent !== mm(reach)) el('ttReachValue').textContent = mm(reach);
+    const {stack,reach,catalog,stackText,reachText} = displayValues();
+    if (el('ttStackValue').textContent !== stackText) el('ttStackValue').textContent = stackText;
+    if (el('ttReachValue').textContent !== reachText) el('ttReachValue').textContent = reachText;
+    const photo = el('ttPhotoPanel');
+    const labels = photo?.querySelectorAll('.photo-data span');
+    if (labels?.length >= 2) {
+      labels[0].textContent = reach === null ? 'PAD REACH · FAIXA' : 'PAD REACH · MEDIDO';
+      labels[1].textContent = stack === null ? 'PAD STACK · FAIXA' : 'PAD STACK · MEDIDO';
+    }
 
     const complete = stack !== null && reach !== null;
     const button = el('paiva-tt-use-comparator');
@@ -50,7 +64,9 @@
     const status = el('paiva-tt-pad-status');
     if (status) status.textContent = complete
       ? 'Coordenadas registradas. Agora você pode compará-las com a faixa de ajuste dos apoios de cada TT.'
-      : 'Sem medição válida dos dois pads, nenhuma posição TT será estimada a partir da tabela Road.';
+      : catalog
+        ? 'As faixas acima são apenas limites do modelo de referência. Preencha os pads reais para comparar a posição do atleta.'
+        : 'Informe a estatura para ver um exemplo de regulagem; nenhuma coordenada ideal TT é calculada só pela antropometria.';
 
     syncReportPreview();
     if (typeof window.fillClientReport === 'function') window.fillClientReport();
@@ -87,14 +103,16 @@
     document.addEventListener('input', event => {
       if (event.target?.id === 'height' || event.target?.id === 'inseam') render();
     });
+    document.addEventListener('change',event=>{
+      if(event.target?.id==='paiva-tt-model')render();
+    });
     // O pré-fit antigo repinta todos os cartões (inclusive os ocultos) em cada
     // input. Um observador restitui o valor medido sem permitir que reapareça a
     // antiga estimativa TT de quadro; só escreve quando o conteúdo difere.
     const observer = new MutationObserver(() => {
       if (mode() !== 'tt') return;
-      const stack = mm(measured('paiva-tt-pad-stack', 200, 1200));
-      const reach = mm(measured('paiva-tt-pad-reach', 100, 900));
-      if (el('ttStackValue').textContent !== stack || el('ttReachValue').textContent !== reach)
+      const {stackText,reachText}=displayValues();
+      if (el('ttStackValue').textContent !== stackText || el('ttReachValue').textContent !== reachText)
         render();
     });
     for (const id of ['ttStackValue', 'ttReachValue'])

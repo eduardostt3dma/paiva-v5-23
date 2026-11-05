@@ -46,6 +46,29 @@ body #paiva-bike-project {border-color:#667a87 !important;background:linear-grad
 #paiva-tt-coordinates button {margin-top:12px;max-width:100%}
 #paiva-tt-coordinates button:disabled {opacity:.5;cursor:not-allowed}
 #paiva-tt-pad-status {margin:9px 0 0 !important;color:#f4d876 !important}
+/* V5.28: faixas TT reais por modelo, sem simulador e sem prescrição falsa. */
+#paiva-tt-catalog[hidden],#paiva-tt-catalog-result[hidden],#paiva-tt-catalog-empty[hidden],#paiva-tt-custom-fields[hidden] {display:none !important}
+#paiva-tt-catalog {padding:15px 14px;margin:0 0 16px;border:1px solid #5d7380;border-radius:12px;background:linear-gradient(140deg,#1f303b,#101b22)}
+.paiva-tt-catalog-header {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:7px;margin:0 0 10px}
+.paiva-tt-catalog-header span {font-size:10px;font-weight:850;letter-spacing:.12em;color:#f8d44e}
+.paiva-tt-catalog-header strong {font-size:13px;color:#f1f6f8}
+#paiva-tt-catalog p {margin:7px 0 12px;font-size:11px;line-height:1.65}
+.paiva-tt-model-label {display:block;font-size:11px;font-weight:800;color:#f3f6f8}
+.paiva-tt-model-label select {display:block;box-sizing:border-box;width:100%;margin:6px 0 12px;padding:11px;background:#111820;color:#f2f7fb;border:1px solid #7b919c;border-radius:9px}
+.paiva-tt-custom-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:4px 0 14px}
+.paiva-tt-custom-grid label {display:block;font-size:10px;font-weight:750;color:#dfebf2}
+.paiva-tt-custom-grid input {display:block;width:100%;min-width:0;margin-top:5px;padding:10px 7px;background:#0d151b;color:#f5f8fa;border:1px solid #667d8b;border-radius:8px;font-size:13px}
+.paiva-tt-catalog-size {font-size:12px;margin:12px 0;color:#c8d7df}
+.paiva-tt-catalog-size strong {color:#f8d44e;font-size:17px}
+.paiva-tt-catalog-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0}
+.paiva-tt-catalog-grid>div {min-width:0;background:#101a23;border:1px solid #5a707e;border-radius:11px;padding:12px}
+.paiva-tt-catalog-grid span,.paiva-tt-catalog-grid small {display:block;font-size:10px;color:#c8d5dd;line-height:1.4}
+.paiva-tt-catalog-grid strong {display:block;font-size:18px;color:#f5d46e;margin:7px 0;overflow-wrap:anywhere}
+.paiva-tt-catalog-grid small b {color:#fff}
+#paiva-tt-catalog .paiva-tt-catalog-alert {border-left:2px solid #f7c85e;background:#2b2b23;padding:8px 10px;color:#f8dd9b}
+#paiva-tt-catalog a {color:#f8d44e;font-size:11px;font-weight:700}
+#paiva-tt-catalog .paiva-tt-catalog-warning {margin:12px 0 0;border-top:1px solid #536773;padding-top:11px;color:#bdcbd3}
+@media(max-width:460px){.paiva-tt-catalog-grid {grid-template-columns:1fr}}
 #paiva-v524-nav {
   position:sticky;top:0;z-index:25;display:flex;gap:7px;overflow:auto;
   scrollbar-width:thin;padding:10px 0;margin:12px 0 -3px;

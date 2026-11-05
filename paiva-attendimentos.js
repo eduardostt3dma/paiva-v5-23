@@ -8,7 +8,7 @@
   const clientIds = ['clientName','evalDate','clientEmail','clientPhone','clientBirth','clientSex'];
   const selectors = [
     '#fields input','#fields select','.bike-meta input','#bikeFields input',
-    '#paiva-proportions-conclusion','#paiva-tt-coordinates input','#paiva-bike-project input',
+    '#paiva-proportions-conclusion','#paiva-tt-coordinates input','#paiva-tt-model','#paiva-bike-project input',
     '#paiva-bike-project select','#paiva-compare input'
   ];
   let database;
@@ -91,7 +91,7 @@
     const panel=document.createElement('section');
     panel.className='card paiva-sessions';panel.id='paiva-attendimentos';
     panel.innerHTML=`
-      <div class="paiva-sessions-title"><div><span>ARQUIVO LOCAL · PAIVA V5.27</span>
+      <div class="paiva-sessions-title"><div><span>ARQUIVO LOCAL · PAIVA V5.28</span>
         <h2>Atendimentos</h2></div><span class="paiva-sessions-indicator" id="paiva-session-current">Ficha nova</span></div>
       <div class="paiva-sessions-actions">
         <button type="button" id="paiva-session-save" class="btn primary">Salvar ficha</button>

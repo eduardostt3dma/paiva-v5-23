@@ -1,0 +1,46 @@
+PAIVA BIKE FIT STUDIO — V5.28 — PRE-FIT TT SEM SIMULADOR
+
+NOVO METODO DE TRIAGEM
+- O profissional sempre tira a antropometria, mesmo quando o cliente nao tem
+  bicicleta TT e ainda nem escolheu o modelo.
+- A estatura aponta um tamanho de REFERENCIA em uma ficha real do fabricante.
+- O app mostra pad stack e pad reach como INTERVALOS DE REGULAGEM da bike,
+  nunca como o fit biomecanico individual do atleta.
+- Mostra o ponto central de cada intervalo apenas como descricao matematica
+  da regulagem, sem recomendar esse centro como alvo do ciclista.
+- A altura inicial do selim e calculada pela entrepernas x 0,883 (medida desde
+  o centro do MC), e comparada com a faixa de canote/selim publicada.
+- Se o selim inicial esta fora da faixa, aparece alerta para verificar
+  convencao de medida e eventual tamanho adjacente.
+- Tronco e bracos fazem parte da ficha e da avaliacao profissional, mas nao
+  recebem coeficientes de TT inventados para fabricar pad stack/reach ideal.
+- Uma Road do cliente pode ajudar na observacao de mobilidade/postura;
+  stack/reach da Road nao sao convertidos diretamente para pads de TT.
+- Se o profissional tem pad stack/reach efetivamente medidos, esses valores
+  SUBSTITUEM as faixas de exemplo no painel e no PDF.
+- O botao do comparador continua usando somente coordenadas medidas como
+  referencia profissional, nao o centro matematico das faixas.
+
+FONTES DE GEOMETRIA INCLUIDAS (DOIS EXEMPLOS ESPECIFICOS)
+- Canyon Speedmax CF 8 Di2, ficha produto 4455:
+  https://www.canyon.com/en-de/productpdf/geometry/?pid=4455
+- Canyon Speedmax CFR Di2, ficha produto 4351:
+  https://www.canyon.com/en-us/productpdf/geometry/?pid=4351
+- Nao generalizar esses intervalos para outras marcas, modelos, anos ou
+  montagens. A compatibilidade final exige consulta a ficha atual da bike,
+  verificacao do selim, avaliacao dinamica e pontos de contato.
+- Opcao 'Outro modelo' permite digitar as faixas de pad stack/reach publicadas
+  para qualquer TT. Nome, tamanho e faixa de selim sao opcionais conforme a
+  disponibilidade da ficha; faixas invertidas ou incompletas nao sao aceitas.
+- Esses campos sao guardados junto a ficha local do cliente.
+
+OUTRAS FUNCOES PRESERVADAS
+- Cor original da marca registrada e titulo institucional amarelo.
+- Persistencia visual dos angulos 2D por cinco giros e tratamento de quadros
+  com ponto/linha da V5.27.
+- Cadastro, antropometria, comparador de quadros, PDF, videos, webcam,
+  fichas locais e funcionamento offline.
+
+INSTALACAO
+- Extraia o ZIP, publique TODOS os arquivos extraidos no GitHub e aguarde.
+- Feche e reabra a PWA para atualizar o cache. Nao apaga clientes salvos.

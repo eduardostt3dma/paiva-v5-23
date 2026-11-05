@@ -1,5 +1,5 @@
-/* PAIVA V5.26 — referência de quadros Road/MTB separada de pads TT.
-   TT depende de medição profissional, não de uma curva Road por estatura. */
+/* PAIVA V5.28 — Road/MTB independentes; TT separa medição real de faixas
+   publicadas por fabricantes. Faixa de regulagem NÃO é fit individual. */
 (() => {
   'use strict';
 
@@ -49,10 +49,19 @@
     if (mode === 'tt') {
       const padStack = number('paiva-tt-pad-stack', 200, 1200);
       const padReach = number('paiva-tt-pad-reach', 100, 900);
-      addRow(fragment, 'Pad stack · apoio TT', padStack === null ? '—' : fmt(padStack) + ' mm',
-        'Coordenada vertical medida do centro do movimento central até o topo do apoio de antebraço. Não é o stack do quadro.');
-      addRow(fragment, 'Pad reach · apoio TT', padReach === null ? '—' : fmt(padReach) + ' mm',
-        'Coordenada horizontal medida do centro do movimento central até a borda posterior do apoio. Não é o reach do quadro.');
+      const catalog = window.PAIVA_TT_REFERENCE?.getEstimate?.();
+      const range = pair => pair ? pair[0] + '–' + pair[1] + ' mm' : '—';
+      const source = catalog ? catalog.model + ' · tamanho ' + catalog.size : 'modelo ainda não definido';
+      addRow(fragment, padStack === null ? 'Pad stack · faixa do modelo TT' : 'Pad stack · MEDIDO',
+        padStack === null ? range(catalog?.padStack) : fmt(padStack) + ' mm',
+        padStack === null
+          ? 'FAIXA DE AJUSTE de ' + source + '. Não é a coordenada ideal do ciclista. Sem simulador, usar apenas para triagem de modelos.'
+          : 'Medida real do centro do movimento central ao topo do apoio de antebraço. Não é o stack do quadro.');
+      addRow(fragment, padReach === null ? 'Pad reach · faixa do modelo TT' : 'Pad reach · MEDIDO',
+        padReach === null ? range(catalog?.padReach) : fmt(padReach) + ' mm',
+        padReach === null
+          ? 'FAIXA DE AJUSTE de ' + source + '. Não é a coordenada ideal do ciclista. Conferir convenção da borda posterior do pad.'
+          : 'Medida real do centro do movimento central à borda posterior do apoio. Não é o reach do quadro.');
     } else {
       addRow(fragment, 'Stack · quadro', stack,
         'Referência exploratória por estatura para a modalidade selecionada.');
@@ -72,7 +81,7 @@
     output.replaceChildren(fragment);
     const note = get('validation');
     if (note) note.textContent = mode === 'tt'
-      ? 'TT: a altura do selim é uma estimativa inicial; pad stack e pad reach são medidas reais dos apoios, informadas pelo avaliador. O stack e o reach do QUADRO TT devem ser obtidos na ficha específica do fabricante. Sem medição dos pads, o software não atribui números arbitrários à posição aerodinâmica.'
+      ? 'TT sem simulador: os números mostrados sem medição são LIMITES MECÂNICOS de regulagem do modelo de exemplo, NÃO alvos calculados pela antropometria. O selim é estimado pelo cavalo, e o stack/reach do quadro constam separadamente na ficha oficial. Quando houver pad medido, a medida real substitui a faixa nesta síntese.'
       : 'Referências exploratórias: a posição final deve ser confirmada na bicicleta. Top tube e mesa não equivalem ao alcance das mãos; registre a geometria real e as medidas finais.';
     if (typeof window.fillClientReport === 'function') window.fillClientReport();
   }
@@ -80,7 +89,7 @@
   function initialize() {
     if (!get('results')) return;
     const warning=document.querySelector('#clientReport .report-warning p');
-    if (warning) warning.textContent = 'Road/MTB usam referências exploratórias por estatura. Para TT, o programa não converte a tabela Road: registra as coordenadas dos apoios de antebraço (pad stack e pad reach) medidas no fit e compara com a montagem específica da bicicleta. A altura do selim por 0,883 é medida desde o movimento central; a regra de 109% parte do eixo do pedal. Os valores finais devem ser medidos e confirmados pelo avaliador em movimento.';
+    if (warning) warning.textContent = 'Road/MTB usam referências exploratórias por estatura. Para TT sem simulador, a ficha oficial de um modelo identificado permite verificar somente a faixa de regulagem possível dos apoios e selim; essas faixas não predizem pad stack/reach ideais por estatura. Quando medidos no fit, os valores dos pads substituem os exemplos de catálogo. A altura do selim por 0,883 parte do movimento central; 109% parte do eixo do pedal. Validar tudo no ajuste dinâmico.';
     document.addEventListener('input', render);
     document.addEventListener('change', render);
     document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', render));
