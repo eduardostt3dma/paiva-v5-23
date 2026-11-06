@@ -1,0 +1,73 @@
+PAIVA MOTION STUDIO — V5.58 · 2D MANUAL NO PLAYER PRINCIPAL
+============================================================
+
+CORREÇÃO DO FLUXO
+Na V5.57, o 2D manual ficou em uma bancada experimental diferente,
+sem a régua visível do vídeo. A V5.58 integra os recursos de rastreio
+ao módulo ANÁLISE ANGULAR 2D que já aceita MP4, MOV, webcam, captura,
+correção, vídeo lento, navegação por quadro e registro dos ângulos.
+
+COMO TESTAR
+1. Abra "ANÁLISE ANGULAR 2D" no PAIVA Motion Studio.
+2. Em "Abrir vídeo do computador ou pendrive", escolha seu vídeo.
+3. A régua de tempo aparece logo ABAIXO do vídeo, sem abrir menus.
+   Arraste para o instante desejado. A imagem volta automaticamente ao
+   vídeo durante o deslocamento da régua.
+4. Clique em "Pausar e marcar". O quadro congelado está pronto.
+5. Escolha "BONECO COMPLETO · 8 PONTOS", "ÂNGULO · ARRASTAR" ou
+   "PONTO LIVRE · RASTREAR"; alinhe manualmente à anatomia do atleta.
+6. No bloco verde "RASTREIO DE PONTOS · SEM IA", escolha a referência:
+   - Textura / contraste: para elementos com textura nítida no vídeo.
+   - Adesivo colorido: para pontos físicos de cor viva.
+   - Ponto claro / refletivo: para pequeno brilho contrastado.
+7. Escolha também o grupo de pontos: todos, tronco+braço,
+   fêmur+tíbia, pé+calcanhar ou só o ponto livre.
+8. Use os botões ◀ ▶ ou a rodinha para testar UM quadro por vez.
+   Os pontos perdidos permanecem para correção manual, em vez de
+   serem posicionados artificialmente em outro local.
+9. Para voltar a outro instante, arraste novamente a régua de tempo
+   e clique em Pausar e marcar.
+
+IMPORTANTE
+- Não há detecção anatômica automática no 2D manual. Os pontos são
+  colocados pelo profissional, e o rastreio por pixels é experimental.
+- Os valores de ângulos fora do grupo escolhido podem continuar
+  exibidos como referência visual anterior: somente o grupo ativo é
+  acompanhado no boneco de oito pontos.
+- Não considere um ângulo confiável sem conferir cada ponto do quadro.
+- A IA corporal e TODAS as ferramentas antigas do Motion Signature
+  continuam guardadas no painel experimental (agora recolhido por
+  padrão), que inclui um atalho para o 2D principal.
+- O projeto não converte vídeo 2D em reconstrução 3D verdadeira.
+
+ATUALIZAÇÃO PEQUENA (8 ARQUIVOS)
+- athlete-motion.js
+- athlete-2d.js
+- athlete-2d.css
+- paiva-aero-pose.js
+- paiva-aero-pose.css
+- paiva-wind-simple.js
+- sw.js
+- NOTAS_V5_58.txt
+
+INSTALAÇÃO
+1. Extraia o ZIP de atualização pequena.
+2. Selecione os OITO arquivos extraídos e envie para a raiz/main:
+   https://github.com/eduardostt3dma/paiva-v5-23/upload/main
+3. Faça Commit changes, aguarde o GitHub Pages e abra:
+   https://eduardostt3dma.github.io/paiva-v5-23/
+4. Se o navegador mostrar a versão anterior, atualize a página e
+   confira o indicador V5.58.
+
+BACKUP
+Esta é a terceira atualização pequena após o backup V5.55.
+Foi preparado também um ZIP COMPLETO V5.58 com o software inteiro,
+para guardar separado como cópia de segurança. Para atualizar o
+GitHub normalmente basta enviar os 8 arquivos pequenos.
+
+VERIFICAÇÃO
+- Sintaxe dos arquivos JavaScript conferida com Node.
+- Rastreio por cor, ponto refletivo, ponto livre e filtros do boneco
+  de oito pontos testados com imagens sintéticas.
+- O teste de usabilidade e fidelidade em um vídeo real ainda precisa
+  ser realizado pelo usuário.

@@ -14,6 +14,86 @@
     return gray;
   }
 
+  // Motor de cor portado do teste Motion Signature para o 2D principal.
+  // Procura a pequena marca REAL no vídeo; não detecta articulações por IA.
+  const hueDistance=(a,b)=>Math.min(Math.abs(a-b),360-Math.abs(a-b));
+  function rgbHue(r,g,b){
+    r/=255;g/=255;b/=255;
+    const max=Math.max(r,g,b),min=Math.min(r,g,b),delta=max-min;
+    let h=0;
+    if(delta){
+      if(max===r)h=60*((g-b)/delta%6);
+      else if(max===g)h=60*((b-r)/delta+2);
+      else h=60*((r-g)/delta+4);
+    }
+    return {h:(h+360)%360,s:max===0?0:delta/max,v:max};
+  }
+  function markerPixel(data,w,x,y){
+    const i=(Math.round(y)*w+Math.round(x))*4;
+    return rgbHue(data[i],data[i+1],data[i+2]);
+  }
+  function sampleColorMarker(image,w,h,at,radius=6){
+    if(!image?.data||!Number.isFinite(at?.x)||!Number.isFinite(at?.y))return null;
+    const bins=Array.from({length:12},()=>[]);
+    for(let y=Math.max(0,Math.floor(at.y-radius));y<=Math.min(h-1,Math.ceil(at.y+radius));y++)
+      for(let x=Math.max(0,Math.floor(at.x-radius));x<=Math.min(w-1,Math.ceil(at.x+radius));x++){
+        if(Math.hypot(x-at.x,y-at.y)>radius)continue;
+        const p=markerPixel(image.data,w,x,y);
+        if(p.s<.32||p.v<.28)continue;
+        bins[Math.floor(p.h/30)%12].push(p);
+      }
+    let best=0;
+    bins.forEach((items,i)=>{if(items.length>bins[best].length)best=i;});
+    if(bins[best].length<3)return null;
+    const colors=[...bins[(best+11)%12],...bins[best],...bins[(best+1)%12]];
+    const cx=colors.reduce((n,p)=>n+Math.cos(p.h*Math.PI/180),0);
+    const cy=colors.reduce((n,p)=>n+Math.sin(p.h*Math.PI/180),0);
+    return {h:(Math.atan2(cy,cx)*180/Math.PI+360)%360,
+      s:colors.reduce((n,p)=>n+p.s,0)/colors.length};
+  }
+  function followColorMarker(image,w,h,at,reference,search=25){
+    if(!image?.data||!reference||!Number.isFinite(at?.x))return null;
+    const x0=Math.max(0,Math.floor(at.x-search)),x1=Math.min(w-1,Math.ceil(at.x+search));
+    const y0=Math.max(0,Math.floor(at.y-search)),y1=Math.min(h-1,Math.ceil(at.y+search));
+    const iw=x1-x0+1,ih=y1-y0+1,mask=new Uint8Array(iw*ih);
+    for(let y=0;y<ih;y++)for(let x=0;x<iw;x++){
+      if(Math.hypot(x+x0-at.x,y+y0-at.y)>search)continue;
+      const p=markerPixel(image.data,w,x+x0,y+y0);
+      if(p.s>.32&&p.v>.25&&hueDistance(p.h,reference.h)<27)mask[y*iw+x]=1;
+    }
+    let best=null,bestScore=Infinity;
+    for(let seed=0;seed<mask.length;seed++){
+      if(mask[seed]!==1)continue;
+      const queue=[seed];mask[seed]=2;
+      let n=0,sumX=0,sumY=0;
+      for(let q=0;q<queue.length;q++){
+        const j=queue[q],x=j%iw,y=Math.floor(j/iw);
+        n++;sumX+=x+x0;sumY+=y+y0;
+        for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+          const nx=x+dx,ny=y+dy;
+          if(nx<0||nx>=iw||ny<0||ny>=ih)continue;
+          const k=ny*iw+nx;
+          if(mask[k]===1){mask[k]=2;queue.push(k);}
+        }
+      }
+      if(n<3||n>420)continue;
+      const x=sumX/n,y=sumY/n,dist=Math.hypot(x-at.x,y-at.y);
+      const score=dist+5/Math.sqrt(n);
+      if(dist<=search&&score<bestScore){best={x,y,confidence:Math.min(1,n/12)};bestScore=score;}
+    }
+    return best;
+  }
+  function trackColorPoint(beforeImage,afterImage,w,h,at,options={}){
+    const reference=sampleColorMarker(beforeImage,w,h,at);
+    if(!reference)return null;
+    const search=Math.max(10,Math.min(42,Number(options.search)||22));
+    const next=followColorMarker(afterImage,w,h,at,reference,search);
+    if(!next)return null;
+    const returned=followColorMarker(beforeImage,w,h,next,reference,search);
+    const error=returned?Math.hypot(returned.x-at.x,returned.y-at.y):Infinity;
+    return error<=7?{...next,method:'color',returnError:error}:null;
+  }
+
   function trackPoint(before,after,w,h,at,patch=PATCH,search=SEARCH,minVariance=110,maxError=24) {
     const x=Math.round(at.x),y=Math.round(at.y);
     if (x-patch<0 || x+patch>=w || y-patch<0 || y+patch>=h) return null;
@@ -191,16 +271,23 @@
     if(!before||!after||before.length!==w*h||after.length!==w*h)
       throw new Error('Os dois quadros devem possuir as mesmas dimensões.');
     const lost=[],moved=[];
+    const mode=['color','reflective'].includes(options.mode)?options.mode:'texture';
+    const groups={all:null,upper:[0,1,2,3],leg:[3,4,5],foot:[5,6,7],free:[]};
+    const group=Object.hasOwn(groups,options.group)?options.group:'all';
     const shapes=annotations.map((item,i)=>({
       ...item,points:item.points.map((point,j)=>{
         if(item.trackEnabled===false||!['point','angle','line','full8'].includes(item.kind))return {...point};
+        if(group==='free'&&item.kind!=='point')return {...point};
+        if(item.kind==='full8'&&group!=='all'&&!groups[group].includes(j))return {...point};
         const scaled={x:point.x/sourceWidth*w,y:point.y/sourceHeight*h};
-        let found=item.kind==='full8'&&item.reflectorMode?
-          trackReflector(before,after,w,h,scaled,options):null;
-        if(!found)found=item.kind==='point'?
+        let found=mode==='color'?trackColorPoint(options.imageBefore,options.imageAfter,w,h,scaled,options):
+          mode==='reflective'?trackReflector(before,after,w,h,scaled,options):
+          item.kind==='full8'&&item.reflectorMode?
+            trackReflector(before,after,w,h,scaled,options):null;
+        if(!found&&mode==='texture')found=item.kind==='point'?
           trackRobustPoint(before,after,w,h,scaled,options):
           trackFinePoint(before,after,w,h,scaled,options);
-        if(!found){
+        if(!found&&mode==='texture'){
           // Segunda tentativa apenas quando o alvo falhou: um pequeno
           // deslocamento maior entre quadros pode ultrapassar a busca padrão.
           // Exigimos confiança mais alta para não inventar o movimento.
@@ -226,9 +313,11 @@
     const surface=document.createElement('canvas');surface.width=width;surface.height=height;
     const context=surface.getContext('2d',{willReadFrequently:true});
     if(!context)throw new Error('Não foi possível preparar a leitura do quadro.');
-    return {width,height,sample(){
+    let lastImage=null;
+    return {width,height,get lastImage(){return lastImage;},sample(){
       context.drawImage(video,0,0,width,height);
-      return grayscale(context.getImageData(0,0,width,height));
+      lastImage=context.getImageData(0,0,width,height);
+      return grayscale(lastImage);
     }};
   }
 
@@ -583,5 +672,6 @@
       supplementary:!!tracked[0].supplementary,hipPath,heelPath};
   }
   globalThis.PAIVA_MOTION_TRACKER={trackPoint,trackSafePoint,trackCyclePoint,trackFinePoint,trackRobustPoint,
-    trackFineShapes,createFrameSampler,scanSinglePoint,grayscale,create,scanWindow,scanCycle};
+    sampleColorMarker,followColorMarker,trackColorPoint,trackFineShapes,
+    createFrameSampler,scanSinglePoint,grayscale,create,scanWindow,scanCycle};
 })();

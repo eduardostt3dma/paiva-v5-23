@@ -1,4 +1,8 @@
-/* PAIVA V5.57 — 2D manual independente e exclusão pelo botão direito. */
+/* PAIVA V5.58 — 2D clássico assume o trabalho manual; IA guardada. */
+#paiva-aero-pose .pose-to-main-2d{display:block;width:100%;margin:9px 0;border:1px solid #75d5c0;
+  border-radius:10px;padding:12px 14px;color:#e9fff8;background:#153f3b;
+  font:750 12px/1.35 system-ui;text-align:left;cursor:pointer;}
+#paiva-aero-pose .pose-main-guide{font:11px/1.5 system-ui;color:#aac9c9;margin:3px 0 12px;}
 #paiva-aero-pose{margin:17px 0 19px;background:linear-gradient(135deg,#171f29,#0c121a);border:1px solid #4a5867;border-radius:15px;overflow:hidden;color:#e8eef4;font-family:Inter,'Segoe UI',system-ui,sans-serif;}
 #paiva-aero-pose>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;list-style:none;cursor:pointer;font-size:13px;font-weight:750;letter-spacing:.035em;color:#f5f7f9;}
 #paiva-aero-pose>summary::-webkit-details-marker{display:none;}

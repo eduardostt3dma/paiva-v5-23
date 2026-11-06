@@ -142,6 +142,7 @@
         <p><strong>Linhas e tamanho dos pontos:</strong> o único controle de 1 a 20 aumenta ou diminui tanto a espessura das linhas quanto os círculos dos pontos de ângulos, linhas e rastros. Você pode deixá-los bem maiores para enxergar a referência.</p>
         <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Grave até 3 minutos ou clique e arraste diretamente no quadro da webcam para congelar e marcar. Não é mais obrigatório apertar “Capturar quadro”. Os pontos iniciais são sempre marcados manualmente.</p>
         <p><strong>Vídeos antigos:</strong> use “Abrir vídeo do computador ou pendrive” para carregar MP4, WebM, MOV e outros formatos que seu navegador consiga decodificar. Pause num quadro, capture e analise com as mesmas ferramentas; nenhum arquivo é enviado à internet.</p>
+        <p><strong>2D manual · V5.58:</strong> a régua de tempo fica sempre visível debaixo do vídeo carregado. Arraste-a até o instante desejado e clique em "Pausar e marcar". Abaixo, escolha como acompanhar os pontos: textura, adesivo colorido ou brilho refletivo, e selecione qual região do boneco de oito pontos será seguida. Depois use ◀ e ▶ um quadro por vez. A IA experimental permanece guardada em outro painel; não é necessária para este teste 2D.</p>
         <p><strong>Recortar vídeo:</strong> na coluna lateral, abra “✂ Recortar trecho do vídeo”. Marque início e fim pelo tempo atual ou digite mm:ss (ex.: 00:15 a 02:00). “Recortar e salvar MP4” gera um novo arquivo de até 3 minutos pelo motor de vídeo local; a filmagem original não é alterada. Esse processamento pode levar alguns minutos.</p>
         <p><strong>Seis cores:</strong> sob o quadro capturado, escolha vermelho, branco, verde, roxo, azul ou âmbar antes de desenhar o ângulo. Para mudar a cor de um ângulo existente, selecione-o com “Ajustar pontos” e escolha outra cor.</p>
         <p><strong>Registro automático:</strong> cada quadro capturado é arquivado como foto PNG com as linhas e ângulos, e atualizado quando você terminar de ajustá-los. As gravações de webcam e os vídeos recortados também vão para “Fotos e vídeos salvos”. Tudo permanece no armazenamento deste navegador, não em uma pasta permanente do Windows. Abra a lista e clique em Baixar para fazer suas cópias de segurança; limpar dados do navegador pode apagar os registros.</p>
@@ -273,7 +274,7 @@
               <label>Quadros por segundo do arquivo (para avançar manualmente)
                 <select id="paiva-2d-file-fps"><option value="24">24 fps</option><option value="25">25 fps</option><option value="30" selected>30 fps</option><option value="50">50 fps</option><option value="60">60 fps</option></select>
               </label>
-              <small class="paiva-2d-wheel-hint">🖱 Rodinha: quadros · Direito: play/pause · Espaço: play/pause · ← →: quadros</small>
+              <small class="paiva-2d-wheel-hint">🖱 Rodinha: quadros · Direito: excluir ponto (área vazia: play/pause) · Espaço: play/pause · ← →: quadros</small>
             </div>
             <label class="paiva-2d-camera-quality">Qualidade da captação
               <select id="paiva-2d-camera-quality" aria-label="Qualidade da webcam">
@@ -341,6 +342,15 @@
     playbackAdvanced.innerHTML='<summary>⚙ Reprodução · velocidade · quadros</summary>';
     playbackAdvanced.append(section.querySelector('.paiva-2d-playback'));
     playerDock.append(playbackAdvanced);
+    // A régua não pode ficar escondida em "Reprodução avançada": ela é a
+    // navegação principal de quem analisa manualmente um vídeo 2D.
+    const videoTimeline=section.querySelector('.paiva-2d-timeline');
+    playerDock.prepend(videoTimeline);
+    playerDock.insertAdjacentHTML('afterbegin',`<div class="paiva-2d-manual-bar" aria-label="Análise 2D manual no vídeo">
+      <strong>2D MANUAL · VÍDEO + PONTOS</strong>
+      <button type="button" id="paiva-2d-manual-freeze">⏸ Pausar e marcar</button>
+      <small>Arraste a régua abaixo para o instante desejado. Pause e marque no quadro.</small>
+    </div>`);
     const markingDock=section.querySelector('.paiva-2d-marking-dock');
     for(const selector of ['.paiva-2d-tools','.paiva-2d-point-role','.paiva-2d-zoom','.paiva-2d-width'])
       markingDock.append(section.querySelector(selector));
@@ -361,7 +371,26 @@
     </div>`);
     quickDock.insertAdjacentHTML('afterbegin','<label class="paiva-2d-follow"><input type="checkbox" id="paiva-2d-auto-track" /> Seguir pontos ao reproduzir <span>· experimental</span></label>');
     playbackAdvanced.append(quickDock.querySelector('.paiva-2d-follow'));
-    quickDock.innerHTML=`<div class="paiva-2d-fine-controls" aria-label="Rastreio fino por quadro">
+    quickDock.innerHTML=`<div class="paiva-2d-marker-lab" aria-label="Rastreamento de pontos sem IA no 2D">
+      <strong>✥ RASTREIO DE PONTOS · SEM IA</strong>
+      <label>Referência na imagem
+        <select id="paiva-2d-marker-reference" aria-label="Como reconhecer o marcador manual entre quadros">
+          <option value="texture" selected>Textura / contraste</option>
+          <option value="color">Adesivo colorido</option>
+          <option value="reflective">Ponto claro / refletivo</option>
+        </select>
+      </label>
+      <label>Região do boneco de 8 pontos
+        <select id="paiva-2d-marker-group" aria-label="Grupo de pontos manuais para rastrear">
+          <option value="all" selected>Oito pontos · todos</option>
+          <option value="upper">Tronco + braço</option>
+          <option value="leg">Fêmur + tíbia</option>
+          <option value="foot">Pé + calcanhar</option>
+          <option value="free">Somente ponto livre</option>
+        </select>
+      </label>
+      <small>Selecione os pontos no quadro parado. Use ◀ ▶ para seguir um quadro de cada vez. Ponto perdido fica para correção.</small>
+    </div><div class="paiva-2d-fine-controls" aria-label="Rastreio fino por quadro">
       <label title="Acompanhar as marcações com rastreio ON ao avançar ou voltar um quadro"><input id="paiva-2d-fine-mode" type="checkbox" checked /> ↔ Seguir por quadro</label>
       <button type="button" id="paiva-2d-fine-prev" title="Voltar um quadro seguindo os pontos">◀</button>
       <button type="button" id="paiva-2d-fine-next" title="Avançar um quadro seguindo os pontos">▶</button>
@@ -2332,6 +2361,11 @@
     byId('scrub').addEventListener('pointerdown',()=>{
       scrubPointerDown=true;scrubActive=true;scrubReleasePending=false;
       fineNavigationEpoch++;
+      // Ao arrastar a régua, voltar à visualização do vídeo: não deixar
+      // um quadro congelado antigo escondendo o novo instante procurado.
+      if(video.hidden&&hasFileVideo()){
+        showVideo(true);byId('back-video').hidden=true;
+      }
     });
     const finishScrub=()=>{
       scrubPointerDown=false;scrubReleasePending=true;
@@ -2342,6 +2376,7 @@
     byId('scrub').addEventListener('change',finishScrub);
     byId('scrub').addEventListener('input',()=>{
       if(!hasFileVideo()||!Number.isFinite(video.duration))return;
+      if(video.hidden){showVideo(true);byId('back-video').hidden=true;}
       fineNavigationEpoch++;
       scrubActive=true;
       if(!scrubPointerDown)scrubReleasePending=true;
@@ -2374,8 +2409,13 @@
       }
       const sampler=fineSampler;
       const before=sampler.sample();
+      const beforeImage=sampler.lastImage;
+      const selectedGroup=byId('marker-group').value;
+      const kneeIsTracked=item=>item?.trackEnabled!==false&&
+        (item?.kind==='full8'?['all','leg'].includes(selectedGroup):
+          item?.kind==='angle'&&selectedGroup!=='free');
       if(!finePeak){
-        const angle=annotations.find(a=>a.trackEnabled!==false&&kneeReading(a)!==null);
+        const angle=annotations.find(a=>kneeIsTracked(a)&&kneeReading(a)!==null);
         const degrees=kneeReading(angle);
         if(degrees!==null)finePeak={time:from,angle:degrees,
           shapes:annotations.map(a=>({...a,points:a.points.map(p=>({...p}))}))};
@@ -2390,12 +2430,15 @@
       if(!annotations.length)recoverWheelAnchor();
       if(!saved){
         const after=sampler.sample();
+        const afterImage=sampler.lastImage;
         // Um marcador já perdido não volta a ser "confiável" por acaso na
         // rodada seguinte. Ele fica parado até o profissional reposicioná-lo.
         const blocked=new Set(fineUncertain.map(p=>`${p.item}:${p.point}`));
         const result=motion.trackFineShapes(before,after,sampler.width,sampler.height,
           annotations,canvas.width,canvas.height,{
-            patch:Number(byId('fine-patch').value),search:Number(byId('fine-search').value)
+            patch:Number(byId('fine-patch').value),search:Number(byId('fine-search').value),
+            mode:byId('marker-reference').value,group:byId('marker-group').value,
+            imageBefore:beforeImage,imageAfter:afterImage
           });
         const previous=annotations;
         for(const token of blocked){
@@ -2421,7 +2464,7 @@
             appendSinglePoint(match.item,old,current,from,next);
         }
       }
-      const firstAngleIndex=annotations.findIndex(a=>a.trackEnabled!==false&&kneeReading(a)!==null);
+      const firstAngleIndex=annotations.findIndex(a=>kneeIsTracked(a)&&kneeReading(a)!==null);
       const firstAngle=annotations[firstAngleIndex];
       const angle=kneeReading(firstAngle);
       if(angle!==null&&!fineUncertain.some(p=>p.item===firstAngleIndex)&&(!finePeak||angle>finePeak.angle)){
@@ -2819,6 +2862,26 @@
     byId('stop-record').addEventListener('click',stopRecording);
     byId('camera-stop').addEventListener('click',stopCamera);
     byId('capture').addEventListener('click',captureVideoFrame);
+    byId('manual-freeze').addEventListener('click',()=>{
+      if(!hasFileVideo()&&!cameraStream){
+        message('Primeiro abra um vídeo na Análise 2D. A régua ficará logo abaixo da imagem.');return;
+      }
+      if(video.seeking){
+        message('Aguarde a régua terminar de localizar o quadro e clique novamente em Pausar e marcar.');return;
+      }
+      if(captureVideoFrame())message('2D manual pronto. Escolha BONECO 8 PONTOS, ÂNGULO ou PONTO LIVRE; depois avance com ◀ ▶ para testar o rastreamento sem IA.');
+    });
+    for(const key of ['marker-reference','marker-group'])
+      byId(key).addEventListener('change',()=>{
+        fineUncertain=[];
+        fineTrails.clear();
+        finePeak=null;
+        byId('fine-peak').disabled=true;
+        if(photoLoaded)render();
+        message(key==='marker-reference'?
+          'Referência alterada. A próxima passagem quadro a quadro usará '+byId(key).selectedOptions[0].textContent+'. Confira os pontos.':
+          'Grupo alterado para '+byId(key).selectedOptions[0].textContent+'. Os pontos fora do grupo são preservados, sem acompanhamento automático.');
+      });
     let forwardedGesture=null;
     function projectVideoPointer(event,sourceRect){
       const target=canvas.getBoundingClientRect();

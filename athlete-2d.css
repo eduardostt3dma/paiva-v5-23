@@ -402,6 +402,25 @@
   border-radius:6px;background:#213745;color:#e1f0f5;font:750 10px system-ui;cursor:pointer;}
 #paiva-athlete-2d .paiva-2d-player-dock {display:flex;flex-direction:column;}
 #paiva-athlete-2d .paiva-2d-player-dock .paiva-2d-playback {order:0;}
+/* V5.58: a régua principal e o comando de congelar ficam visíveis no vídeo. */
+#paiva-athlete-2d .paiva-2d-manual-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;
+  border-bottom:1px solid #3a6270;padding:5px 2px 9px;color:#c9ebeb;font:700 11px system-ui;}
+#paiva-athlete-2d .paiva-2d-manual-bar strong{letter-spacing:.045em;color:#dcfff5;font-size:11px;}
+#paiva-athlete-2d .paiva-2d-manual-bar button{border:1px solid #78d1c0;border-radius:7px;
+  background:#19453f;color:#effff9;padding:8px 11px;font:750 11px system-ui;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-manual-bar small{flex:1 1 220px;color:#adc6cf;font:10px/1.4 system-ui;}
+#paiva-athlete-2d .paiva-2d-player-dock > .paiva-2d-timeline{width:100%;order:1;
+  padding:8px 4px;background:#122a32;border-radius:8px;box-sizing:border-box;}
+#paiva-athlete-2d .paiva-2d-player-dock > .paiva-2d-timeline input{accent-color:#6de4cd;}
+#paiva-athlete-2d .paiva-2d-marker-lab{display:flex;flex-wrap:wrap;align-items:center;gap:7px;
+  margin-bottom:8px;padding:8px;border:1px solid #3c796e;border-radius:9px;background:#112b2a;}
+#paiva-athlete-2d .paiva-2d-marker-lab strong{color:#dffff7;font:750 11px system-ui;}
+#paiva-athlete-2d .paiva-2d-marker-lab label{display:flex;align-items:center;gap:6px;color:#c2e8e5;font:650 10px system-ui;}
+#paiva-athlete-2d .paiva-2d-marker-lab select{max-width:170px;min-width:0;border:1px solid #55877e;
+  border-radius:6px;background:#192f34;color:#edffff;padding:6px;font:650 10px system-ui;}
+#paiva-athlete-2d .paiva-2d-marker-lab small{flex:1 1 200px;color:#bad0d1;font:10px/1.35 system-ui;}
+@media(max-width:620px){#paiva-athlete-2d .paiva-2d-marker-lab label{flex:1 1 100%;justify-content:space-between;}
+  #paiva-athlete-2d .paiva-2d-marker-lab select{flex:1;max-width:64%;}}
 /* Recorte e arquivo ficam recolhidos na coluna estreita; abrem sob demanda. */
 #paiva-athlete-2d .paiva-2d-trimmer,
 #paiva-athlete-2d .paiva-2d-records {width:100%;min-width:0;border:1px solid #516d7e;

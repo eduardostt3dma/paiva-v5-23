@@ -246,13 +246,15 @@
     const aero=document.getElementById('paiva-wind-simple');
     if(!aero||document.getElementById('paiva-aero-pose'))return false;
     const panel=document.createElement('details');
-    panel.id='paiva-aero-pose';panel.className='paiva-aero-pose';panel.open=true;
+    panel.id='paiva-aero-pose';panel.className='paiva-aero-pose';panel.open=false;
     panel.innerHTML=`
-      <summary><span>✧ PAIVA MOTION SIGNATURE</span><span class="pose-experimental">ANÁLISE 2D · BETA</span></summary>
+      <summary><span>✧ PAIVA MOTION SIGNATURE</span><span class="pose-experimental">IA EXPERIMENTAL · GUARDADA</span></summary>
       <div class="pose-interior">
+        <button type="button" id="pose-to-main-2d" class="pose-to-main-2d">↗ Abrir Análise 2D principal · vídeo + régua + rastreio de pontos</button>
+        <p class="pose-main-guide">O teste manual agora está integrado à Análise Angular 2D principal, com a régua do vídeo à vista. As ferramentas experimentais deste painel permanecem aqui para consultas futuras.</p>
         <p class="pose-intro">Assinatura visual da pedalada: linhas finas registram trajetórias observadas de joelho, quadril, calcanhar e ombro. A leitura vem do vídeo, não de uma simulação de vento.</p>
         <div class="pose-mode-tabs" role="group" aria-label="Escolha a análise independente">
-          <button type="button" id="pose-mode-2d" aria-pressed="true">◎ 2D MANUAL · sem IA</button>
+          <button type="button" id="pose-mode-2d" aria-pressed="true">◎ 2D manual anterior · teste</button>
           <button type="button" id="pose-mode-ai" aria-pressed="false">✧ IA CORPORAL · experimental</button>
         </div>
         <p class="pose-mode-hint" id="pose-mode-hint">2D MANUAL: use as ferramentas laterais para marcar pontos na foto ou no vídeo pausado. Para acompanhar pontos em vídeo, clique em Seguir meus pontos. Nenhuma detecção corporal automática será iniciada.</p>
@@ -359,6 +361,12 @@
     aero.querySelector('.aero-measure')?.before(panel);
     if(!panel.isConnected)aero.append(panel);
     const el=id=>panel.querySelector('#'+id);
+    el('pose-to-main-2d').addEventListener('click',()=>{
+      const main2d=document.getElementById('paiva-athlete-2d');
+      if(main2d){panel.open=false;main2d.scrollIntoView({behavior:'smooth',block:'start'});
+        main2d.querySelector('#paiva-2d-video-file')?.focus({preventScroll:true});}
+      else panel.querySelector('.pose-main-guide').textContent='A Análise 2D principal ainda não foi carregada. Atualize a página.';
+    });
     // Ferramentas junto das laterais da imagem: esquerda = rastreio/grupo;
     // direita = IA, correção e seleção anatômica. Um botão amplia o quadro
     // sem exigir que o usuário gire o celular para acertar os pontos.
