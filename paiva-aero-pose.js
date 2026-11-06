@@ -1,4 +1,4 @@
-/* PAIVA MOTION SIGNATURE V5.56 — grupos visíveis ao trocar e barras laterais.
+/* PAIVA MOTION SIGNATURE V5.57 — motor 2D manual paralelo, IA preservada.
    Estimativas de ângulos projetados em 2D; nunca ajuste biomecânico automático.
    Não altera ou reutiliza ferramentas, eventos ou medidas do módulo Análise 2D. */
 (() => {
@@ -251,8 +251,13 @@
       <summary><span>✧ PAIVA MOTION SIGNATURE</span><span class="pose-experimental">ANÁLISE 2D · BETA</span></summary>
       <div class="pose-interior">
         <p class="pose-intro">Assinatura visual da pedalada: linhas finas registram trajetórias observadas de joelho, quadril, calcanhar e ombro. A leitura vem do vídeo, não de uma simulação de vento.</p>
+        <div class="pose-mode-tabs" role="group" aria-label="Escolha a análise independente">
+          <button type="button" id="pose-mode-2d" aria-pressed="true">◎ 2D MANUAL · sem IA</button>
+          <button type="button" id="pose-mode-ai" aria-pressed="false">✧ IA CORPORAL · experimental</button>
+        </div>
+        <p class="pose-mode-hint" id="pose-mode-hint">2D MANUAL: use as ferramentas laterais para marcar pontos na foto ou no vídeo pausado. Para acompanhar pontos em vídeo, clique em Seguir meus pontos. Nenhuma detecção corporal automática será iniciada.</p>
         <div class="pose-actions">
-          <button type="button" id="pose-toggle">▶ Iniciar leitura IA</button>
+          <button type="button" id="pose-toggle" hidden>▶ Iniciar leitura IA</button>
           <button type="button" id="pose-manual-toggle" aria-pressed="false">✥ Corrigir pontos</button>
           <label class="pose-trail-toggle" for="pose-stability">Estabilidade
             <select id="pose-stability" aria-label="Intensidade da estabilização dos pontos">
@@ -287,7 +292,7 @@
               <option value="heel">Calcanhar</option><option value="toe">Metatarso / frente do pé</option>
             </select>
           </label>
-          <button type="button" id="pose-manual-clear">↺ Restaurar pontos da IA</button>
+              <button type="button" id="pose-manual-clear">↺ Restaurar pontos deste quadro</button>
           <label class="pose-trail-toggle"><input type="checkbox" id="pose-manual-labels" checked> Nome externo com linha-guia</label>
           <small>Vídeo pausado: arraste uma bolinha ou selecione a articulação e clique na posição correta. O nome fica afastado da marcação e pode ser ocultado acima. É possível marcar os oito pontos mesmo sem detecção da IA. O ajuste vale só para este quadro.</small>
         </div>
@@ -309,7 +314,7 @@
               <button type="button" id="pose-marker-stop" disabled>■ Parar rastreio</button>
               <button type="button" id="pose-marker-free" aria-pressed="false">⊕ Posicionar ponto livre</button>
               <label for="pose-marker-kind">Referência
-                <select id="pose-marker-kind"><option value="color" selected>Marcador colorido · contraste</option><option value="texture">Textura / contraste</option><option value="reflective">Ponto claro / refletivo</option></select>
+                <select id="pose-marker-kind"><option value="color">Marcador colorido · contraste</option><option value="texture" selected>Textura / contraste · 2D</option><option value="reflective">Ponto claro / refletivo</option></select>
               </label>
               <label for="pose-marker-size">Tamanho da bolinha
                 <input id="pose-marker-size" type="range" min="4" max="34" value="16" step="1" aria-label="Diâmetro visível do ponto de rastreio" />
@@ -320,7 +325,7 @@
             <small>O tamanho da bolinha altera a apresentação, não a região física identificada pelo rastreador. Marcador perdido fica vermelho e deixa de produzir medidas. Pause, corrija e reinicie. Refletivo é apenas reconhecimento de brilho na webcam comum: não é infravermelho profissional nem medição 3D.</small>
           </div>
         </details>
-        <p class="pose-status" id="pose-status" role="status" aria-live="polite">Abra uma foto ou vídeo no Motion Studio e clique em Iniciar. Primeiro acesso exige internet.</p>
+        <p class="pose-status" id="pose-status" role="status" aria-live="polite">2D manual pronto. Abra uma foto ou vídeo e clique em Corrigir pontos. Sem download de IA.</p>
         <div class="pose-canvas-wrap"><canvas id="pose-view" width="960" height="540" aria-label="Trajetórias biomecânicas 2D e ângulos aproximados identificados por IA"></canvas></div>
         <p class="pose-legend"><span><i style="background:#89dbea"></i>Joelho</span><span><i style="background:#b8c9d4"></i>Quadril</span><span><i style="background:#83e0c6"></i>Calcanhar</span><span><i style="background:#b6b5cf"></i>Ombro</span></p>
         <div class="pose-stats" aria-live="polite">
@@ -348,7 +353,7 @@
             <p class="pose-compare-legend"><span><i style="background:#92d9ea"></i>ANTES</span><span><i style="background:#69dfc9"></i>DEPOIS</span><span>Trajetórias em coordenadas da imagem; sem calibração 3D.</span></p>
           </div>
         </details>
-        <p class="pose-hint" id="pose-hint">Use vídeo de perfil e câmera fixa. Ajuste Estabilidade para filtrar saltos e selecione o lado corporal quando a IA confundir as pernas. Círculos vazados indicam uma posição anterior: o ângulo não é calculado sem detecção confiável.</p>
+        <p class="pose-hint" id="pose-hint">2D: pause o vídeo, coloque os pontos manualmente e escolha Textura, Marcador colorido ou Refletivo para o rastreio experimental. A IA corporal continua disponível como modo separado.</p>
         <p class="pose-disclaimer">⚠️ Teste exploratório em 2D: o filtro reduz tremores e descarta saltos improváveis, mas não prende fisicamente os pontos ao atleta. A estabilização pode suavizar ângulos extremos. A inclinação do pé é a linha calcanhar–frente do pé com a horizontal da imagem, não uma medida direta do tornozelo. Não são reconstrução 3D, medidas de aerodinâmica nem diagnóstico. Fotos e quadros são processados no dispositivo; o modelo de IA precisa ser baixado na primeira utilização.</p>
       </div>`;
     aero.querySelector('.aero-measure')?.before(panel);
@@ -375,6 +380,7 @@
       </div>
       <aside class="pose-rail pose-rail-right" aria-label="Ferramentas de correção à direita">
         <strong class="pose-rail-heading">CORRIGIR</strong>
+        <button type="button" id="pose-delete-selected" title="Excluir ponto marcado nesta análise">✕ Excluir ponto</button>
         <div class="pose-joint-buttons" role="group" aria-label="Selecionar ponto anatômico para corrigir">
           <button type="button" data-pose-joint="shoulder">1 Ombro</button>
           <button type="button" data-pose-joint="elbow">2 Cotovelo</button>
@@ -389,6 +395,14 @@
     const leftRail=workbench.querySelector('.pose-rail-left');
     const rightRail=workbench.querySelector('.pose-rail-right');
     const center=workbench.querySelector('.pose-workbench-center');
+    const deleteMenu=document.createElement('div');
+    deleteMenu.id='pose-delete-menu';deleteMenu.className='pose-delete-menu';
+    deleteMenu.hidden=true;deleteMenu.setAttribute('role','menu');
+    deleteMenu.innerHTML='<span id="pose-delete-label">Ponto selecionado</span>'+
+      '<button type="button" id="pose-delete-one">✕ Excluir este ponto</button>'+
+      '<button type="button" id="pose-delete-all">✕ Excluir todas as marcações manuais</button>'+
+      '<button type="button" id="pose-delete-cancel">Cancelar</button>';
+    panel.append(deleteMenu);
     const originalView=el('pose-view').parentElement;
     originalView.before(workbench);
     workbench.after(el('pose-marker-mode'));
@@ -428,12 +442,14 @@
     let results=null,lastSource=null;
     let originalLandmarks=null,frameSlot=null;
     const correctedFrames=new Map();
+    const hiddenJoints=new Set();
     const trackHistory={},ghosts={};
     // Modo experimental separado da estimativa corporal da MediaPipe.
     // Reutiliza o motor de pontos do 2D clássico, sem alterar seus arquivos.
     const markerCanvas=document.createElement('canvas');markerCanvas.width=640;markerCanvas.height=360;
     const markerCtx=markerCanvas.getContext('2d',{willReadFrequently:true});
     const markerPoints=new Map(),lostMarkers=new Set(),markerColors=new Map();
+    let analysisMode='manual';
     let markerActive=false,markerEpoch=null,markerPrevGray=null;
     let markerLastTime=null,markerPreviousRate=null;
     let freeMarker=null,freeMarkerEpoch=null,placingFreeMarker=false;
@@ -445,12 +461,16 @@
     function correctedMeasurement(landmarks,poseSide,slot){
       if(!landmarks||!poseSide)return null;
       const fixes=slot?correctedFrames.get(slot):null;
-      if(!fixes||!Object.keys(fixes).length)return measure(landmarks,poseSide);
+      if((!fixes||!Object.keys(fixes).length)&&!hiddenJoints.size)return measure(landmarks,poseSide);
       const adjusted=landmarks.slice();
-      for(const [joint,coords] of Object.entries(fixes)){
+      for(const [joint,coords] of Object.entries(fixes||{})){
         const index=ANATOMY[poseSide]?.[joint];
         if(index===undefined)continue;
         adjusted[index]={...landmarks[index],x:coords.x,y:coords.y,visibility:1,presence:1};
+      }
+      for(const joint of hiddenJoints){
+        const index=ANATOMY[poseSide]?.[joint];
+        if(index!==undefined)adjusted[index]={x:0,y:0,visibility:0,presence:0};
       }
       return measure(adjusted,poseSide);
     }
@@ -470,6 +490,24 @@
     const fmt=x=>x===null||!Number.isFinite(x)?'—':x.toFixed(1).replace('.',',')+'°';
     const setText=(id,v)=>{el(id).textContent=v;};
     const status=message=>setText('pose-status',message);
+    function selectAnalysisMode(mode){
+      if(mode===analysisMode)return;
+      if(active){active=false;el('pose-toggle').textContent='▶ Iniciar leitura IA';}
+      if(markerActive)stopMarker('Rastreio pausado ao trocar de modo. Os pontos foram preservados.');
+      if(editing)exitEditing();
+      analysisMode=mode;
+      el('pose-toggle').hidden=mode!=='ai';
+      el('pose-mode-2d').setAttribute('aria-pressed',String(mode==='manual'));
+      el('pose-mode-ai').setAttribute('aria-pressed',String(mode==='ai'));
+      el('pose-mode-hint').textContent=mode==='manual'?
+        '2D MANUAL: corrija os pontos na foto ou no vídeo pausado. Para acompanhá-los, use Seguir meus pontos. Nenhuma detecção automática do corpo será iniciada.':
+        'IA CORPORAL · experimental: o reconhecimento automático continua disponível, sem alterações. Seus pontos manuais não são excluídos ao trocar de modo.';
+      status(mode==='manual'?'2D manual ativado. Abra a imagem e clique em Corrigir pontos.':
+        'Modo IA experimental ativado. Clique em Iniciar leitura IA quando desejar.');
+      draw();
+    }
+    el('pose-mode-2d').addEventListener('click',()=>selectAnalysisMode('manual'));
+    el('pose-mode-ai').addEventListener('click',()=>selectAnalysisMode('ai'));
     function renderComparison(){
       if(!compareCtx)return;
       const c=compareCtx;
@@ -650,7 +688,8 @@
       ctx.fillStyle='rgba(10,18,26,.8)';ctx.fillRect(12,H-32,W-24,24);
       ctx.fillStyle='#c8d3dc';ctx.font='12px system-ui';
       ctx.fillText(editing?'CORREÇÃO MANUAL · QUADRO PAUSADO · PONTOS EM VERDE = CORRIGIDOS':
-        'TRAJETÓRIAS DE ARTICULAÇÕES DETECTADAS · LEITURA EXPERIMENTAL',20,H-15);
+        analysisMode==='manual'?'2D MANUAL · SEM DETECÇÃO CORPORAL · RASTREIO EXPERIMENTAL':
+        'TRAJETÓRIAS DE ARTICULAÇÕES DETECTADAS · IA EXPERIMENTAL',20,H-15);
     }
     function publish(data,source,record=true){
       data=viewByGroup(data,el('pose-marker-group').value);
@@ -907,7 +946,7 @@
         return;
       }
       if(currentEpoch!==source.epoch){
-        currentEpoch=source.epoch;reset();correctedFrames.clear();originalLandmarks=null;
+        currentEpoch=source.epoch;reset();correctedFrames.clear();hiddenJoints.clear();originalLandmarks=null;
         freeMarker=null;freeMarkerEpoch=null;
       }
       // Pular vários segundos ou voltar o vídeo invalida a estimativa de
@@ -973,6 +1012,10 @@
       requestAnimationFrame(schedule);
     }
     el('pose-toggle').addEventListener('click',async()=>{
+      if(analysisMode!=='ai'){
+        status('2D manual não inicia reconhecimento corporal. Selecione a aba IA CORPORAL para usar a IA.');
+        return;
+      }
       if(editing){exitEditing();status('Correção deste quadro concluída. Clique novamente em Continuar leitura para acompanhar o vídeo.');return;}
       if(markerActive)stopMarker('Modo de marcadores pausado. A IA corporal pode ser iniciada separadamente.');
       markerPoints.clear();lostMarkers.clear();
@@ -1013,7 +1056,7 @@
       if(!results||!originalLandmarks||currentEpoch!==source.epoch||
           (source.mode==='video'&&lastSource?.mode==='video'&&
             Math.abs(source.videoTime-lastSource.videoTime)>.25)){
-        if(currentEpoch!==source.epoch){correctedFrames.clear();currentEpoch=source.epoch;reset();}
+        if(currentEpoch!==source.epoch){correctedFrames.clear();hiddenJoints.clear();currentEpoch=source.epoch;reset();}
         lastSource=source;lastVideoTime=source.videoTime;frameSlot=slotFor(source);
         side=el('pose-side').value==='right'?'right':'left';
         originalLandmarks=Array.from({length:33},()=>({x:0,y:0,visibility:0,presence:0}));
@@ -1097,12 +1140,103 @@
     }
     function moveJoint(joint,p){
       if(!originalLandmarks||!frameSlot||!ANATOMY[side]?.[joint])return;
+      hiddenJoints.delete(joint);
       const edits={...(correctedFrames.get(frameSlot)||{})};
       edits[joint]={x:p.x,y:p.y};
       correctedFrames.set(frameSlot,edits);
       if(correctedFrames.size>300)correctedFrames.delete(correctedFrames.keys().next().value);
       refreshManualPoints();
     }
+    let pendingDeleteJoint=null;
+    function manuallyMarked(joint){
+      if(joint==='free')return !!freeMarker||markerPoints.has('free');
+      return markerPoints.has(joint)||!!correctedFrames.get(frameSlot)?.[joint]||
+        (visible(results?.points?.[joint])&&!hiddenJoints.has(joint));
+    }
+    function jointAt(p){
+      let closest=null,distance=Infinity;
+      const candidates=new Map();
+      for(const [joint,item] of Object.entries(results?.points||{}))
+        if(visible(item)&&!hiddenJoints.has(joint))candidates.set(joint,item);
+      for(const [joint,item] of Object.entries(correctedFrames.get(frameSlot)||{}))candidates.set(joint,item);
+      for(const [joint,item] of markerPoints)candidates.set(joint,item);
+      if(freeMarker)candidates.set('free',freeMarker);
+      for(const [joint,item] of candidates){
+        const d=Math.hypot((p.x-item.x)*W,(p.y-item.y)*H);
+        if(d<distance){closest=joint;distance=d;}
+      }
+      return distance<=42?closest:null;
+    }
+    function closePoseDelete(){deleteMenu.hidden=true;pendingDeleteJoint=null;}
+    function showPoseDelete(joint,x,y){
+      if(!joint||!manuallyMarked(joint)){
+        status('Marque um ponto no 2D e clique com o botão direito sobre ele para excluir.');return;
+      }
+      pendingDeleteJoint=joint;
+      el('pose-delete-label').textContent='Excluir '+(JOINT_NAMES[joint]||joint)+'?';
+      deleteMenu.style.left=Math.max(4,Math.min(x,innerWidth-265))+'px';
+      deleteMenu.style.top=Math.max(4,Math.min(y,innerHeight-145))+'px';
+      deleteMenu.hidden=false;
+    }
+    function deletePoseJoint(joint){
+      if(!joint)return;
+      if(markerActive)stopMarker('Rastreio pausado: ponto excluído.');
+      if(joint==='free'){
+        freeMarker=null;freeMarkerEpoch=null;placingFreeMarker=false;
+        canvas.classList.remove('pose-placing-free');
+        el('pose-marker-free').setAttribute('aria-pressed','false');
+      }else hiddenJoints.add(joint);
+      markerPoints.delete(joint);lostMarkers.delete(joint);markerColors.delete(joint);
+      for(const [slot,edits] of correctedFrames){
+        if(!edits[joint])continue;
+        const copy={...edits};delete copy[joint];
+        if(Object.keys(copy).length)correctedFrames.set(slot,copy);
+        else correctedFrames.delete(slot);
+      }
+      if(originalLandmarks&&side){
+        results=correctedMeasurement(originalLandmarks,side,frameSlot);
+        publish(results,lastSource,false);
+      }
+      draw();closePoseDelete();
+      status((JOINT_NAMES[joint]||joint)+' excluído da análise visual. Vídeo e IA preservados.');
+    }
+    function deleteAllManual(){
+      if(markerActive)stopMarker('Rastreio pausado: pontos manuais removidos.');
+      const deleted=new Set([...markerPoints.keys(),
+        ...[...correctedFrames.values()].flatMap(edits=>Object.keys(edits))]);
+      if(freeMarker)deleted.add('free');
+      for(const joint of deleted)if(joint!=='free')hiddenJoints.add(joint);
+      markerPoints.clear();lostMarkers.clear();markerColors.clear();correctedFrames.clear();
+      freeMarker=null;freeMarkerEpoch=null;placingFreeMarker=false;
+      canvas.classList.remove('pose-placing-free');
+      el('pose-marker-free').setAttribute('aria-pressed','false');
+      if(originalLandmarks&&side){
+        results=correctedMeasurement(originalLandmarks,side,frameSlot);
+        publish(results,lastSource,false);
+      }
+      draw();closePoseDelete();
+      status('Marcações manuais excluídas. O vídeo, a foto e a IA permanecem intactos.');
+    }
+    canvas.addEventListener('contextmenu',event=>{
+      event.preventDefault();event.stopPropagation();
+      showPoseDelete(jointAt(coordinateFromPointer(event)),event.clientX,event.clientY);
+    });
+    el('pose-delete-selected').addEventListener('click',event=>{
+      const chosen=el('pose-manual-joint').value;
+      const joint=manuallyMarked(chosen)?chosen:
+        (freeMarker?'free':null);
+      const rect=event.currentTarget.getBoundingClientRect();
+      showPoseDelete(joint,rect.left,rect.bottom+5);
+    });
+    el('pose-delete-one').addEventListener('click',()=>deletePoseJoint(pendingDeleteJoint));
+    el('pose-delete-all').addEventListener('click',deleteAllManual);
+    el('pose-delete-cancel').addEventListener('click',closePoseDelete);
+    document.addEventListener('pointerdown',event=>{
+      if(!deleteMenu.hidden&&!deleteMenu.contains(event.target))closePoseDelete();
+    });
+    document.addEventListener('keydown',event=>{
+      if(event.key==='Escape'&&!deleteMenu.hidden){event.preventDefault();closePoseDelete();}
+    });
     canvas.addEventListener('pointerdown',event=>{
       if(!editing||event.button!==0)return;
       event.preventDefault();
@@ -1133,7 +1267,10 @@
     el('pose-manual-clear').addEventListener('click',()=>{
       if(!frameSlot)return;
       correctedFrames.delete(frameSlot);
-      refreshManualPoints();status('Pontos originais da IA restaurados neste quadro.');
+      hiddenJoints.clear();
+      refreshManualPoints();status(analysisMode==='manual'?
+        'Correções removidas deste quadro. Marque novamente os pontos desejados.':
+        'Pontos originais da IA restaurados neste quadro.');
     });
     const aeroVideo=document.getElementById('aero-source-video');
     function applySpeed(){

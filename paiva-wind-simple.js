@@ -1,4 +1,4 @@
-/* PAIVA MOTION STUDIO V5.56 — área de captura, assinatura biomecânica 2D.
+/* PAIVA MOTION STUDIO V5.57 — área de captura, assinatura biomecânica 2D.
    Antigas ondas puramente ilustrativas ficam recolhidas como legado opcional.
    Painel independente, com autoria Eduardo Paiva. */
 (() => {
@@ -74,7 +74,7 @@
       '<div class="aero-heading"><div><span>PAIVA · BIOMECHANICAL MOTION ANALYSIS</span>',
       '<h2>PAIVA MOTION STUDIO</h2>',
       '<p>Vídeo, fotografia e trajetórias reais de articulações em 2D. Interpretação biomecânica conduzida pelo profissional.</p></div>',
-      '<span class="aero-badge">V5.56</span></div>',
+      '<span class="aero-badge">V5.57</span></div>',
       '<div class="aero-toolbar">',
       '<label class="aero-file">📷 Abrir foto<input id="aero-photo" type="file" accept="image/png,image/jpeg,image/webp"></label>',
       '<label class="aero-file">▶ Abrir vídeo<input id="aero-video-file" type="file" accept="video/*,.mp4,.mov,.webm,.m4v"></label>',

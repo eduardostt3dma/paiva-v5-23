@@ -1,0 +1,55 @@
+PAIVA MOTION STUDIO — ATUALIZAÇÃO PEQUENA V5.57
+=============================================
+
+OBJETIVO
+Separar a análise manual em 2D da busca automática do corpo por IA,
+sem remover os recursos criados nas versões anteriores.
+
+1. Ao abrir PAIVA MOTION SIGNATURE, a aba "2D MANUAL · sem IA" vem ativa.
+   A IA não é carregada nem detecta o corpo neste modo.
+2. Abra uma foto ou vídeo no Motion Studio. Pause o vídeo.
+   Clique em "Corrigir pontos" e marque as articulações com o mouse.
+   A barra direita permite escolher ombro, cotovelo, punho, quadril,
+   joelho, tornozelo, calcanhar e metatarso individualmente.
+3. Na barra esquerda, escolha 8 pontos, tronco + braço, fêmur + tíbia,
+   pé + calcanhar ou ponto livre. Ajuste o tamanho dos pontos.
+4. Para tentar acompanhar os pontos no vídeo sem IA, use
+   "Seguir meus pontos". O padrão é Textura / contraste; para adesivos
+   coloridos ou claros selecione a referência correspondente.
+   O rastreio continua experimental: se o ponto escapar, pause,
+   corrija e reinicie. Não use sem conferir quadro a quadro.
+5. Botão DIREITO sobre um ponto na imagem do Motion Signature:
+   abre "Excluir este ponto" ou "Excluir todas as marcações manuais".
+   Também há "Excluir ponto" ao lado direito da imagem, útil em touch.
+6. Na área clássica Análise 2D, botão direito agora abre a exclusão
+   do desenho selecionado, mesmo que o clique não acerte a linha fina.
+   Com a área sem qualquer desenho, o atalho antigo play/pause permanece.
+7. A aba "IA CORPORAL · experimental" continua com a tecnologia
+   anterior disponível, sem excluir o trabalho. Não foi convertido
+   em sistema tridimensional: as medições são projeções 2D.
+
+ARQUIVOS ATUALIZADOS (6)
+- paiva-aero-pose.js
+- paiva-aero-pose.css
+- athlete-2d.js
+- paiva-wind-simple.js
+- sw.js
+- NOTAS_V5_57.txt
+
+COMO INSTALAR
+1. Extraia este ZIP pequeno.
+2. Envie APENAS os 6 arquivos extraídos para a raiz/main do repositório:
+   https://github.com/eduardostt3dma/paiva-v5-23/upload/main
+3. Clique em Commit changes e aguarde o GitHub Pages publicar.
+4. Abra https://eduardostt3dma.github.io/paiva-v5-23/
+   Se necessário, atualize a página para carregar a versão V5.57.
+
+POLÍTICA DE BACKUP
+Este é o segundo pacote pequeno desde o backup completo V5.55.
+Depois de mais um pacote pequeno, gerar um novo ZIP completo
+para guardar tudo até aquela versão.
+
+VERIFICAÇÃO
+JavaScript: quatro arquivos testados com node --check.
+Motor de ângulos: cálculos de joelho, grupos e oito pontos testados.
+O teste visual final com o vídeo real do atleta deve ser feito por Eduardo.

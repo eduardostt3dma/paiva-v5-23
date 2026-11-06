@@ -1,4 +1,4 @@
-/* PAIVA V5.56 — grupos instantâneos e ferramentas nas duas laterais. */
+/* PAIVA V5.57 — 2D manual independente e exclusão pelo botão direito. */
 #paiva-aero-pose{margin:17px 0 19px;background:linear-gradient(135deg,#171f29,#0c121a);border:1px solid #4a5867;border-radius:15px;overflow:hidden;color:#e8eef4;font-family:Inter,'Segoe UI',system-ui,sans-serif;}
 #paiva-aero-pose>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;list-style:none;cursor:pointer;font-size:13px;font-weight:750;letter-spacing:.035em;color:#f5f7f9;}
 #paiva-aero-pose>summary::-webkit-details-marker{display:none;}
@@ -8,6 +8,15 @@
 #paiva-aero-pose .pose-experimental{font-size:9px;font-weight:760;letter-spacing:.1em;color:#b7d7de;border:1px solid #4b6d74;border-radius:99px;padding:5px 8px;}
 #paiva-aero-pose .pose-interior{padding:0 17px 20px;}
 #paiva-aero-pose .pose-intro,#paiva-aero-pose .pose-hint,#paiva-aero-pose .pose-disclaimer{font-size:12px;line-height:1.58;color:#b7c3ce;margin:9px 0 13px;}
+#paiva-aero-pose .pose-mode-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0 6px;}
+#paiva-aero-pose .pose-mode-tabs button{padding:11px 14px;min-height:42px;border:1px solid #456675;border-radius:9px;background:#1a2a34;color:#c3dce4;font:700 12px system-ui;cursor:pointer;}
+#paiva-aero-pose .pose-mode-tabs button[aria-pressed="true"]{border-color:#6ce1cb;background:#15423e;color:#e6fff7;}
+#paiva-aero-pose .pose-mode-hint{margin:7px 0 14px;color:#bdd9df;font:12px/1.5 system-ui;}
+#paiva-aero-pose #pose-toggle[hidden],#paiva-aero-pose .pose-delete-menu[hidden]{display:none!important;}
+#paiva-aero-pose .pose-delete-menu{position:fixed;z-index:2147483600;min-width:205px;max-width:270px;box-sizing:border-box;display:grid;gap:6px;padding:11px;background:#121e28;border:1px solid #86c5c4;border-radius:11px;box-shadow:0 12px 38px #000b;color:#e9f9fa;font:700 11px system-ui;}
+#paiva-aero-pose .pose-delete-menu button{cursor:pointer;text-align:left;padding:9px 10px;border:1px solid #527078;border-radius:7px;background:#20333d;color:#edf9f9;font:650 11px system-ui;}
+#paiva-aero-pose .pose-delete-menu #pose-delete-one{border-color:#bb6262;color:#fff0ee;background:#432b31;}
+#paiva-aero-pose .pose-delete-menu #pose-delete-all{color:#ffd6cf;}
 #paiva-aero-pose .pose-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;}
 /* Bancada 2D: seleção/rastreio à esquerda, canvas ao centro e correção à direita. */
 #paiva-aero-pose .pose-workbench{display:grid;grid-template-columns:minmax(145px,190px) minmax(0,1fr) minmax(145px,190px);gap:9px;align-items:start;margin:10px 0 14px;}

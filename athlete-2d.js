@@ -1393,8 +1393,12 @@
     });
     canvas.addEventListener('contextmenu',event=>{
       if(!photoLoaded||scanningActive)return;
-      const index=annotationAt(event);
-      if(index<0)return; // botão direito livre continua sendo play/pause
+      // O toque não precisa acertar uma linha fina: respeita o item
+      // selecionado e, na ausência de seleção, o último desenho da tela.
+      const hit=annotationAt(event);
+      const index=hit>=0?hit:
+        (selectedIndex>=0&&selectedIndex<annotations.length?selectedIndex:annotations.length-1);
+      if(index<0)return; // sem marcações: manter o atalho play/pause
       event.preventDefault();event.stopPropagation();
       pendingDeleteIndex=index;selectedIndex=index;
       updateTrackToggle();
@@ -2523,7 +2527,7 @@
     },{passive:false});
     const playerArea=canvas.parentElement;
     playerArea.tabIndex=0;
-    playerArea.setAttribute('aria-label','Área de análise 2D. Botão direito pausa ou reproduz; Espaço alterna vídeo; setas mudam os quadros.');
+    playerArea.setAttribute('aria-label','Área de análise 2D. Botão direito exclui a marcação selecionada; Espaço alterna vídeo; setas mudam os quadros.');
     playerArea.addEventListener('pointerenter',()=>{globalThis.PAIVA_ACTIVE_VIDEO_PANEL='athlete';});
     playerArea.addEventListener('pointerdown',()=>playerArea.focus({preventScroll:true}));
     playerArea.addEventListener('contextmenu',event=>{
