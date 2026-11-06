@@ -1,0 +1,49 @@
+PAIVA MOTION STUDIO V5.55 — ATUALIZAÇÃO INCREMENTAL
+==================================================
+
+O que mudou:
+- Motion Signature: oito marcadores físicos individuais no mesmo quadro.
+- Seletor independente: todos / tronco + braços / fêmur + tíbia / pé e
+  calcanhar / somente ponto livre.
+- Ponto livre para colocar em qualquer lugar do vídeo pausado, sem desenhar
+  linha ou ângulo. O círculo tem controle de tamanho de 4 a 34 px.
+- Modo de marcador colorido: amostra a cor de uma bolinha saturada no quadro
+  inicial e procura uma região semelhante perto da posição anterior.
+- Preservados os modos antigos de contraste e ponto claro/refletivo.
+- Na análise 2D tradicional, a ferramenta PONTO LIVRE tem ajuste de diâmetro
+  independente (4 a 36 px), conservado por marcação entre os quadros salvos.
+- Cache atualizado para carregar a nova versão sem misturar scripts antigos.
+
+TESTE PASSO A PASSO:
+1. Abra um vídeo gravado em perfil; pause no início.
+2. No Motion Signature, clique em Corrigir pontos e marque até oito pontos:
+   ombro, cotovelo, punho, quadril, joelho, tornozelo, calcanhar, metatarso.
+3. Conclua a correção. Escolha o grupo e o tipo de referência.
+4. Com marcadores COLORIDOS foscos, escolha Marcador colorido · contraste.
+   Use roupa escura ajustada, iluminação estável e pontos visíveis.
+5. Clique em Seguir meus pontos. O vídeo reproduz em velocidade reduzida.
+6. Para um ponto completamente livre: clique em Posicionar ponto livre,
+   clique no vídeo pausado, ajuste Tamanho da bolinha, escolha Somente
+   ponto livre e clique em Seguir meus pontos.
+7. No módulo 2D tradicional, escolha PONTO LIVRE · RASTREAR e use seu controle
+   separado de tamanho. O botão Rastreio ON/OFF controla essa marcação.
+
+LIMITAÇÕES IMPORTANTES:
+- O rastreamento colorido é experimental. Ele pode perder a referência se
+  houver oclusão, pouca luz, objeto da mesma cor ou movimento rápido.
+- O tamanho da bolinha desenhada não muda o tamanho real do marcador.
+- Quando há perda, o ponto fica vermelho e suas medidas são suspensas; não
+  se inventam ângulos. Corrija no quadro pausado e reinicie.
+- Os ângulos continuam sendo projeções 2D, não reconstrução 3D ou diagnóstico.
+- Esta atualização NÃO altera os módulos de Pré-fit, PDF, comparador e 3DMA.
+
+INSTALAÇÃO NO GITHUB:
+1. Extraia o ZIP de atualização.
+2. Envie os arquivos extraídos para a RAIZ do repositório (main):
+   https://github.com/eduardostt3dma/paiva-v5-23/upload/main
+3. Confirme Commit changes e aguarde a publicação do GitHub Pages.
+4. Atualize a página e confira o selo V5.55.
+
+O ZIP PEQUENO desta versão só contém arquivos modificados.
+Para guardar o programa integral, use o backup completo V5.54 já entregue
+mais este pacote incremental V5.55.

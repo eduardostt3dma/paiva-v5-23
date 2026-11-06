@@ -1,4 +1,4 @@
-/* PAIVA V5.54 — Motion Signature, filtro temporal e rastreio de marcadores. */
+/* PAIVA V5.55 — marcadores físicos por módulo e ponto livre independente. */
 #paiva-aero-pose{margin:17px 0 19px;background:linear-gradient(135deg,#171f29,#0c121a);border:1px solid #4a5867;border-radius:15px;overflow:hidden;color:#e8eef4;font-family:Inter,'Segoe UI',system-ui,sans-serif;}
 #paiva-aero-pose>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;list-style:none;cursor:pointer;font-size:13px;font-weight:750;letter-spacing:.035em;color:#f5f7f9;}
 #paiva-aero-pose>summary::-webkit-details-marker{display:none;}
@@ -20,6 +20,7 @@
 #paiva-aero-pose .pose-manual-controls button{border:1px solid #548085;background:#183b40;color:#e4faf8;border-radius:7px;padding:8px 10px;cursor:pointer;}
 #paiva-aero-pose .pose-manual-controls small{flex-basis:100%;line-height:1.5;color:#b5d8d6;font-size:11px;}
 #paiva-aero-pose canvas.pose-editing{cursor:crosshair;touch-action:none;}
+#paiva-aero-pose canvas.pose-placing-free{cursor:crosshair;touch-action:none;}
 #paiva-aero-pose #pose-toggle{background:#9fc5cd;color:#0b151e;border-color:#c8e3e7;}
 #paiva-aero-pose .pose-trail-toggle{display:inline-flex;align-items:center;gap:7px;
   font:650 12px Inter,'Segoe UI',system-ui,sans-serif;cursor:pointer;padding:9px 12px;
@@ -69,6 +70,9 @@
 #paiva-aero-pose .pose-marker-actions button:disabled{opacity:.4;cursor:not-allowed;}
 #paiva-aero-pose .pose-marker-actions label{display:inline-flex;align-items:center;gap:6px;font:650 11px system-ui;color:#c1e7e6;}
 #paiva-aero-pose .pose-marker-actions select{padding:7px;border:1px solid #56808b;border-radius:7px;background:#142a33;color:#e5fbfc;}
+#paiva-aero-pose .pose-marker-actions input[type="range"]{width:112px;accent-color:#75eadc;cursor:pointer;}
+#paiva-aero-pose .pose-marker-actions output{min-width:34px;color:#a8f4e7;font-variant-numeric:tabular-nums;}
+#paiva-aero-pose #pose-marker-free[aria-pressed="true"]{background:#376b60;border-color:#89eecf;color:#fff;}
 #paiva-aero-pose #pose-marker-status{background:#132c35;padding:8px 10px;border-radius:7px;min-height:22px;}
 #paiva-aero-pose .pose-disclaimer{border-left:2px solid #9d804a;background:#141d26;padding:10px 12px;border-radius:0 8px 8px 0;margin-bottom:0;}
 @media(max-width:640px){#paiva-aero-pose>summary{padding:13px 11px;gap:7px;font-size:11px}#paiva-aero-pose .pose-experimental{font-size:8px;letter-spacing:.06em}#paiva-aero-pose .pose-interior{padding:0 10px 15px}#paiva-aero-pose .pose-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#paiva-aero-pose .pose-stats>div.pose-extreme,#paiva-aero-pose .pose-stats>div.pose-foot{grid-column:span 1}#paiva-aero-pose .pose-stats strong{font-size:20px}#paiva-aero-pose .pose-actions button{padding:9px 8px;font-size:11px}#paiva-aero-pose .pose-trail-toggle{font-size:11px}}

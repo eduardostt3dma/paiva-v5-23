@@ -149,7 +149,7 @@
         <p><strong>Extensão em trecho curto:</strong> capture um quadro próximo da extensão máxima e marque os três pontos anatômicos. Use “Buscar extensão” para examinar um intervalo curto antes e depois daquele instante, procurando o maior valor na convenção angular escolhida. O rastreio é experimental e pode interromper em áreas sem contraste; é uma prévia a validar manualmente, não uma medição clínica autônoma.</p>
         <p><strong>Seguir marcações em vídeo:</strong> depois de congelar um quadro do vídeo gravado, desenhe e alinhe as marcações. O comando avançado “Seguir marcações no vídeo” tenta acompanhá-las durante a reprodução. Se perder a referência, interrompe; não reconhece articulações e pode sofrer desvios. Use marcadores contrastantes, câmera fixa e valide cada ângulo antes de usar no bike fit.</p>
         <p><strong>Seguir pontos ao reproduzir:</strong> após capturar e marcar o quadro, escolha Voltar ao vídeo e Reproduzir. Com essa opção ativa, o rastreio assistido tenta acompanhar os pontos já desenhados, inclusive no retorno. Se perder algum marcador, a análise é interrompida para evitar um ângulo enganoso. Reposicione os pontos e recomece do quadro correto.</p>
-        <p><strong>Ponto de trajetória:</strong> escolha “PONTO · RASTRO” e clique em qualquer referência visível. Não é necessário escolher “quadril” nem “calcanhar”. Em “↗ Traçar ponto”, escolha um intervalo curto para desenhar o caminho sobre o atleta. Não exibimos medidas horizontais/verticais: a finalidade é ver a trajetória. Distâncias reais exigirão calibração posterior.</p>
+        <p><strong>Ponto de trajetória:</strong> escolha “PONTO LIVRE · RASTREAR” e clique em qualquer referência visível. Ajuste o controle separado “Tamanho do ponto livre” de 4 a 36 px, sem alterar as linhas nem os outros pontos. Em “↗ Traçar ponto”, escolha um intervalo curto para desenhar o caminho sobre o atleta. Não exibimos medidas horizontais/verticais: a finalidade é ver a trajetória. Distâncias reais exigirão calibração posterior.</p>
         <p><strong>Rastreio ON/OFF:</strong> marque ou selecione um Ângulo, Linha ou Ponto na imagem e clique em “Rastreio ON/OFF” para ativar ou desativar o acompanhamento desta marcação. Uma linha tem duas pontas, um ângulo tem três pontos e um ponto isolado tem um; cada ferramenta respeita a escolha.</p>
         <p><strong>Análises guardadas pelo tempo:</strong> ao concluir as marcações, o aplicativo registra o instante do vídeo e o desenho. Ao voltar com a régua ou a rodinha ao mesmo quadro, a análise reaparece para continuar editando. Fotos e a lista de instantes são armazenadas neste navegador. O MP4 original e os recortes continuam arquivos de vídeo limpos: as marcações ficam no projeto local salvo separadamente, não são incorporadas aos pixels do MP4 nesta versão.</p>
         <p><strong>Não perder o ângulo nem a correção:</strong> se o rastreador perder um ponto, o ângulo permanece visível na última posição conhecida, com os marcadores incertos em laranja. Corrija-os manualmente antes de interpretar o valor. Ao voltar a um quadro já corrigido, o programa restaura exatamente os pontos que você deixou naquele instante, sem substituir sua medição pela estimativa automática. Em quadros novos, o desenho anterior continua visível apenas como referência provisória, até você ajustá-lo. A referência angular é guardada com o projeto para reaparecer ao reabrir o mesmo vídeo.</p>
@@ -221,7 +221,7 @@
             </div>
             <button type="button" data-2d-tool="angle" aria-pressed="true">ÂNGULO · ARRASTAR</button>
             <button type="button" data-2d-tool="line" aria-pressed="false">LINHA · ARRASTAR</button>
-            <button type="button" data-2d-tool="point" aria-pressed="false">PONTO · RASTRO</button>
+            <button type="button" data-2d-tool="point" aria-pressed="false">● PONTO LIVRE · RASTREAR</button>
             <button type="button" data-2d-tool="edit" aria-pressed="false">AJUSTAR PONTOS</button>
             <button type="button" id="paiva-2d-track-toggle" title="Rastreio ON/OFF da marcação selecionada">Rastreio ON</button>
             <button type="button" id="paiva-2d-delete-selected" title="Excluir esta marcação em todos os quadros deste vídeo" disabled>✕ Excluir</button>
@@ -239,8 +239,11 @@
             <button type="button" id="paiva-2d-zoom-reset">100%</button>
             <button type="button" id="paiva-2d-zoom-in">+</button>
           </div>
-          <label class="paiva-2d-width" for="paiva-2d-width">Linhas e tamanho dos pontos <output id="paiva-2d-width-value" for="paiva-2d-width">3 px</output>
-            <input id="paiva-2d-width" type="range" min="1" max="20" step="1" value="3" aria-label="Espessura das linhas e tamanho dos pontos, de um a vinte" />
+          <label class="paiva-2d-width" for="paiva-2d-width">Espessura das linhas e pontos anatômicos <output id="paiva-2d-width-value" for="paiva-2d-width">3 px</output>
+            <input id="paiva-2d-width" type="range" min="1" max="20" step="1" value="3" aria-label="Espessura das linhas e pontos de ângulos" />
+          </label>
+          <label class="paiva-2d-width" for="paiva-2d-point-size">● Tamanho do ponto livre <output id="paiva-2d-point-size-value" for="paiva-2d-point-size">14 px</output>
+            <input id="paiva-2d-point-size" type="range" min="4" max="36" step="1" value="14" aria-label="Diâmetro individual do ponto livre de rastreio" />
           </label>
           <div class="paiva-2d-actions">
             <button type="button" id="paiva-2d-undo">Desfazer</button>
@@ -415,6 +418,8 @@
     let selectedIndex = -1;
     let defaultTrackEnabled=true;
     let lineWidth = 3;
+    let pointDiameter = 14;
+    let pointSizeSelection = null;
     let cycleResult=null,cycleTrailsVisible=false;
     const fineTrails=new Map();
     const singlePointTrails=new Map();
@@ -462,6 +467,7 @@
       color:item.color||null,supplementary:!!item.supplementary,
       trackEnabled:item.trackEnabled!==false,
       ...(item.reflectorMode?{reflectorMode:true}:{}),
+      ...(item.kind==='point'?{diameter:Number.isFinite(item.diameter)?item.diameter:14}:{}),
       ...(Number.isFinite(item.lastValidAngle)?{lastValidAngle:item.lastValidAngle}:{}),
       ...(item.lastReadings?{lastReadings:{...item.lastReadings}}:{}),
       points:item.points.map(p=>({x:p.x,y:p.y}))}));
@@ -959,7 +965,7 @@
       if(item.kind==='point') {
         if(pts.length){
           const p=pts[0];
-          ctx.beginPath();ctx.arc(p.x,p.y,Math.max(4,Math.min(29,lineWidth*1.4+2)),0,Math.PI*2);
+          ctx.beginPath();ctx.arc(p.x,p.y,Math.max(2,Math.min(22,(item.diameter||pointDiameter)/2)),0,Math.PI*2);
           ctx.fillStyle=color;ctx.fill();
           ctx.strokeStyle='#102a24';ctx.lineWidth=1.5;ctx.stroke();
         }
@@ -1057,6 +1063,16 @@
 
     function updateTrackToggle(){
       const selected=annotations[selectedIndex];
+      // O tamanho do ponto é próprio da marcação selecionada. A linha e os
+      // demais pontos não mudam ao alterar este controle.
+      const selectedPoint=selected?.kind==='point'?selected:null;
+      const sizeSelection=selectedPoint?.uid||null;
+      if(sizeSelection!==pointSizeSelection){
+        pointSizeSelection=sizeSelection;
+        const size=selectedPoint?.diameter||pointDiameter;
+        byId('point-size').value=String(size);
+        byId('point-size-value').textContent=size+' px';
+      }
       const enabled=selected?selected.trackEnabled!==false:defaultTrackEnabled;
       const button=byId('track-toggle');
       button.textContent=`Rastreio ${enabled?'ON':'OFF'}`;
@@ -1408,6 +1424,14 @@
       render();
     });
     byId('width').addEventListener('change',schedulePhotoSave);
+    byId('point-size').addEventListener('input',()=>{
+      pointDiameter=Math.max(4,Math.min(36,Number(byId('point-size').value)||14));
+      byId('point-size-value').textContent=pointDiameter+' px';
+      const selected=annotations[selectedIndex];
+      if(selected?.kind==='point')selected.diameter=pointDiameter;
+      render();
+    });
+    byId('point-size').addEventListener('change',()=>{rememberTimelineFrame(0);schedulePhotoSave();});
     function availableImageHeight(){
       const view=section.querySelector('.paiva-2d-view');
       const viewport=canvas.parentElement;
@@ -2916,7 +2940,7 @@
         }
       }
       if(tool==='point'){
-        annotations.push({uid:newMarkUid(),kind:'point',role:byId('point-role').value,points:[point],trackEnabled:defaultTrackEnabled});
+        annotations.push({uid:newMarkUid(),kind:'point',role:byId('point-role').value,points:[point],diameter:pointDiameter,trackEnabled:defaultTrackEnabled});
         lastDeletedAnnotation=null;
         selectedIndex=annotations.length-1;
         render();updateCameraControls();
