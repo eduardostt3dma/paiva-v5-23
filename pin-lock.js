@@ -1,4 +1,5 @@
-/* PAIVA V5.23 — trava simples de interface por PIN. NÃO é login seguro. */
+/* PAIVA V5.61 — assinatura própria PAIVA Motion Studio e PIN visual.
+   O PIN é uma trava local de interface; NÃO é autenticação de servidor. */
 (() => {
   'use strict';
 
@@ -15,19 +16,98 @@
     return Array.from(bytes, n => n.toString(16).padStart(2, '0')).join('');
   }
 
+  // Símbolo PAIVA: um P geométrico e um eixo de movimento. Desenho original
+  // do software, independente das marcas dos equipamentos do estúdio.
+  function paivaSymbol(suffix) {
+    return `<svg class="paiva-signature-symbol" viewBox="0 0 72 72" fill="none"
+      xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <defs><linearGradient id="paiva-steel-${suffix}" x1="12" y1="8" x2="60" y2="65"
+        gradientUnits="userSpaceOnUse"><stop stop-color="#f8fafb"/>
+        <stop offset=".42" stop-color="#9baab4"/><stop offset=".72" stop-color="#e0e7eb"/>
+        <stop offset="1" stop-color="#6d7c86"/></linearGradient></defs>
+      <path d="M17 61V13H39C51.8 13 59 20.5 59 31S51.8 49 39 49H17"
+        stroke="url(#paiva-steel-${suffix})" stroke-width="6.5" stroke-linejoin="miter"/>
+      <path d="M38 60L57 41" stroke="url(#paiva-steel-${suffix})"
+        stroke-width="2.3" stroke-linecap="square"/>
+      <circle cx="58" cy="40" r="3.1" fill="#dce5ea"/>
+    </svg>`;
+  }
+
+  function enhanceHeader(main) {
+    const header = main.querySelector(':scope > header');
+    if (!header || header.classList.contains('paiva-premium-header')) return;
+    const logo = header.querySelector('#logo');
+    const legacyTag = header.querySelector('.brand-tag');
+    const headline = header.querySelector('h1');
+    const content = headline?.parentElement;
+    const actions = header.querySelector('.actions');
+    const pdf = actions?.querySelector('#print');
+    const upload = actions?.querySelector('#logoFile')?.closest('label');
+    const reset = actions?.querySelector('#resetLogo');
+    if (!logo || !content || !actions || !pdf || !upload || !reset) return;
+
+    const identity = document.createElement('div');
+    identity.className = 'paiva-premium-identity';
+    identity.innerHTML = `${paivaSymbol('header')}
+      <div class="paiva-premium-wordmark"><strong>PAIVA</strong>
+        <span>MOTION STUDIO</span></div>`;
+
+    content.classList.add('paiva-premium-content');
+    const eyebrow = document.createElement('span');
+    eyebrow.className = 'paiva-premium-eyebrow';
+    eyebrow.textContent = 'BIOMECÂNICA  /  PRECISÃO  /  MOVIMENTO';
+    content.prepend(eyebrow);
+    const fitter = content.querySelector('.fitter-header-info');
+    fitter?.classList.add('paiva-premium-contact');
+    // Mantém os dados e o mailto originais, mas o endereço legado não compete
+    // visualmente com a assinatura própria PAIVA.
+    const fitterName = fitter?.querySelector('strong');
+    if (fitterName) fitterName.parentElement.replaceChildren(fitterName);
+    const email = fitter?.querySelector('a[href^="mailto:"]');
+    if (email) {
+      email.title = email.textContent;
+      email.textContent = 'Contato profissional';
+      email.parentElement.replaceChildren(email);
+    }
+
+    const settings = document.createElement('details');
+    settings.id = 'paiva-brand-settings';
+    settings.className = 'paiva-brand-settings';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Identidade do relatório';
+    const settingsContent = document.createElement('div');
+    settingsContent.className = 'paiva-brand-settings-content';
+    const label = document.createElement('span');
+    label.textContent = 'Logotipo utilizado no PDF';
+    settingsContent.append(label, logo, upload, reset);
+    settings.append(summary, settingsContent);
+
+    actions.classList.add('paiva-premium-actions');
+    pdf.textContent = 'Salvar PDF';
+    actions.replaceChildren(pdf, settings);
+    legacyTag?.remove();
+    header.classList.add('paiva-premium-header');
+    header.replaceChildren(identity, content, actions);
+  }
+
   function initialize() {
     const main = document.querySelector('body > main');
     if (!main) return;
+
+    enhanceHeader(main);
 
     const overlay = document.createElement('section');
     overlay.id = 'paiva-pin-lock';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-label', 'Acesso ao PAIVA Bike Fit Studio');
+    overlay.setAttribute('aria-label', 'Acesso ao PAIVA Motion Studio');
     overlay.innerHTML = `
       <div class="paiva-pin-panel">
-        <img class="paiva-pin-logo" src="./paiva-logo-round.png"
-          alt="PAIVA — Análise Biomecânica em Ciclismo" width="240" height="240" />
+        <div class="paiva-pin-emblem">${paivaSymbol('pin')}</div>
+        <div class="paiva-pin-wordmark">PAIVA</div>
+        <div class="paiva-pin-submark">MOTION STUDIO</div>
+        <div class="paiva-pin-divider" aria-hidden="true"></div>
+        <p class="paiva-pin-eyebrow">ÁREA RESERVADA</p>
         <h2 class="paiva-pin-title">Acesso pessoal</h2>
         <p class="paiva-pin-description">Digite seu PIN de 6 dígitos para continuar.</p>
         <form id="paiva-pin-form" autocomplete="off">
@@ -35,10 +115,10 @@
           <input id="paiva-pin-input" class="paiva-pin-input" type="password"
             inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6"
             autocomplete="off" enterkeyhint="done" required aria-describedby="paiva-pin-error" />
-          <button class="paiva-pin-submit" type="submit">Entrar</button>
+          <button class="paiva-pin-submit" type="submit">Entrar no estúdio</button>
           <p id="paiva-pin-error" class="paiva-pin-error" role="status" aria-live="polite"></p>
         </form>
-        <p class="paiva-pin-note">PAIVA V5.23 · ACESSO LOCAL</p>
+        <p class="paiva-pin-note">PAIVA MOTION STUDIO · V5.61 · ACESSO LOCAL</p>
       </div>`;
 
     const relock = document.createElement('button');

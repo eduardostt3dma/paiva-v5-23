@@ -135,6 +135,226 @@ html.paiva-pin-unlocked #paiva-pin-relock { display: block; }
   #paiva-pin-lock, #paiva-pin-relock { display: none !important; }
 }
 
+/* PAIVA Motion Studio V5.61 — identidade independente e cabeçalho compacto.
+   As imagens de marca do relatório seguem acessíveis no menu de identidade. */
+main > header.paiva-premium-header {
+  display: grid;
+  grid-template-columns: minmax(225px, 302px) minmax(240px, 1fr) auto;
+  gap: clamp(14px, 2.2vw, 30px);
+  align-items: center;
+  padding: 14px 0 17px;
+  margin: 0;
+  border-bottom: 1px solid #52616b !important;
+  background: transparent;
+  position: relative;
+}
+main > header.paiva-premium-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: min(260px, 32%);
+  height: 1px;
+  background: linear-gradient(90deg, #e5edf2, #8495a1 54%, transparent);
+  pointer-events: none;
+}
+.paiva-premium-identity { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.paiva-premium-identity .paiva-signature-symbol {
+  width: 57px; height: 57px; flex: 0 0 57px;
+  padding: 7px;
+  border: 1px solid #687680;
+  background: linear-gradient(145deg, #202931, #0c1116 76%);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 #ffffff24, 0 8px 19px #0006;
+}
+.paiva-premium-wordmark { display: flex; flex-direction: column; min-width: 0; }
+.paiva-premium-wordmark strong {
+  font: 750 clamp(28px, 2.6vw, 38px)/.95 system-ui, sans-serif;
+  letter-spacing: .105em;
+  color: #e3ebf0;
+  background: linear-gradient(175deg, #fff 8%, #bac7d0 54%, #748692 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+}
+.paiva-premium-wordmark span {
+  margin-top: 8px;
+  font: 650 9px/1.1 system-ui, sans-serif;
+  letter-spacing: .35em;
+  color: #9eadb7;
+  white-space: nowrap;
+}
+main > header .paiva-premium-content { min-width: 0; margin: 0; }
+main > header .paiva-premium-eyebrow {
+  display: block; margin: 0 0 5px;
+  font-size: 9px; font-weight: 720;
+  letter-spacing: .13em; color: #9babba;
+}
+main > header .paiva-premium-content h1 {
+  font-size: clamp(16px, 1.7vw, 22px);
+  font-weight: 650; letter-spacing: -.018em; line-height: 1.2;
+  margin: 0; color: #edf2f5;
+}
+main > header .paiva-premium-content > p {
+  margin: 4px 0 0; font-size: 11px; line-height: 1.4;
+  color: #9eacb7; max-width: 540px;
+}
+main > header .paiva-premium-contact {
+  margin-top: 7px; gap: 5px 17px;
+  color: #9daeba; font-size: 10px;
+}
+main > header .paiva-premium-contact strong,
+main > header .paiva-premium-contact a { color: #cdd8df; font-weight: 650; }
+main > header .paiva-premium-actions {
+  display: flex; flex-wrap: nowrap; gap: 8px; align-items: center;
+  justify-content: flex-end; margin: 0; min-width: 0;
+}
+main > header .paiva-premium-actions #print {
+  border: 1px solid #b1bec7 !important;
+  border-radius: 8px; padding: 11px 15px;
+  background: linear-gradient(160deg, #dfe8ed, #9aabb6) !important;
+  color: #11191f !important;
+  font: 750 11px/1.2 system-ui, sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 3px 15px #0005 !important;
+}
+.paiva-brand-settings { position: relative; flex: 0 0 auto; }
+.paiva-brand-settings > summary {
+  list-style: none; cursor: pointer;
+  border: 1px solid #485966; border-radius: 8px;
+  background: #18232b; color: #becbd4;
+  padding: 11px 12px; white-space: nowrap;
+  font: 650 11px/1.2 system-ui, sans-serif;
+}
+.paiva-brand-settings > summary::-webkit-details-marker { display: none; }
+.paiva-brand-settings > summary::after { content: ' ⌄'; color: #e3eaf0; }
+.paiva-brand-settings[open] > summary { border-color: #9babb5; }
+.paiva-brand-settings-content {
+  position: absolute; z-index: 200; top: calc(100% + 8px); right: 0;
+  width: min(260px, 86vw); box-sizing: border-box;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  align-items: center; padding: 14px;
+  border: 1px solid #687781; border-radius: 12px;
+  background: #111a21; color: #dce4e9;
+  box-shadow: 0 18px 38px #000b;
+}
+.paiva-brand-settings-content > span {
+  grid-column: 1 / -1; font: 700 10px system-ui, sans-serif;
+  letter-spacing: .05em; color: #b9c6d0;
+}
+#paiva-brand-settings #logo {
+  width: 54px !important; height: 54px !important;
+  border: 1px solid #61727c !important;
+  box-shadow: none !important;
+  justify-self: center;
+}
+.paiva-brand-settings-content .file,
+.paiva-brand-settings-content .btn {
+  width: 100%; min-width: 0; padding: 9px 8px;
+  border-radius: 7px; text-align: center;
+  font-size: 10px; line-height: 1.2;
+}
+.paiva-brand-settings-content .file { grid-column: 2; }
+.paiva-brand-settings-content #resetLogo { grid-column: 1 / -1; }
+.paiva-brand-settings > summary:focus-visible,
+main > header .paiva-premium-actions #print:focus-visible {
+  outline: 2px solid #e7f1f7; outline-offset: 3px;
+}
+
+/* PIN com a mesma assinatura do software, sem marca de terceiros. */
+#paiva-pin-lock {
+  background: radial-gradient(ellipse 500px 350px at 50% 13%, #25313a 0%, #0b1015 67%, #06080b 100%);
+}
+#paiva-pin-lock .paiva-pin-panel {
+  width: min(100%, 380px);
+  padding: clamp(24px, 5vw, 38px) clamp(22px, 5vw, 35px);
+  border: 1px solid #54626c;
+  border-radius: 16px;
+  background: linear-gradient(158deg, #1c252d 0%, #10161c 53%, #0b1116 100%);
+  box-shadow: inset 0 1px 0 #ffffff1c, 0 28px 80px #0009;
+}
+#paiva-pin-lock .paiva-pin-emblem {
+  width: 72px; height: 72px; margin: 0 auto 11px;
+  padding: 8px; border: 1px solid #70808b; border-radius: 16px;
+  background: linear-gradient(140deg, #243039, #0d1318);
+  box-shadow: inset 0 1px 0 #ffffff2a, 0 12px 26px #0008;
+}
+#paiva-pin-lock .paiva-signature-symbol { display: block; width: 100%; height: 100%; }
+#paiva-pin-lock .paiva-pin-wordmark {
+  font: 750 clamp(31px, 7vw, 39px)/1 system-ui, sans-serif;
+  letter-spacing: .22em; text-indent: .22em;
+  color: #e6edf2;
+  background: linear-gradient(#fff, #9dadb7);
+  background-clip: text; -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#paiva-pin-lock .paiva-pin-submark {
+  font-size: 9px; font-weight: 680; letter-spacing: .33em;
+  text-indent: .33em; color: #aab8c1; margin-top: 8px;
+}
+#paiva-pin-lock .paiva-pin-divider {
+  height: 1px; background: linear-gradient(90deg, transparent, #8d9da9 50%, transparent);
+  margin: 23px auto 20px; max-width: 220px;
+}
+#paiva-pin-lock .paiva-pin-eyebrow {
+  color: #a4b6c1; font-size: 9px; font-weight: 740;
+  letter-spacing: .21em; margin: 0 0 8px;
+}
+#paiva-pin-lock .paiva-pin-title { font-size: 19px; font-weight: 670; margin: 0 0 6px; }
+#paiva-pin-lock .paiva-pin-description { color: #a9b8c3; font-size: 12px; margin-bottom: 17px; }
+#paiva-pin-lock .paiva-pin-input {
+  height: 53px; border-radius: 9px; background: #0b1116;
+  border-color: #687984; font-size: 23px;
+}
+#paiva-pin-lock .paiva-pin-submit {
+  border-radius: 9px; background: linear-gradient(160deg, #e7eef2, #9faeba);
+}
+#paiva-pin-lock .paiva-pin-note {
+  margin-top: 17px; font-size: 9px; letter-spacing: .09em; color: #8595a1;
+}
+
+@media (max-width: 1130px) {
+  main > header.paiva-premium-header {
+    grid-template-columns: minmax(196px, 246px) minmax(220px, 1fr);
+    gap: 9px 16px;
+  }
+  main > header .paiva-premium-actions { grid-column: 1 / -1; justify-content: flex-end; }
+  .paiva-premium-identity .paiva-signature-symbol { width: 51px; height: 51px; flex-basis: 51px; }
+}
+@media (max-width: 720px) {
+  main > header.paiva-premium-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px; padding: 7px 0 14px;
+  }
+  .paiva-premium-identity { gap: 9px; }
+  .paiva-premium-identity .paiva-signature-symbol {
+    width: 45px; height: 45px; flex-basis: 45px; padding: 5px; border-radius: 9px;
+  }
+  .paiva-premium-wordmark strong { font-size: 26px; }
+  .paiva-premium-wordmark span { font-size: 7px; margin-top: 5px; }
+  main > header .paiva-premium-content { grid-column: 1 / -1; grid-row: 2; }
+  main > header .paiva-premium-eyebrow { font-size: 8px; margin-bottom: 3px; }
+  main > header .paiva-premium-content h1 { font-size: 17px; }
+  main > header .paiva-premium-content > p { font-size: 10px; }
+  main > header .paiva-premium-contact { font-size: 9px; gap: 3px 10px; }
+  main > header .paiva-premium-actions {
+    grid-column: 2; grid-row: 1; flex-wrap: wrap;
+    justify-content: flex-end; width: auto; gap: 5px;
+  }
+  main > header .paiva-premium-actions #print,
+  .paiva-brand-settings > summary { font-size: 9px; padding: 8px 9px; }
+}
+@media (max-width: 430px) {
+  main > header.paiva-premium-header { grid-template-columns: 1fr; }
+  main > header .paiva-premium-actions { grid-column: 1; grid-row: 3; justify-content: flex-start; }
+  main > header .paiva-premium-content { grid-row: 2; }
+  .paiva-brand-settings-content { right: auto; left: 0; }
+}
+@media print {
+  main > header.paiva-premium-header { display: none !important; }
+}
+
 /* PAIVA V5.23 — correção responsiva da antropometria para iPad/tablets.
    A imagem e os resultados deixam de disputar a mesma largura na barra lateral. */
 @media screen and (min-width: 701px) {
