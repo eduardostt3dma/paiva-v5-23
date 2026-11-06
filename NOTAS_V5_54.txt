@@ -1,0 +1,46 @@
+PAIVA MOTION STUDIO — V5.54
+================================
+
+TESTE DE RASTREIO DE MARCADORES ESCOLHIDOS PELO PROFISSIONAL
+
+O novo painel "Testar rastreio de pontos marcados · sem IA corporal"
+usa o MESMO motor de textura/contraste que já existe em Análise 2D.
+Nenhum arquivo de Análise 2D foi modificado.
+
+PASSO A PASSO
+1. Abra um vídeo de perfil do atleta no Motion Studio e PAUSE.
+2. No Motion Signature, clique "Corrigir pontos".
+3. Escolha os marcos no menu e marque 1 a 5 pontos visíveis no corpo.
+   Para ângulo de joelho: quadril, joelho e tornozelo.
+   Para inclinação do pé: calcanhar e metatarso.
+4. Clique "Concluir correção".
+5. Abra o painel de teste e clique "Seguir meus pontos".
+6. A reprodução passa temporariamente à velocidade máxima de 0,25x.
+   Se o notebook não acompanhar, tente 0,1x.
+7. Pontos cianos estão sendo acompanhados pelo contraste.
+   Ponto vermelho indica perda de referência, sem ângulo inventado.
+8. Pare o vídeo, corrija o marcador e reinicie o rastreio.
+
+No painel "Referência", use "Textura / contraste" como padrão.
+Experimente "Ponto claro / refletivo" somente quando houver
+marcadores claros e isolados com contraste contra a roupa.
+
+ATENÇÃO
+- Rastreio semiautomático EXPERIMENTAL para vídeo gravado.
+- Não promete grudar no ponto anatômico. Reflexos da bicicleta,
+  roupa lisa, vídeo borrado e oclusões causam perda de referência.
+- O módulo IA corporal continua disponível, especialmente para foto.
+- Verifique visualmente cada quadro antes de considerar qualquer
+  medida ou comparação.
+
+ENCERRAMENTO / CONSOLIDAÇÃO DO PROJETO
+- Pronto para revisão: cadastro, antropometria, pré-fit, comparador,
+  medidas finais, relatório e Análise 2D manual (validar com usuários).
+- Experimental: Motion Signature em vídeo, IA automática, trajetórias
+  de marcadores, comparação visual A/B e ondas antigas ilustrativas.
+- A próxima etapa é uma rodada estruturada de testes para decidir
+  o que manter, melhorar, ocultar ou retirar de uma versão estável.
+
+SUBIR NO GITHUB
+https://github.com/eduardostt3dma/paiva-v5-23/upload/main
+Extraia o ZIP e envie SOMENTE os arquivos de dentro dele.

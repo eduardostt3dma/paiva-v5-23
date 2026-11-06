@@ -1,4 +1,4 @@
-/* PAIVA MOTION SIGNATURE V5.53 — trajetórias 2D estabilizadas e etiquetas externas.
+/* PAIVA MOTION SIGNATURE V5.54 — modo de rastreio de marcadores manuais.
    Estimativas de ângulos projetados em 2D; nunca ajuste biomecânico automático.
    Não altera ou reutiliza ferramentas, eventos ou medidas do módulo Análise 2D. */
 (() => {
@@ -199,6 +199,21 @@
           <label class="pose-trail-toggle"><input type="checkbox" id="pose-manual-labels" checked> Nome externo com linha-guia</label>
           <small>Vídeo pausado: arraste uma bolinha ou selecione a articulação e clique na posição correta. O nome fica afastado da marcação e pode ser ocultado acima. É possível marcar os oito pontos mesmo sem detecção da IA. O ajuste vale só para este quadro.</small>
         </div>
+        <details class="pose-marker-mode" id="pose-marker-mode">
+          <summary>◎ Testar rastreio de pontos marcados · sem IA corporal</summary>
+          <div class="pose-marker-content">
+            <p>Teste separado da IA: pause um vídeo, clique em <strong>Corrigir pontos</strong>, escolha e marque de 1 a 5 referências no corpo (por exemplo: quadril, joelho, tornozelo, calcanhar e metatarso). Conclua a correção e só então inicie. O rastreador segue a <strong>textura/contraste</strong> perto de cada marcação, como no nosso Análise 2D.</p>
+            <div class="pose-marker-actions">
+              <button type="button" id="pose-marker-start">▶ Seguir meus pontos</button>
+              <button type="button" id="pose-marker-stop" disabled>■ Parar rastreio</button>
+              <label for="pose-marker-kind">Referência
+                <select id="pose-marker-kind"><option value="texture" selected>Textura / contraste</option><option value="reflective">Ponto claro / refletivo</option></select>
+              </label>
+            </div>
+            <p id="pose-marker-status" role="status" aria-live="polite">Para começar, marque manualmente pelo menos um ponto no vídeo pausado. Recomendo usar reprodução em 0,25×.</p>
+            <small>Experimental: quando perder o contraste, a posição fica indicada em vermelho e deixa de produzir ângulo. Pause, corrija o ponto no quadro atual e reinicie. Não é rastreamento de refletor infravermelho nem medição 3D.</small>
+          </div>
+        </details>
         <p class="pose-status" id="pose-status" role="status" aria-live="polite">Abra uma foto ou vídeo no Motion Studio e clique em Iniciar. Primeiro acesso exige internet.</p>
         <div class="pose-canvas-wrap"><canvas id="pose-view" width="960" height="540" aria-label="Trajetórias biomecânicas 2D e ângulos aproximados identificados por IA"></canvas></div>
         <p class="pose-legend"><span><i style="background:#89dbea"></i>Joelho</span><span><i style="background:#b8c9d4"></i>Quadril</span><span><i style="background:#83e0c6"></i>Calcanhar</span><span><i style="background:#b6b5cf"></i>Ombro</span></p>
@@ -249,6 +264,13 @@
     let originalLandmarks=null,frameSlot=null;
     const correctedFrames=new Map();
     const trackHistory={},ghosts={};
+    // Modo experimental separado da estimativa corporal da MediaPipe.
+    // Reutiliza o motor de pontos do 2D clássico, sem alterar seus arquivos.
+    const markerCanvas=document.createElement('canvas');markerCanvas.width=640;markerCanvas.height=360;
+    const markerCtx=markerCanvas.getContext('2d',{willReadFrequently:true});
+    const markerPoints=new Map(),lostMarkers=new Set();
+    let markerActive=false,markerEpoch=null,markerPrevGray=null;
+    let markerLastTime=null,markerPreviousRate=null;
     const JOINT_NAMES={shoulder:'Ombro',elbow:'Cotovelo',wrist:'Punho',hip:'Quadril',knee:'Joelho',ankle:'Tornozelo',heel:'Calcanhar',toe:'Metatarso'};
     function slotFor(source){
       return source?.mode==='photo'?'foto':
@@ -445,6 +467,7 @@
       }
       drawTrails();
       if(results)drawSkeleton(results);
+      if(markerPoints.size)drawMarkerPoints();
       drawGhosts();
       ctx.fillStyle='rgba(9,16,23,.76)';ctx.fillRect(12,12,250,31);
       ctx.fillStyle='#ffe476';ctx.font='600 14px system-ui';
@@ -476,7 +499,171 @@
           'Ângulos e rastros observados ('+samples+' quadros válidos). Oscilações podem incluir imprecisão do rastreador; não são metas de ajuste.';
       }
     }
+    function drawMarkerPoints(){
+      ctx.save();ctx.lineWidth=2.5;
+      for(const [joint,p] of markerPoints){
+        const x=p.x*W,y=p.y*H,lost=lostMarkers.has(joint);
+        ctx.strokeStyle=lost?'#f77979':'#5cf2df';
+        ctx.setLineDash(lost?[4,3]:[]);
+        ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.stroke();
+        if(!lost){ctx.fillStyle='#dffff9';ctx.beginPath();ctx.arc(x,y,2.3,0,Math.PI*2);ctx.fill();}
+      }
+      ctx.restore();
+    }
+    function markerGray(){
+      const tracker=globalThis.PAIVA_MOTION_TRACKER;
+      if(!markerCtx||!tracker?.grayscale)return null;
+      markerCtx.drawImage(raw,0,0,markerCanvas.width,markerCanvas.height);
+      return tracker.grayscale(markerCtx.getImageData(0,0,markerCanvas.width,markerCanvas.height));
+    }
+    function stopMarker(message,pause=true){
+      markerActive=false;
+      el('pose-marker-stop').disabled=true;
+      const v=document.getElementById('aero-source-video');
+      if(v){
+        if(pause&&!v.paused)v.pause();
+        if(markerPreviousRate!==null){v.defaultPlaybackRate=markerPreviousRate;v.playbackRate=markerPreviousRate;}
+      }
+      if(pause){const player=document.getElementById('aero-play');
+        if(player)player.textContent='▶ Reproduzir vídeo';}
+      markerPreviousRate=null;
+      if(message)setText('pose-marker-status',message);
+    }
+    function markerEditsNear(source){
+      if(currentEpoch!==source.epoch)return {};
+      const slot=slotFor(source),exact=correctedFrames.get(slot);
+      if(exact&&Object.keys(exact).length)return exact;
+      if(!Number.isFinite(source.videoTime))return {};
+      const target=Math.round(source.videoTime*30);
+      let best=null,smallest=Infinity;
+      for(const [key,edits] of correctedFrames){
+        if(!key.startsWith('video:')||!Object.keys(edits).length)continue;
+        const delta=Math.abs(Number(key.slice(6))-target);
+        if(delta<smallest){smallest=delta;best=edits;}
+      }
+      // No máximo 1/4 de segundo: acima disso o atleta pode estar em outra
+      // fase da pedalada e não é seguro reutilizar o ponto anterior.
+      return smallest<=7?best:{};
+    }
+    function updateMarkerMeasurements(source){
+      const invisible=()=>({x:0,y:0,visibility:0,presence:0});
+      const points=Array.from({length:33},invisible);
+      const edits={};
+      for(const [joint,p] of markerPoints){
+        if(lostMarkers.has(joint))continue;
+        const index=ANATOMY[side]?.[joint];if(index===undefined)continue;
+        points[index]={x:p.x,y:p.y,visibility:1,presence:1};
+        edits[joint]={x:p.x,y:p.y};
+        if(source.playing&&Object.hasOwn(TRAILS,joint))
+          pushTrail(trails,joint,points[index],source.videoTime*1000);
+      }
+      originalLandmarks=points;
+      frameSlot=slotFor(source);
+      correctedFrames.set(frameSlot,edits);
+      if(correctedFrames.size>300)correctedFrames.delete(correctedFrames.keys().next().value);
+      results=measure(points,side);
+      lastSource=source;lastVideoTime=source.videoTime;
+      publish(results,source,source.playing);
+      draw();
+    }
+    function markerTick(){
+      if(!markerActive||busy||document.hidden||!panel.open)return;
+      const source=globalThis.PAIVA_WIND_SIMPLE?.getAnalysisFrame?.(rawCtx);
+      if(!source||source.mode!=='video'||source.epoch!==markerEpoch){
+        stopMarker('O vídeo mudou. Pause e marque novamente os pontos antes de reiniciar.',false);
+        return;
+      }
+      if(source.videoTime===markerLastTime)return;
+      const step=source.videoTime-markerLastTime;
+      if(step<-.03||step>.48){
+        stopMarker('O vídeo pulou muitos quadros para seguir com confiança. Pause, corrija os pontos e reinicie.');
+        return;
+      }
+      const gray=markerGray();
+      const tracker=globalThis.PAIVA_MOTION_TRACKER;
+      if(!gray||!tracker?.trackRobustPoint){stopMarker('Rastreador do 2D indisponível.');return;}
+      for(const [joint,p] of markerPoints){
+        if(lostMarkers.has(joint))continue;
+        const scaled={x:p.x*markerCanvas.width,y:p.y*markerCanvas.height};
+        let found=null;
+        if(el('pose-marker-kind').value==='reflective'&&tracker.trackFineShapes){
+          const match=tracker.trackFineShapes(markerPrevGray,gray,
+            markerCanvas.width,markerCanvas.height,
+            [{kind:'full8',reflectorMode:true,trackEnabled:true,points:[scaled]}],
+            markerCanvas.width,markerCanvas.height,{patch:5,search:24});
+          if(!match.lost.length)found=match.shapes[0].points[0];
+        }
+        if(!found)found=tracker.trackRobustPoint(markerPrevGray,gray,
+          markerCanvas.width,markerCanvas.height,scaled,{patch:5,search:24});
+        if(!found){lostMarkers.add(joint);continue;}
+        markerPoints.set(joint,{x:found.x/markerCanvas.width,y:found.y/markerCanvas.height});
+      }
+      markerPrevGray=gray;markerLastTime=source.videoTime;
+      updateMarkerMeasurements(source);
+      const names=[...markerPoints.keys()];
+      const lost=names.filter(key=>lostMarkers.has(key));
+      setText('pose-marker-status',lost.length?
+        'Referência perdida: '+lost.map(key=>JOINT_NAMES[key]).join(', ')+
+        '. Círculo vermelho = último local conhecido. Pause, corrija e reinicie.':
+        '● '+names.length+' ponto(s) acompanhados por contraste · sem IA corporal. Confira o alinhamento durante a reprodução.');
+      if(lost.length===names.length)stopMarker('Todos os pontos perderam a referência. Corrija-os no quadro atual e reinicie.');
+    }
+    el('pose-marker-start').addEventListener('click',async()=>{
+      if(editing){setText('pose-marker-status','Primeiro conclua a correção manual dos pontos.');return;}
+      if(markerActive)stopMarker('Preparando novo rastreio.');
+      const tracker=globalThis.PAIVA_MOTION_TRACKER;
+      if(!tracker?.grayscale||!tracker?.trackRobustPoint||!markerCtx){
+        setText('pose-marker-status','O motor do rastreador 2D ainda não carregou. Atualize a página.');return;
+      }
+      const source=globalThis.PAIVA_WIND_SIMPLE?.getAnalysisFrame?.(rawCtx);
+      if(!source||source.mode!=='video'){
+        setText('pose-marker-status','Abra um VÍDEO gravado no Motion Studio e pause no quadro em que marcou os pontos.');return;
+      }
+      frameSlot=slotFor(source);
+      const edits=markerEditsNear(source);
+      const priority=['hip','knee','ankle','heel','toe','shoulder','elbow','wrist'];
+      const chosen=priority.filter(joint=>edits[joint]).slice(0,5);
+      if(!chosen.length){
+        setText('pose-marker-status','Pause o vídeo, clique em Corrigir pontos, marque pelo menos uma articulação e conclua a correção.');return;
+      }
+      markerPoints.clear();lostMarkers.clear();
+      for(const joint of chosen)markerPoints.set(joint,{...edits[joint]});
+      if(!side)side=el('pose-side').value==='right'?'right':'left';
+      active=false;el('pose-toggle').textContent='▶ Iniciar leitura IA';
+      samples=0;minKnee=Infinity;maxKnee=-Infinity;
+      trunkSamples=0;minTrunk=Infinity;maxTrunk=-Infinity;
+      Object.values(trails).forEach(path=>{path.length=0;});
+      markerEpoch=source.epoch;markerLastTime=source.videoTime;
+      markerPrevGray=markerGray();
+      if(!markerPrevGray){setText('pose-marker-status','Não foi possível preparar a imagem do vídeo.');return;}
+      const weak=[];
+      for(const [joint,p] of markerPoints){
+        const at={x:p.x*markerCanvas.width,y:p.y*markerCanvas.height};
+        if(!tracker.trackRobustPoint(markerPrevGray,markerPrevGray,
+          markerCanvas.width,markerCanvas.height,at,{patch:5,search:8}))weak.push(joint);
+      }
+      if(weak.length){
+        setText('pose-marker-status','Sem contraste suficiente no quadro inicial: '+
+          weak.map(key=>JOINT_NAMES[key]).join(', ')+
+          '. Use fita ou marcador de maior contraste, corrija a posição e tente novamente.');
+        return;
+      }
+      markerActive=true;el('pose-marker-stop').disabled=false;
+      const video=document.getElementById('aero-source-video');
+      markerPreviousRate=video?.playbackRate??null;
+      if(video){video.defaultPlaybackRate=Math.min(video.playbackRate,.25);
+        video.playbackRate=Math.min(video.playbackRate,.25);
+        try{await video.play();const player=document.getElementById('aero-play');
+          if(player)player.textContent='⏸ Pausar vídeo';
+        }catch(_){/* o usuário pode iniciar no player */}}
+      lastSample=0;
+      setText('pose-marker-status','Rastreando '+chosen.map(key=>JOINT_NAMES[key]).join(', ')+
+        ' em reprodução lenta. Se perder um ponto, pause e corrija manualmente.'+
+        (priority.filter(joint=>edits[joint]).length>5?' Foram usados os cinco primeiros pontos.':''));
+    });
+    el('pose-marker-stop').addEventListener('click',()=>stopMarker('Rastreio pausado. Você pode corrigir os pontos no quadro atual.'));
     async function sample(now){
+      if(markerActive){markerTick();return;}
       if(busy||!active||editing||!panel.open||document.hidden)return;
       const aeroSource=globalThis.PAIVA_WIND_SIMPLE;
       if(!aeroSource?.getAnalysisFrame)return;
@@ -547,11 +734,13 @@
     }
     function schedule(now){
       if(stopped)return;
-      if(active&&now-lastSample>=sampleIntervalMs){lastSample=now;void sample(now);}
+      if((active||markerActive)&&now-lastSample>=sampleIntervalMs){lastSample=now;void sample(now);}
       requestAnimationFrame(schedule);
     }
     el('pose-toggle').addEventListener('click',async()=>{
       if(editing){exitEditing();status('Correção deste quadro concluída. Clique novamente em Continuar leitura para acompanhar o vídeo.');return;}
+      if(markerActive)stopMarker('Modo de marcadores pausado. A IA corporal pode ser iniciada separadamente.');
+      markerPoints.clear();lostMarkers.clear();
       if(active){active=false;el('pose-toggle').textContent='▶ Continuar leitura';status('Leitura pausada.');return;}
       if(!globalThis.PAIVA_WIND_SIMPLE?.getAnalysisFrame){status('Aguarde o Motion Studio terminar de carregar.');return;}
       const playingVideo=document.getElementById('aero-source-video');
@@ -568,6 +757,8 @@
     });
     for(const settingId of ['pose-stability','pose-side']){
       el(settingId).addEventListener('change',()=>{
+        if(markerActive)stopMarker('Rastreio de marcadores parado para alterar o ajuste.');
+        markerPoints.clear();lostMarkers.clear();
         reset();lastSource=null;originalLandmarks=null;correctedFrames.clear();
         status(settingId==='pose-side'?'Lado corporal alterado. A leitura começa uma nova trajetória.':
           'Filtro de estabilidade alterado. Iniciando uma nova trajetória.');
@@ -576,16 +767,26 @@
     }
     el('pose-manual-toggle').addEventListener('click',()=>{
       if(editing){exitEditing();status('Correção manual concluída. A imagem corrigida pode ser salva. Continue a leitura para outros quadros.');draw();return;}
+      if(markerActive)stopMarker('Rastreio pausado para você corrigir um marcador.');
+      markerPoints.clear();lostMarkers.clear();
       // Se a IA não reconhecer o atleta, o profissional ainda pode colocar
       // os seis marcos manualmente sobre a imagem importada no Aero.
-      if(!results||!originalLandmarks){
-        const source=globalThis.PAIVA_WIND_SIMPLE?.getAnalysisFrame?.(rawCtx);
-        if(!source){status('Primeiro abra uma foto ou vídeo no Motion Studio para marcar os pontos.');return;}
+      const source=globalThis.PAIVA_WIND_SIMPLE?.getAnalysisFrame?.(rawCtx);
+      if(!source){status('Primeiro abra uma foto ou vídeo no Motion Studio para marcar os pontos.');return;}
+      if(!results||!originalLandmarks||currentEpoch!==source.epoch||
+          (source.mode==='video'&&lastSource?.mode==='video'&&
+            Math.abs(source.videoTime-lastSource.videoTime)>.25)){
         if(currentEpoch!==source.epoch){correctedFrames.clear();currentEpoch=source.epoch;reset();}
         lastSource=source;lastVideoTime=source.videoTime;frameSlot=slotFor(source);
         side=el('pose-side').value==='right'?'right':'left';
         originalLandmarks=Array.from({length:33},()=>({x:0,y:0,visibility:0,presence:0}));
         results=measure(originalLandmarks,side);
+      }else{
+        const prior=markerEditsNear(source);
+        lastSource=source;lastVideoTime=source.videoTime;frameSlot=slotFor(source);
+        if(Object.keys(prior).length&&!correctedFrames.has(frameSlot))
+          correctedFrames.set(frameSlot,{...prior});
+        refreshManualPoints();
       }
       active=false;el('pose-toggle').textContent='▶ Continuar leitura';
       const sourceVideo=document.getElementById('aero-source-video');
@@ -663,10 +864,16 @@
       aeroVideo.playbackRate=speed;
     }
     el('pose-speed').addEventListener('change',()=>{
-      applySpeed();status('Reprodução em '+el('pose-speed').selectedOptions[0].textContent+'. A velocidade não modifica os ângulos.');
+      applySpeed();
+      if(markerActive&&aeroVideo.playbackRate>.25)aeroVideo.playbackRate=.25;
+      status('Reprodução em '+aeroVideo.playbackRate+'×. A velocidade não modifica os ângulos.');
     });
     aeroVideo?.addEventListener('loadedmetadata',applySpeed);
-    el('pose-reset').addEventListener('click',()=>{reset();draw();status('Rastros e ângulos extremos reiniciados. Correções manuais deste quadro preservadas.');});
+    el('pose-reset').addEventListener('click',()=>{
+      if(markerActive)stopMarker('Rastreio manual parado para reiniciar os traçados.');
+      markerPoints.clear();lostMarkers.clear();
+      reset();draw();status('Rastros e ângulos extremos reiniciados. Correções manuais deste quadro preservadas.');
+    });
     el('pose-trails').addEventListener('change',()=>{draw();status(el('pose-trails').checked?
       'Rastros visíveis: acompanham pontos reais do movimento.':'Rastros ocultos. Ângulos continuam visíveis.');});
     el('pose-export').addEventListener('click',()=>{
@@ -695,6 +902,7 @@
     panel.addEventListener('toggle',()=>{
       if(!panel.open){
         if(active){active=false;el('pose-toggle').textContent='▶ Continuar leitura';}
+        if(markerActive)stopMarker('Rastreio manual pausado porque o painel foi fechado.');
         if(editing)exitEditing();
       }
     });
