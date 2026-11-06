@@ -1,0 +1,72 @@
+PAIVA MOTION STUDIO — V5.59 · ACABAMENTO FINAL DA ANÁLISE ANGULAR 2D
+===================================================================
+
+ESTA É UMA ATUALIZAÇÃO PEQUENA (5 ARQUIVOS)
+- athlete-2d.js
+- athlete-2d.css
+- paiva-wind-simple.js
+- sw.js
+- NOTAS_V5_59.txt
+
+O QUE MELHOROU
+1. Botão direito sobre uma marcação: abre Excluir; sobre área vazia:
+   não seleciona nem oferece exclusão do último desenho. No player
+   com vídeo carregado, a área vazia mantém o comando de pausa/play.
+2. Etiquetas de ângulos, joelho, tronco e calcanhar afastadas das bolinhas,
+   com linha-guia fina; o desenho tenta evitar etiquetas sobrepostas e
+   sobre pontos visíveis.
+3. O seletor "Visualizar e rastrear" agora funciona como VISTA do boneco:
+   - Oito pontos: exibe o boneco todo.
+   - Tronco + braço: exibe os quatro pontos superiores.
+   - Fêmur + tíbia: exibe quadril, joelho e tornozelo.
+   - Pé + calcanhar: exibe tornozelo, metatarso e calcanhar.
+   - Somente ponto livre: oculta o boneco e mostra os pontos isolados.
+   Os oito pontos anatômicos permanecem no projeto, mesmo quando ocultos.
+   A região selecionada também define os pontos do boneco acompanhados
+   no RASTREIO FINO (◀ ▶, rodinha).
+4. Avanço manual suporta arquivos configurados em 24, 25, 30, 50, 60,
+   100 ou 120 fps. O histórico identifica instantes em milissegundos para
+   evitar colisão entre quadros de vídeos de alta taxa de captura.
+5. A chave de cache e o indicador da interface foram atualizados para
+   V5.59, ajudando o GitHub Pages a carregar os arquivos recentes.
+
+IMPORTANTE SOBRE PRECISÃO
+- O salto quadro a quadro num navegador é APROXIMADO e depende do
+  decodificador e do FPS escolhido pelo profissional. Conferir a imagem.
+- O rastreador de pontos por textura, cor e refletor CONTINUA experimental.
+  Ele não faz reconhecimento anatômico confiável sozinho.
+- Um ponto perdido não deve ser considerado medição válida. Corrigir o
+  marcador manualmente antes de usar o ângulo no laudo.
+- Nada foi removido dos módulos anteriores ou do Motion Signature.
+
+COMO INSTALAR
+1. Extraia PAIVA_V5_59_ATUALIZACAO_2D_FINAL.zip.
+2. Selecione somente os 5 arquivos extraídos, não o ZIP.
+3. Abra a página da raiz/main no GitHub:
+   https://github.com/eduardostt3dma/paiva-v5-23/upload/main
+4. Envie os 5 arquivos e clique em "Commit changes".
+5. Aguarde alguns minutos e abra:
+   https://eduardostt3dma.github.io/paiva-v5-23/
+6. Atualize a página se ainda aparecer a versão anterior.
+
+TESTE RECOMENDADO
+1. Abra Análise Angular 2D e carregue um MP4 de pedalada.
+2. Arraste a régua de tempo e clique em Pausar e marcar.
+3. Coloque o boneco 8 pontos. Escolha Tronco + braço, depois
+   Fêmur + tíbia e Pé + calcanhar. Confirme se só a região aparece.
+4. Volte a Oito pontos: os oito pontos devem estar onde ficaram.
+5. Clique com o direito num marcador (Excluir), depois num local vazio
+   (não deve oferecer exclusão do marcador anterior).
+6. Corrija um ponto e confirme que o nome não cobre mais a bolinha.
+7. Teste o vídeo avançando e retrocedendo; salve/reabra a análise.
+
+STATUS
+- Sintaxe dos scripts conferida.
+- Testes automatizados de etiquetas, grupos, exclusão, chave de quadros,
+  persistência e rastreamento sintético aprovados.
+- Teste visual e rastreamento em filmagem REAL ainda dependem de validação
+  no computador do Eduardo.
+
+PRÓXIMOS PACOTES
+Esta é a primeira atualização pequena após o backup completo V5.58.
+Como combinado, após três pacotes pequenos preparamos outro ZIP COMPLETO.

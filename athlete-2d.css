@@ -144,6 +144,9 @@
 #paiva-athlete-2d .paiva-2d-wheel-hint {grid-column:1/-1;
   display:block;color:#9ec4d2;font:650 10px system-ui,sans-serif;
   padding:1px 0 0;text-align:center;}
+#paiva-athlete-2d .paiva-2d-fps-advice {grid-column:1/-1;
+  font:550 10px/1.4 system-ui,sans-serif;color:#bad3dd;
+  padding:2px 0;text-align:left;}
 #paiva-athlete-2d .paiva-2d-playback button {padding:9px 5px;background:#253a49;
   color:#edf4f8;border:1px solid #536f80;border-radius:8px;font:750 11px system-ui;}
 #paiva-athlete-2d .paiva-2d-playback button:disabled {opacity:.42;cursor:not-allowed;}
@@ -202,6 +205,8 @@
 #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-zoom button {padding:6px 2px;}
 #paiva-athlete-2d .paiva-2d-quick-actions {display:flex;align-items:center;
   gap:6px;flex-wrap:wrap;}
+#paiva-athlete-2d #paiva-2d-marker-group-note {color:#a4e8dc;
+  font:650 11px/1.4 system-ui,sans-serif;display:block;}
 #paiva-athlete-2d .paiva-2d-quick-actions button {border:1px solid #577283;
   border-radius:8px;background:#243845;color:#e1eef5;padding:9px 7px;
   font:750 10px system-ui;cursor:pointer;flex:1 1 108px;}
@@ -402,7 +407,7 @@
   border-radius:6px;background:#213745;color:#e1f0f5;font:750 10px system-ui;cursor:pointer;}
 #paiva-athlete-2d .paiva-2d-player-dock {display:flex;flex-direction:column;}
 #paiva-athlete-2d .paiva-2d-player-dock .paiva-2d-playback {order:0;}
-/* V5.58: a régua principal e o comando de congelar ficam visíveis no vídeo. */
+/* V5.59: acabamento do 2D com régua visível, grupos e etiquetas afastadas. */
 #paiva-athlete-2d .paiva-2d-manual-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;
   border-bottom:1px solid #3a6270;padding:5px 2px 9px;color:#c9ebeb;font:700 11px system-ui;}
 #paiva-athlete-2d .paiva-2d-manual-bar strong{letter-spacing:.045em;color:#dcfff5;font-size:11px;}
