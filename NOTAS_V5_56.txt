@@ -1,0 +1,46 @@
+PAIVA MOTION STUDIO — V5.56 | CORREÇÃO DE TROCA DOS 8 PONTOS
+=============================================================
+
+O PROBLEMA CORRIGIDO
+- No Motion Signature V5.55, trocar Todos / Tronco + braço / Fêmur +
+  tíbia / Pé + calcanhar limpava os marcadores e não alterava a imagem na
+  hora. Isso fazia a ferramenta parecer sem resposta.
+- Agora o motor rastreia todos os pontos anatômicos previamente marcados,
+  e a troca de grupo filtra imediatamente a imagem e os ângulos mostrados,
+  sem cancelar o rastreamento em andamento.
+
+DUAS BARRAS AO LADO DO VÍDEO
+- Lado esquerdo: cinco botões para grupos, tipo de marcador, iniciar/parar
+  rastreio, ponto livre e tamanho.
+- Lado direito: oito atalhos anatômicos e controles de correção, IA,
+  estabilidade, lado, velocidade, rastro e exportação.
+- No celular em posição vertical, as duas barras ficam estreitas e podem
+  rolar internamente. O botão "Ampliar vídeo" oculta temporariamente as
+  laterais para permitir uma correção precisa; clicar de novo restaura.
+
+COMO TESTAR
+1. Abra um vídeo no Motion Studio e pause no quadro de referência.
+2. Na barra direita, use Corrigir pontos ou os atalhos 1 a 8 para colocar
+   os marcadores físicos correspondentes.
+3. Conclua a correção e clique em Seguir meus pontos, na barra esquerda.
+4. Enquanto o vídeo anda, toque nos cinco botões da barra esquerda.
+   A imagem DEVE trocar de imediato (8 / superior / perna / pé / livre).
+5. Quando não existe um ponto físico marcado de determinado grupo, o grupo
+   mostra o que há; não inventa nem troca pontos por outros.
+6. Para analisar somente ponto livre, posicione e reinicie o rastreio
+   nesse modo. Para mudar a cor de referência, também é preciso reiniciar.
+
+LIMITAÇÃO
+- O rastreio de adesivos em webcam comum segue experimental. O filtro de
+  grupos apenas escolhe o que mostrar; a qualidade de cada ponto depende
+  da referência visual, iluminação e ausência de oclusões.
+- O botão de ampliar é recomendado quando o vídeo central fica estreito
+  no celular em posição vertical.
+
+ATUALIZAÇÃO (PACOTE PEQUENO)
+- Extraia o ZIP e envie os CINCO arquivos para a raiz do GitHub, na main:
+  https://github.com/eduardostt3dma/paiva-v5-23/upload/main
+- Confirme Commit changes e atualize o site após a publicação.
+- O selo do Motion Studio passa para V5.56.
+- O backup integral V5.55 permanece guardado. Pela combinação adotada,
+  faremos o próximo ZIP completo depois de três pacotes incrementais.

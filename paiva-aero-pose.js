@@ -1,4 +1,4 @@
-/* PAIVA MOTION SIGNATURE V5.55 — oito marcadores, módulos independentes e ponto livre.
+/* PAIVA MOTION SIGNATURE V5.56 — grupos visíveis ao trocar e barras laterais.
    Estimativas de ângulos projetados em 2D; nunca ajuste biomecânico automático.
    Não altera ou reutiliza ferramentas, eventos ou medidas do módulo Análise 2D. */
 (() => {
@@ -37,6 +37,19 @@
     foot:['ankle','heel','toe'],
     free:['free']
   };
+  function viewByGroup(data,group){
+    if(!data||group==='all'||!MARKER_GROUPS[group])return data;
+    const keys=new Set(MARKER_GROUPS[group]);
+    const pts=Object.fromEntries(Object.entries(data.points||{}).map(([key,value])=>
+      [key,keys.has(key)?value:null]));
+    const has=(...names)=>names.every(key=>keys.has(key));
+    return {...data,points:pts,
+      knee:has('hip','knee','ankle')?data.knee:null,
+      trunk:has('hip','shoulder')?data.trunk:null,
+      elbow:has('shoulder','elbow','wrist')?data.elbow:null,
+      hip:has('shoulder','hip','knee')?data.hip:null,
+      foot:has('heel','toe')?data.foot:null};
+  }
   const hueDistance=(a,b)=>Math.min(Math.abs(a-b),360-Math.abs(a-b));
   function rgbHue(r,g,b){
     r/=255;g/=255;b/=255;
@@ -204,7 +217,7 @@
   }
   // Núcleo puro disponível para testes automatizados, sem abrir navegador.
   globalThis.PAIVA_AERO_POSE_MATH={angle3,trunkAngle,footAngle,chooseSide,measure,
-    confidence,pushTrail,stabilizeLandmarks,sampleColorMarker,followColorMarker,MARKER_GROUPS};
+    confidence,pushTrail,stabilizeLandmarks,sampleColorMarker,followColorMarker,MARKER_GROUPS,viewByGroup};
   if(typeof document==='undefined')return;
 
   const PACKAGE='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/vision_bundle.mjs';
@@ -341,6 +354,65 @@
     aero.querySelector('.aero-measure')?.before(panel);
     if(!panel.isConnected)aero.append(panel);
     const el=id=>panel.querySelector('#'+id);
+    // Ferramentas junto das laterais da imagem: esquerda = rastreio/grupo;
+    // direita = IA, correção e seleção anatômica. Um botão amplia o quadro
+    // sem exigir que o usuário gire o celular para acertar os pontos.
+    const workbench=document.createElement('div');
+    workbench.className='pose-workbench';
+    workbench.innerHTML=`
+      <aside class="pose-rail pose-rail-left" aria-label="Ferramentas de rastreamento à esquerda">
+        <strong class="pose-rail-heading">RASTREAR</strong>
+        <div class="pose-group-buttons" role="group" aria-label="Trocar imediatamente o conjunto visível">
+          <button type="button" data-pose-group="all" aria-pressed="true">8 pontos</button>
+          <button type="button" data-pose-group="upper" aria-pressed="false">Tronco + braço</button>
+          <button type="button" data-pose-group="leg" aria-pressed="false">Fêmur + tíbia</button>
+          <button type="button" data-pose-group="foot" aria-pressed="false">Pé + calcanhar</button>
+          <button type="button" data-pose-group="free" aria-pressed="false">Ponto livre</button>
+        </div>
+      </aside>
+      <div class="pose-workbench-center">
+        <button type="button" id="pose-expand-view" class="pose-expand-view" aria-pressed="false">⤢ Ampliar vídeo</button>
+      </div>
+      <aside class="pose-rail pose-rail-right" aria-label="Ferramentas de correção à direita">
+        <strong class="pose-rail-heading">CORRIGIR</strong>
+        <div class="pose-joint-buttons" role="group" aria-label="Selecionar ponto anatômico para corrigir">
+          <button type="button" data-pose-joint="shoulder">1 Ombro</button>
+          <button type="button" data-pose-joint="elbow">2 Cotovelo</button>
+          <button type="button" data-pose-joint="wrist">3 Punho</button>
+          <button type="button" data-pose-joint="hip">4 Quadril</button>
+          <button type="button" data-pose-joint="knee">5 Joelho</button>
+          <button type="button" data-pose-joint="ankle">6 Tornozelo</button>
+          <button type="button" data-pose-joint="heel">7 Calcanhar</button>
+          <button type="button" data-pose-joint="toe">8 Metatarso</button>
+        </div>
+      </aside>`;
+    const leftRail=workbench.querySelector('.pose-rail-left');
+    const rightRail=workbench.querySelector('.pose-rail-right');
+    const center=workbench.querySelector('.pose-workbench-center');
+    const originalView=el('pose-view').parentElement;
+    originalView.before(workbench);
+    workbench.after(el('pose-marker-mode'));
+    center.append(el('pose-status'),originalView, panel.querySelector('.pose-legend'));
+    leftRail.append(panel.querySelector('.pose-marker-actions'),el('pose-marker-status'));
+    rightRail.append(panel.querySelector('.pose-actions'),el('pose-manual-controls'));
+    el('pose-marker-mode').open=false; // instruções detalhadas sob o vídeo
+    for(const button of leftRail.querySelectorAll('[data-pose-group]'))
+      button.addEventListener('click',()=>{
+        el('pose-marker-group').value=button.dataset.poseGroup;
+        el('pose-marker-group').dispatchEvent(new Event('change',{bubbles:true}));
+      });
+    for(const button of rightRail.querySelectorAll('[data-pose-joint]'))
+      button.addEventListener('click',()=>{
+        if(!editing)el('pose-manual-toggle').click();
+        if(!editing)return;
+        el('pose-manual-joint').value=button.dataset.poseJoint;
+        el('pose-manual-joint').dispatchEvent(new Event('change',{bubbles:true}));
+      });
+    el('pose-expand-view').addEventListener('click',()=>{
+      const expanded=workbench.classList.toggle('pose-workbench-expanded');
+      el('pose-expand-view').setAttribute('aria-pressed',String(expanded));
+      el('pose-expand-view').textContent=expanded?'↤ Mostrar ferramentas laterais':'⤢ Ampliar vídeo';
+    });
     const canvas=el('pose-view'),ctx=canvas.getContext('2d');
     const raw=document.createElement('canvas');raw.width=W;raw.height=H;
     const rawCtx=raw.getContext('2d');
@@ -471,8 +543,10 @@
     }
     function drawTrails(){
       if(editing||!el('pose-trails').checked)return;
+      const allowed=new Set(MARKER_GROUPS[el('pose-marker-group').value]||MARKER_GROUPS.all);
       ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
       for(const [key,opts] of Object.entries(TRAILS)){
+        if(!allowed.has(key))continue;
         const points=trails[key];
         if(points.length<2)continue;
         ctx.strokeStyle=opts.color;
@@ -522,10 +596,12 @@
     function drawSkeleton(data){
       if(!data)return;
       const p=data.points;
+      const visibleGroup=new Set(MARKER_GROUPS[el('pose-marker-group').value]||MARKER_GROUPS.all);
       const lines=[['shoulder','elbow'],['elbow','wrist'],['shoulder','hip'],['hip','knee'],['knee','ankle'],['ankle','heel'],['heel','toe']];
       ctx.save();ctx.lineCap='round';
       for(const [a,b] of lines){
         if(!visible(p[a])||!visible(p[b]))continue;
+        ctx.globalAlpha=editing&&(!visibleGroup.has(a)||!visibleGroup.has(b)) ? .23 : 1;
         const [x1,y1]=coords(p[a]),[x2,y2]=coords(p[b]);
         ctx.strokeStyle='rgba(0,0,0,.87)';ctx.lineWidth=7;
         ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
@@ -534,6 +610,7 @@
       }
       for(const key of Object.keys(p)){
         if(!visible(p[key]))continue;
+        ctx.globalAlpha=editing&&!visibleGroup.has(key) ? .3 : 1;
         const [x,y]=coords(p[key]);
         ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);
         const corrected=!!correctedFrames.get(frameSlot)?.[key];
@@ -546,6 +623,7 @@
             drawPointCallout(x,y,JOINT_NAMES[key],'#69f0df');
         }
       }
+      ctx.globalAlpha=1;
       // Graus são exibidos nos cartões abaixo do vídeo, deixando as
       // articulações desobstruídas durante a correção manual.
       ctx.restore();
@@ -560,18 +638,25 @@
         ctx.textAlign='left';
       }
       drawTrails();
-      if(results)drawSkeleton(results);
+      // Em modo de correção, todos os pontos voltam a aparecer para permitir
+      // selecionar qualquer articulação pela barra direita.
+      if(results)drawSkeleton(editing?results:viewByGroup(results,el('pose-marker-group').value));
       if(markerPoints.size||freeMarker)drawMarkerPoints();
       drawGhosts();
-      ctx.fillStyle='rgba(9,16,23,.76)';ctx.fillRect(12,12,250,31);
+      ctx.fillStyle='rgba(9,16,23,.8)';ctx.fillRect(12,12,390,31);
       ctx.fillStyle='#ffe476';ctx.font='600 14px system-ui';
-      ctx.fillText('PAIVA MOTION SIGNATURE · 2D',22,33);
+      const groupName=el('pose-marker-group').selectedOptions[0].textContent.trim();
+      ctx.fillText('PAIVA · '+groupName.toUpperCase()+' · 2D',22,33);
       ctx.fillStyle='rgba(10,18,26,.8)';ctx.fillRect(12,H-32,W-24,24);
       ctx.fillStyle='#c8d3dc';ctx.font='12px system-ui';
       ctx.fillText(editing?'CORREÇÃO MANUAL · QUADRO PAUSADO · PONTOS EM VERDE = CORRIGIDOS':
         'TRAJETÓRIAS DE ARTICULAÇÕES DETECTADAS · LEITURA EXPERIMENTAL',20,H-15);
     }
     function publish(data,source,record=true){
+      data=viewByGroup(data,el('pose-marker-group').value);
+      const groupKeys=new Set(MARKER_GROUPS[el('pose-marker-group').value]||MARKER_GROUPS.all);
+      const showKnee=['hip','knee','ankle'].every(key=>groupKeys.has(key));
+      const showTrunk=['hip','shoulder'].every(key=>groupKeys.has(key));
       ['knee','trunk','elbow','hip','foot'].forEach(k=>setText('pose-'+k,fmt(data?.[k]??null)));
       if(source?.mode==='photo'){
         setText('pose-extension','—');setText('pose-flexion','—');setText('pose-trunk-delta','—');
@@ -581,13 +666,13 @@
           minKnee=Math.min(minKnee,data.knee);maxKnee=Math.max(maxKnee,data.knee);
           samples++;
         }
-        setText('pose-extension',samples>=5?fmt(maxKnee):'—');
-        setText('pose-flexion',samples>=5?fmt(minKnee):'—');
+        setText('pose-extension',showKnee&&samples>=5?fmt(maxKnee):'—');
+        setText('pose-flexion',showKnee&&samples>=5?fmt(minKnee):'—');
         if(record&&data?.trunk!==null&&data?.trunk!==undefined){
           minTrunk=Math.min(minTrunk,data.trunk);maxTrunk=Math.max(maxTrunk,data.trunk);
           trunkSamples++;
         }
-        setText('pose-trunk-delta',trunkSamples>=5?fmt(maxTrunk-minTrunk):'—');
+        setText('pose-trunk-delta',showTrunk&&trunkSamples>=5?fmt(maxTrunk-minTrunk):'—');
         el('pose-hint').textContent=samples<5?
           'Aguarde cinco quadros válidos. Rastros e extremos exigem pedalada em vídeo, com câmera fixa.':
           'Ângulos e rastros observados ('+samples+' quadros válidos). Oscilações podem incluir imprecisão do rastreador; não são metas de ajuste.';
@@ -596,7 +681,9 @@
     function drawMarkerPoints(){
       ctx.save();ctx.lineWidth=2.5;
       const diameter=Number(el('pose-marker-size').value)||16;
+      const allowed=new Set(MARKER_GROUPS[el('pose-marker-group').value]||MARKER_GROUPS.all);
       for(const [joint,p] of markerPoints){
+        if(!allowed.has(joint))continue;
         const x=p.x*W,y=p.y*H,lost=lostMarkers.has(joint);
         ctx.strokeStyle=lost?'#f77979':'#5cf2df';
         ctx.setLineDash(lost?[4,3]:[]);
@@ -734,8 +821,11 @@
       frameSlot=slotFor(source);
       const edits=markerEditsNear(source);
       const group=el('pose-marker-group').value;
-      const chosen=(MARKER_GROUPS[group]||MARKER_GROUPS.all).filter(joint=>
-        joint==='free'?freeMarker&&freeMarkerEpoch===source.epoch:edits[joint]);
+      // O motor prepara TODOS os marcadores definidos. O seletor alterna
+      // apenas a visualização, sem perder os outros pontos nem parar o vídeo.
+      const chosen=group==='free'?
+        (freeMarker&&freeMarkerEpoch===source.epoch?['free']:[]):
+        MARKER_GROUPS.all.filter(joint=>edits[joint]);
       if(!chosen.length){
         setText('pose-marker-status',group==='free'?
           'Clique em Posicionar ponto livre e marque uma referência no vídeo pausado.':
@@ -787,12 +877,25 @@
         ' em reprodução lenta. Se perder um ponto, pause e corrija manualmente.');
     });
     el('pose-marker-stop').addEventListener('click',()=>stopMarker('Rastreio pausado. Você pode corrigir os pontos no quadro atual.'));
-    for(const id of ['pose-marker-group','pose-marker-kind'])
-      el(id).addEventListener('change',()=>{
-        if(markerActive)stopMarker('Configuração alterada. Inicie novamente com os pontos do grupo escolhido.');
-        markerPoints.clear();lostMarkers.clear();markerColors.clear();
-        draw();
-      });
+    el('pose-marker-group').addEventListener('change',()=>{
+      const group=el('pose-marker-group').value;
+      for(const button of panel.querySelectorAll('[data-pose-group]'))
+        button.setAttribute('aria-pressed',String(button.dataset.poseGroup===group));
+      if(lastSource)publish(results,lastSource,false);
+      draw();
+      const keys=MARKER_GROUPS[group]||MARKER_GROUPS.all;
+      const tracked=keys.filter(joint=>markerPoints.has(joint)&&!lostMarkers.has(joint));
+      setText('pose-marker-status',tracked.length?
+        'Exibindo '+el('pose-marker-group').selectedOptions[0].textContent.trim()+
+        ' · '+tracked.length+' ponto(s) deste grupo. O rastreio continua, sem reiniciar.':
+        'Visualização: '+el('pose-marker-group').selectedOptions[0].textContent.trim()+
+        '. Se aparecer vazio, pause e marque os pontos deste grupo antes de rastrear.');
+    });
+    el('pose-marker-kind').addEventListener('change',()=>{
+      if(markerActive)stopMarker('Referência alterada. Inicie novamente para capturar a nova cor ou textura.');
+      markerColors.clear();
+      draw();
+    });
     async function sample(now){
       if(markerActive){markerTick();return;}
       if(busy||!active||editing||!panel.open||document.hidden)return;
@@ -1009,6 +1112,8 @@
       draggingJoint=(explicitSelected?el('pose-manual-joint').value:null)||
         nearestJoint(p)||el('pose-manual-joint').value;
       el('pose-manual-joint').value=draggingJoint;
+      for(const button of panel.querySelectorAll('[data-pose-joint]'))
+        button.setAttribute('aria-pressed',String(button.dataset.poseJoint===draggingJoint));
       try{canvas.setPointerCapture(event.pointerId);}catch(_){}
       moveJoint(draggingJoint,p);
     });
@@ -1019,7 +1124,10 @@
     for(const name of ['pointerup','pointercancel','lostpointercapture'])
       canvas.addEventListener(name,()=>{draggingJoint=null;explicitSelected=false;});
     el('pose-manual-joint').addEventListener('change',()=>{
-      explicitSelected=true;if(editing)draw();
+      explicitSelected=true;
+      for(const button of panel.querySelectorAll('[data-pose-joint]'))
+        button.setAttribute('aria-pressed',String(button.dataset.poseJoint===el('pose-manual-joint').value));
+      if(editing)draw();
     });
     el('pose-manual-labels').addEventListener('change',()=>{if(editing)draw();});
     el('pose-manual-clear').addEventListener('click',()=>{
