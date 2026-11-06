@@ -118,7 +118,11 @@
       <div class="paiva-2d-title">
         <div><span>FERRAMENTA COMPLEMENTAR</span><h2>ANÁLISE ANGULAR 2D</h2></div>
         <div class="paiva-2d-title-actions">
-          <button type="button" id="paiva-2d-fit" title="Mostrar a foto inteira sem barras de rolagem">▣ Ajustar foto</button>
+          <button type="button" id="paiva-2d-fit" title="Mostrar a imagem inteira e voltar ao zoom anterior">▣ Ajustar foto</button>
+          <select id="paiva-2d-screen-size" aria-label="Tamanho da área de análise" title="Escolha o tamanho da área de imagem">
+            <option value="normal" selected>Tela · Normal</option>
+            <option value="large">Tela · Grande</option>
+          </select>
           <button type="button" id="paiva-2d-wide" aria-pressed="false" title="Ampliar a área de análise">⛶ Tela ampla</button>
           <button type="button" id="paiva-2d-help" aria-label="Como medir ângulos e linhas" aria-expanded="false">?</button>
         </div>
@@ -134,15 +138,15 @@
         <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. No quadro de vídeo capturado, a nova opção “Seguir pontos por quadro” tenta deslocar os marcadores automaticamente; quando um ponto se perder, corrija-o com o mouse. Com essa opção desligada, as marcações permanecem fixas.</p>
         <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
         <p><strong>Congelar com clique:</strong> no vídeo gravado, clique com o botão ESQUERDO sobre a imagem para pausar e capturar automaticamente o quadro atual; as ferramentas compactas ficam logo abaixo. Com o quadro capturado, você pode marcar ou editar os pontos.</p>
-        <p><strong>Zoom:</strong> a análise abre centralizada em 175% para facilitar os pontos. O controle varia de 5% em 5%, incluindo 175% e 180%, até 400%. Clique em “Ajustar foto” ou “100%” para ver toda a imagem.</p>
+        <p><strong>Zoom:</strong> a análise abre centralizada em 175% para facilitar os pontos. O controle varia de 5% em 5%, até 400%. “Ajustar foto” mostra a imagem inteira e vira “Voltar zoom”: o segundo clique restaura a porcentagem anterior automaticamente.</p>
         <p><strong>Qualidade da imagem:</strong> o quadro congelado preserva até Full HD (1920 × 1080, quando a fonte oferece essa resolução). Para filmar pela webcam, escolha Alta nitidez (solicita Full HD/até 60 fps e grava com menos compressão) ou Leve (HD/até 30 fps). O navegador negocia o que a câmera realmente suporta; confira resolução e fps mostrados após ligar. O rastreio usa uma amostra de até 1280 px, sem ampliar artificialmente o vídeo. Iluminação forte e exposição curta, quando ajustável na câmera, reduzem o borrão dos refletores. A opção de alta nitidez gera arquivos maiores e não melhora vídeos já gravados.</p>
-        <p><strong>Enquadramento:</strong> em 100%, a foto inteira se ajusta automaticamente à altura e largura visíveis, sem precisar rolar a imagem. O botão “Ajustar foto” restaura esse enquadramento. “Tela ampla” esconde temporariamente o painel lateral e ocupa a janela para analisar com mais espaço. Saia pela mesma tecla ou Esc. O zoom acima de 100% volta a permitir deslocamento intencional para ver detalhes.</p>
+        <p><strong>Tamanho da tela:</strong> escolha “Tela · Normal” ou “Tela · Grande” para aumentar a área da imagem sem alterar a porcentagem do zoom. “Tela ampla” ocupa a janela; clique outra vez ou use Esc para sair. Ao voltar, o tamanho e o zoom anteriores são preservados. A opção “100%” do zoom continua disponível para mudar o enquadramento manualmente.</p>
         <p><strong>Marcar sem capturar:</strong> com um vídeo carregado, escolha Ângulo, Linha ou Ponto (as ferramentas ficam sempre visíveis). Clique e arraste diretamente no atleta: o vídeo congela naquele instante automaticamente e a marcação já começa com o mouse pressionado. Um clique simples também congela para você ajustar os pontos em seguida. O tamanho da imagem é mantido ao alternar do vídeo para o quadro congelado.</p>
         <p><strong>Régua de recorte:</strong> abaixo do vídeo, arraste as duas alças da régua — início e fim — até o trecho desejado. O botão “✂ Salvar trecho” gera o novo MP4 local, preservando o original. O ícone 📷 tira uma foto do quadro e salva um PNG com as marcações que estiverem visíveis.</p>
         <p><strong>Linhas e tamanho dos pontos:</strong> o único controle de 1 a 20 aumenta ou diminui tanto a espessura das linhas quanto os círculos dos pontos de ângulos, linhas e rastros. Você pode deixá-los bem maiores para enxergar a referência.</p>
         <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Grave até 3 minutos ou clique e arraste diretamente no quadro da webcam para congelar e marcar. Não é mais obrigatório apertar “Capturar quadro”. Os pontos iniciais são sempre marcados manualmente.</p>
         <p><strong>Vídeos antigos:</strong> use “Abrir vídeo do computador ou pendrive” para carregar MP4, WebM, MOV e outros formatos que seu navegador consiga decodificar. Pause num quadro, capture e analise com as mesmas ferramentas; nenhum arquivo é enviado à internet.</p>
-        <p><strong>2D manual · V5.59:</strong> a régua de tempo fica sempre visível debaixo do vídeo carregado. Arraste-a até o instante desejado e clique em "Pausar e marcar". Abaixo, escolha textura, adesivo colorido ou brilho refletivo. O seletor de região mostra somente os pontos daquele segmento, mas guarda os oito originais para voltar a qualquer momento. Os nomes dos ângulos ficam afastados dos marcadores. Use ◀ e ▶ um quadro por vez; o FPS selecionado é uma aproximação para vídeos importados. A IA experimental continua preservada.</p>
+        <p><strong>2D manual · V5.60:</strong> a régua de tempo fica sempre visível debaixo do vídeo. Os grupos de pontos, etiquetas afastadas e rastreamento da V5.59 continuam. Novidade: selecione o tamanho da área (Normal ou Grande), use Tela ampla e volte sem perder o zoom. “Ajustar foto” mostra o quadro inteiro e permite voltar ao zoom anterior com um único clique. A IA experimental continua preservada.</p>
         <p><strong>Recortar vídeo:</strong> na coluna lateral, abra “✂ Recortar trecho do vídeo”. Marque início e fim pelo tempo atual ou digite mm:ss (ex.: 00:15 a 02:00). “Recortar e salvar MP4” gera um novo arquivo de até 3 minutos pelo motor de vídeo local; a filmagem original não é alterada. Esse processamento pode levar alguns minutos.</p>
         <p><strong>Seis cores:</strong> sob o quadro capturado, escolha vermelho, branco, verde, roxo, azul ou âmbar antes de desenhar o ângulo. Para mudar a cor de um ângulo existente, selecione-o com “Ajustar pontos” e escolha outra cor.</p>
         <p><strong>Registro automático:</strong> cada quadro capturado é arquivado como foto PNG com as linhas e ângulos, e atualizado quando você terminar de ajustá-los. As gravações de webcam e os vídeos recortados também vão para “Fotos e vídeos salvos”. Tudo permanece no armazenamento deste navegador, não em uma pasta permanente do Windows. Abra a lista e clique em Baixar para fazer suas cópias de segurança; limpar dados do navegador pode apagar os registros.</p>
@@ -1562,24 +1566,27 @@
     });
     byId('point-size').addEventListener('change',()=>{rememberTimelineFrame(0);schedulePhotoSave();});
     function availableImageHeight(){
-      const view=section.querySelector('.paiva-2d-view');
       const viewport=canvas.parentElement;
-      let controls=0;
-      for(const element of view.children){
-        if(element===viewport || element.hidden || getComputedStyle(element).display==='none')continue;
-        const css=getComputedStyle(element);
-        controls+=element.offsetHeight+(parseFloat(css.marginTop)||0)+(parseFloat(css.marginBottom)||0);
-      }
       const fullHeight=window.visualViewport?.height||window.innerHeight;
-      // Reserva margem para título, barras do navegador e espaçamento do layout.
+      // Os controles abaixo da foto não podem fazê-la encolher a 180 px.
+      // A imagem tem área própria; os demais comandos podem ficar mais abaixo.
+      const expanded=section.classList.contains('paiva-2d-expanded');
+      const large=section.classList.contains('paiva-2d-size-large');
       const viewportLimit=parseFloat(getComputedStyle(viewport).maxHeight);
-      const byWindow=Math.max(180,Math.floor(fullHeight-controls-
-        (section.classList.contains('paiva-2d-expanded')?56:82)));
-      // A própria janela de desenho tem limite de altura: respeitá-lo impede
-      // o reaparecimento de barras internas mesmo em monitores muito largos.
-      return Number.isFinite(viewportLimit)?Math.min(byWindow,Math.max(150,viewportLimit-4)):byWindow;
+      const desired=Math.floor(fullHeight*(expanded ? 0.56 : large ? 0.78 : 0.67));
+      return Math.max(220,Number.isFinite(viewportLimit)?
+        Math.min(desired,Math.max(220,viewportLimit-4)):desired);
     }
-    function updateZoom(value) {
+    let fitPreviousZoom=null;
+    function syncFitButton(){
+      const button=byId('fit');
+      button.textContent=fitPreviousZoom===null?'▣ Ajustar foto':'↩ Voltar zoom';
+      button.title=fitPreviousZoom===null?
+        'Mostrar a imagem inteira e guardar o zoom atual':
+        `Restaurar automaticamente o zoom anterior (${fitPreviousZoom}%)`;
+    }
+    function updateZoom(value,retainFitChoice=false) {
+      if(!retainFitChoice&&fitPreviousZoom!==null){fitPreviousZoom=null;syncFitButton();}
       const next=Math.max(100,Math.min(400,Math.round(value/5)*5));
       byId('zoom').value=String(next);
       byId('zoom-value').textContent=`${next}%`;
@@ -1601,8 +1608,30 @@
         viewport.scrollTop=Math.max(0,(viewport.scrollHeight-viewport.clientHeight)/2);
       }
     }
-    byId('fit').addEventListener('click',()=>updateZoom(100));
-    window.addEventListener('resize',()=>updateZoom(Number(byId('zoom').value)));
+    byId('fit').addEventListener('click',()=>{
+      if(fitPreviousZoom!==null){
+        const previous=fitPreviousZoom;
+        fitPreviousZoom=null;
+        updateZoom(previous);
+        syncFitButton();
+      }else{
+        const current=Number(byId('zoom').value)||175;
+        if(current===100){
+          message('A imagem já está ajustada a 100%. Use Tela · Grande ou aumente o zoom para ver mais detalhes.');
+          return;
+        }
+        fitPreviousZoom=current;
+        updateZoom(100,true);
+        syncFitButton();
+      }
+    });
+    window.addEventListener('resize',()=>requestAnimationFrame(()=>
+      updateZoom(Number(byId('zoom').value),true)));
+    byId('screen-size').addEventListener('change',()=>{
+      section.classList.toggle('paiva-2d-size-large',byId('screen-size').value==='large');
+      if(section.classList.contains('paiva-2d-expanded'))setWideMode(false);
+      requestAnimationFrame(()=>updateZoom(Number(byId('zoom').value),true));
+    });
     let previousBodyOverflow='';
     function setWideMode(enable){
       if(section.classList.contains('paiva-2d-expanded')===enable)return;
@@ -1611,8 +1640,9 @@
       else document.body.style.overflow=previousBodyOverflow;
       byId('wide').textContent=enable?'↙ Sair da tela ampla':'⛶ Tela ampla';
       byId('wide').setAttribute('aria-pressed',String(enable));
-      updateZoom(Number(byId('zoom').value));
-      if(!video.hidden)fitVideoImage();
+      // Espera a troca real do layout. A porcentagem e a memória do botão
+      // "Voltar zoom" continuam iguais ao sair da tela ampla.
+      requestAnimationFrame(()=>updateZoom(Number(byId('zoom').value),true));
     }
     byId('wide').addEventListener('click',()=>setWideMode(!section.classList.contains('paiva-2d-expanded')));
     document.addEventListener('keydown',event=>{
