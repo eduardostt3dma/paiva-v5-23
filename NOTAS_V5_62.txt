@@ -1,0 +1,35 @@
+PAIVA MOTION STUDIO — ATUALIZACAO PARCIAL V5.62
+===============================================
+
+ATUALIZACAO DE IDENTIDADE VISUAL — SEM ALTERAR O MODULO 2D
+
+- Usa a assinatura PAIVA aprovada: P angular, raio delicado, divisor,
+  letras em aco escovado e subtitulo MOTION STUDIO.
+- Logo com fundo TRANSPARENTE: nenhuma caixa preta ou borda em volta.
+- Cabecalho compacto, transparente, com um unico detalhe amarelo discreto
+  e contato profissional em amarelo suave.
+- Acesso por PIN no mesmo estilo, sem cartao com tom de preto diferente.
+- O PIN e seu funcionamento continuam iguais aos da V5.61.
+- Cache offline renovado para carregar a marca nova.
+- As ferramentas 2D, os calculos e os relatorios permanecem inalterados.
+
+ARQUIVOS DA ATUALIZACAO (5 NO ZIP)
+---------------------------------
+1. pin-lock.js
+2. pin-lock.css
+3. sw.js
+4. paiva-brand-v562.png
+5. NOTAS_V5_62.txt
+
+COMO PUBLICAR NO GITHUB
+----------------------
+1. Extraia o ZIP no computador/celular.
+2. No repositorio paiva-v5-23, entre em Add file > Upload files.
+3. Envie os cinco arquivos para a RAIZ do repositorio, sem pasta adicional.
+4. Se o GitHub perguntar, aceite substituir os tres arquivos existentes.
+5. Clique em Commit changes. Feche e reabra o aplicativo.
+6. Se a versao antiga continuar, atualize a pagina ou limpe o cache do app.
+
+ATENCAO: Este pacote depende dos demais arquivos ja publicados no projeto.
+Nao e um backup completo. O bloqueio por PIN continua sendo apenas local:
+nao substitui autenticacao segura em servidor.

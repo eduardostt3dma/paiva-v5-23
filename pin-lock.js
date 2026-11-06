@@ -1,7 +1,8 @@
-/* PAIVA V5.61 — assinatura própria PAIVA Motion Studio e PIN visual.
+/* PAIVA V5.62 — assinatura aprovada em aço escovado e acesso sem moldura.
    O PIN é uma trava local de interface; NÃO é autenticação de servidor. */
 (() => {
   'use strict';
+  const BRAND_ASSET = './paiva-brand-v562.png';
 
   // SHA-256 de um PIN aleatório de 6 dígitos. O código fonte continua público.
   const PIN_SHA256 = 'f0d8a8299da2e2fb211a6bec83576f05f8387fa4f43e9b308531a7572747c8d9';
@@ -14,23 +15,6 @@
     const data = new TextEncoder().encode(value);
     const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
     return Array.from(bytes, n => n.toString(16).padStart(2, '0')).join('');
-  }
-
-  // Símbolo PAIVA: um P geométrico e um eixo de movimento. Desenho original
-  // do software, independente das marcas dos equipamentos do estúdio.
-  function paivaSymbol(suffix) {
-    return `<svg class="paiva-signature-symbol" viewBox="0 0 72 72" fill="none"
-      xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-      <defs><linearGradient id="paiva-steel-${suffix}" x1="12" y1="8" x2="60" y2="65"
-        gradientUnits="userSpaceOnUse"><stop stop-color="#f8fafb"/>
-        <stop offset=".42" stop-color="#9baab4"/><stop offset=".72" stop-color="#e0e7eb"/>
-        <stop offset="1" stop-color="#6d7c86"/></linearGradient></defs>
-      <path d="M17 61V13H39C51.8 13 59 20.5 59 31S51.8 49 39 49H17"
-        stroke="url(#paiva-steel-${suffix})" stroke-width="6.5" stroke-linejoin="miter"/>
-      <path d="M38 60L57 41" stroke="url(#paiva-steel-${suffix})"
-        stroke-width="2.3" stroke-linecap="square"/>
-      <circle cx="58" cy="40" r="3.1" fill="#dce5ea"/>
-    </svg>`;
   }
 
   function enhanceHeader(main) {
@@ -48,9 +32,12 @@
 
     const identity = document.createElement('div');
     identity.className = 'paiva-premium-identity';
-    identity.innerHTML = `${paivaSymbol('header')}
-      <div class="paiva-premium-wordmark"><strong>PAIVA</strong>
-        <span>MOTION STUDIO</span></div>`;
+    const brandImage = document.createElement('img');
+    brandImage.className = 'paiva-premium-brand-image';
+    brandImage.src = BRAND_ASSET;
+    brandImage.alt = 'PAIVA Motion Studio';
+    brandImage.decoding = 'async';
+    identity.append(brandImage);
 
     content.classList.add('paiva-premium-content');
     const eyebrow = document.createElement('span');
@@ -103,9 +90,8 @@
     overlay.setAttribute('aria-label', 'Acesso ao PAIVA Motion Studio');
     overlay.innerHTML = `
       <div class="paiva-pin-panel">
-        <div class="paiva-pin-emblem">${paivaSymbol('pin')}</div>
-        <div class="paiva-pin-wordmark">PAIVA</div>
-        <div class="paiva-pin-submark">MOTION STUDIO</div>
+        <img class="paiva-pin-brand-image" src="${BRAND_ASSET}"
+          alt="PAIVA Motion Studio" width="1321" height="310" />
         <div class="paiva-pin-divider" aria-hidden="true"></div>
         <p class="paiva-pin-eyebrow">ÁREA RESERVADA</p>
         <h2 class="paiva-pin-title">Acesso pessoal</h2>
@@ -118,7 +104,7 @@
           <button class="paiva-pin-submit" type="submit">Entrar no estúdio</button>
           <p id="paiva-pin-error" class="paiva-pin-error" role="status" aria-live="polite"></p>
         </form>
-        <p class="paiva-pin-note">PAIVA MOTION STUDIO · V5.61 · ACESSO LOCAL</p>
+        <p class="paiva-pin-note">PAIVA MOTION STUDIO · V5.62 · ACESSO LOCAL</p>
       </div>`;
 
     const relock = document.createElement('button');
