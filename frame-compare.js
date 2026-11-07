@@ -1,9 +1,15 @@
-/* PAIVA Bike Fit Studio — comparação exploratória de geometrias de quadros.
-   Não estima um bike fit definitivo com medidas corporais isoladas. */
+/* PAIVA V5.63 — comparação assistida entre antropometria e duas geometrias.
+   O filtro e o laudo são calculados localmente com regras explícitas.
+   Não há conexão com modelo generativo ou diagnóstico de bike fit definitivo. */
 (() => {
   'use strict';
 
   const MODALITIES = { road: 'Speed / Road', mtb: 'MTB', tt: 'Triatlo / TT' };
+  const PROFILE_LABELS = { aggressive: 'Agressivo', balanced: 'Intermediário', comfortable: 'Confortável' };
+  const ANTHRO_FIELDS = [
+    ['height','estatura'],['inseam','entrepernas'],['torso','tronco líquido'],
+    ['arm','braço líquido'],['shoulder','ombros'],['foot','pé']
+  ];
   const MODE_NOTES = {
     road: 'Road / Speed: compare geometrias de quadros da mesma modalidade. Mesa, espaçadores, guidão e posição das mãos precisam ser avaliados na montagem.',
     mtb: 'MTB: compare geometrias de MTB. Curso e SAG da suspensão, mesa, rise, backsweep e altura do guidão alteram a posição real do ciclista.',
@@ -75,6 +81,7 @@
     output.distanceB = db;
 
     const bothInside = da[axisX] === 0 && da[axisY] === 0 && db[axisX] === 0 && db[axisY] === 0;
+    const equalDistances = da[axisX] === db[axisX] && da[axisY] === db[axisY];
     const aDominates = da[axisX] <= db[axisX] && da[axisY] <= db[axisY] &&
       (da[axisX] < db[axisX] || da[axisY] < db[axisY]);
     const bDominates = db[axisX] <= da[axisX] && db[axisY] <= da[axisY] &&
@@ -85,6 +92,11 @@
       output.conclusion = tt
         ? 'As duas montagens atingem a referência informada para os apoios. Sem preferência clara: confira limites de regulagem, posição do selim e avaliação dinâmica.'
         : 'Os dois quadros estão dentro da faixa de referência. Não há preferência geométrica clara: compare montagem, ajustes e posicionamento dinâmico.';
+    } else if (equalDistances) {
+      output.status = 'tie';
+      output.conclusion = tt
+        ? 'As duas montagens têm desvios iguais de pad stack e pad reach frente à referência. Sem preferência geométrica clara: confira a regulagem dos apoios.'
+        : 'Os dois quadros têm desvios iguais de stack e reach frente à referência. Não há preferência geométrica clara; compare as montagens e a posição dinâmica.';
     } else if (aDominates || bDominates) {
       output.winner = aDominates ? 'A' : 'B';
       output.status = 'preliminary';
@@ -98,6 +110,86 @@
         : 'Não há superioridade geométrica clara: um quadro se aproxima mais em stack e o outro em reach. A decisão depende da posição de contato desejada, da montagem e do teste dinâmico.';
     }
     return output;
+  }
+
+  // Reaproveita exatamente o motor exploratório do módulo de pré-fit.
+  // Nunca transpõe stack/reach de quadro Road/MTB para pad stack/reach de TT.
+  function athleteReference(mode) {
+    if (mode === 'tt') return { value: null,
+      note: 'TT: a antropometria não define automaticamente pad stack e pad reach. Informe uma referência profissional dos apoios.' };
+    const body = Object.fromEntries(ANTHRO_FIELDS.map(([key]) =>
+      [key, document.getElementById(key)?.value || '']));
+    const missing = ANTHRO_FIELDS.filter(([key]) => !String(body[key]).trim())
+      .map(([,label]) => label);
+    if (missing.length) return { value: null,
+      note: `Complete a antropometria para ativar o filtro: ${missing.join(', ')}.` };
+    const engine = globalThis.PAIVA_BIKE_PROJECT;
+    const base = typeof globalThis.frameReference === 'function'
+      ? globalThis.frameReference(numberFrom(body.height), mode) : null;
+    const draft = engine?.getDraft?.();
+    const profile = PROFILE_LABELS[draft?.profile] ? draft.profile : 'balanced';
+    const value = engine?.estimate?.(body, base, profile) || null;
+    if (!value) return { value: null,
+      note: 'Confira as medidas antropométricas. O filtro requer valores válidos e uma referência de estatura da modalidade.' };
+    return { value, profile,
+      note: `Pré-fit · ${PROFILE_LABELS[profile]}: stack ${display(value.stack)} mm / reach ${display(value.reach)} mm. Referência antropométrica experimental, não posição prescrita.` };
+  }
+
+  function axisDescription(delta, nameB, nameA) {
+    const phrase = (amount, larger, smaller, axis) => amount === 0
+      ? `o mesmo ${axis}` : `${display(Math.abs(amount))} mm de ${axis} ${amount > 0 ? larger : smaller}`;
+    return `${nameB} apresenta ${phrase(delta.stack,'a mais','a menos','stack')} e ` +
+      `${phrase(delta.reach,'a mais','a menos','reach')} em relação à ${nameA}.`;
+  }
+
+  function technicalReport(d, comparison) {
+    const passages = [axisDescription(comparison.delta, d.b.name, d.a.name)];
+    if (d.reference) {
+      const label = d.referenceSource === 'anthropometry'
+        ? 'referência exploratória obtida da antropometria'
+        : 'referência profissional informada';
+      passages.push(`O filtro utiliza a ${label}. Os desvios são distâncias geométricas por eixo, não diferenças diretas na posição das mãos.`);
+      if (comparison.distanceA && comparison.distanceB) {
+        const axisX = d.mode === 'tt' ? 'padStack' : 'stack';
+        const axisY = d.mode === 'tt' ? 'padReach' : 'reach';
+        passages.push(`${d.a.name}: desvios ${display(comparison.distanceA[axisX])} mm / ${display(comparison.distanceA[axisY])} mm. ` +
+          `${d.b.name}: desvios ${display(comparison.distanceB[axisX])} mm / ${display(comparison.distanceB[axisY])} mm (altura / alcance).`);
+      }
+    } else passages.push('Sem referência válida do atleta ou dos apoios, o sistema descreve as diferenças, mas não indica preferência entre os quadros.');
+    passages.push(comparison.conclusion);
+    passages.push(d.mode === 'tt'
+      ? 'Antes da escolha, conferir faixa de regulagem dos pads, posição do selim, geometria do modelo e análise dinâmica.'
+      : d.mode === 'mtb'
+        ? 'Antes da escolha, conferir mesa, guidão, altura dos apoios, suspensão/SAG, posição do selim e análise dinâmica.'
+        : 'Antes da escolha, conferir mesa, espaçadores, guidão, posições de apoio das mãos, selim e análise dinâmica.');
+    if (d.referenceSource === 'anthropometry') passages.push(
+      'Esta comparação usa a hipótese exploratória do pré-fit, sem validação clínica para prescrever quadros. A conclusão exige revisão do bike fitter.');
+    return passages;
+  }
+
+  function aiReportPrompt(d, comparison) {
+    const body = ANTHRO_FIELDS.map(([key,label]) => {
+      const value = document.getElementById(key)?.value?.trim();
+      return value ? `${label}: ${value} cm` : null;
+    }).filter(Boolean);
+    const target = d.referenceLabel || 'Não há referência individual válida';
+    const measure = bike => `${bike.name}: stack ${display(bike.stack)} mm; ` +
+      `reach ${display(bike.reach)} mm` + (d.mode === 'tt' && bike.padStack && bike.padReach
+        ? `; pad stack ${display(bike.padStack)} mm; pad reach ${display(bike.padReach)} mm` : '');
+    return [
+      'Atue como assistente técnico de um bike fitter. Redija um laudo comparativo em português do Brasil (até 220 palavras).',
+      'Não invente fórmulas validadas, ângulos, marcas de geometria, medidas ausentes ou compatibilidade clínica.',
+      'O filtro antropométrico do PAIVA é experimental. Não afirme que uma bicicleta serve melhor sem referência e possibilidade de montagem verificadas.',
+      'Mostre diferenças, vantagens geométricas relativas, limites e próximos pontos a conferir no bike fit dinâmico.',
+      `Modalidade: ${MODALITIES[d.mode]}.`,
+      `Antropometria (sem identificação pessoal): ${body.length ? body.join('; ') : 'não informada'}.`,
+      `Bicicleta 01: ${measure(d.a)}.`,
+      `Bicicleta 02: ${measure(d.b)}.`,
+      `Referência: ${target}.`,
+      `Diferenças B - A: stack ${signed(comparison.delta.stack)} mm; reach ${signed(comparison.delta.reach)} mm.`,
+      `Resultado do filtro local: ${comparison.conclusion}`,
+      'Inclua uma conclusão preliminar, ressalvando que o profissional decidirá após verificar regulagens e movimento.'
+    ].join('\n');
   }
 
   // Duas leituras do pré-fit. A antropometria completa descreve proporções
@@ -273,9 +365,9 @@
     section.innerHTML = `
       <div class="paiva-cmp-heading">
         <div>
-          <span class="paiva-cmp-eyebrow">ANÁLISE COMPARATIVA · NOVO RECURSO</span>
+          <span class="paiva-cmp-eyebrow">PAIVA · FILTRO GEOMÉTRICO ASSISTIDO</span>
           <h2>Comparador de quadros</h2>
-          <p>Compare duas bicicletas da mesma modalidade, com medidas reais. Não existe um stack/reach universal para MTB, Road e TT.</p>
+          <p>O sistema cruza a antropometria do cliente com duas geometrias da mesma modalidade e apresenta uma leitura técnica. A confirmação final é feita no bike fit.</p>
         </div>
         <span id="paiva-cmp-mode" class="paiva-cmp-mode">Speed / Road</span>
       </div>
@@ -319,8 +411,13 @@
           </div>
         </fieldset>
       </div>
+      <div class="paiva-cmp-auto" aria-live="polite">
+        <div class="paiva-cmp-auto-head"><span>REFERÊNCIA DO ATLETA</span>
+          <strong id="paiva-cmp-auto-label">Verificando antropometria...</strong></div>
+        <p id="paiva-cmp-auto-status">Preencha a ficha do atleta para ativar o filtro automático.</p>
+      </div>
       <details class="paiva-cmp-reference">
-        <summary>Usar referência profissional personalizada (opcional)</summary>
+        <summary>Substituir pelo stack/reach de referência profissional (opcional)</summary>
         <p id="paiva-cmp-target-note">Informe o stack e o reach de quadro usados como referência na sua avaliação ou de uma bicicleta já ajustada. Não confunda estas dimensões com coordenadas do guidão.</p>
         <div class="paiva-cmp-target" data-frame-reference>
           <label>Stack de referência (mm)<input id="paiva-cmp-target-stack" type="number" inputmode="decimal" min="1" step="0.1" placeholder="Ex.: 575" /></label>
@@ -332,11 +429,21 @@
         </div>
       </details>
       <div class="paiva-cmp-actions">
-        <button class="btn primary" type="button" id="paiva-cmp-run">Comparar quadros</button>
+        <button class="btn primary" type="button" id="paiva-cmp-run">Gerar laudo comparativo</button>
+        <button class="btn" type="button" id="paiva-cmp-ai-prep">Preparar dados para IA</button>
         <button class="btn" type="button" id="paiva-cmp-clear">Limpar comparação</button>
       </div>
       <div class="paiva-cmp-output" id="paiva-cmp-output" aria-live="polite">
         <p id="paiva-cmp-message">Preencha o stack e o reach dos dois quadros para começar.</p>
+      </div>
+      <div class="paiva-cmp-ai-panel" id="paiva-cmp-ai-panel" hidden>
+        <p>Para pedir uma redação com IA generativa, copie estes dados e cole no ChatGPT. Nenhum nome, e-mail ou telefone é incluído; revise antes de compartilhar.</p>
+        <textarea id="paiva-cmp-ai-text" rows="9" readonly aria-label="Texto para a IA"></textarea>
+        <div class="paiva-cmp-ai-actions">
+          <button class="btn" type="button" id="paiva-cmp-ai-copy">Copiar texto</button>
+          <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Abrir ChatGPT</a>
+        </div>
+        <p id="paiva-cmp-ai-feedback" role="status" aria-live="polite"></p>
       </div>`;
     footer.before(section);
 
@@ -388,6 +495,18 @@
       #paiva-compare input:focus { outline:2px solid #8394a1; outline-offset:1px; }
       #paiva-compare .paiva-cmp-dimensions, #paiva-compare .paiva-cmp-target {
         display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+      #paiva-compare .paiva-cmp-auto { margin-top:16px; border:1px solid #50606b;
+        border-radius:12px; padding:12px 13px; background:#111922; }
+      #paiva-compare .paiva-cmp-auto-head { display:flex; align-items:center;
+        flex-wrap:wrap; justify-content:space-between; gap:5px 14px; }
+      #paiva-compare .paiva-cmp-auto-head span { color:#a5b4bf; font-size:9px;
+        font-weight:800; letter-spacing:.1em; }
+      #paiva-compare .paiva-cmp-auto-head span::before { content:'';display:inline-block;
+        width:4px;height:4px;margin-right:8px;border-radius:50%;background:#d8bd6d;
+        vertical-align:middle; }
+      #paiva-compare .paiva-cmp-auto-head strong { color:#e9eff2; font-size:11px; }
+      #paiva-compare .paiva-cmp-auto p { margin:8px 0 0;color:#afc1cb;
+        font-size:11px;line-height:1.6; }
       #paiva-compare .paiva-cmp-reference { margin-top:16px;
         border:1px solid #3e4b55; border-radius:12px; padding:11px 13px; }
       #paiva-compare .paiva-cmp-reference summary { color:#e0e8ed;
@@ -410,6 +529,26 @@
       #paiva-compare .paiva-cmp-comparison strong { font-size:15px; }
       #paiva-compare .paiva-cmp-disclaimer { font-size:10px; line-height:1.6;
         color:#92a2ae; margin:14px 0 0; }
+      #paiva-compare .paiva-cmp-assessment { margin-top:14px;
+        padding:15px 14px;border:1px solid #697a85;border-radius:12px;
+        background:#151d24; }
+      #paiva-compare .paiva-cmp-assessment h3 { margin:0 0 12px;
+        font-size:13px;letter-spacing:.01em;color:#f0f5f7; }
+      #paiva-compare .paiva-cmp-assessment p { margin:8px 0;
+        font-size:11px;line-height:1.7;color:#c6d3da; }
+      #paiva-compare .paiva-cmp-assessment small {display:block;margin-top:12px;
+        font-size:9px;color:#92a2ae;line-height:1.6;}
+      #paiva-compare .paiva-cmp-ai-panel { margin-top:12px;padding:13px;
+        border:1px solid #4f606a;border-radius:12px;background:#101820; }
+      #paiva-compare .paiva-cmp-ai-panel p { color:#bacad3;font-size:11px;
+        line-height:1.6; margin:0 0 9px; }
+      #paiva-compare .paiva-cmp-ai-panel textarea { box-sizing:border-box;
+        width:100%;min-height:150px;background:#080e14;color:#d7e2e8;
+        border:1px solid #596d79;border-radius:8px;padding:12px;
+        font:11px/1.55 ui-monospace,monospace;resize:vertical; }
+      #paiva-compare .paiva-cmp-ai-actions { display:flex;align-items:center;
+        flex-wrap:wrap;gap:12px;margin-top:9px; }
+      #paiva-compare .paiva-cmp-ai-actions a { color:#dfc67d;font-size:11px; }
       @media(max-width:680px){ #paiva-compare .paiva-cmp-grid { grid-template-columns:1fr; }
         #paiva-compare { padding:15px; } #paiva-compare h2 { font-size:19px; } }
       @media print { #paiva-compare { display:none!important; } }
@@ -474,20 +613,37 @@
         b.stack !== null && b.reach !== null;
       let reference = null;
       let referenceLabel = '';
+      let referenceSource = 'none';
+      const athlete = athleteReference(mode);
       if (!oneTarget && stackTarget !== null && reachTarget !== null) {
         reference = mode === 'tt'
           ? { padStack: stackTarget, padReach: reachTarget }
           : { stack: stackTarget, reach: reachTarget };
+        referenceSource = 'professional';
         referenceLabel = mode === 'tt'
           ? `Referência profissional TT: Pad stack ${display(stackTarget)} mm / Pad reach ${display(reachTarget)} mm.`
           : `Referência profissional ${MODALITIES[mode]}: Stack ${display(stackTarget)} mm / Reach ${display(reachTarget)} mm.`;
+      } else if (!oneTarget && mode !== 'tt' && athlete.value) {
+        reference = { stack: athlete.value.stack, reach: athlete.value.reach };
+        referenceSource = 'anthropometry';
+        referenceLabel = `Pré-fit antropométrico experimental (${PROFILE_LABELS[athlete.profile]}): ` +
+          `Stack ${display(reference.stack)} mm / Reach ${display(reference.reach)} mm. ` +
+          'Hipótese exploratória, não medida de fit validada.';
       }
-      return { a, b, reference, referenceLabel, oneTarget, valid, mode };
+      return { a, b, reference, referenceLabel, referenceSource, athlete, oneTarget, valid, mode };
     }
 
     function render() {
       const d = read();
+      id('ai-panel').hidden = true;
       id('mode').textContent = MODALITIES[d.mode] || d.mode;
+      id('auto-label').textContent = d.referenceSource === 'professional'
+        ? 'Referência profissional ativa'
+        : d.athlete.value ? `Pré-fit ${PROFILE_LABELS[d.athlete.profile]} disponível`
+          : 'Referência automática indisponível';
+      id('auto-status').textContent = d.referenceSource === 'professional'
+        ? 'Os dois valores da referência profissional substituem a hipótese antropométrica nesta comparação.'
+        : d.athlete.note;
       const output = id('output');
       output.replaceChildren();
       lastData = null;
@@ -535,8 +691,22 @@
         grid.append(box);
       }
       output.append(grid);
-      paragraph(comparison.conclusion);
-      lastData = { ...d, comparison };
+      const report = technicalReport(d, comparison);
+      const article = document.createElement('article');
+      article.className = 'paiva-cmp-assessment';
+      const title = document.createElement('h3');
+      title.textContent = 'Laudo automático · análise geométrica';
+      article.append(title);
+      for (const sentence of report) {
+        const item = document.createElement('p');
+        item.textContent = sentence;
+        article.append(item);
+      }
+      const footnote = document.createElement('small');
+      footnote.textContent = 'Gerado pelo motor de regras local do PAIVA. Ainda não utiliza IA generativa online. Revisar antes de entregar ao cliente.';
+      article.append(footnote);
+      output.append(article);
+      lastData = { ...d, comparison, report };
     }
 
     fields.forEach(field => {
@@ -544,6 +714,28 @@
       id(field).addEventListener('change', render);
     });
     id('run').addEventListener('click', render);
+    id('ai-prep').addEventListener('click', () => {
+      render();
+      if (!lastData) {
+        id('output').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+      id('ai-text').value = aiReportPrompt(lastData, lastData.comparison);
+      id('ai-feedback').textContent = '';
+      id('ai-panel').hidden = false;
+      id('ai-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+    id('ai-copy').addEventListener('click', async () => {
+      const field = id('ai-text');
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error('clipboard indisponível');
+        await navigator.clipboard.writeText(field.value);
+        id('ai-feedback').textContent = 'Texto copiado. Cole na IA para solicitar a interpretação.';
+      } catch (_) {
+        field.focus(); field.select();
+        id('ai-feedback').textContent = 'Selecione o texto e use Copiar no celular/computador.';
+      }
+    });
     id('clear').addEventListener('click', () => {
       fields.forEach(field => { id(field).value = ''; });
       render();
@@ -557,6 +749,11 @@
     document.querySelectorAll('#fields input').forEach(input => {
       input.addEventListener('input', () => setTimeout(render, 0));
     });
+    // Delegação: os controles do projeto são montados após o comparador.
+    document.addEventListener('click', event => {
+      if (event.target?.closest?.('#paiva-bike-project [data-prj-profile], #paiva-sizing-method [data-sizing]'))
+        setTimeout(render, 0);
+    });
 
     globalThis.PAIVA_FRAME_COMPARE = {
       compare,
@@ -569,7 +766,7 @@
       getReport() {
         render();
         if (!lastData) return null;
-        const { a, b, mode, referenceLabel, comparison } = lastData;
+        const { a, b, mode, referenceLabel, referenceSource, comparison, report } = lastData;
         const rows = [
           { label: 'Modalidade da comparação', value: MODALITIES[mode] },
           { label: 'Bicicleta A', value: `${a.name} · Stack ${display(a.stack)} mm · Reach ${display(a.reach)} mm` },
@@ -590,14 +787,22 @@
         }
         rows.push(
           { label: 'Referência', value: referenceLabel || 'Não informada' },
+          { label: 'Tipo de filtro', value: referenceSource === 'anthropometry'
+            ? 'Pré-fit antropométrico experimental (não validado)'
+            : referenceSource === 'professional' ? 'Referência profissional manual' : 'Descritivo, sem referência' },
           { label: 'Conclusão preliminar', value: comparison.conclusion }
         );
+        for (const [index, sentence] of report.entries())
+          rows.push({ label: `Laudo · observação ${index + 1}`, value: sentence });
         return {
           rows
         };
       }
     };
     switchMode(selectedMode, false);
+    // O projeto antropométrico é inicializado depois deste módulo na página.
+    // Atualiza a referência automaticamente ao terminar a inicialização.
+    setTimeout(render, 0);
   }
 
   // Permite testar a lógica sem abrir a interface.
