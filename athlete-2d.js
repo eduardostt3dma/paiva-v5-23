@@ -118,11 +118,7 @@
       <div class="paiva-2d-title">
         <div><span>FERRAMENTA COMPLEMENTAR</span><h2>ANÁLISE ANGULAR 2D</h2></div>
         <div class="paiva-2d-title-actions">
-          <button type="button" id="paiva-2d-fit" title="Mostrar a imagem inteira e voltar ao zoom anterior">▣ Ajustar foto</button>
-          <select id="paiva-2d-screen-size" aria-label="Tamanho da área de análise" title="Escolha o tamanho da área de imagem">
-            <option value="normal" selected>Tela · Normal</option>
-            <option value="large">Tela · Grande</option>
-          </select>
+          <button type="button" id="paiva-2d-fit" title="Mostrar a foto inteira sem barras de rolagem">▣ Ajustar foto</button>
           <button type="button" id="paiva-2d-wide" aria-pressed="false" title="Ampliar a área de análise">⛶ Tela ampla</button>
           <button type="button" id="paiva-2d-help" aria-label="Como medir ângulos e linhas" aria-expanded="false">?</button>
         </div>
@@ -138,15 +134,16 @@
         <p><strong>Rodinha do mouse:</strong> sobre o vídeo ou sobre um quadro capturado, gire para avançar ou voltar um quadro da pedalada. A página permanece parada. Em fotos independentes, use Ctrl + rodinha para o zoom. No quadro de vídeo capturado, a nova opção “Seguir pontos por quadro” tenta deslocar os marcadores automaticamente; quando um ponto se perder, corrija-o com o mouse. Com essa opção desligada, as marcações permanecem fixas.</p>
         <p><strong>Mouse e teclado:</strong> com o mouse sobre o vídeo, o botão DIREITO alterna pausar/reproduzir, sem abrir o menu do navegador. A tecla Espaço também alterna play/pause; K pausa, L reproduz e as setas ← / → mudam um quadro. Atalhos não são aplicados enquanto você digita em campos ou usa seletores.</p>
         <p><strong>Congelar com clique:</strong> no vídeo gravado, clique com o botão ESQUERDO sobre a imagem para pausar e capturar automaticamente o quadro atual; as ferramentas compactas ficam logo abaixo. Com o quadro capturado, você pode marcar ou editar os pontos.</p>
-        <p><strong>Zoom:</strong> a análise abre centralizada em 175% para facilitar os pontos. O controle varia de 5% em 5%, até 400%. “Ajustar foto” mostra a imagem inteira e vira “Voltar zoom”: o segundo clique restaura a porcentagem anterior automaticamente.</p>
+        <p><strong>Zoom:</strong> a análise abre centralizada em 175% para facilitar os pontos. O controle varia de 5% em 5%, incluindo 175% e 180%, até 400%. Clique em “Ajustar foto” ou “100%” para ver toda a imagem.</p>
         <p><strong>Qualidade da imagem:</strong> o quadro congelado preserva até Full HD (1920 × 1080, quando a fonte oferece essa resolução). Para filmar pela webcam, escolha Alta nitidez (solicita Full HD/até 60 fps e grava com menos compressão) ou Leve (HD/até 30 fps). O navegador negocia o que a câmera realmente suporta; confira resolução e fps mostrados após ligar. O rastreio usa uma amostra de até 1280 px, sem ampliar artificialmente o vídeo. Iluminação forte e exposição curta, quando ajustável na câmera, reduzem o borrão dos refletores. A opção de alta nitidez gera arquivos maiores e não melhora vídeos já gravados.</p>
-        <p><strong>Tamanho da tela:</strong> escolha “Tela · Normal” ou “Tela · Grande” para aumentar a área da imagem sem alterar a porcentagem do zoom. “Tela ampla” ocupa a janela; clique outra vez ou use Esc para sair. Ao voltar, o tamanho e o zoom anteriores são preservados. A opção “100%” do zoom continua disponível para mudar o enquadramento manualmente.</p>
+        <p><strong>Enquadramento:</strong> em 100%, a foto inteira se ajusta automaticamente à altura e largura visíveis, sem precisar rolar a imagem. O botão “Ajustar foto” restaura esse enquadramento. “Tela ampla” esconde temporariamente o painel lateral e ocupa a janela para analisar com mais espaço. Saia pela mesma tecla ou Esc. O zoom acima de 100% volta a permitir deslocamento intencional para ver detalhes.</p>
         <p><strong>Marcar sem capturar:</strong> com um vídeo carregado, escolha Ângulo, Linha ou Ponto (as ferramentas ficam sempre visíveis). Clique e arraste diretamente no atleta: o vídeo congela naquele instante automaticamente e a marcação já começa com o mouse pressionado. Um clique simples também congela para você ajustar os pontos em seguida. O tamanho da imagem é mantido ao alternar do vídeo para o quadro congelado.</p>
         <p><strong>Régua de recorte:</strong> abaixo do vídeo, arraste as duas alças da régua — início e fim — até o trecho desejado. O botão “✂ Salvar trecho” gera o novo MP4 local, preservando o original. O ícone 📷 tira uma foto do quadro e salva um PNG com as marcações que estiverem visíveis.</p>
         <p><strong>Linhas e tamanho dos pontos:</strong> o único controle de 1 a 20 aumenta ou diminui tanto a espessura das linhas quanto os círculos dos pontos de ângulos, linhas e rastros. Você pode deixá-los bem maiores para enxergar a referência.</p>
         <p><strong>Webcam:</strong> no computador, libere o acesso à câmera para visualizar e filmar o pedal. Grave até 3 minutos ou clique e arraste diretamente no quadro da webcam para congelar e marcar. Não é mais obrigatório apertar “Capturar quadro”. Os pontos iniciais são sempre marcados manualmente.</p>
         <p><strong>Vídeos antigos:</strong> use “Abrir vídeo do computador ou pendrive” para carregar MP4, WebM, MOV e outros formatos que seu navegador consiga decodificar. Pause num quadro, capture e analise com as mesmas ferramentas; nenhum arquivo é enviado à internet.</p>
-        <p><strong>2D manual · V5.60:</strong> a régua de tempo fica sempre visível debaixo do vídeo. Os grupos de pontos, etiquetas afastadas e rastreamento da V5.59 continuam. Novidade: selecione o tamanho da área (Normal ou Grande), use Tela ampla e volte sem perder o zoom. “Ajustar foto” mostra o quadro inteiro e permite voltar ao zoom anterior com um único clique. A IA experimental continua preservada.</p>
+        <p><strong>2D manual · V5.58:</strong> a régua de tempo fica sempre visível debaixo do vídeo carregado. Arraste-a até o instante desejado e clique em "Pausar e marcar". Abaixo, escolha como acompanhar os pontos: textura, adesivo colorido ou brilho refletivo, e selecione qual região do boneco de oito pontos será seguida. Depois use ◀ e ▶ um quadro por vez. A IA experimental permanece guardada em outro painel; não é necessária para este teste 2D.</p>
+        <p><strong>PAIVA AERO METRICS · V5.59:</strong> na barra lateral da própria Análise Angular 2D, abra Aero Metrics. Com foto ou quadro parado, informe uma distância vertical conhecida, marque as duas extremidades da referência, depois o solo e o ponto mais alto da cabeça. A ferramenta mostra réguas laterais e uma linha horizontal vermelha com a altura em centímetros; o PNG marcado também inclui essa medida. Use uma régua posicionada no mesmo plano do atleta, com câmera fixa. Neste primeiro teste o topo é marcado manualmente, não rastreado por IA; ao mudar de quadro é preciso reposicionar o topo. A largura frontal, a área e o comparativo A/B ficam para fases posteriores.</p>
         <p><strong>Recortar vídeo:</strong> na coluna lateral, abra “✂ Recortar trecho do vídeo”. Marque início e fim pelo tempo atual ou digite mm:ss (ex.: 00:15 a 02:00). “Recortar e salvar MP4” gera um novo arquivo de até 3 minutos pelo motor de vídeo local; a filmagem original não é alterada. Esse processamento pode levar alguns minutos.</p>
         <p><strong>Seis cores:</strong> sob o quadro capturado, escolha vermelho, branco, verde, roxo, azul ou âmbar antes de desenhar o ângulo. Para mudar a cor de um ângulo existente, selecione-o com “Ajustar pontos” e escolha outra cor.</p>
         <p><strong>Registro automático:</strong> cada quadro capturado é arquivado como foto PNG com as linhas e ângulos, e atualizado quando você terminar de ajustá-los. As gravações de webcam e os vídeos recortados também vão para “Fotos e vídeos salvos”. Tudo permanece no armazenamento deste navegador, não em uma pasta permanente do Windows. Abra a lista e clique em Baixar para fazer suas cópias de segurança; limpar dados do navegador pode apagar os registros.</p>
@@ -276,9 +273,8 @@
               <div><button type="button" id="paiva-2d-play-video" disabled>▶ Reproduzir</button>
                 <button type="button" id="paiva-2d-pause-video" disabled>⏸ Pausar</button></div>
               <label>Quadros por segundo do arquivo (para avançar manualmente)
-                <select id="paiva-2d-file-fps"><option value="24">24 fps</option><option value="25">25 fps</option><option value="30" selected>30 fps</option><option value="50">50 fps</option><option value="60">60 fps</option><option value="100">100 fps</option><option value="120">120 fps</option></select>
+                <select id="paiva-2d-file-fps"><option value="24">24 fps</option><option value="25">25 fps</option><option value="30" selected>30 fps</option><option value="50">50 fps</option><option value="60">60 fps</option></select>
               </label>
-              <small class="paiva-2d-fps-advice">Selecione o FPS original. Em MP4/MOV o salto é aproximado e depende da precisão de busca do navegador; confirme sempre o quadro.</small>
               <small class="paiva-2d-wheel-hint">🖱 Rodinha: quadros · Direito: excluir ponto (área vazia: play/pause) · Espaço: play/pause · ← →: quadros</small>
             </div>
             <label class="paiva-2d-camera-quality">Qualidade da captação
@@ -338,6 +334,7 @@
       </div>
       <p class="paiva-2d-disclaimer">Medição angular manual sobre fotografia estática, para triagem. Confirme pontos anatômicos, plano da câmera e valores com sua avaliação dinâmica/STT/Retül.</p>`;
     target.before(section);
+    document.dispatchEvent(new Event('paiva:athlete-2d-ready'));
 
     // O conjunto que mais se usa na análise fica sempre imediatamente sob o vídeo.
     // Controles e IDs existentes são movidos (não duplicados), preservando eventos.
@@ -385,7 +382,7 @@
           <option value="reflective">Ponto claro / refletivo</option>
         </select>
       </label>
-      <label>Visualizar e rastrear
+      <label>Região do boneco de 8 pontos
         <select id="paiva-2d-marker-group" aria-label="Grupo de pontos manuais para rastrear">
           <option value="all" selected>Oito pontos · todos</option>
           <option value="upper">Tronco + braço</option>
@@ -394,7 +391,6 @@
           <option value="free">Somente ponto livre</option>
         </select>
       </label>
-      <small id="paiva-2d-marker-group-note" aria-live="polite">Exibindo 8 pontos · todas as regiões. Trocar o grupo não apaga os outros pontos.</small>
       <small>Selecione os pontos no quadro parado. Use ◀ ▶ para seguir um quadro de cada vez. Ponto perdido fica para correção.</small>
     </div><div class="paiva-2d-fine-controls" aria-label="Rastreio fino por quadro">
       <label title="Acompanhar as marcações com rastreio ON ao avançar ou voltar um quadro"><input id="paiva-2d-fine-mode" type="checkbox" checked /> ↔ Seguir por quadro</label>
@@ -496,9 +492,7 @@
     const deletedMarkIds=new Set();
     const newMarkUid=()=>['mark',Date.now().toString(36),
       (++markSerial).toString(36),Math.random().toString(36).slice(2,7)].join('-');
-    // Chave em milissegundos: quadros consecutivos de 100/120 fps não podem
-    // colidir na mesma centésima de segundo (formato antigo, 30/60 fps).
-    const frameKey=time=>Math.round(Math.max(0,Number(time)||0)*1000);
+    const frameKey=time=>Math.round(Math.max(0,Number(time)||0)*100);
     const cloneAnnotations=items=>items.map(item=>({uid:item.uid||(item.uid=newMarkUid()),
       kind:item.kind,role:item.role||'free',
       color:item.color||null,supplementary:!!item.supplementary,
@@ -563,10 +557,7 @@
       const raw=frameKey(time),fps=Number(byId('file-fps')?.value)||30;
       const tolerance=Math.min(.022,.62/Math.max(1,fps));
       let best=null;
-      // Tolerância à busca aproximada do decodificador sem fundir dois
-      // quadros vizinhos de 120 fps em um único registro.
-      const radius=Math.max(3,Math.ceil(tolerance*1000));
-      for(let offset=-radius;offset<=radius;offset++){
+      for(let offset=-3;offset<=3;offset++){
         const key=raw+offset,entry=timelineFrames.get(key);
         if(!entry)continue;
         const gap=Math.abs(entry.time-time);
@@ -615,8 +606,7 @@
       // correção, para que nenhuma delas reapareça ao voltar com a régua.
       const fps=Number(byId('file-fps')?.value)||30;
       const tolerance=Math.min(.022,.62/Math.max(1,fps));
-      const radius=Math.max(3,Math.ceil(tolerance*1000));
-      for(let offset=-radius;offset<=radius;offset++){
+      for(let offset=-3;offset<=3;offset++){
         const duplicate=key+offset,entry=timelineFrames.get(duplicate);
         if(duplicate!==key&&entry&&Math.abs(entry.time-time)<=tolerance)
           timelineFrames.delete(duplicate);
@@ -978,23 +968,6 @@
       return Math.hypot(p.x-(a.x+t*dx),p.y-(a.y+t*dy));
     }
 
-    // Cada região é apenas uma vista do MESMO boneco: não modificar os oito
-    // pontos guardados nem mover os demais ao trocar a seleção.
-    const full8Views={all:[0,1,2,3,4,5,6,7],upper:[0,1,2,3],
-      leg:[3,4,5],foot:[5,6,7],free:[]};
-    function activeFull8Points(){
-      const group=byId('marker-group')?.value||'all';
-      return full8Views[group]||full8Views.all;
-    }
-    function isPointVisible(item,index){
-      return item?.kind!=='full8'||activeFull8Points().includes(index);
-    }
-    function visibleFull8Segments(){
-      const shown=activeFull8Points();
-      return shown.slice(1).filter((index)=>shown.includes(index-1))
-        .map(index=>[index-1,index]);
-    }
-
     function mark(p,color) {
       const radius = Math.max(3,Math.min(25,lineWidth*1.1+2));
       ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);
@@ -1002,53 +975,19 @@
       ctx.lineWidth = Math.max(1,lineWidth/2);ctx.strokeStyle = color;ctx.stroke();
     }
 
-    let occupiedTags=[];
     function tag(x,y,text,color) {
       const fontSize = Math.max(12,Math.min(20,canvas.width/65));
       ctx.font = `700 ${fontSize}px system-ui,sans-serif`;
       const padding = 4;
       const w = ctx.measureText(text).width + padding*2;
       const h = fontSize+padding*2;
-      // Etiqueta com linha-guia longe do marcador: o texto não pode encobrir
-      // a bolinha enquanto o profissional a reposiciona com o mouse.
-      const candidates=[
-        [x+35,y-h-27],[x-w-35,y-h-27],
-        [x+35,y+27],[x-w-35,y+27],
-        [x-w/2,y-h-40],[x-w/2,y+40]
-      ];
-      const clamp=(value,low,high)=>Math.max(low,Math.min(high,value));
-      const overlap=(left,top,right,bottom,rect)=>
-        Math.max(0,Math.min(right,rect.right)-Math.max(left,rect.left))*
-        Math.max(0,Math.min(bottom,rect.bottom)-Math.max(top,rect.top));
-      let best=null;
-      for(const [cx,cy] of candidates){
-        const tx=clamp(cx,4,Math.max(4,canvas.width-w-4));
-        const top=clamp(cy,4,Math.max(4,canvas.height-h-4));
-        const penalty=occupiedTags.reduce((sum,rect)=>sum+overlap(tx,top,tx+w,top+h,rect)*12,0);
-        const pointsObscured=annotations.reduce((count,item)=>count+
-          item.points.filter((p,j)=>isPointVisible(item,j)&&
-            p.x>=tx-12&&p.x<=tx+w+12&&p.y>=top-12&&p.y<=top+h+12).length,0);
-        const score=penalty+pointsObscured*2200+Math.abs(cx-tx)*7+Math.abs(cy-top)*7+
-          Math.hypot(tx+w/2-x,top+h/2-y)*.08;
-        if(!best||score<best.score)best={tx,top,score};
-      }
-      const {tx,top}=best;
-      const endX=clamp(x,tx,tx+w),endY=clamp(y,top,top+h);
-      const length=Math.hypot(endX-x,endY-y);
-      ctx.save();
-      if(length>1){
-        ctx.strokeStyle=color;ctx.globalAlpha=.83;ctx.lineWidth=1.25;
-        ctx.beginPath();ctx.moveTo(x+(endX-x)*Math.min(12/length,.42),y+(endY-y)*Math.min(12/length,.42));
-        ctx.lineTo(endX,endY);ctx.stroke();
-      }
+      const tx = Math.max(4,Math.min(canvas.width-w-4,x+11));
+      const ty = Math.max(h+4,Math.min(canvas.height-4,y-11));
       ctx.fillStyle = 'rgba(8,20,29,.74)';
-      ctx.fillRect(tx,top,w,h);
-      ctx.strokeStyle = color;ctx.lineWidth=1;ctx.strokeRect(tx,top,w,h);
-      ctx.fillStyle = '#f4f8fa';ctx.textBaseline='middle';ctx.fillText(text,tx+padding,top+h/2);
-      ctx.restore();
-      const bounds={left:tx,top,right:tx+w,bottom:top+h};
-      occupiedTags.push(bounds);
-      return bounds;
+      ctx.fillRect(tx,ty-h,w,h);
+      ctx.strokeStyle = color;ctx.lineWidth=1;ctx.strokeRect(tx,ty-h,w,h);
+      ctx.fillStyle = '#f4f8fa';ctx.textBaseline='middle';ctx.fillText(text,tx+padding,ty-h/2);
+      return {left:tx,top:ty-h,right:tx+w,bottom:ty};
     }
 
     function drawAnnotation(item,index,partial=false) {
@@ -1066,16 +1005,10 @@
       ctx.lineWidth = lineWidth;
       ctx.lineCap = 'round';ctx.lineJoin = 'round';ctx.strokeStyle=color;
       ctx.beginPath();
-      if(item.kind==='full8'&&!partial){
-        for(const [a,b] of visibleFull8Segments()){
-          ctx.moveTo(pts[a].x,pts[a].y);ctx.lineTo(pts[b].x,pts[b].y);
-        }
-      }else{
-        if (pts.length) ctx.moveTo(pts[0].x,pts[0].y);
-        for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
-      }
+      if (pts.length) ctx.moveTo(pts[0].x,pts[0].y);
+      for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
       ctx.stroke();
-      pts.forEach((p,j)=>{if(partial||isPointVisible(item,j))mark(p,color);});
+      for (const p of pts) mark(p,color);
       if (!partial && item.kind === 'angle' && pts.length === 3) {
         item.labelBounds=null;
         const a = displayedAngle(item);
@@ -1088,26 +1021,21 @@
         tag((pts[0].x+pts[1].x)/2,(pts[0].y+pts[1].y)/2,`L${index+1}`,color);
       }
       if(!partial&&item.kind==='full8'&&pts.length===8){
-        const view=byId('marker-group')?.value||'all';
         // Referência horizontal do solo para o ângulo do pé. O calcanhar
         // nunca é medido em relação à tíbia.
-        if(view==='all'||view==='foot'){
-          ctx.save();ctx.setLineDash([7,5]);ctx.strokeStyle='rgba(72,215,234,.62)';
-          ctx.lineWidth=Math.max(1.5,lineWidth*.6);ctx.beginPath();
-          ctx.moveTo(pts[7].x,pts[7].y);ctx.lineTo(pts[6].x,pts[7].y);
-          ctx.stroke();ctx.restore();
-        }
+        ctx.save();ctx.setLineDash([7,5]);ctx.strokeStyle='rgba(72,215,234,.62)';
+        ctx.lineWidth=Math.max(1.5,lineWidth*.6);ctx.beginPath();
+        ctx.moveTo(pts[7].x,pts[7].y);ctx.lineTo(pts[6].x,pts[7].y);
+        ctx.stroke();ctx.restore();
         const raw=full8Measurements(pts),m=stableFull8Measurements(item);
         if(m){
           const pending=stillFromVideo?fineUncertain.filter(p=>p.item===index).map(p=>p.point):[];
           const kneePending=pending.some(j=>[3,4,5].includes(j));
           const footPending=pending.some(j=>[6,7].includes(j));
-          if(view==='all'||view==='leg')tag(pts[4].x,pts[4].y,m.knee===null?'Joelho — · ajustar':
+          tag(pts[4].x,pts[4].y,m.knee===null?'Joelho — · ajustar':
             `Joelho ${kneePending||raw.knee===null?'≈ ':''}${format(m.knee)}°${kneePending?' · conferir':''}`,color);
-          if(view==='all'||view==='foot')tag(pts[6].x,pts[6].y,m.foot===null?'Pé/solo — · ajustar':
+          tag(pts[6].x,pts[6].y,m.foot===null?'Pé/solo — · ajustar':
             `Pé/solo ${footPending||raw.foot===null?'≈ ':''}${format(m.foot)}°${footPending?' · conferir':''}`,color);
-          if(view==='upper')tag(pts[2].x,pts[2].y,m.trunk===null?'Tronco — · ajustar':
-            `Tronco/solo ${format(m.trunk)}°`,color);
         }
       }
     }
@@ -1123,20 +1051,7 @@
           const m=stableFull8Measurements(item);
           const pending=stillFromVideo?fineUncertain.filter(p=>p.item===index).map(p=>p.point):[];
           const val=(label,n,indices=[])=>`${label} ${n===null?'rever':`${pending.some(j=>indices.includes(j))?'≈ ':''}${format(n)}°`}`;
-          const view=byId('marker-group')?.value||'all';
-          if(m){
-            const parts={elbow:val('Cotovelo',m.elbow,[0,1,2]),
-              shoulder:val('Ombro',m.shoulder,[1,2,3]),
-              hip:val('Quadril',m.hip,[2,3,4]),
-              knee:val('Joelho',m.knee,[3,4,5]),
-              ankle:val('Tornozelo',m.ankle,[4,5,6]),
-              trunk:val('Tronco/solo',m.trunk,[2,3]),
-              foot:val('Pé/solo',m.foot,[6,7])};
-            const groups={all:['elbow','shoulder','hip','knee','ankle','trunk','foot'],
-              upper:['elbow','shoulder','trunk'],leg:['knee'],foot:['foot'],free:[]};
-            const shown=(groups[view]||groups.all).map(key=>parts[key]);
-            if(shown.length)values.push(`${view==='all'?'8 pontos':view==='upper'?'Tronco + braço':view==='leg'?'Fêmur + tíbia':'Pé + calcanhar'} · ${shown.join(' · ')}`);
-          }
+          if(m)values.push(`8 pontos · ${val('Cotovelo',m.elbow,[0,1,2])} · ${val('Ombro',m.shoulder,[1,2,3])} · ${val('Quadril',m.hip,[2,3,4])} · ${val('Joelho',m.knee,[3,4,5])} · ${val('Tornozelo',m.ankle,[4,5,6])} · ${val('Tronco/solo',m.trunk,[2,3])} · ${val('Pé/solo',m.foot,[6,7])}`);
         } else if(item.kind==='point') values.push(`${item.role==='heel'?'Calcanhar':item.role==='hip'?'Quadril':`Ponto ${index+1}`} · rastro`);
         else values.push(`Linha ${index+1}`);
       });
@@ -1219,7 +1134,6 @@
 
     function render() {
       if(stillFromVideo&&!annotations.length)recoverWheelAnchor();
-      occupiedTags=[];
       ctx.clearRect(0,0,canvas.width,canvas.height);
       if (photoLoaded) ctx.drawImage(original,0,0,canvas.width,canvas.height);
       else {
@@ -1245,9 +1159,7 @@
       if(stillFromVideo&&byId('fine-mode').checked){
         for(const [key,path] of fineTrails){
           if(path.length<2)continue;
-          const [itemIndex,pointIndex]=key.split(':').map(Number);
-          const item=annotations[itemIndex];
-          if(!isPointVisible(item,pointIndex))continue;
+          const item=annotations[Number(key.split(':')[0])];
           const color=item?.color||(item?.role==='hip'?'#64cbff':'#a8f5c3');
           ctx.save();ctx.globalAlpha=.52;ctx.strokeStyle=color;
           ctx.lineWidth=Math.max(1.5,lineWidth*.55);ctx.beginPath();
@@ -1274,9 +1186,7 @@
       annotations.forEach((item,index) => drawAnnotation(item,index));
       if(stillFromVideo){
         for(const lost of fineUncertain){
-          const item=annotations[lost.item];
-          const p=item?.points?.[lost.point];
-          if(!p||!isPointVisible(item,lost.point))continue;
+          const p=annotations[lost.item]?.points?.[lost.point];if(!p)continue;
           ctx.save();ctx.strokeStyle='#ffb45e';ctx.lineWidth=2.5;
           ctx.beginPath();ctx.arc(p.x,p.y,11,0,Math.PI*2);ctx.stroke();ctx.restore();
         }
@@ -1343,12 +1253,9 @@
       try{pixels=originalCtx.getImageData(0,0,original.width,original.height);}
       catch(_){message('Não foi possível examinar os refletores desta imagem. Ajuste os pontos com o mouse.');return;}
       const group=annotations[index],radius=Math.max(22,Math.min(140,canvas.width*.08));
-      const targets=activeFull8Points();
-      if(!targets.length){message('Selecione uma região do boneco antes de encaixar refletores.');return;}
       const used=[],notFound=[];
       let foundCount=0;
       group.points=group.points.map((p,j)=>{
-        if(!targets.includes(j))return {...p};
         const found=reflectorNear(pixels,p,radius,used);
         if(!found){notFound.push({item:index,point:j});return {...p};}
         used.push(found);foundCount++;
@@ -1360,7 +1267,7 @@
         fineUncertain=fineUncertain.filter(p=>p.item!==index).concat(notFound);
         render();updateCameraControls();schedulePhotoSave();
       }
-      message(foundCount?`${foundCount}/${targets.length} referências visíveis foram encaixadas em regiões refletivas. Confira a anatomia: pontos laranja precisam de correção manual.`:
+      message(foundCount?`${foundCount}/8 referências próximas foram encaixadas em regiões refletivas. Confira a anatomia: pontos laranja precisam de correção manual.`:
         'Nenhum refletor isolado foi identificado perto das bolinhas. Mova o boneco inteiro para perto dos plugs e tente novamente.');
     }
     byId('full8-reflectors').addEventListener('click',snapFull8ToReflectors);
@@ -1372,11 +1279,6 @@
     function selectTool(next,manual=false) {
       full8ManualMode=next==='full8'&&manual;
       tool=next;draft=[];angleSequence=[];full8Sequence=[];activeDrag=null;activeDraw=null;
-      // Não permitir que o modo "só ponto livre" esconda o boneco que o
-      // usuário acabou de pedir para posicionar.
-      if(next==='full8'&&byId('marker-group').value==='free'){
-        byId('marker-group').value='all';updateMarkerGroupNote();
-      }
       byId('point-role-field').hidden=true; // O ponto é livre: não precisa escolher parte do corpo.
       for (const button of section.querySelectorAll('[data-2d-tool]'))
         button.setAttribute('aria-pressed',String(button.getAttribute('data-2d-tool')===tool));
@@ -1420,7 +1322,6 @@
       const tolerance = Math.max(10,18 * canvas.width / rect.width);
       for (let i=annotations.length-1;i>=0;i--) {
         for (let j=annotations[i].points.length-1;j>=0;j--) {
-          if(!isPointVisible(annotations[i],j))continue;
           const p=annotations[i].points[j];
           if (Math.hypot(p.x-point.x,p.y-point.y)<=tolerance)
             return {item:i,index:j,pointer:event.pointerId};
@@ -1444,7 +1345,7 @@
       for (let i=annotations.length-1;i>=0;i--) {
         const pts=annotations[i].points;
         const segments=annotations[i].kind==='angle' ? [[0,1],[1,2]] : annotations[i].kind==='line' ? [[0,1]] :
-          annotations[i].kind==='full8' ? visibleFull8Segments() : [];
+          annotations[i].kind==='full8' ? [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7]] : [];
         if (segments.some(([a,b])=>segmentDistance(point,pts[a],pts[b])<=tolerance))
           return {item:i,index:-1,pointer:event.pointerId,origin:point,
             original:pts.map(p=>({...p}))};
@@ -1523,11 +1424,12 @@
     });
     canvas.addEventListener('contextmenu',event=>{
       if(!photoLoaded||scanningActive)return;
-      // Excluir somente a marcação realmente atingida; nunca oferecer o
-      // último desenho ao clicar num trecho vazio do atleta ou vídeo.
+      // O toque não precisa acertar uma linha fina: respeita o item
+      // selecionado e, na ausência de seleção, o último desenho da tela.
       const hit=annotationAt(event);
-      if(hit<0){closeDeleteMenu();return;} // área vazia: pausa/play no player
-      const index=hit;
+      const index=hit>=0?hit:
+        (selectedIndex>=0&&selectedIndex<annotations.length?selectedIndex:annotations.length-1);
+      if(index<0)return; // sem marcações: manter o atalho play/pause
       event.preventDefault();event.stopPropagation();
       pendingDeleteIndex=index;selectedIndex=index;
       updateTrackToggle();
@@ -1566,27 +1468,24 @@
     });
     byId('point-size').addEventListener('change',()=>{rememberTimelineFrame(0);schedulePhotoSave();});
     function availableImageHeight(){
+      const view=section.querySelector('.paiva-2d-view');
       const viewport=canvas.parentElement;
+      let controls=0;
+      for(const element of view.children){
+        if(element===viewport || element.hidden || getComputedStyle(element).display==='none')continue;
+        const css=getComputedStyle(element);
+        controls+=element.offsetHeight+(parseFloat(css.marginTop)||0)+(parseFloat(css.marginBottom)||0);
+      }
       const fullHeight=window.visualViewport?.height||window.innerHeight;
-      // Os controles abaixo da foto não podem fazê-la encolher a 180 px.
-      // A imagem tem área própria; os demais comandos podem ficar mais abaixo.
-      const expanded=section.classList.contains('paiva-2d-expanded');
-      const large=section.classList.contains('paiva-2d-size-large');
+      // Reserva margem para título, barras do navegador e espaçamento do layout.
       const viewportLimit=parseFloat(getComputedStyle(viewport).maxHeight);
-      const desired=Math.floor(fullHeight*(expanded ? 0.56 : large ? 0.78 : 0.67));
-      return Math.max(220,Number.isFinite(viewportLimit)?
-        Math.min(desired,Math.max(220,viewportLimit-4)):desired);
+      const byWindow=Math.max(180,Math.floor(fullHeight-controls-
+        (section.classList.contains('paiva-2d-expanded')?56:82)));
+      // A própria janela de desenho tem limite de altura: respeitá-lo impede
+      // o reaparecimento de barras internas mesmo em monitores muito largos.
+      return Number.isFinite(viewportLimit)?Math.min(byWindow,Math.max(150,viewportLimit-4)):byWindow;
     }
-    let fitPreviousZoom=null;
-    function syncFitButton(){
-      const button=byId('fit');
-      button.textContent=fitPreviousZoom===null?'▣ Ajustar foto':'↩ Voltar zoom';
-      button.title=fitPreviousZoom===null?
-        'Mostrar a imagem inteira e guardar o zoom atual':
-        `Restaurar automaticamente o zoom anterior (${fitPreviousZoom}%)`;
-    }
-    function updateZoom(value,retainFitChoice=false) {
-      if(!retainFitChoice&&fitPreviousZoom!==null){fitPreviousZoom=null;syncFitButton();}
+    function updateZoom(value) {
       const next=Math.max(100,Math.min(400,Math.round(value/5)*5));
       byId('zoom').value=String(next);
       byId('zoom-value').textContent=`${next}%`;
@@ -1608,30 +1507,8 @@
         viewport.scrollTop=Math.max(0,(viewport.scrollHeight-viewport.clientHeight)/2);
       }
     }
-    byId('fit').addEventListener('click',()=>{
-      if(fitPreviousZoom!==null){
-        const previous=fitPreviousZoom;
-        fitPreviousZoom=null;
-        updateZoom(previous);
-        syncFitButton();
-      }else{
-        const current=Number(byId('zoom').value)||175;
-        if(current===100){
-          message('A imagem já está ajustada a 100%. Use Tela · Grande ou aumente o zoom para ver mais detalhes.');
-          return;
-        }
-        fitPreviousZoom=current;
-        updateZoom(100,true);
-        syncFitButton();
-      }
-    });
-    window.addEventListener('resize',()=>requestAnimationFrame(()=>
-      updateZoom(Number(byId('zoom').value),true)));
-    byId('screen-size').addEventListener('change',()=>{
-      section.classList.toggle('paiva-2d-size-large',byId('screen-size').value==='large');
-      if(section.classList.contains('paiva-2d-expanded'))setWideMode(false);
-      requestAnimationFrame(()=>updateZoom(Number(byId('zoom').value),true));
-    });
+    byId('fit').addEventListener('click',()=>updateZoom(100));
+    window.addEventListener('resize',()=>updateZoom(Number(byId('zoom').value)));
     let previousBodyOverflow='';
     function setWideMode(enable){
       if(section.classList.contains('paiva-2d-expanded')===enable)return;
@@ -1640,9 +1517,8 @@
       else document.body.style.overflow=previousBodyOverflow;
       byId('wide').textContent=enable?'↙ Sair da tela ampla':'⛶ Tela ampla';
       byId('wide').setAttribute('aria-pressed',String(enable));
-      // Espera a troca real do layout. A porcentagem e a memória do botão
-      // "Voltar zoom" continuam iguais ao sair da tela ampla.
-      requestAnimationFrame(()=>updateZoom(Number(byId('zoom').value),true));
+      updateZoom(Number(byId('zoom').value));
+      if(!video.hidden)fitVideoImage();
     }
     byId('wide').addEventListener('click',()=>setWideMode(!section.classList.contains('paiva-2d-expanded')));
     document.addEventListener('keydown',event=>{
@@ -1832,32 +1708,22 @@
       annotations.forEach(item=>{
         const pts=item.points,color=item.color||colors[item.kind]||'#70d8e8';
         if(!pts?.length)return;
-        trackCtx.beginPath();
-        if(item.kind==='full8'){
-          for(const [a,b] of visibleFull8Segments()){
-            trackCtx.moveTo(pts[a].x,pts[a].y);trackCtx.lineTo(pts[b].x,pts[b].y);
-          }
-        }else{
-          trackCtx.moveTo(pts[0].x,pts[0].y);
-          if(item.kind!=='point')for(let i=1;i<pts.length;i++)trackCtx.lineTo(pts[i].x,pts[i].y);
-        }
+        trackCtx.beginPath();trackCtx.moveTo(pts[0].x,pts[0].y);
+        if(item.kind!=='point')for(let i=1;i<pts.length;i++)trackCtx.lineTo(pts[i].x,pts[i].y);
         trackCtx.lineWidth=Math.max(2,lineWidth);trackCtx.strokeStyle=color;trackCtx.stroke();
-        pts.forEach((p,j)=>{
-          if(!isPointVisible(item,j))return;
+        for(const p of pts){
           trackCtx.beginPath();trackCtx.arc(p.x,p.y,6,0,2*Math.PI);
           trackCtx.fillStyle='#102631';trackCtx.fill();
           trackCtx.strokeStyle=color;trackCtx.lineWidth=2;trackCtx.stroke();
-        });
+        }
         if(item.kind==='angle'&&pts.length===3){
           const a=displayedAngle(item);
           stamp(pts[1],a===null?'A — · corrigir':`A ${format(a)}° · referência`,color);
         }else if(item.kind==='full8'&&pts.length===8){
           const m=stableFull8Measurements(item);
           if(m){
-            const view=byId('marker-group').value;
-            if(view==='all'||view==='leg')stamp(pts[4],m.knee===null?'Joelho — · corrigir':`Joelho ${format(m.knee)}° · referência`,color);
-            if(view==='all'||view==='foot')stamp(pts[6],m.foot===null?'Pé — · corrigir':`Pé/solo ${format(m.foot)}° · referência`,color);
-            if(view==='upper')stamp(pts[2],m.trunk===null?'Tronco — · corrigir':`Tronco ${format(m.trunk)}° · referência`,color);
+            stamp(pts[4],m.knee===null?'Joelho — · corrigir':`Joelho ${format(m.knee)}° · referência`,color);
+            stamp(pts[6],m.foot===null?'Pé — · corrigir':`Pé/solo ${format(m.foot)}° · referência`,color);
           }
         }
       });
@@ -1905,18 +1771,10 @@
           return;
         }
         trackCtx.strokeStyle=color;trackCtx.fillStyle=color;
-        trackCtx.beginPath();
-        if(item.kind==='full8'){
-          for(const [a,b] of visibleFull8Segments()){
-            trackCtx.moveTo(pts[a].x,pts[a].y);trackCtx.lineTo(pts[b].x,pts[b].y);
-          }
-        }else{
-          trackCtx.moveTo(pts[0].x,pts[0].y);
-          for(let j=1;j<pts.length;j++)trackCtx.lineTo(pts[j].x,pts[j].y);
-        }
+        trackCtx.beginPath();trackCtx.moveTo(pts[0].x,pts[0].y);
+        for(let j=1;j<pts.length;j++)trackCtx.lineTo(pts[j].x,pts[j].y);
         trackCtx.stroke();
         for(let j=0;j<pts.length;j++){
-          if(!isPointVisible(item,j))continue;
           const p=pts[j];
           trackCtx.beginPath();trackCtx.arc(p.x,p.y,4,0,Math.PI*2);
           trackCtx.fill();
@@ -1942,17 +1800,10 @@
           trackCtx.font='650 13px system-ui,sans-serif';
           const kneePending=needsCheck(index,[3,4,5])||m.knee===null;
           const footPending=needsCheck(index,[6,7])||m.foot===null;
-          const trunkPending=needsCheck(index,[2,3])||m.trunk===null;
           if(!kneePending)cached.knee=m.knee;
           if(!footPending)cached.foot=m.foot;
-          if(!trunkPending)cached.trunk=m.trunk;
           trackedLastValues.set(index,cached);
-          const view=byId('marker-group').value;
-          const candidates=[['Joelho',pts[4],m.knee,'knee',kneePending,['all','leg']],
-            ['Pé/solo',pts[6],m.foot,'foot',footPending,['all','foot']],
-            ['Tronco',pts[2],m.trunk,'trunk',trunkPending,['upper']]];
-          for(const [name,point,value,key,pending,views] of candidates){
-            if(!views.includes(view))continue;
+          for(const [name,point,value,key,pending] of [['Joelho',pts[4],m.knee,'knee',kneePending],['Pé/solo',pts[6],m.foot,'foot',footPending]]){
             const last=pending?(cached[key]??value):value;
             const label=last===null?`${name} — · corrigir`:`${name} ${pending?'≈ ':''}${format(last)}°${pending?' · conferir':''}`;
             readings.push(label);
@@ -3022,32 +2873,16 @@
       }
       if(captureVideoFrame())message('2D manual pronto. Escolha BONECO 8 PONTOS, ÂNGULO ou PONTO LIVRE; depois avance com ◀ ▶ para testar o rastreamento sem IA.');
     });
-    function updateMarkerGroupNote(){
-      const group=byId('marker-group').value;
-      const note={all:'Exibindo os 8 pontos · todos podem ser rastreados.',
-        upper:'Tronco + braço · 4 pontos visíveis. Os outros 4 ficam guardados.',
-        leg:'Fêmur + tíbia · 3 pontos visíveis. Os outros 5 ficam guardados.',
-        foot:'Pé + calcanhar · 3 pontos visíveis. Os outros 5 ficam guardados.',
-        free:'Somente pontos livres visíveis. O boneco de 8 pontos fica guardado.'};
-      byId('marker-group-note').textContent=note[group]||note.all;
-    }
-    updateMarkerGroupNote();
     for(const key of ['marker-reference','marker-group'])
       byId(key).addEventListener('change',()=>{
-        fineNavigationEpoch++; // não aplicar rastreio iniciado com o grupo anterior
         fineUncertain=[];
         fineTrails.clear();
         finePeak=null;
         byId('fine-peak').disabled=true;
-        if(key==='marker-group'){
-          updateMarkerGroupNote();
-          if(annotations[selectedIndex]?.kind==='full8'&&!activeFull8Points().length)
-            selectedIndex=-1;
-        }
         if(photoLoaded)render();
         message(key==='marker-reference'?
           'Referência alterada. A próxima passagem quadro a quadro usará '+byId(key).selectedOptions[0].textContent+'. Confira os pontos.':
-          'Vista alterada para '+byId(key).selectedOptions[0].textContent+'. Só os pontos desta região do boneco aparecem e são seguidos; os demais continuam salvos.');
+          'Grupo alterado para '+byId(key).selectedOptions[0].textContent+'. Os pontos fora do grupo são preservados, sem acompanhamento automático.');
       });
     let forwardedGesture=null;
     function projectVideoPointer(event,sourceRect){
@@ -3352,6 +3187,8 @@
       if(!exportCtx){message('Não foi possível preparar a imagem.');return;}
       exportCtx.drawImage(canvas,0,0);
       if(curveLayer?.canvas)exportCtx.drawImage(curveLayer.canvas,0,0,canvas.width,canvas.height);
+      // A medição Aero aparece também no PNG, sem alterar o vídeo original.
+      globalThis.PAIVA_AERO_METRICS?.drawOnCanvas?.(exportCtx,canvas.width,canvas.height);
       exportCanvas.toBlob(blob => {
         if (!blob) {message('Não foi possível gerar a imagem.');return;}
         const uri=URL.createObjectURL(blob);
@@ -3410,4 +3247,12 @@
   windScript.src='./paiva-wind-simple.js';
   windScript.async=false;
   document.head.append(windScript);
+  // V5.59: camada de altura frontal calibrada no mesmo painel 2D.
+  const metricsStyle=document.createElement('link');
+  metricsStyle.rel='stylesheet';
+  metricsStyle.href='./paiva-aero-metrics.css';
+  document.head.append(metricsStyle);
+  const metricsScript=document.createElement('script');
+  metricsScript.src='./paiva-aero-metrics.js';
+  document.head.append(metricsScript);
 })();

@@ -1,0 +1,54 @@
+/* PAIVA V5.59 · apenas o painel Aero Metrics, sem alterar os controles 2D. */
+#paiva-athlete-2d .paiva-aero-metrics{
+  margin:6px 0 14px;border:1px solid #77838b;border-radius:10px;
+  background:#121a20;color:#dce5ea;font:600 11px system-ui,sans-serif;
+  overflow:hidden;
+}
+#paiva-athlete-2d .paiva-aero-metrics summary{
+  list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;
+  justify-content:space-between;gap:5px;padding:12px 10px;
+  color:#d8e2e8;letter-spacing:.08em;font-size:11px;font-weight:850;
+}
+#paiva-athlete-2d .paiva-aero-metrics summary::-webkit-details-marker{display:none;}
+#paiva-athlete-2d .paiva-aero-metrics summary::after{content:'⌄';color:#b4c2cb;}
+#paiva-athlete-2d .paiva-aero-metrics[open] summary::after{content:'⌃';}
+#paiva-athlete-2d .paiva-aero-metrics summary span{
+  font-size:8px;letter-spacing:.09em;color:#a7b5bd;font-weight:700;
+}
+#paiva-athlete-2d .paiva-aero-metrics-body{border-top:1px solid #56636b;padding:11px;}
+#paiva-athlete-2d .paiva-aero-metrics-body p{
+  font-size:10px;line-height:1.55;color:#b9c7ce;margin:0 0 10px;
+}
+#paiva-athlete-2d .paiva-aero-metrics-body label{display:block;font-size:10px;color:#d8e3e8;}
+#paiva-athlete-2d .paiva-aero-metrics-body input{
+  box-sizing:border-box;width:100%;margin-top:5px;padding:8px;
+  background:#0c1419;color:#eef4f7;border:1px solid #697981;border-radius:7px;
+  font:700 12px system-ui,sans-serif;
+}
+#paiva-athlete-2d .paiva-aero-metrics-buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0;}
+#paiva-athlete-2d .paiva-aero-metrics-buttons button{
+  border:1px solid #617079;border-radius:7px;background:#1c292f;color:#dbe5e9;
+  font:750 10px system-ui,sans-serif;padding:8px 5px;cursor:pointer;
+}
+#paiva-athlete-2d .paiva-aero-metrics-buttons button[data-active]{
+  border-color:#ef6565;color:#fff;background:#513034;
+}
+#paiva-athlete-2d #paiva-aero-height{
+  display:block;background:#10181d;border:1px solid #697981;border-radius:7px;
+  padding:9px;color:#e9f1f5;font-weight:800;font-size:14px;
+  font-variant-numeric:tabular-nums;
+}
+#paiva-athlete-2d #paiva-aero-message{
+  display:block;color:#d9b4a3;line-height:1.5;margin-top:8px;font-size:10px;
+}
+#paiva-athlete-2d .paiva-aero-disclaimer{
+  display:block;color:#9baab2;line-height:1.5;margin-top:9px;font-size:9px;
+}
+#paiva-athlete-2d .paiva-aero-overlay{
+  position:absolute;z-index:6;display:none;margin:0;padding:0;
+  overflow:visible;touch-action:none;user-select:none;
+}
+#paiva-athlete-2d .paiva-aero-overlay[style*='pointer-events: auto']{cursor:crosshair;}
+@media(max-width:680px){
+  #paiva-athlete-2d .paiva-aero-metrics{flex-basis:100%;}
+}
