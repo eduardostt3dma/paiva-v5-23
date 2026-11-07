@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>PAIVA Motion Studio | Análise 2D e Bike Fit</title><style>
+:root{color-scheme:dark;--bg:#0b0e12;--card:#191f26;--line:#36404a;--accent:#e5bf58;--txt:#f5f6f7;--muted:#b1bcc6}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#25303a 0,#0b0e12 70%);color:var(--txt);font:15px system-ui,-apple-system,'Segoe UI',sans-serif}main{max-width:1260px;margin:auto;padding:18px 15px 45px}header{display:flex;align-items:center;gap:20px;padding:12px 0 22px;border-bottom:1px solid var(--line)}#logo{width:91px;height:91px;border-radius:50%;object-fit:cover;border:1px solid #65707a}h1{font-size:clamp(22px,3vw,34px);margin:0;letter-spacing:.06em}header p{margin:4px 0;color:var(--muted)}.actions{margin-left:auto;display:flex;flex-wrap:wrap;gap:7px}.btn,.file{border:1px solid #59636e;background:#2a323b;color:white;border-radius:10px;padding:10px 13px;cursor:pointer;font:inherit}.file input{display:none}.primary{background:var(--accent);color:#141414;font-weight:800;border-color:var(--accent)}.layout{display:grid;grid-template-columns:minmax(240px,310px) minmax(360px,1fr) minmax(245px,310px);gap:13px;margin-top:18px}.card{background:linear-gradient(150deg,#222a33,#151a20);border:1px solid #46515d;border-radius:17px;padding:16px;min-width:0}.card h2{font-size:18px;margin:0 0 14px}.muted,.note{color:var(--muted);font-size:12px;line-height:1.5}.mode{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:15px}.mode button{padding:12px 4px;border-radius:9px;border:1px solid #505d68;background:#303a44;color:#fff;font-weight:700;cursor:pointer}.mode button.active{background:var(--accent);color:#121212;border-color:var(--accent)}.field{display:grid;grid-template-columns:1fr 93px 27px;align-items:center;gap:6px;padding:9px 0;border-bottom:1px solid #39424c}.field label{font-weight:650;font-size:13px}.field input{width:100%;background:#0f141a;color:white;border:1px solid #58636d;border-radius:8px;padding:10px 7px;text-align:right;font-size:15px}.help{background:none;border:1px solid #65707c;color:var(--accent);border-radius:50%;width:25px;height:25px;cursor:pointer;font-weight:700}.result{padding:11px 0;border-bottom:1px solid #3d4852}.result .head{display:flex;align-items:center;justify-content:space-between;gap:8px}.result strong{color:var(--accent);font-size:20px;white-space:nowrap}.result span{font-size:13px;font-weight:600}.result small{display:block;color:var(--muted);margin-top:5px;font-size:11px;line-height:1.4}.diagram{width:100%;display:block;border-radius:12px;background:radial-gradient(ellipse at center,#26323b,#10161d 80%)}.bike-wrap{position:relative}.bike-wrap svg{width:100%;height:auto;display:block}.bike-label{fill:#f5d06c;font:700 17px system-ui,sans-serif;paint-order:stroke;stroke:#101820;stroke-width:4px}.bike-title{fill:#f4f5f7;font:600 15px system-ui,sans-serif}.measure{stroke:#f2c44e;stroke-width:2.3;fill:none;stroke-linecap:round}.dash{stroke-dasharray:5 5;opacity:.65}.subtle{fill:#9facb8}.below{margin-top:12px}.disclaimer{border-left:3px solid var(--accent);padding:9px 11px;background:#101820;color:#c4cdd5;font-size:12px;line-height:1.5;margin-top:12px}.extra{margin-top:14px}.extra details{border-top:1px solid #47525d;padding:12px 0}.extra summary{cursor:pointer;color:#e6d19a}.guide{display:none;margin-top:10px;background:#101820;border:1px solid #485560;border-radius:12px;padding:10px}.guide.show{display:block}.guide svg{width:100%;max-height:160px}.guide p{font-size:12px;color:#d5dce3}.guide h3{margin:0 0 6px;font-size:14px}.wide{grid-column:1/-1}.bottom{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.hidden{display:none!important}footer{color:#98a4ae;text-align:center;font-size:11px;padding-top:25px}@media(max-width:1000px){.layout{grid-template-columns:1fr 1fr}.results-card{grid-column:1/-1}.bottom{grid-template-columns:1fr}}@media(max-width:650px){header{flex-wrap:wrap}header .actions{margin-left:0}.layout{grid-template-columns:1fr}.results-card{grid-column:auto}.card{padding:13px}.field{grid-template-columns:1fr 86px 26px}}@media print{body{background:#fff;color:#111}.actions,.help,.extra{display:none!important}.card{background:#fff;color:#111;border:1px solid #ccc}.layout{grid-template-columns:1fr 1fr}.results-card{grid-column:1/-1}.result span,.result small,.muted{color:#222}.bike-wrap{background:#1b252d}header{border-color:#aaa}}
+@media print{#roadPhoto{print-color-adjust:exact;-webkit-print-color-adjust:exact}#clientName,#evalDate,#clientEmail,#clientBirth{color:#111!important;background:white!important} .bike-wrap svg{max-height:330px}} 
+/* PAIVA STUDIO V5 · acabamento premium */
+:root{--bg:#080b10;--card:#14191f;--line:#3d444b;--accent:#ffcf29;--txt:#f6f7f9;--muted:#9da6b1}
+html{scroll-behavior:smooth}body{background:radial-gradient(ellipse 900px 650px at 50% -180px,#293039 0,transparent 80%),linear-gradient(140deg,#090b0e,#10141a 55%,#07090c);font-family:Inter,'Segoe UI',system-ui,sans-serif;letter-spacing:-.012em}
+main{max-width:1510px;padding:24px 22px 60px}header{padding:4px 0 25px;gap:22px;border-bottom:1px solid #3c4148}#logo{width:84px;height:84px;border:1px solid #68645c;box-shadow:0 0 0 5px #ffffff06,0 14px 30px #0009}.brand-tag{display:flex;flex-direction:column;align-self:center;margin-right:4px}.brand-kicker{color:#f8d44e;font-size:10px;font-weight:850;letter-spacing:.19em;white-space:nowrap}.brand-rule{margin-top:8px;height:2px;background:linear-gradient(90deg,#f4d24e,transparent)}header h1{font-size:clamp(25px,2.7vw,42px);font-weight:760;letter-spacing:-.045em}header p{font-size:13px;max-width:510px;line-height:1.45}.actions{gap:8px;justify-content:flex-end}.btn,.file{border-radius:12px;padding:12px 15px;background:linear-gradient(160deg,#31343a,#1b2027);border:1px solid #555c64;font-size:12px;font-weight:700;transition:filter .2s,transform .2s}.btn:hover,.file:hover,.mode button:hover{filter:brightness(1.14)}.btn:active,.file:active{transform:translateY(1px)}.primary{background:linear-gradient(135deg,#ffe455,#f6b900);color:#171410;border:1px solid #ffdb3c;box-shadow:0 8px 20px #eabf2426}.layout{grid-template-columns:minmax(270px,315px) minmax(430px,1fr) minmax(275px,325px);gap:16px;margin-top:22px;align-items:start}.card{background:linear-gradient(145deg,#20252b 0%,#12161c 54%,#101318 100%);border:1px solid #41464c;border-radius:22px;padding:21px;box-shadow:inset 0 1px #ffffff18,0 16px 42px #0006}.card h2{font-size:17px;font-weight:800;letter-spacing:-.025em;margin:0 0 17px}.layout>.card:nth-child(2){background:radial-gradient(ellipse at 50% 37%,#303740 0,#161b22 47%,#0c1016 90%);overflow:hidden;padding:20px 14px}.diagram-eyebrow{display:flex;align-items:center;gap:8px;color:#e2e7ed;font-size:9px;font-weight:750;letter-spacing:.13em;margin:2px 7px 14px}.diagram-sub{margin-left:auto;color:#a8b0b9;letter-spacing:.07em}.live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px #f7d03c99}.bike-wrap{border-radius:18px;overflow:hidden;box-shadow:0 0 35px #0005;background:radial-gradient(ellipse at center,#252c35,#0a0d12 85%)}.bike-wrap svg{width:100%;max-height:570px;object-fit:contain}.diagram-legend{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:13px 6px 0;color:#a8b1bb;font-size:10px}.legend-dot{display:inline-block;background:#ffcf29;width:7px;height:7px;border-radius:50%;margin-right:4px}.mode{gap:6px}.mode button{font-size:12px;letter-spacing:.07em;border-radius:11px;background:#181e25;padding:13px 5px}.mode button.active{background:linear-gradient(135deg,#ffe45d,#f3b900);box-shadow:0 4px 17px #e5b91526;color:#17140d}.field{grid-template-columns:1fr 92px 28px;padding:10px 0;border-color:#ffffff17}.field label{font-size:12px;line-height:1.3;color:#e4e8ed}.field input{background:#0b1016;border:1px solid #4d555f;padding:11px 7px;font-weight:700;border-radius:10px;font-size:14px;font-variant-numeric:tabular-nums}.field input:focus{outline:2px solid #f9ce32;outline-offset:1px}.help{border:1px solid #8b7b40;background:#29291f;color:#ffdc55;font-size:13px}.result{padding:13px 0;border-color:#ffffff1d}.result .head{align-items:start}.result strong{color:#ffdb3d;font-size:18px;letter-spacing:-.03em}.result span{font-size:12px;max-width:55%;line-height:1.4}.result small{font-size:10px;line-height:1.55}.note{color:#aeb5bd;font-size:11px;line-height:1.6}.disclaimer{border-left-color:#ffce29;border-radius:0 9px 9px 0;background:#171b1e}.bike-label{fill:#ffe26c;font-weight:800;stroke-width:5px}.guide{background:#0d131a;border-color:#555d67;border-radius:14px}.guide svg{max-height:190px}.bottom{gap:16px;margin-top:16px}.bottom .card{padding:22px}.eyebrow{font-size:10px;color:#ffd83d;font-weight:850;letter-spacing:.15em}.report-heading{display:flex;justify-content:space-between;gap:15px;align-items:center;margin:5px 0 17px}.report-lead{color:#c2cad3;font-size:12px;margin:6px 0}.report-chip{border:1px solid #746431;color:#d7c06a;border-radius:99px;padding:7px 10px;font-size:9px;font-weight:800;letter-spacing:.03em}.body-report{display:grid;grid-template-columns:185px 1fr;gap:18px;align-items:center;border:1px solid #414951;background:linear-gradient(120deg,#151c24,#101318);border-radius:17px;padding:15px;margin-top:17px}.body-silhouette{max-height:265px;display:flex;justify-content:center}.body-silhouette svg{max-height:260px}.body-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.body-stats>div{background:#20252c;border:1px solid #3c444d;border-radius:11px;padding:13px 10px;min-width:0}.body-stats span{display:block;color:#a9b4bf;font-size:9px;font-weight:750;letter-spacing:.06em}.body-stats strong{display:block;color:#ffe05a;font-size:20px;margin-top:8px;white-space:nowrap}footer{color:#7f8b97;letter-spacing:.05em}
+@media(max-width:1180px){.layout{grid-template-columns:minmax(250px,310px) minmax(350px,1fr)}.results-card{grid-column:1/-1}.brand-tag{display:none}}@media(max-width:700px){main{padding:13px 11px 45px}header{gap:10px;flex-wrap:wrap}#logo{width:62px;height:62px}header h1{font-size:26px}header p{font-size:11px}.actions{width:100%;margin:8px 0 0;justify-content:stretch}.actions>*{flex:1;text-align:center}.layout{grid-template-columns:1fr;gap:12px}.results-card{grid-column:auto}.card{padding:16px;border-radius:17px}.layout>.card:nth-child(2){padding:14px 8px}.diagram-eyebrow{font-size:8px}.diagram-sub{display:none}.bottom{grid-template-columns:1fr}.body-report{grid-template-columns:105px 1fr;gap:8px;padding:8px}.body-silhouette svg{max-height:230px}.body-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.body-stats>div{padding:9px 6px}.body-stats strong{font-size:15px}.report-chip{display:none}}
+@media print{@page{size:A4;margin:12mm}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body{background:#fff!important;color:#151a20!important;font-size:10px}main{padding:0;max-width:none}header{padding-bottom:10px}header h1{font-size:22px;color:#111}.brand-tag{display:none}.actions,.mode,.help,.guide,.diagram-eyebrow,.diagram-legend,.extra,.bottom>section:last-child,#reset,.note:not(#validation){display:none!important}.layout{display:grid;grid-template-columns:36% 64%;gap:8px}.layout>.card:nth-child(2){grid-column:2;grid-row:1;background:#171c22!important}.layout>.card:first-child{grid-column:1;grid-row:1}.results-card{grid-column:1/-1!important;grid-row:2}.card{border:1px solid #aeb6bd;background:#fff!important;box-shadow:none;break-inside:avoid;padding:9px;border-radius:8px}.card h2{color:#161b21;font-size:13px}.field{padding:3px 0}.field label{color:#222}.field input{color:#111;background:#fff;border:0;padding:4px;font-size:11px}.result{display:inline-block;width:49%;vertical-align:top;padding:6px}.result span,.result small{color:#111}.result strong{font-size:14px;color:#9c7700}.bottom{display:block}.bottom>.card:first-child{display:block!important;break-before:avoid}.body-report{grid-template-columns:115px 1fr;background:#fff;border:1px solid #bbb}.body-stats>div{background:#fff;border-color:#bbb}.body-stats span{color:#444}.body-stats strong{color:#9a7300}#validation{color:#555}footer{padding-top:5px}}
+
+/* V5.1: fotografia Road fixa, com valores vivos independentes da imagem */
+.road-hero{position:relative;width:100%;aspect-ratio:900/646;overflow:hidden;background:#0b1016;border-radius:15px}
+.road-hero img{width:100%;height:100%;display:block;object-fit:contain}
+.road-measure{position:absolute;top:1.8%;left:39%;width:41%;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;pointer-events:none;text-shadow:0 2px 7px #000,0 0 4px #000}
+.road-measure span{font-size:clamp(8px,.85vw,12px);font-weight:750;color:#fff;letter-spacing:.035em;background:#10151bc9;border-radius:5px;padding:3px 5px}
+.road-measure strong{font-size:clamp(13px,1.65vw,23px);color:#ffdd3c;background:#111923e8;border:1px solid #ffcd2e;border-radius:20px;padding:3px 11px;font-variant-numeric:tabular-nums}
+.road-measure.stack-pill{top:53%;left:37%;width:28%}
+.road-measure.stack-pill span{font-size:clamp(7px,.75vw,10px)}
+.road-measure.stack-pill strong{font-size:clamp(11px,1.25vw,18px)}
+@media(max-width:650px){.road-measure span{font-size:8px}.road-measure strong{font-size:14px}.road-measure.stack-pill strong{font-size:12px}}
+@media print{.road-hero,.road-hero img{print-color-adjust:exact;-webkit-print-color-adjust:exact}.road-hero{max-height:390px;aspect-ratio:900/646}#clientEmail,#clientBirth{color:#111!important;background:white!important}}
+
+/* PAIVA 5.3 — fotografia fixa, antropometria anatômica */
+.body-silhouette{min-width:0;overflow:hidden;border-radius:14px;background:#090b0e}
+.body-silhouette img{display:block;width:100%;height:100%;max-height:390px;object-fit:cover;object-position:center center;filter:contrast(1.07)}
+.body-report{align-items:stretch}
+.body-stats{grid-template-columns:repeat(2,minmax(0,1fr));align-content:center}
+.body-stats>div{background:linear-gradient(135deg,#22282f,#11161b);border-color:#3b4149}
+.body-stats strong{color:#ffda38}
+.mtb-hero img{object-fit:cover;object-position:center center}
+.mtb-hero .road-measure{top:1%;left:37%;width:34%}
+.mtb-hero .road-measure.stack-pill{top:48%;left:36%;width:27%}
+@media(max-width:700px){.body-silhouette img{max-height:290px}.mtb-hero .road-measure span{font-size:7px}.mtb-hero .road-measure strong{font-size:11px}}
+@media print{.road-hero{break-inside:avoid}.body-report{break-inside:avoid}}
+</style><style>
+.client-first{margin-top:20px;border-color:#76663e;background:linear-gradient(140deg,#252932,#151a20)}
+.client-first label,.bike-meta label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:650;color:#e5e9ed}
+.client-first input,.client-first select,.bike-meta input{font:inherit;min-height:43px}
+.bike-meta{grid-column:1/-1}
+.bike-meta-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.bike-meta input{width:100%;padding:11px 12px;background:#0f141a;color:#fff;border:1px solid #58636d;border-radius:9px}
+.client-first .body-report{display:none}
+.layout>.card:first-child .body-report{margin-top:20px}
+@media(max-width:900px){.bike-meta-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){.bike-meta-grid{grid-template-columns:1fr}}
+@media print{.client-first select,.bike-meta input{color:#111!important;background:#fff!important;border:1px solid #aaa!important}.bike-meta{break-inside:avoid}.client-first{break-inside:avoid}}
+</style><style>
+.tt-photo-hero{position:relative;width:100%;aspect-ratio:647/361;overflow:hidden;background:#11151a}.tt-photo-hero img{display:block;width:100%;height:100%;object-fit:cover}.tt-live{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;background:#10151ddd;border:1px solid #f5c72c;border-radius:10px;box-shadow:0 5px 16px #0009;white-space:nowrap}.tt-live span,.saddle-live span{font-size:9px;color:#e9edf0;letter-spacing:.04em;font-weight:700}.tt-live strong,.saddle-live strong{font-size:15px;color:#ffdc41;font-weight:850}.tt-reach{left:48%;top:3%;transform:translateX(-15%)}.tt-stack{left:45%;top:38%}.tt-saddle{left:5%;top:27%}.road-hero,.mtb-hero{position:relative}.saddle-live{position:absolute;left:6%;top:11%;z-index:5;display:flex;flex-direction:column;gap:2px;background:#111720dd;border:1px solid #edc631;border-radius:10px;padding:6px 10px;pointer-events:none}
+.client-report{display:none}
+@media(max-width:700px){.tt-live{padding:3px 5px;border-radius:6px}.tt-live span,.saddle-live span{font-size:6px}.tt-live strong,.saddle-live strong{font-size:10px}.saddle-live{padding:4px 6px}.tt-stack{top:42%}}
+@media print{
+@page{size:A4;margin:13mm}body{background:#fff!important;color:#17212a!important;font:10pt Arial,sans-serif!important}main{max-width:none!important;padding:0!important}main>header,main>.client-first,main>.bike-meta,main>.layout,main>.bottom,main>footer{display:none!important}.client-report{display:block!important;color:#1b2631!important}.report-top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #c5a143;padding:0 0 13px;margin-bottom:16px}.report-brand{font-size:27pt;font-weight:900;letter-spacing:.1em;color:#171e27}.report-brand small{display:block;font-size:8pt;letter-spacing:.22em;color:#aa8734}.report-top h1{font-size:15pt;margin:12px 0 3px}.report-top p{font-size:9pt;color:#66717d;margin:0}.report-date{font-size:9pt;color:#596571}.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.report-grid section{border:1px solid #d9dee3;border-radius:7px;padding:12px;break-inside:avoid}.report-grid h2{font-size:10pt;text-transform:uppercase;color:#7a5d21;border-bottom:1px solid #e2e4e7;margin:0 0 8px;padding-bottom:7px}.report-grid dl{margin:0}.report-grid dl>div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #eceef0}.report-grid dt{font-weight:600;color:#56616d}.report-grid dd{margin:0;text-align:right;font-weight:700;overflow-wrap:anywhere}.report-grid .result{padding:5px 0;border-bottom:1px solid #eceef0}.report-grid .result .head{display:flex;justify-content:space-between;gap:8px}.report-grid .result strong{color:#222!important;font-size:10pt}.report-grid .result span{font-size:9pt}.report-grid .result small{display:none}.report-warning{background:#f6f5f1;border-left:3px solid #c4a044;padding:11px 14px;margin-top:18px;font-size:9pt;break-inside:avoid}.report-warning p{margin:5px 0 0;line-height:1.45}.report-sign{border-top:1px solid #c9cfd5;margin-top:24px;padding-top:9px;display:flex;justify-content:space-between;font-size:8pt;font-weight:700;color:#68737f}
+}
+</style><style id="paiva-v55-fix">
+.paiva-fixed-bikes{width:100%;position:relative;overflow:hidden;border-radius:16px;background:#090d12}
+.paiva-fixed-bikes .paiva-bike-photo{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden}
+.paiva-fixed-bikes .paiva-bike-photo.hidden{display:none!important}
+.paiva-fixed-bikes .paiva-bike-photo img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;background:#090d12}
+.paiva-fixed-bikes .photo-data{position:absolute;display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:5px 9px;min-width:94px;max-width:32%;border-radius:10px;border:1px solid #e7bd36;background:rgba(9,14,19,.91);box-shadow:0 3px 14px #000b;text-align:center}
+.paiva-fixed-bikes .photo-data span{font-size:clamp(7px,1vw,10px);line-height:1.2;color:#e5e9ed;font-weight:700}
+.paiva-fixed-bikes .photo-data strong{font-size:clamp(12px,1.5vw,20px);color:#ffdd45;line-height:1.2}
+.paiva-fixed-bikes .photo-reach{top:2%;left:45%;transform:translateX(-20%)}
+.paiva-fixed-bikes .photo-stack{top:42%;left:50%}
+.paiva-fixed-bikes .photo-saddle{top:43%;left:4%}
+.paiva-fixed-bikes .legacy-svg{display:none!important}
+@media(max-width:650px){.paiva-fixed-bikes .photo-data{padding:4px 5px;min-width:70px}.paiva-fixed-bikes .photo-data span{font-size:7px}.paiva-fixed-bikes .photo-data strong{font-size:12px}.paiva-fixed-bikes .photo-saddle{left:2%;top:35%}.paiva-fixed-bikes .photo-stack{left:52%;top:43%}}
+@media print{.paiva-fixed-bikes .paiva-bike-photo{break-inside:avoid}.paiva-fixed-bikes .photo-data{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style><style>
+.client-report{display:none}
+@media print{
+@page{size:A4;margin:13mm 12mm}
+html,body{width:auto!important;min-height:0!important;overflow:visible!important;background:#fff!important}
+main{padding:0!important;margin:0!important;width:100%!important;max-width:none!important}
+main>header,main>.client-first,main>.bike-meta,main>.layout,main>.bottom,main>footer{display:none!important}
+#clientReport{display:block!important;position:static!important;visibility:visible!important;width:100%!important;max-width:none!important;padding:0!important;margin:0!important;background:#fff!important;color:#1b2530!important}
+#clientReport *{visibility:visible!important}
+.report-top{padding:10px 0 16px!important;border-bottom:3px solid #e0b927!important;margin-bottom:20px!important}
+.report-brand{font-size:31pt!important;letter-spacing:.08em!important;color:#171b23!important}
+.report-brand small{color:#a4800d!important}
+.report-top h1{font-size:16pt!important;margin-top:14px!important}
+.report-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important;align-items:start!important}
+.report-grid>section{background:#fff!important;border:1px solid #d5dce3!important;border-radius:10px!important;padding:15px!important;break-inside:avoid!important;box-shadow:none!important;min-width:0!important}
+.report-grid>section:nth-child(3),.report-grid>section:nth-child(4){break-inside:auto!important}
+.report-grid h2{color:#866900!important;font-size:10pt!important;letter-spacing:.025em!important}
+.report-grid dl>div{display:flex!important;justify-content:space-between!important;gap:10px!important;min-width:0!important}
+.report-grid dd{overflow-wrap:anywhere!important;max-width:58%!important;text-align:right!important}
+.report-grid .result{break-inside:avoid!important}
+.report-grid .result .head{display:flex!important;align-items:baseline!important;gap:12px!important}
+.report-grid .result strong{white-space:normal!important;text-align:right!important;color:#171b23!important}
+.report-grid .result small{display:block!important;color:#626e79!important;font-size:7.5pt!important;line-height:1.35!important;margin-top:2px!important}
+.report-warning{margin-top:18px!important;background:#f5f6f7!important;color:#26313a!important;border-left:3px solid #d3ad27!important}
+.report-sign{margin-top:20px!important}
+}
+</style><style>
+/* V5.8 · relatório editorial PAIVA, sem sobreposições */
+@media screen {#reportLogo{display:none}}
+@media print {
+@page {size:A4;margin:14mm 13mm}
+#clientReport {font-family:Arial,Helvetica,sans-serif!important;font-size:9pt!important;line-height:1.38!important}
+#clientReport .report-top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:15px!important;padding:0 0 14px!important;margin:0 0 15px!important;border-bottom:2px solid #c7a342!important}
+#clientReport .report-top>div:first-child{grid-column:1!important;grid-row:1!important;min-width:0!important;display:grid!important;grid-template-columns:70px minmax(0,1fr)!important;column-gap:15px!important;align-items:center!important}
+#reportLogo{display:block!important;width:64px!important;height:64px!important;object-fit:contain!important;border-radius:50%!important;grid-column:1!important;grid-row:1/4!important;align-self:center!important}
+#clientReport .report-top>div:first-child>.report-brand,#clientReport .report-top>div:first-child>h1,#clientReport .report-top>div:first-child>p{grid-column:2!important;min-width:0!important}
+#clientReport .report-brand{font-size:23pt!important;line-height:1.05!important;letter-spacing:.07em!important}
+#clientReport .report-brand small{font-size:7pt!important;line-height:1.4!important;margin-top:4px!important}
+#clientReport .report-top h1{font-size:13pt!important;margin:8px 0 4px!important;line-height:1.15!important}
+#clientReport .report-top p{font-size:8pt!important;line-height:1.4!important}
+#clientReport .report-date{grid-column:2!important;grid-row:1!important;align-self:start!important;white-space:nowrap!important;font-size:8pt!important}
+#clientReport .report-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;align-items:start!important}
+#clientReport .report-grid>section{border:1px solid #d8dde2!important;border-radius:7px!important;padding:11px 12px!important;break-inside:avoid!important;page-break-inside:avoid!important;min-width:0!important;box-shadow:none!important}
+#clientReport .report-grid>section:nth-child(3),#clientReport .report-grid>section:nth-child(4){break-inside:avoid!important;page-break-inside:avoid!important}
+#clientReport .report-grid h2{font-size:9pt!important;line-height:1.3!important;margin:0 0 7px!important;padding-bottom:6px!important}
+#clientReport .report-grid dl>div{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)!important;gap:8px!important;align-items:start!important;padding:5px 0!important;break-inside:avoid!important}
+#clientReport .report-grid dt{font-size:8.3pt!important;line-height:1.3!important;overflow-wrap:anywhere!important}
+#clientReport .report-grid dd{font-size:8.5pt!important;line-height:1.3!important;max-width:none!important;overflow-wrap:anywhere!important;text-align:right!important}
+#clientReport #reportResults .result{display:block!important;width:100%!important;padding:6px 0!important;break-inside:avoid!important}
+#clientReport #reportResults .result .head{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;align-items:start!important}
+#clientReport #reportResults .result span{font-size:8.5pt!important;max-width:none!important;line-height:1.3!important}
+#clientReport #reportResults .result strong{font-size:9.3pt!important;white-space:normal!important;line-height:1.3!important;text-align:right!important}
+#clientReport #reportResults .result small{font-size:7.2pt!important;line-height:1.3!important;margin-top:3px!important}
+#clientReport .report-warning{margin-top:14px!important;padding:10px 12px!important;font-size:8pt!important;break-inside:avoid!important}
+#clientReport .report-warning p{line-height:1.45!important}
+#clientReport .report-sign{margin-top:14px!important;padding-top:8px!important;break-inside:avoid!important}
+}
+/* clean photographic frame: prevent remnants of pre-rendered labels from touching the dynamic reach */
+#roadPhotoPanel img{object-fit:contain!important}
+#roadPhotoPanel .photo-reach{top:3%!important;left:45%!important;z-index:4!important}
+</style><style>
+/* V5.9 — single, legible measurement legend with guide pointers */
+.paiva-fixed-bikes .paiva-bike-photo{isolation:isolate}
+.paiva-fixed-bikes .photo-data{z-index:8!important;transform:none!important;box-sizing:border-box;min-width:0!important;max-width:none!important;width:clamp(94px,23%,145px)!important;gap:3px!important;padding:7px 9px!important;border-radius:9px!important;background:rgba(9,14,20,.96)!important;box-shadow:0 4px 16px #000c!important;text-align:left!important;align-items:flex-start!important;white-space:normal!important}
+.paiva-fixed-bikes .photo-data span{font-size:clamp(8px,.9vw,11px)!important;line-height:1.25!important;letter-spacing:.02em}
+.paiva-fixed-bikes .photo-data strong{font-size:clamp(12px,1.45vw,18px)!important;line-height:1.25!important;overflow-wrap:anywhere}
+.paiva-fixed-bikes .photo-reach{top:3%!important;left:auto!important;right:2%!important}
+.paiva-fixed-bikes .photo-stack{top:34%!important;left:auto!important;right:2%!important}
+.paiva-fixed-bikes .photo-saddle{top:auto!important;bottom:3%!important;left:2%!important;right:auto!important}
+.paiva-fixed-bikes .photo-data::before{content:'';position:absolute;top:50%;height:2px;width:clamp(18px,5vw,58px);background:#f2cc42;box-shadow:0 1px 4px #000}
+.paiva-fixed-bikes .photo-reach::before,.paiva-fixed-bikes .photo-stack::before{right:100%}
+.paiva-fixed-bikes .photo-saddle::before{left:100%}
+.paiva-fixed-bikes .photo-data::after{content:'';position:absolute;top:calc(50% - 4px);width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent}
+.paiva-fixed-bikes .photo-reach::after,.paiva-fixed-bikes .photo-stack::after{right:calc(100% + clamp(18px,5vw,58px));border-right:8px solid #f2cc42}
+.paiva-fixed-bikes .photo-saddle::after{left:calc(100% + clamp(18px,5vw,58px));border-left:8px solid #f2cc42}
+@media(max-width:650px){.paiva-fixed-bikes .photo-data{width:29%!important;padding:4px 5px!important}.paiva-fixed-bikes .photo-data span{font-size:7px!important}.paiva-fixed-bikes .photo-data strong{font-size:11px!important}.paiva-fixed-bikes .photo-reach{top:2%!important;right:1%!important}.paiva-fixed-bikes .photo-stack{top:38%!important;right:1%!important}.paiva-fixed-bikes .photo-saddle{bottom:2%!important;left:1%!important}.paiva-fixed-bikes .photo-data::before{width:12px}.paiva-fixed-bikes .photo-reach::after,.paiva-fixed-bikes .photo-stack::after{right:calc(100% + 12px)}.paiva-fixed-bikes .photo-saddle::after{left:calc(100% + 12px)}}
+/* Client-facing report: deliberate white page border and generous margins */
+@media print{
+@page{size:A4;margin:18mm 17mm!important}
+#clientReport{box-sizing:border-box!important;width:100%!important;padding:6mm 5mm!important;margin:0!important;border:1px solid #e2e5e9!important;border-radius:3mm!important;background:white!important}
+#clientReport .report-top{padding-bottom:12px!important;margin-bottom:14px!important}
+#clientReport .report-grid{gap:11px!important}
+#clientReport .report-grid>section{padding:11px!important}
+#clientReport .report-warning{margin-top:12px!important}
+#clientReport .report-sign{margin-top:12px!important}
+}
+</style><style>
+/* V5.10 — painel numérico limpo, sem linhas nem setas */
+.paiva-fixed-bikes .paiva-bike-photo{aspect-ratio:16/10;isolation:isolate}
+.paiva-fixed-bikes .paiva-bike-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center 32%;}
+.paiva-fixed-bikes .paiva-bike-photo::after{content:"";position:absolute;z-index:1;bottom:0;left:0;right:0;height:28%;background:linear-gradient(0deg,#090d12 45%,rgba(9,13,18,.9) 78%,transparent);pointer-events:none}
+.paiva-fixed-bikes .photo-data,
+.paiva-fixed-bikes .photo-reach,
+.paiva-fixed-bikes .photo-stack,
+.paiva-fixed-bikes .photo-saddle,
+.paiva-fixed-bikes .photo-top-tube{
+ position:absolute!important;z-index:2!important;top:auto!important;bottom:3%!important;left:auto!important;right:auto!important;transform:none!important;
+ width:23%!important;max-width:none!important;min-width:0!important;height:17%!important;
+ padding:5px 3px!important;border:1px solid #424a51!important;border-radius:9px!important;
+ background:rgba(18,24,31,.96)!important;box-shadow:none!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;
+ text-align:center!important;text-shadow:none!important;
+}
+.paiva-fixed-bikes .photo-saddle{left:1.5%!important}
+.paiva-fixed-bikes .photo-reach{left:26.1%!important}
+.paiva-fixed-bikes .photo-stack{left:50.7%!important}
+.paiva-fixed-bikes .photo-top-tube{left:75.3%!important}
+.paiva-fixed-bikes #ttPhotoPanel .photo-saddle{left:8%!important;width:26%!important}
+.paiva-fixed-bikes #ttPhotoPanel .photo-reach{left:37%!important;width:26%!important}
+.paiva-fixed-bikes #ttPhotoPanel .photo-stack{left:66%!important;width:26%!important}
+.paiva-fixed-bikes .photo-data span{color:#b9c3cd!important;font-size:clamp(7px,.83vw,10px)!important;line-height:1.12!important;font-weight:750!important;letter-spacing:.015em!important;background:transparent!important;padding:0!important}
+.paiva-fixed-bikes .photo-data strong{color:#ffdc4b!important;font-size:clamp(10px,1.2vw,16px)!important;line-height:1.1!important;font-weight:800!important;white-space:nowrap!important;background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;font-variant-numeric:tabular-nums!important}
+@media(max-width:650px){
+ .paiva-fixed-bikes .paiva-bike-photo{aspect-ratio:4/3}
+ .paiva-fixed-bikes .paiva-bike-photo::after{height:37%}
+ .paiva-fixed-bikes .photo-data,.paiva-fixed-bikes .photo-reach,.paiva-fixed-bikes .photo-stack,.paiva-fixed-bikes .photo-saddle,.paiva-fixed-bikes .photo-top-tube{height:15%!important;bottom:3%!important;width:23%!important;padding:3px 2px!important}
+ .paiva-fixed-bikes .photo-data span{font-size:clamp(6px,1.7vw,8px)!important}
+ .paiva-fixed-bikes .photo-data strong{font-size:clamp(9px,2.4vw,12px)!important}
+}
+@media print{.paiva-fixed-bikes .photo-data{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}}
+</style><style>
+/* V5.11: fotografia PAIVA limpa e indicadores dinâmicos em cartões, sem setas */
+.paiva-fixed-bikes .photo-data::before,.paiva-fixed-bikes .photo-data::after,
+.paiva-fixed-bikes .photo-reach::before,.paiva-fixed-bikes .photo-reach::after,
+.paiva-fixed-bikes .photo-stack::before,.paiva-fixed-bikes .photo-stack::after,
+.paiva-fixed-bikes .photo-saddle::before,.paiva-fixed-bikes .photo-saddle::after,
+.paiva-fixed-bikes .photo-top-tube::before,.paiva-fixed-bikes .photo-top-tube::after {content:none!important;display:none!important;border:0!important;}
+.paiva-fixed-bikes .paiva-bike-photo{aspect-ratio:16/10!important;background:#090b0e!important;overflow:hidden!important}
+.paiva-fixed-bikes .paiva-bike-photo img{object-fit:contain!important;object-position:center top!important}
+.paiva-fixed-bikes .paiva-bike-photo::after{height:27%!important;background:linear-gradient(0deg,#090b0e 35%,rgba(9,11,14,.82) 74%,transparent)!important}
+.paiva-fixed-bikes .photo-data{border:1px solid #63676c!important;background:linear-gradient(180deg,rgba(34,35,38,.97),rgba(13,14,16,.98))!important;border-radius:12px!important;box-shadow:0 3px 10px #0008!important}
+.paiva-fixed-bikes .photo-data span{color:#d3d4d7!important;font-weight:800!important;letter-spacing:.09em!important}
+.paiva-fixed-bikes .photo-data strong{color:#f5f6f8!important;font-weight:850!important;font-size:clamp(10px,1.45vw,19px)!important}
+@media(max-width:650px){.paiva-fixed-bikes .paiva-bike-photo{aspect-ratio:4/3!important}.paiva-fixed-bikes .photo-data{border-radius:7px!important}.paiva-fixed-bikes .photo-data strong{font-size:clamp(9px,2.4vw,12px)!important}}
+</style><style>
+/* V5.12 — fotografias separadas e cartões exclusivamente ABAIXO das bikes */
+.paiva-fixed-bikes .paiva-bike-photo{aspect-ratio:auto!important;overflow:visible!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important;padding:0 0 10px!important;background:#090b0e!important;border-radius:13px!important;align-items:stretch!important}
+.paiva-fixed-bikes .paiva-bike-photo.hidden{display:none!important}
+.paiva-fixed-bikes .paiva-bike-photo img{position:static!important;inset:auto!important;grid-column:1/-1!important;width:100%!important;height:auto!important;aspect-ratio:700/558!important;object-fit:contain!important;object-position:center!important;display:block!important;border-radius:12px 12px 0 0!important}
+.paiva-fixed-bikes .paiva-bike-photo::after{content:none!important;display:none!important}
+.paiva-fixed-bikes .photo-data,.paiva-fixed-bikes .photo-reach,.paiva-fixed-bikes .photo-stack,.paiva-fixed-bikes .photo-saddle,.paiva-fixed-bikes .photo-top-tube{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;transform:none!important;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:66px!important;margin:0!important;padding:10px 3px!important;border:1px solid #51545a!important;border-radius:10px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;background:linear-gradient(180deg,#222326,#0d0e10)!important;box-shadow:none!important}
+.paiva-fixed-bikes .photo-data::before,.paiva-fixed-bikes .photo-data::after{content:none!important;display:none!important}
+.paiva-fixed-bikes .photo-saddle{grid-column:1!important}
+.paiva-fixed-bikes .photo-reach{grid-column:2!important}
+.paiva-fixed-bikes .photo-stack{grid-column:3!important}
+.paiva-fixed-bikes .photo-top-tube{grid-column:4!important}
+.paiva-fixed-bikes #ttPhotoPanel{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.paiva-fixed-bikes #ttPhotoPanel .photo-saddle{grid-column:1!important;width:auto!important}
+.paiva-fixed-bikes #ttPhotoPanel .photo-reach{grid-column:2!important;width:auto!important}
+.paiva-fixed-bikes #ttPhotoPanel .photo-stack{grid-column:3!important;width:auto!important}
+.paiva-fixed-bikes .photo-data span{font-size:clamp(9px,1.05vw,12px)!important;color:#cdd0d4!important;line-height:1.1!important;text-align:center!important}
+.paiva-fixed-bikes .photo-data strong{font-size:clamp(12px,1.65vw,20px)!important;color:#f4f5f6!important;white-space:nowrap!important;line-height:1.1!important}
+@media(max-width:650px){.paiva-fixed-bikes .paiva-bike-photo{gap:4px!important}.paiva-fixed-bikes .photo-data{min-height:52px!important;padding:6px 2px!important}.paiva-fixed-bikes .photo-data span{font-size:clamp(7px,2vw,10px)!important;letter-spacing:0!important}.paiva-fixed-bikes .photo-data strong{font-size:clamp(9px,2.65vw,14px)!important}}
+</style><style>
+/* V5.13 — uma linha horizontal, sem sobreposições, mesmo em telas pequenas */
+.paiva-fixed-bikes #roadPhotoPanel,.paiva-fixed-bikes #mtbPhotoPanel{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+.paiva-fixed-bikes #ttPhotoPanel{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.paiva-fixed-bikes .paiva-bike-photo{gap:6px!important;align-items:stretch!important}
+.paiva-fixed-bikes .photo-data{grid-column:auto!important;min-width:0!important;min-height:72px!important;padding:9px 3px!important}
+.paiva-fixed-bikes .photo-data span{font-size:clamp(8px,.9vw,11px)!important;letter-spacing:0!important}
+.paiva-fixed-bikes .photo-data strong{font-size:clamp(10px,1.1vw,16px)!important;white-space:normal!important;overflow-wrap:anywhere!important}
+.paiva-fixed-bikes .photo-stem,.paiva-fixed-bikes .photo-cockpit{position:static!important;transform:none!important;left:auto!important;top:auto!important;bottom:auto!important;right:auto!important;width:auto!important}
+@media(max-width:850px){
+.paiva-fixed-bikes #roadPhotoPanel,.paiva-fixed-bikes #mtbPhotoPanel{grid-template-columns:repeat(6,minmax(115px,1fr))!important;overflow-x:auto!important;overscroll-behavior-inline:contain!important}
+.paiva-fixed-bikes #ttPhotoPanel{grid-template-columns:repeat(3,minmax(105px,1fr))!important;overflow-x:auto!important}
+.paiva-fixed-bikes .paiva-bike-photo img{grid-column:1/-1!important;position:sticky!important;left:0!important;width:100%!important;max-width:100%!important;min-width:0!important}
+.paiva-fixed-bikes .photo-data{min-height:64px!important}
+.paiva-fixed-bikes .photo-data span{font-size:9px!important}
+.paiva-fixed-bikes .photo-data strong{font-size:13px!important}
+}
+@media print{.paiva-fixed-bikes .paiva-bike-photo{overflow:visible!important}.paiva-fixed-bikes #roadPhotoPanel,.paiva-fixed-bikes #mtbPhotoPanel{grid-template-columns:repeat(6,minmax(0,1fr))!important}.paiva-fixed-bikes .photo-data{min-height:48px!important;padding:4px 1px!important}.paiva-fixed-bikes .photo-data strong{font-size:9px!important}.paiva-fixed-bikes .photo-data span{font-size:7px!important}}
+</style><style>
+/* V5.14: o painel da bike tem largura controlada e nunca herda a largura do carrossel */
+.paiva-fixed-bikes{min-width:0!important;max-width:100%!important;overflow:hidden!important}
+.paiva-fixed-bikes .paiva-bike-photo,
+.paiva-fixed-bikes #roadPhotoPanel,
+.paiva-fixed-bikes #mtbPhotoPanel,
+.paiva-fixed-bikes #ttPhotoPanel{
+ display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;
+ width:100%!important;min-width:0!important;max-width:100%!important;
+ overflow:hidden!important;gap:5px!important;padding:5px!important;
+ box-sizing:border-box!important;align-items:stretch!important;
+ aspect-ratio:auto!important;
+}
+.paiva-fixed-bikes .paiva-bike-photo.hidden{display:none!important}
+.paiva-fixed-bikes #ttPhotoPanel{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.paiva-fixed-bikes .paiva-bike-photo>img{
+ position:static!important;grid-column:1/-1!important;grid-row:1!important;
+ display:block!important;width:100%!important;max-width:100%!important;
+ min-width:0!important;height:auto!important;max-height:310px!important;
+ aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;
+ border-radius:9px!important;
+}
+.paiva-fixed-bikes .paiva-bike-photo .photo-data{
+ position:static!important;grid-column:auto!important;grid-row:2!important;
+ width:auto!important;min-width:0!important;max-width:100%!important;
+ min-height:52px!important;height:auto!important;padding:5px 1px!important;
+ box-sizing:border-box!important;overflow:hidden!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;
+ justify-content:center!important;gap:3px!important;
+}
+.paiva-fixed-bikes .paiva-bike-photo .photo-data span{font-size:clamp(7px,.85vw,10px)!important;white-space:nowrap!important}
+.paiva-fixed-bikes .paiva-bike-photo .photo-data strong{font-size:clamp(9px,1vw,14px)!important;line-height:1.2!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important}
+@media(max-width:650px){
+ .paiva-fixed-bikes .paiva-bike-photo,
+ .paiva-fixed-bikes #roadPhotoPanel,.paiva-fixed-bikes #mtbPhotoPanel,.paiva-fixed-bikes #ttPhotoPanel{gap:3px!important;padding:3px!important;overflow:hidden!important}
+ .paiva-fixed-bikes .paiva-bike-photo>img{max-height:220px!important;position:static!important;left:auto!important}
+ .paiva-fixed-bikes .paiva-bike-photo .photo-data{min-height:48px!important;padding:4px 0!important}
+ .paiva-fixed-bikes .paiva-bike-photo .photo-data span{font-size:7px!important}
+ .paiva-fixed-bikes .paiva-bike-photo .photo-data strong{font-size:9px!important}
+}
+@media print{.paiva-fixed-bikes .paiva-bike-photo>img{max-height:190px!important}}
+</style><style>
+/* V5.15 — painel único visível e grade responsiva sem corte de textos */
+.paiva-fixed-bikes #roadPhotoPanel.hidden,
+.paiva-fixed-bikes #mtbPhotoPanel.hidden,
+.paiva-fixed-bikes #ttPhotoPanel.hidden{display:none!important;visibility:hidden!important}
+.paiva-fixed-bikes .paiva-bike-photo:not(.hidden){display:grid!important;visibility:visible!important}
+.paiva-fixed-bikes #roadPhotoPanel,
+.paiva-fixed-bikes #mtbPhotoPanel{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.paiva-fixed-bikes #ttPhotoPanel{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.paiva-fixed-bikes .paiva-bike-photo{width:100%!important;max-width:100%!important;min-width:0!important;gap:10px!important;padding:8px!important;overflow:hidden!important}
+.paiva-fixed-bikes .paiva-bike-photo>img{grid-column:1/-1!important;grid-row:1!important;max-height:310px!important;width:100%!important;max-width:100%!important;object-fit:contain!important}
+.paiva-fixed-bikes .paiva-bike-photo .photo-data{grid-row:auto!important;grid-column:auto!important;min-width:0!important;min-height:68px!important;padding:9px 6px!important;border-radius:10px!important;overflow:visible!important}
+.paiva-fixed-bikes .paiva-bike-photo .photo-data span{font-size:clamp(9px,1.05vw,12px)!important;white-space:normal!important;overflow-wrap:normal!important;line-height:1.25!important;text-align:center!important;letter-spacing:.025em!important}
+.paiva-fixed-bikes .paiva-bike-photo .photo-data strong{font-size:clamp(12px,1.55vw,18px)!important;white-space:normal!important;overflow-wrap:normal!important;line-height:1.2!important}
+@media(max-width:540px){
+ .paiva-fixed-bikes #roadPhotoPanel,.paiva-fixed-bikes #mtbPhotoPanel{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .paiva-fixed-bikes #ttPhotoPanel{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .paiva-fixed-bikes .paiva-bike-photo{gap:7px!important;padding:5px!important}
+ .paiva-fixed-bikes .paiva-bike-photo>img{max-height:220px!important}
+ .paiva-fixed-bikes .paiva-bike-photo .photo-data{min-height:65px!important;padding:8px 4px!important}
+ .paiva-fixed-bikes .paiva-bike-photo .photo-data span{font-size:10px!important}
+ .paiva-fixed-bikes .paiva-bike-photo .photo-data strong{font-size:14px!important}
+}
+@media print{
+ .paiva-fixed-bikes #roadPhotoPanel.hidden,.paiva-fixed-bikes #mtbPhotoPanel.hidden,.paiva-fixed-bikes #ttPhotoPanel.hidden{display:none!important}
+ .paiva-fixed-bikes .paiva-bike-photo .photo-data{break-inside:avoid!important}
+}
+</style><style>
+/* V5.16: regras definitivas e isoladas, sem conflito com versões antigas */
+#roadPhotoPanel,#mtbPhotoPanel,#ttPhotoPanel{display:none!important;visibility:hidden!important}
+#roadPhotoPanel.paiva-current,#mtbPhotoPanel.paiva-current,#ttPhotoPanel.paiva-current{display:grid!important;visibility:visible!important}
+.paiva-fixed-bikes{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important}
+.paiva-fixed-bikes #roadPhotoPanel,.paiva-fixed-bikes #mtbPhotoPanel,.paiva-fixed-bikes #ttPhotoPanel{
+ position:relative!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-flow:row!important;
+ aspect-ratio:auto!important;width:100%!important;max-width:100%!important;min-width:0!important;
+ padding:10px!important;gap:10px!important;overflow:hidden!important;align-items:stretch!important;
+}
+.paiva-fixed-bikes #roadPhotoPanel>img,.paiva-fixed-bikes #mtbPhotoPanel>img,.paiva-fixed-bikes #ttPhotoPanel>img{
+ display:block!important;position:static!important;inset:auto!important;grid-column:1/-1!important;grid-row:auto!important;
+ width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;
+ max-height:275px!important;object-fit:contain!important;object-position:center!important;
+ border-radius:10px!important;background:#090d12!important;
+}
+.paiva-fixed-bikes .paiva-bike-photo::after{display:none!important;content:none!important}
+.paiva-fixed-bikes #roadPhotoPanel .photo-data,.paiva-fixed-bikes #mtbPhotoPanel .photo-data,.paiva-fixed-bikes #ttPhotoPanel .photo-data{
+ display:flex!important;position:static!important;inset:auto!important;transform:none!important;
+ grid-column:auto!important;grid-row:auto!important;float:none!important;
+ width:100%!important;max-width:100%!important;min-width:0!important;min-height:72px!important;height:auto!important;
+ margin:0!important;padding:10px 7px!important;overflow:visible!important;
+ border:1px solid #4b5059!important;border-radius:12px!important;background:linear-gradient(145deg,#202329,#0e1116)!important;
+ flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:5px!important;
+}
+.paiva-fixed-bikes .photo-data::before,.paiva-fixed-bikes .photo-data::after{display:none!important;content:none!important}
+.paiva-fixed-bikes #roadPhotoPanel .photo-data span,.paiva-fixed-bikes #mtbPhotoPanel .photo-data span,.paiva-fixed-bikes #ttPhotoPanel .photo-data span{
+ display:block!important;font-size:11px!important;line-height:1.3!important;font-weight:700!important;letter-spacing:.025em!important;
+ white-space:normal!important;overflow-wrap:break-word!important;text-align:center!important;color:#cdd3dc!important;
+}
+.paiva-fixed-bikes #roadPhotoPanel .photo-data strong,.paiva-fixed-bikes #mtbPhotoPanel .photo-data strong,.paiva-fixed-bikes #ttPhotoPanel .photo-data strong{
+ display:block!important;font-size:clamp(14px,2vw,19px)!important;line-height:1.25!important;font-weight:800!important;
+ white-space:normal!important;overflow-wrap:break-word!important;text-align:center!important;color:#f7d658!important;
+}
+
+@media(max-width:420px){.paiva-fixed-bikes #roadPhotoPanel,.paiva-fixed-bikes #mtbPhotoPanel,.paiva-fixed-bikes #ttPhotoPanel{gap:7px!important;padding:6px!important}.paiva-fixed-bikes .photo-data{min-height:75px!important}.paiva-fixed-bikes #roadPhotoPanel .photo-data span,.paiva-fixed-bikes #mtbPhotoPanel .photo-data span,.paiva-fixed-bikes #ttPhotoPanel .photo-data span{font-size:10px!important}}
+@media print{#roadPhotoPanel:not(.paiva-current),#mtbPhotoPanel:not(.paiva-current),#ttPhotoPanel:not(.paiva-current){display:none!important}}
+</style><style>
+/* V5.17 — identificação profissional no cabeçalho */
+.fitter-header-info{display:flex;flex-wrap:wrap;column-gap:22px;row-gap:4px;margin-top:10px;font-size:13px;color:#dbe1e6;letter-spacing:.01em}
+.fitter-header-info strong{color:#fff;font-weight:650}
+.fitter-header-info a{color:#e5bf58;text-decoration:none;overflow-wrap:anywhere}
+@media(max-width:680px){.fitter-header-info{display:grid;gap:4px;font-size:12px}}
+@media print{.fitter-header-info{display:none}}
+</style><style>
+/* PAIVA V5.19 — página visual do relatório */
+#clientReport .report-bike-visual{margin-top:18px;padding:16px;border:1px solid #e1e5ea;border-radius:12px;background:#fff;break-inside:avoid;page-break-inside:avoid}
+#clientReport .report-bike-visual h2{font-size:15px;margin:0 0 4px;color:#20252b}
+#clientReport .report-bike-sub{font-size:11px;color:#626c78;margin:0 0 12px}
+#clientReport .report-bike-frame{background:#0b0e12;border-radius:10px;overflow:hidden;text-align:center}
+#clientReport #reportBikePhoto{display:block;width:100%;height:auto;max-height:250px;object-fit:contain;margin:auto}
+#clientReport .report-bike-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+#clientReport .report-bike-metric{min-width:0;background:#171c22;color:#fff;padding:10px 7px;border-radius:8px;text-align:center}
+#clientReport .report-bike-metric span{display:block;font-size:9px;letter-spacing:.04em;color:#c2c9d0;text-transform:uppercase;line-height:1.3}
+#clientReport .report-bike-metric strong{display:block;font-size:13px;line-height:1.4;margin-top:3px;color:#fff;overflow-wrap:anywhere}
+#clientReport .report-bike-caption{font-size:10px;color:#66717c;margin:10px 0 0}
+@media print{
+#clientReport .report-bike-visual{display:block!important;margin-top:16px!important;padding:12px!important;break-inside:avoid!important;page-break-inside:avoid!important}
+#clientReport #reportBikePhoto{max-height:190px!important}
+#clientReport .report-bike-metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+#clientReport .report-bike-metric{background:#171c22!important;color:white!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;padding:7px!important}
+#clientReport .report-bike-metric strong{color:#fff!important;font-size:11px!important}
+#clientReport .report-bike-metric span{color:#d7dce2!important;font-size:8px!important}
+#clientReport .report-bike-frame{background:#0b0e12!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+}
+</style><style>
+#fields .field select{width:100%;min-width:0;padding:12px 13px;border:1px solid #35404a;border-radius:10px;background:#171d24;color:#f3f5f7;font:inherit;box-sizing:border-box}
+#fields .field input{max-width:100%;box-sizing:border-box}
+@media print{#clientReport #reportBody dl>div{break-inside:avoid;page-break-inside:avoid}}
+</style><style>.paiva-method-note{margin:14px 0;padding:12px 14px;border:1px solid #53606a;border-radius:10px;font-size:12px;line-height:1.55;color:#c9d2d9;background:#1b2329}@media print{.paiva-method-note{color:#333;background:#fff;border-color:#bbb}}</style><meta name="theme-color" content="#0b0e12"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PAIVA Motion"><meta name="application-name" content="PAIVA Motion"><meta name="description" content="PAIVA Motion Studio — Análise 2D e Bike Fit"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png"><link rel="stylesheet" href="./pin-lock.css"><link rel="stylesheet" href="./final-measures.css"><link rel="stylesheet" href="./photo-calibrator.css"><link rel="stylesheet" href="./athlete-2d.css"><link rel="stylesheet" href="./anthro-live.css"><script src="./pin-lock.js" defer></script><script src="./sternum-calc.js" defer></script><script src="./arm-calc.js" defer></script><script src="./pdf-lib.min.js" defer></script><script src="./pdf-export.js" defer></script><script src="./body-proportions.js" defer></script><script src="./bike-photo-upload.js" defer></script><script src="./help-text.js" defer></script><script src="./frame-compare.js" defer></script><script src="./bike-project.js" defer></script><script src="./anthro-live.js" defer></script><script src="./final-measures.js" defer></script><script src="./photo-calibrator.js" defer></script><script src="./athlete-2d.js" defer></script><style id="paiva-v565-premium-header">
+/* PAIVA V5.65 — cabeçalho premium isolado, sem alterar módulos */
+@media screen {
+header.paiva-premium-header{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:15px 0 23px;border-bottom:1px solid #454a50}
+.paiva-premium-header .paiva-brand-lockup{display:flex;align-items:center;gap:17px;min-width:0;flex:1}
+.paiva-premium-header #logo{width:70px;height:70px;flex:none;object-fit:contain;border:0;border-radius:0;box-shadow:none;background:transparent}
+.paiva-premium-header .paiva-brand-divider{width:1px;height:58px;flex:none;background:linear-gradient(180deg,transparent,#9fa6ad 18%,#656d75 80%,transparent)}
+.paiva-premium-header .paiva-brand-copy{min-width:0}
+.paiva-premium-header .paiva-brand-name{font-size:clamp(23px,2.5vw,34px);font-weight:800;line-height:1;letter-spacing:.16em;color:#d8dde2;text-shadow:0 1px 0 #fff2}
+.paiva-premium-header .paiva-brand-studio{font-size:11px;letter-spacing:.31em;color:#aeb6be;margin-top:7px;font-weight:650}
+.paiva-premium-header .paiva-brand-manifesto{font-size:11px;line-height:1.5;color:#939da7;margin:9px 0 0;max-width:480px}
+.paiva-premium-header .fitter-header-info{font-size:10px;margin-top:7px;gap:5px 17px;color:#929ca5}
+.paiva-premium-header .fitter-header-info strong{color:#bfc7ce}
+.paiva-premium-header .fitter-header-info a{color:#aeb8c2}
+.paiva-premium-header .actions{flex:none;margin-left:auto}
+@media(max-width:900px){header.paiva-premium-header{flex-wrap:wrap}.paiva-premium-header .actions{width:100%;margin-left:0;justify-content:flex-start}}
+@media(max-width:520px){.paiva-premium-header #logo{width:54px;height:54px}.paiva-premium-header .paiva-brand-lockup{gap:11px}.paiva-premium-header .paiva-brand-divider{height:52px}.paiva-premium-header .paiva-brand-name{font-size:24px}.paiva-premium-header .paiva-brand-studio{font-size:9px;letter-spacing:.19em}.paiva-premium-header .paiva-brand-manifesto{font-size:10px}.paiva-premium-header .actions{display:flex;flex-wrap:wrap}}
+}
+</style></head><body><main><header class="paiva-premium-header"><div class="paiva-brand-lockup"><img alt="Logotipo PAIVA" id="logo" src="./paiva-logo-round.png"/><span class="paiva-brand-divider" aria-hidden="true"></span><div class="paiva-brand-copy"><div class="paiva-brand-name">PAIVA</div><div class="paiva-brand-studio">MOTION STUDIO</div><p class="paiva-brand-manifesto">Da anatomia à geometria. Inteligência aplicada ao movimento.</p><div class="fitter-header-info"><div>Fitter: <strong>Eduardo Paiva</strong></div><div>E-mail: <a href="mailto:retul@yahoo.com">retul@yahoo.com</a></div></div></div></div><div class="actions"><label class="file">Trocar logo<input accept="image/*" id="logoFile" type="file"/></label><button class="btn" id="resetLogo">Restaurar logo</button><button class="btn primary" id="print">Salvar PDF</button></div></header><section class="card client-first" style=""><h2>01 / Cadastro do cliente</h2><div class="report-heading"><div><span class="eyebrow">IDENTIFICAÇÃO</span><p class="report-lead">Ficha individual para apresentação ao cliente</p></div><span class="report-chip">PRÉ-FIT · NÃO SUBSTITUI BIKE FIT DINÂMICO</span></div><div style="display:flex;gap:12px;flex-wrap:wrap"><label style="flex:2;min-width:190px">Nome do cliente <input id="clientName" placeholder="Nome completo" style="width:100%;padding:10px;background:#0f141a;color:white;border:1px solid #58636d;border-radius:8px"/></label><label style="flex:1;min-width:150px">Data da avaliação <input id="evalDate" style="width:100%;padding:10px;background:#0f141a;color:white;border:1px solid #58636d;border-radius:8px" type="date"/></label><label style="flex:2;min-width:220px">E-mail do cliente <input autocomplete="email" id="clientEmail" placeholder="cliente@exemplo.com" style="width:100%;padding:10px;background:#0f141a;color:white;border:1px solid #58636d;border-radius:8px" type="email"/></label><label style="flex:1;min-width:180px">Telefone / WhatsApp <input autocomplete="tel" id="clientPhone" inputmode="tel" type="tel" placeholder="(00) 00000-0000" style="width:100%;padding:10px;background:#0f141a;color:white;border:1px solid #58636d;border-radius:8px"/></label><label style="flex:1;min-width:165px">Data de nascimento <input id="clientBirth" style="width:100%;padding:10px;background:#0f141a;color:white;border:1px solid #58636d;border-radius:8px" type="date"/></label><label style="flex:1;min-width:150px">Sexo <select id="clientSex" style="width:100%;padding:10px;background:#0f141a;color:white;border:1px solid #58636d;border-radius:8px"><option value="">Selecione</option><option value="feminino">Feminino</option><option value="masculino">Masculino</option></select></label></div><p class="note">Ao tocar em Imprimir / salvar PDF, o relatório inclui os dados antropométricos, a imagem da bicicleta e os resultados estimados.</p></section>
+<div class="layout"><section class="card"><h2>02 / Medidas antropométricas</h2><div aria-label="Modalidade" class="mode" role="group"><button class="" data-mode="mtb">MTB</button><button class="active" data-mode="road">ROAD</button><button class="" data-mode="tt">TT</button></div><div id="fields"></div><div aria-live="polite" class="guide" id="guide"></div><p class="note">Preencha em centímetros. Toque no <b>?</b> para ver onde medir.</p><div class="body-report"><div class="body-silhouette"><img alt="Esqueleto anatômico ilustrativo em vista frontal e lateral" src="./antropometria-paiva.png"/></div><div class="body-stats"><div><span>ESTATURA</span><strong id="repHeight">—</strong></div><div><span>TRONCO</span><strong id="repTorso">—</strong></div><div><span>ENTREPERNA</span><strong id="repInseam">—</strong></div><div><span>BRAÇO</span><strong id="repArm">—</strong></div><div><span>OMBROS</span><strong id="repShoulder">—</strong></div><div><span>PÉ DIREITO</span><strong id="repFoot">—</strong><small id="repFootRightNote"></small></div><div><span>PÉ ESQUERDO</span><strong id="repFootLeft">—</strong></div></div></div></section><section class="card bike-meta"><h2>03 / Dados da bicicleta</h2><p class="note">Identifique a bicicleta avaliada. Esses dados são registrados na ficha; não alteram automaticamente as estimativas.</p><div class="bike-meta-grid"><label>Marca da bicicleta<input autocomplete="off" id="bikeBrand" placeholder="Ex.: Specialized"/></label><label>Modelo<input autocomplete="off" id="bikeModel" placeholder="Ex.: Tarmac SL8"/></label><label>Tamanho do quadro<input autocomplete="off" id="bikeSize" placeholder="Ex.: 54 / M"/></label><label>Comprimento do pedivela (mm)<input id="crankLength" max="190" min="140" placeholder="Ex.: 170" step="2.5" type="number"/></label></div></section>
+<section class="card"><h2 id="bikeHeading">04 / Referências na bicicleta</h2><div class="diagram-eyebrow"><span class="live-dot"></span> VISUALIZAÇÃO FIXA · VALORES DINÂMICOS <span class="diagram-sub">REFERÊNCIAS INICIAIS</span></div><div class="bike-wrap paiva-fixed-bikes"><div class="paiva-bike-photo paiva-current" id="roadPhotoPanel">
+<img alt="Bicicleta PAIVA ROAD com marca somente no quadro" decoding="async" loading="eager" src="./bike-road-cutout.png"/>
+<div class="photo-data photo-reach"><span>REACH · REF. INICIAL</span><strong id="roadReachValue">—</strong></div>
+<div class="photo-data photo-stack"><span>STACK · REF. INICIAL</span><strong id="roadStackValue">—</strong></div>
+<div class="photo-data photo-saddle"><span>ALTURA DO SELIM</span><strong id="roadHeroSaddle">—</strong></div>
+</div><div class="paiva-bike-photo hidden" id="mtbPhotoPanel">
+<img alt="Bicicleta PAIVA MTB com marca somente no quadro" decoding="async" loading="eager" src="./bike-mtb-cutout.png"/>
+<div class="photo-data photo-reach"><span>REACH · REF. INICIAL</span><strong id="mtbReachValue">—</strong></div>
+<div class="photo-data photo-stack"><span>STACK · REF. INICIAL</span><strong id="mtbStackValue">—</strong></div>
+<div class="photo-data photo-saddle"><span>ALTURA DO SELIM</span><strong id="mtbHeroSaddle">—</strong></div>
+</div><div class="paiva-bike-photo hidden" id="ttPhotoPanel">
+<img alt="Bicicleta PAIVA TT com marca somente no quadro" decoding="async" loading="eager" src="./bike-tt-cutout.png"/>
+<div class="photo-data photo-reach"><span>PAD REACH · MEDIDO</span><strong id="ttReachValue">—</strong></div>
+<div class="photo-data photo-stack"><span>PAD STACK · MEDIDO</span><strong id="ttStackValue">—</strong></div>
+<div class="photo-data photo-saddle"><span>ALTURA DO SELIM</span><strong id="ttSaddleValue">—</strong></div>
+</div><div class="hidden" id="roadHero"></div><div class="hidden" id="mtbHero"></div><div class="hidden" id="ttPhotoHero"></div><div aria-hidden="true" class="hidden legacy-svg"><svg aria-label="Bicicleta fixa com setas e valores atualizados" id="bike" role="img" viewbox="0 0 720 490"><defs><lineargradient id="frame" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f2f4f6"></stop><stop offset=".48" stop-color="#8d9ba8"></stop><stop offset="1" stop-color="#f4f5f6"></stop></lineargradient><marker id="arrow" markerheight="7" markerwidth="7" orient="auto-start-reverse" refx="3.5" refy="3.5"><path d="M0 0L7 3.5L0 7" fill="none" stroke="#f2c44e" stroke-width="1.3"></path></marker></defs><defs><lineargradient id="silver" x1="0" x2=".8" y1="0" y2="1"><stop stop-color="#ffffff"></stop><stop offset=".32" stop-color="#b4c2cd"></stop><stop offset=".72" stop-color="#6e7c88"></stop><stop offset="1" stop-color="#f0f3f5"></stop></lineargradient><lineargradient id="tire" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#78848e"></stop><stop offset=".5" stop-color="#1b242c"></stop><stop offset="1" stop-color="#78848e"></stop></lineargradient></defs>
+<g id="roadbar">
+<g opacity=".97"><circle cx="166" cy="327" fill="none" r="126" stroke="#151c22" stroke-width="17"></circle><circle cx="555" cy="327" fill="none" r="126" stroke="#151c22" stroke-width="17"></circle><circle cx="166" cy="327" fill="none" r="126" stroke="#bd9862" stroke-width="3"></circle><circle cx="555" cy="327" fill="none" r="126" stroke="#bd9862" stroke-width="3"></circle><circle cx="166" cy="327" fill="none" r="115" stroke="#66737e" stroke-width="4"></circle><circle cx="555" cy="327" fill="none" r="115" stroke="#66737e" stroke-width="4"></circle><g id="spokes" opacity=".55" stroke="#778590" stroke-width=".9"></g><circle cx="166" cy="327" fill="#75818c" r="18" stroke="#e2e7eb" stroke-width="2"></circle><circle cx="555" cy="327" fill="#75818c" r="17" stroke="#e2e7eb" stroke-width="2"></circle></g>
+<g fill="none" stroke="url(#silver)" stroke-linecap="round" stroke-linejoin="round"><path d="M166 327L276 170L369 323L166 327" stroke-width="10"></path><path d="M276 170L476 165L369 323" stroke-width="16"></path><path d="M476 165L555 327" stroke-width="12"></path><path d="M276 170L255 117" stroke-width="13"></path><path d="M476 165L485 123" stroke-width="12"></path></g>
+<g fill="none" stroke="#384651" stroke-width="2.5"><path d="M166 327L276 170L369 323L166 327 M276 170L476 165L369 323"></path></g>
+<path d="M211 111Q243 102 293 107Q310 108 312 116L298 121L227 121Q215 119 211 111Z" fill="#10161c" stroke="#9faeb9" stroke-width="2"></path><path d="M486 123L521 118" stroke="#c9d4db" stroke-linecap="round" stroke-width="9"></path><path d="M520 118L548 118Q566 116 567 135L563 160Q557 174 540 163L535 151" fill="none" stroke="#161c23" stroke-linecap="round" stroke-width="12"></path><path d="M521 118L548 118Q566 116 567 135L563 160" fill="none" stroke="#a7b5bf" stroke-linecap="round" stroke-width="5"></path><path d="M550 115L558 98L566 99L569 127" fill="#252d35" stroke="#a7b5bf" stroke-width="2"></path>
+<circle cx="369" cy="323" fill="#141b22" r="30" stroke="#b8c5ce" stroke-width="4"></circle><circle cx="369" cy="323" fill="none" r="18" stroke="#aab6bf" stroke-width="2"></circle><path d="M369 323L397 344" stroke="#d8e0e5" stroke-linecap="round" stroke-width="9"></path><path d="M397 344L413 344" stroke="#141b22" stroke-width="8"></path><path d="M166 327L369 323" stroke="#85919b" stroke-dasharray="3 3" stroke-width="2"></path><g transform="translate(178 325)"><circle fill="none" r="26" stroke="#a6b4bf" stroke-width="4"></circle><circle fill="none" r="19" stroke="#697682" stroke-width="3"></circle><circle fill="none" r="12" stroke="#697682" stroke-width="3"></circle></g>
+<path d="M314 278L367 315L397 344" fill="none" opacity=".6" stroke="#c2cbd1" stroke-width="2"></path></g>
+<g class="hidden" id="mtbbar"><g opacity=".98"><circle cx="166" cy="327" fill="none" r="130" stroke="#141a1f" stroke-width="23"></circle><circle cx="555" cy="327" fill="none" r="130" stroke="#141a1f" stroke-width="23"></circle><circle cx="166" cy="327" fill="none" r="130" stroke="#89949c" stroke-dasharray="6 7" stroke-width="2"></circle><circle cx="555" cy="327" fill="none" r="130" stroke="#89949c" stroke-dasharray="6 7" stroke-width="2"></circle><circle cx="166" cy="327" fill="none" r="116" stroke="#8a99a4" stroke-width="5"></circle><circle cx="555" cy="327" fill="none" r="116" stroke="#8a99a4" stroke-width="5"></circle><g id="mtbSpokes" opacity=".65" stroke="#7b8994" stroke-width="1"></g><circle cx="166" cy="327" fill="#8b98a2" r="16"></circle><circle cx="555" cy="327" fill="#8b98a2" r="16"></circle></g>
+<g fill="none" stroke="url(#silver)" stroke-linecap="round" stroke-linejoin="round"><path d="M166 327L276 171L369 323L166 327" stroke-width="13"></path><path d="M276 171L476 165L369 323" stroke-width="19"></path><path d="M476 165L555 327" stroke-width="16"></path><path d="M276 171L254 118" stroke-width="15"></path><path d="M476 165L485 120" stroke-width="12"></path></g><path d="M209 112Q255 100 312 111L304 120H221Z" fill="#171d23" stroke="#a9b7c1" stroke-width="2"></path><path d="M485 119L522 113L577 106" fill="none" stroke="#c6d1d8" stroke-linecap="round" stroke-width="9"></path><path d="M572 104L580 110" stroke="#151c22" stroke-linecap="round" stroke-width="16"></path><path d="M515 115L510 126" stroke="#202a32" stroke-width="5"></path><path d="M481 172L555 327" stroke="#273039" stroke-width="5"></path><path d="M486 186L491 207" stroke="#d5e0e7" stroke-width="6"></path><circle cx="369" cy="323" fill="#141b22" r="29" stroke="#c3cbd1" stroke-width="5"></circle><path d="M369 323L398 345" stroke="#e0e7eb" stroke-linecap="round" stroke-width="10"></path><path d="M166 327L369 323" stroke="#96a4ae" stroke-dasharray="4 4" stroke-width="3"></path><g transform="translate(177 326)"><circle fill="none" r="29" stroke="#c4cdd3" stroke-width="4"></circle><circle fill="none" r="20" stroke="#87939c" stroke-width="3"></circle></g></g>
+<g class="hidden" id="ttbar"><g opacity=".96"><circle cx="166" cy="327" fill="none" r="126" stroke="#1b222a" stroke-width="19"></circle><circle cx="555" cy="327" fill="none" r="126" stroke="#1b222a" stroke-width="19"></circle><circle cx="166" cy="327" fill="none" r="117" stroke="#83909a" stroke-width="5"></circle><circle cx="555" cy="327" fill="none" r="117" stroke="#83909a" stroke-width="5"></circle><g id="ttSpokes" opacity=".5" stroke="#81909b"></g><circle cx="166" cy="327" fill="#9aabb5" r="15"></circle><circle cx="555" cy="327" fill="#9aabb5" r="15"></circle></g><g fill="none" stroke="url(#silver)" stroke-linecap="round" stroke-linejoin="round" stroke-width="15"><path d="M166 327L273 172L369 323L166 327M273 172L476 165L369 323M476 165L555 327"></path><path d="M273 172L255 117M476 165L485 121"></path></g><path d="M211 109Q258 100 310 109L303 120H218Z" fill="#202830"></path><path d="M484 122L518 120L557 96L585 96M525 121L557 110L591 110" fill="none" stroke="#d5e0e7" stroke-linecap="round" stroke-width="8"></path><circle cx="369" cy="323" fill="#1c252c" r="28" stroke="#aebac3" stroke-width="4"></circle><path d="M369 323L393 340" stroke="#d4dce2" stroke-width="8"></path></g>
+<g fill="none" marker-end="url(#arrow)" marker-start="url(#arrow)" stroke="#e8bd50" stroke-width="2"><path d="M369 322V165"></path><path d="M369 322H476"></path><path d="M269 78H545" id="handArrow"></path></g><g class="dash" stroke="#f2c44e" stroke-width="1.5"><path d="M369 323V155"></path><path d="M476 165V323"></path><path d="M269 110V70"></path><path d="M545 117V70"></path></g><g><text class="bike-title" x="383" y="240">STACK</text><text class="bike-label" id="bikeStack" x="383" y="262">—</text><text class="bike-title" x="387" y="349">REACH</text><text class="bike-label" id="bikeReach" x="387" y="371">—</text><text class="bike-title" id="handCaption" text-anchor="middle" x="405" y="44">Bico do selim → manoplas</text><text class="bike-label" id="bikeHands" text-anchor="middle" x="405" y="64">—</text></g><text fill="#b7c1ca" font-size="13" text-anchor="middle" x="360" y="477">Desenho fixo · medidas não representadas em escala</text></svg></div></div><p class="note below">Fotografias fixas por modalidade. As medidas aparecem em cartões discretos e são atualizadas automaticamente.</p><div class="disclaimer">Pré-fit = estimativa inicial. Stack e reach do quadro são referências de triagem por faixa de estatura, não um cálculo individual validado. A distância real até as mãos exige medidas da bicicleta e da posição do selim.</div><div class="diagram-legend"><span><i class="legend-dot"></i> Medidas de geometria do quadro</span><span>Imagem ilustrativa · não está em escala</span></div></section>
+<section class="card results-card"><h2>05 / Resultados do pré-fit</h2><div class="paiva-method-note" role="note"><strong>Leitura técnica:</strong> resultados calculados são referências exploratórias de pré-fit, não medidas finais ou prescrições. A escolha de quadro, mesa, pedivela, selim e tacos depende da geometria real, dos pontos de medição e da avaliação dinâmica. A soma top tube + mesa não é o alcance efetivo das mãos.</div>
+<link rel="stylesheet" href="./paiva-spline.css">
+<script src="./paiva-spline.js" defer></script>
+<link rel="stylesheet" href="./paiva-aero-compare.css">
+<script src="./paiva-aero-compare.js" defer></script>
+<link rel="stylesheet" href="./paiva-aero-pose.css">
+<script src="./paiva-aero-pose.js" defer></script>
+<script src="./paiva-2d-history.js" defer></script>
+<script src="./paiva-tt-simple.js" defer></script>
+<div id="paiva-tt-coordinates" hidden>
+<div id="paiva-tt-pad-details">
+  <h3>TT / TRIATLO · protocolo dos apoios</h3>
+  <p>Na TT, a referência prioritária são as coordenadas dos apoios de antebraço, não o stack/reach do quadro Road. Meça a partir do centro do movimento central: <b>pad stack</b> até o topo do apoio; <b>pad reach</b> até a borda posterior do apoio. Utilize sempre a mesma convenção ao comparar bicicletas.</p>
+  <div class="paiva-tt-pad-grid">
+    <label for="paiva-tt-pad-stack">Pad stack medido (mm)<input id="paiva-tt-pad-stack" type="number" inputmode="decimal" min="200" max="1200" step="0.1" placeholder="Ex.: 650"></label>
+    <label for="paiva-tt-pad-reach">Pad reach medido (mm)<input id="paiva-tt-pad-reach" type="number" inputmode="decimal" min="100" max="900" step="0.1" placeholder="Ex.: 475"></label>
+  </div>
+  <button id="paiva-tt-use-comparator" class="btn" type="button" disabled>Aplicar como referência no comparador TT</button>
+  <p id="paiva-tt-pad-status" aria-live="polite">Preencha as duas medidas obtidas no bike fit para comparar geometrias TT.</p>
+</div>
+</div>
+<div id="results"></div><p aria-live="polite" class="note" id="validation"></p></section></div>
+<div class="bottom"><section class="card"><h2>Medidas reais da bicicleta (opcional)</h2><p class="note">Use apenas se quiser calcular a distância horizontal existente entre o bico do selim e o apoio das mãos. Não é uma recomendação de ajuste.</p><div id="bikeFields"></div></section><section class="card"><h2>Entenda as medidas</h2><p class="note"><b>Stack:</b> altura vertical do centro do movimento central até o topo de referência do tubo de direção.</p><p class="note"><b>Reach:</b> distância horizontal entre esses mesmos pontos.</p><p class="note"><b>Selim → mãos:</b> distância horizontal do bico do selim até o centro da manopla (MTB) ou o ponto de apoio no STI (Road). Na TT, a referência dos apoios de antebraço é diferente do reach do quadro.</p><button class="btn" id="reset">Limpar medidas da bicicleta</button></section></div><footer>PAIVA · Pré-Fit Antropométrico · Uso educativo e profissional como triagem inicial</footer><section class="client-report" id="clientReport"><div class="report-top"><div><img alt="Logotipo PAIVA" id="reportLogo" src="./paiva-logo-round.png"/><div class="report-brand">PAIVA <small>BIKE FIT STUDIO</small></div><h1>Relatório de pré-fit antropométrico</h1><p>Estimativa inicial · sujeita à avaliação biomecânica dinâmica</p></div><div class="report-date" id="printDate"></div></div><div class="report-grid"><section><h2>01 · Identificação do cliente</h2><div id="reportClient"></div></section><section><h2>02 · Dados da bicicleta</h2><div id="reportBike"></div></section><section><h2>03 · Medidas antropométricas</h2><div id="reportBody"></div></section><section><h2>04 · Resultados do pré-fit</h2><div id="reportResults"></div></section></div><section class="report-bike-visual" id="reportBikeVisual"><h2>05 · Visualização da bicicleta</h2><p class="report-bike-sub">Bicicleta ilustrativa PAIVA · Medidas preliminares do cliente</p><div class="report-bike-frame"><img alt="Bicicleta da modalidade selecionada" id="reportBikePhoto"/></div><div class="report-bike-metrics" id="reportBikeMetrics"></div><p class="report-bike-caption">Imagem ilustrativa da modalidade. Os valores são estimativas iniciais e não substituem a avaliação dinâmica.</p></section><div class="report-warning"><strong>Interpretação profissional</strong><p>Os valores são referências iniciais de pré-fit. Top tube efetivo é calculado por um modelo geométrico simplificado com ângulo de tubo do selim assumido; seat tube é uma faixa exploratória e depende do projeto do quadro. Stack e reach são faixas exploratórias por estatura, não medidas ideais calculadas individualmente. As duas regras de altura do selim utilizam pontos de medição diferentes. Confirme a posição com avaliação dinâmica e geometria real da bicicleta.</p></div><div class="report-sign">PAIVA · MOTION STUDIO <span>Relatório de triagem antropométrica</span></div></section></main><script>
+(()=>{'use strict';const $=id=>document.getElementById(id);const originalLogo=$('logo').src;try{const l=localStorage.getItem('paiva-logo-prefit');if(l)$('logo').src=l}catch(e){}$('logoFile').onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>2500000){alert('Escolha uma imagem de até 2,5 MB.');return}const r=new FileReader();r.onload=()=>{const val=String(r.result);$('logo').src=val;try{localStorage.setItem('paiva-logo-prefit',val)}catch(e){}};r.readAsDataURL(f)};$('resetLogo').onclick=()=>{$('logo').src=originalLogo;try{localStorage.removeItem('paiva-logo-prefit')}catch(e){}};
+const fields=[['height','Estatura',180,'Do chão até o topo da cabeça.'],['inseam','Entrepernas (cavalo)',82,'Da virilha até o chão, descalço.'],['torso','Tronco',62,'Da referência superior do ombro à referência da pelve, seguindo o protocolo de medição escolhido.'],['arm','Braço',65,'Do acrômio (ombro) até o punho.'],['shoulder','Largura dos ombros',44,'Distância entre os acrômios, de um ombro ao outro.'],['metatarsal','Calcanhar → linha do metatarso',18,'Distância do ponto posterior do calcanhar até a linha transversal das cabeças dos metatarsos (referência para posicionar o taco). Meça no pé e registre o protocolo usado.'],['foot','Comprimento do pé',27.5,'Do calcanhar até a ponta do dedo mais longo.']];const bikes=[];let mode='road';function makeField([id,label,val,desc],unit){const row=document.createElement('div');row.className='field';row.innerHTML='<label for="'+id+'">'+label+'</label><input id="'+id+'" type="number" inputmode="decimal" step="0.1" value="" placeholder="'+val+'" aria-label="'+label+' em '+unit+'"><button type="button" class="help" aria-label="Como medir '+label+'" data-help="'+id+'">?</button>';return row}fields.forEach(f=>$('fields').append(makeField(f,'cm')));
+// Dados complementares de avaliação: registro, sem inferência automática de diagnóstico.
+const extraAnthro=[
+ ['bodyWeight','Peso corporal','kg','0.1','Ex.: 72,5','Peso aferido na avaliação.'],
+ ['ischialWidth','Distância entre tuberosidades isquiáticas','mm','1','Ex.: 120','Distância entre centros das impressões das tuberosidades isquiáticas, conforme o protocolo de medição. Não equivale diretamente à largura do selim.'],
+ ['wellsReach','Flexibilidade — Banco de Wells (sentar e alcançar)','cm','0.1','Ex.: 24,5','Registrar a distância alcançada no teste de sentar e alcançar, em centímetros. Informar o protocolo utilizado; a posição do zero varia conforme o banco. Não interpretar como diagnóstico isolado.']
+];
+extraAnthro.forEach(([id,label,unit,step,placeholder,help])=>{
+ const box=document.createElement('div');box.className='field';
+ const lab=document.createElement('label');lab.htmlFor=id;lab.textContent=label+' ('+unit+')';
+ const inp=document.createElement('input');inp.id=id;inp.type='number';inp.inputMode='decimal';inp.step=step;inp.min='0';inp.placeholder=placeholder;inp.setAttribute('aria-label',label+' em '+unit);
+ inp.title=help;box.append(lab,inp);$('fields').append(box);
+});
+// Campo antigo preservado apenas para não perder os números já salvos em
+// fichas anteriores. O cadastro atual usa uma categoria observacional.
+const oldArch=document.createElement('input');oldArch.id='plantarArchHeight';oldArch.type='hidden';
+$('fields').append(oldArch);
+const archBox=document.createElement('div');archBox.className='field';
+archBox.style.gridTemplateColumns='minmax(0,1fr) minmax(145px,1fr)';
+const archLabel=document.createElement('label');archLabel.htmlFor='plantarArchProfile';
+archLabel.textContent='Arco plantar · classificação observada';
+const archSelect=document.createElement('select');archSelect.id='plantarArchProfile';
+archSelect.setAttribute('aria-label','Arco plantar observado');
+[['','Não avaliado'],['baixo','Baixo (arco rebaixado)'],
+ ['medio','Médio (intermediário)'],['alto','Alto (arco elevado)']].forEach(([value,label])=>{
+  const opt=document.createElement('option');opt.value=value;opt.textContent=label;archSelect.append(opt);
+});
+archSelect.style.cssText='min-width:0;width:100%;background:#0b1016;color:#f4f6f8;border:1px solid #60717d;border-radius:10px;padding:10px;font-size:13px';
+archBox.append(archLabel,archSelect);$('fields').append(archBox);
+const archNote=document.createElement('p');
+archNote.className='wells-protocol-note';
+archNote.style.cssText='grid-column:1/-1;font-size:11px;line-height:1.55;color:#b1bcc6;padding:9px 12px;border:1px solid #36404a;border-radius:10px;margin:4px 0';
+archNote.textContent='Arco plantar: classifique baixo, médio ou alto na avaliação com apoio dos pés. É uma descrição observada, não diagnóstico de pé plano/cavo. Arco e pronação/supinação são características diferentes.';
+$('fields').append(archNote);
+const postureBox=document.createElement('div');postureBox.className='field';
+const postureLabel=document.createElement('label');postureLabel.htmlFor='footPosture';postureLabel.textContent='Postura observada do pé (separada do arco)';
+const postureSelect=document.createElement('select');postureSelect.id='footPosture';postureSelect.setAttribute('aria-label','Classificação observada do pé');
+[['','Não avaliado'],['neutro','Neutro'],['pronado','Pronado'],['supinado','Supinado']].forEach(([value,label])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=label;postureSelect.append(opt)});
+postureBox.append(postureLabel,postureSelect);$('fields').append(postureBox);$('fields').insertAdjacentHTML('beforeend','<div class="wells-protocol-note" style="grid-column:1/-1;font-size:12px;line-height:1.5;color:#b1bcc6;padding:9px 12px;border:1px solid #36404a;border-radius:10px;margin-top:4px">Banco de Wells: registre o alcance em cm conforme a escala do equipamento. O ponto zero e a interpretação variam entre protocolos; use sempre o mesmo procedimento nas reavaliações.</div>');
+bikes.forEach(f=>$('bikeFields').append(makeField(f,f[0]==='realReach'?'mm':'cm')));const get=id=>{const el=$(id);if(!el)return null;const n=Number(el.value);return el.value.trim()!==''&&Number.isFinite(n)?n:null};const fmt=(n,d=1)=>n.toFixed(d).replace('.',',');const guideText=Object.fromEntries([...fields,...bikes].map(x=>[x[0],[x[1],x[3]]]));function guideSvg(key){const isBody=['height','inseam','torso','arm','shoulder','foot','metatarsal'].includes(key);let line={height:'<path d="M38 18V175"/>',inseam:'<path d="M146 91V175"/>',torso:'<path d="M146 50V91"/>',arm:'<path d="M110 57L141 109"/>',shoulder:'<path d="M79 52H141"/>',foot:'<path d="M88 176H116"/>',metatarsal:'<path d="M88 176H107"/>'}[key]||'<path d="M92 75H223"/>';let human='<circle cx="110" cy="30" r="13" fill="#aebcc6"/><path d="M110 45V91M110 53L78 110M110 53L142 110M110 91L90 172M110 91L130 172" stroke="#aebcc6" stroke-width="10" fill="none" stroke-linecap="round"/>';let bike='<circle cx="53" cy="140" r="38" stroke="#aebcc6" fill="none"/><circle cx="240" cy="140" r="38" stroke="#aebcc6" fill="none"/><path d="M53 140L106 70L154 140L53 140M106 70L193 70L154 140M193 70L240 140M89 68H125M193 70L201 54L225 54" fill="none" stroke="#d1dbe3" stroke-width="4"/>';return '<svg viewBox="0 0 300 190" role="img" aria-label="Esquema de '+key+'"><defs><marker id="garr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse"><path d="M0 0L6 3L0 6" fill="none" stroke="#e5bf58"/></marker></defs>'+(isBody?human:bike)+'<g stroke="#e5bf58" stroke-width="3" fill="none" marker-start="url(#garr)" marker-end="url(#garr)">'+line+'</g></svg>'}document.addEventListener('click',e=>{const btn=e.target.closest('[data-help]');if(!btn)return;const id=btn.dataset.help,g=$('guide'),[title,desc]=guideText[id];if(g.classList.contains('show')&&g.dataset.open===id){g.classList.remove('show');return}g.dataset.open=id;g.innerHTML='<h3>'+title+'</h3>'+guideSvg(id)+'<p>'+desc+'</p>';g.classList.add('show')});
+// Pontos inferiores do guia empírico anterior: NÃO são tamanho ideal nem limite mínimo clínico.
+// Os valores superiores antigos foram retirados por não terem validação científica.
+function frameReference(h,m){
+  if(h===null||h<140||h>215)return null;
+  // TT NÃO usa uma transposição da referência Road por estatura.
+  // A posição aerodinâmica depende das coordenadas dos pads medidas no fit.
+  // O stack/reach do quadro específico deve vir da geometria do fabricante.
+  if(m==='tt')return null;
+  const limits=m==='mtb'?[155,165,175,185,195]:[158,168,178,186,195];
+  const guides=m==='mtb'
+    ?[[355,540],[365,560],[380,575],[405,595],[425,615],[445,635]]
+    :[[360,500],[370,520],[375,535],[385,555],[395,570],[410,590]];
+  // Mantém o guia empírico, mas evita saltos de 10–20 mm quando a estatura
+  // muda apenas um décimo de centímetro em torno da fronteira da tabela.
+  // A suavização NÃO transforma esta referência em uma fórmula validada.
+  for(let j=0;j<limits.length;j++){
+    const center=limits[j];
+    if(h<center-1)break;
+    if(h<=center+1){
+      const t=Math.max(0,Math.min(1,(h-(center-1))/2));
+      const smooth=t*t*(3-2*t);
+      return {
+        reach:Math.round(guides[j][0]+(guides[j+1][0]-guides[j][0])*smooth),
+        stack:Math.round(guides[j][1]+(guides[j+1][1]-guides[j][1])*smooth)
+      };
+    }
+  }
+  const k=limits.findIndex(x=>h<x),j=k<0?5:k;
+  return {reach:guides[j][0],stack:guides[j][1]};
+}
+function row(label,value,desc){return '<div class="result"><div class="head"><span>'+label+'</span><strong>'+value+'</strong></div>'+(desc?'<small>'+desc+'</small>':'')+'</div>'}function update(){['road','mtb','tt'].forEach(m=>{const panel=$(m+'PhotoPanel');if(panel){const active=m===mode;panel.classList.toggle('hidden',!active);panel.classList.toggle('paiva-current',active);panel.setAttribute('aria-hidden',String(!active))}});const h=get('height'),i=get('inseam'),sh=get('shoulder');const valid=h!==null&&h>=140&&h<=215&&i!==null&&i>=55&&i<=110&&i<h;const p=frameReference(h,mode);const crankSuggested='Avaliar individualmente';const saddle=valid?fmt(i*.883)+' cm':'—',saddle109=valid?fmt(i*1.09)+' cm':'—';const stack=p?p.stack+' mm':'—',reach=p?p.reach+' mm':'—';const handsMm=get(mode==='mtb'?'finalNoseGrip':mode==='road'?'finalNoseSTI':'finalNoseTT');const hands=handsMm!==null&&handsMm>0?fmt(handsMm/10)+' cm (medida final)':'—';const handsLabel=mode==='mtb'?'Bico do selim → manoplas':mode==='road'?'Bico do selim → STI':'Bico do selim → apoio TT';for(const [key,id] of [['height','repHeight'],['torso','repTorso'],['inseam','repInseam'],['arm','repArm'],['shoulder','repShoulder'],['foot','repFoot']]){const v=get(key);$(id).textContent=v!==null&&v>0?fmt(v,Number.isInteger(v)?0:1)+' cm':'—';} $('ttPhotoHero').classList.toggle('hidden',mode!=='tt');$('ttReachValue').textContent=reach;$('ttStackValue').textContent=stack;$('ttSaddleValue').textContent=saddle;$('roadHeroSaddle').textContent=saddle;$('mtbHeroSaddle').textContent=saddle;$('bikeStack').textContent=stack;$('bikeReach').textContent=reach;$('bikeHands').textContent=hands;$('handCaption').textContent=handsLabel;$('bikeHeading').textContent='2. Referências na bicicleta · '+({mtb:'MTB',road:'ROAD',tt:'TT'}[mode]);$('roadbar').classList.toggle('hidden',mode!=='road');$('mtbbar').classList.toggle('hidden',mode!=='mtb');$('ttbar').classList.toggle('hidden',mode!=='tt');$('roadHero').classList.toggle('hidden',mode!=='road');$('mtbHero').classList.toggle('hidden',mode!=='mtb');$('bike').classList.toggle('hidden',mode!=='tt');$('roadReachValue').textContent=reach;$('roadStackValue').textContent=stack;$('mtbReachValue').textContent=reach;$('mtbStackValue').textContent=stack;$('repFootLeft').textContent=$('repFoot').textContent;let output='';if(mode==='tt'){output+=row('Altura do selim · LeMond',saddle,'Estimativa: cavalo × 0,883. Centro do movimento central ao topo do selim.');output+=row('Stack · referência inferior (TT)',stack,'Ponto de partida empírico; não é pad stack nem prescrição individual.');output+=row('Reach · referência inferior (TT)',reach,'Ponto de partida empírico; não é pad reach nem prescrição individual.');output+=row('Altura do selim · 109%',saddle109,'Referência histórica aproximada: medir do eixo do pedal ao topo do selim, com pedivela alinhado à linha do tubo do selim; não equivale à medida a partir do movimento central.');output+=row('Stack · referência inferior',stack,'Ponto de partida empírico por estatura, não valor ideal ou limite clínico.');output+=row('Reach · referência inferior',reach,'Ponto de partida empírico por estatura, não valor ideal ou limite clínico.');output+=row(handsLabel,hands,'Calculado apenas com as três medidas reais informadas abaixo.');if(sh!==null&&sh>=25&&sh<=65){output+=row('Largura do guidão · referência',mode==='road'?fmt(sh-2,0)+'–'+fmt(sh,0)+' cm':Math.round((sh+30)*10)+'–'+Math.round((sh+34)*10)+' mm','Referência prática exploratória, não largura ideal comprovada.')}else output+=row('Largura do guidão','—','Informe a largura dos ombros.');output+=row('Pedivela','Avaliar','Não há fórmula validada para definir comprimento exato a partir do pé ou cavalo.')} if(mode!=='tt'){output+='<div class="result"><div class="head"><span>Pedivela · escolha técnica</span><strong>'+crankSuggested+'</strong></div><small>Não há fórmula universal de comprimento de pedivela baseada somente na entreperna. Compare medidas disponíveis, flexão de quadril e joelho, cadência e conforto durante o ajuste dinâmico.</small></div>';}else{output+='<div class="result"><div class="head"><span>Pedivela TT · escolha técnica</span><strong>'+crankSuggested+'</strong></div><small>Referência exploratória, não prescrição. Conferir ângulo fechado de quadril e posição aerodinâmica.</small></div>';}$('results').innerHTML=output;$('validation').textContent=valid?'Stack e reach são pontos inferiores do guia empírico anterior, sem faixa máxima e sem prescrição de quadro. Confirme na avaliação dinâmica.':'Informe a estatura para o ponto de partida empírico e a entrepernas para as estimativas de selim. A escolha do quadro exige avaliação individual.';$('bikeFields').closest('.card').classList.toggle('hidden',mode==='tt');$('handArrow').classList.toggle('hidden',mode==='tt');$('bikeHands').classList.toggle('hidden',mode==='tt');$('handCaption').classList.toggle('hidden',mode==='tt');if(typeof fillClientReport==='function')fillClientReport()}
+for(let k=0;k<16;k++){const a=k*Math.PI/8;for(const x of [166,555]){const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x);l.setAttribute('y1',327);l.setAttribute('x2',x+114*Math.cos(a));l.setAttribute('y2',327+114*Math.sin(a));$('spokes').append(l);for(const id of ['mtbSpokes','ttSpokes']){$(id).append(l.cloneNode(true))}}}document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));update()});document.querySelectorAll('input[type=number]').forEach(x=>x.addEventListener('input',update));$('reset').onclick=()=>{bikes.forEach(f=>$(f[0]).value='');update()};$('print').onclick=()=>window.print();if(!$('evalDate').value)$('evalDate').value=[new Date().getFullYear(),String(new Date().getMonth()+1).padStart(2,'0'),String(new Date().getDate()).padStart(2,'0')].join('-');update()})();
+
+function fillClientReport(){
+const val=id=>{const el=document.getElementById(id);return el?String(el.value||'').trim()||'Não informado':'Não informado'};
+const safe=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pairs=arr=>'<dl>'+arr.map(([a,b])=>'<div><dt>'+safe(a)+'</dt><dd>'+safe(b)+'</dd></div>').join('')+'</dl>';
+const sel=document.querySelector('#clientSex')||document.querySelector('#clientGender');
+const sex=sel?(sel.selectedOptions?.[0]?.textContent||sel.value):'Não informado';
+const mode=document.querySelector('[data-mode].active')?.dataset.mode||'road';
+const v=id=>{const el=document.getElementById(id);return el&&el.value!==''?el.value.replace('.',',')+' cm':'Não informado'};
+const reportMeasure=(id,unit)=>{const el=document.getElementById(id);return el&&el.value.trim()!==''?el.value.trim().replace('.',',')+' '+unit:'Não informado'};
+document.getElementById('reportClient').innerHTML=pairs([['Nome',val('clientName')],['Nascimento',val('clientBirth')],['Sexo',sex],['E-mail',val('clientEmail')],['Telefone',val('clientPhone')],['Avaliação',val('evalDate')]]);
+document.getElementById('reportBike').innerHTML=pairs([['Modalidade',mode==='road'?'Road / Speed':mode==='mtb'?'MTB':'TT'],['Marca',val('bikeBrand')],['Modelo',val('bikeModel')],['Quadro',val('bikeSize')],['Pedivela instalado',val('crankLength')==='Não informado'?'Não informado':val('crankLength')+' mm']]);
+const archProfile=({baixo:'Baixo (rebaixado)',medio:'Médio (intermediário)',alto:'Alto (elevado)'})[document.getElementById('plantarArchProfile')?.value]||'Não avaliado';
+const oldArchValue=document.getElementById('plantarArchHeight')?.value?.trim();
+document.getElementById('reportBody').innerHTML=pairs([['Estatura',v('height')],['Esterno (altura ao solo)',v('sternumHeight')],['Entrepernas',v('inseam')],['Tronco líquido (esterno − entrepernas)',v('torso')],['Leitura superior do braço (acrômio)',v('armUpper')],['Leitura inferior do braço (palma)',v('armLower')],['Braço líquido (superior − inferior)',v('arm')],['Ombros',v('shoulder')],['Comprimento do pé (medida registrada)',v('foot')],['Calcanhar → linha do metatarso',v('metatarsal')],['Peso corporal',reportMeasure('bodyWeight','kg')],['Distância entre ísquios',reportMeasure('ischialWidth','mm')],['Arco plantar · perfil observado',archProfile],...(oldArchValue?[['Arco plantar · valor antigo informado',reportMeasure('plantarArchHeight','mm')]]:[]),['Banco de Wells — alcance',reportMeasure('wellsReach','cm')],['Postura do pé (observada)',({neutro:'Neutro',pronado:'Pronado',supinado:'Supinado'})[document.getElementById('footPosture')?.value]||'Não avaliado']]);
+document.getElementById('reportResults').innerHTML='<p style="font-size:11px;line-height:1.45"><strong>Referências preliminares:</strong> não substituem a avaliação dinâmica. Stack e reach ilustrativos são pontos exploratórios de triagem; as medidas finais registradas pelo avaliador aparecem separadamente.</p>'+document.getElementById('results').innerHTML;
+document.getElementById('printDate').textContent='Emissão: '+new Date().toLocaleDateString('pt-BR');
+}
+window.addEventListener('beforeprint',fillClientReport);
+document.getElementById('print').addEventListener('click',fillClientReport,{capture:true});
+document.addEventListener('input',()=>{try{fillClientReport()}catch(e){} });
+document.addEventListener('change',()=>{try{fillClientReport()}catch(e){} });
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(fillClientReport,0)));
+fillClientReport();
+</script><script>
+(function(){
+function syncReportLogo(){var a=document.getElementById('logo'),b=document.getElementById('reportLogo');if(a&&b&&a.src!==b.src)b.src=a.src;}
+window.addEventListener('beforeprint',syncReportLogo);
+var l=document.getElementById('logo');if(l){new MutationObserver(syncReportLogo).observe(l,{attributes:true,attributeFilter:['src']});}
+var upload=document.getElementById('logoFile');if(upload)upload.addEventListener('change',()=>setTimeout(syncReportLogo,120));
+var reset=document.getElementById('resetLogo');if(reset)reset.addEventListener('click',()=>setTimeout(syncReportLogo,0));
+syncReportLogo();
+})();</script><script>
+(function(){
+ function updateReportBikeVisual(){
+   const mode=document.querySelector('[data-mode].active')?.dataset.mode||'road';
+   const panel=document.getElementById((mode==='mtb'?'mtb':mode==='tt'?'tt':'road')+'PhotoPanel');
+   const output=document.getElementById('reportBikePhoto');
+   const metrics=document.getElementById('reportBikeMetrics');
+   if(!panel||!output||!metrics)return;
+   const photo=panel.querySelector('img');
+   if(photo)output.src=photo.currentSrc||photo.src;
+   const names={road:'Road / Speed',mtb:'Mountain Bike',tt:'Triatlo / TT'};
+   output.alt='Bicicleta PAIVA '+names[mode];
+   const cards=[...panel.querySelectorAll('.photo-data')];
+   metrics.replaceChildren();
+   for(const card of cards){
+      const label=card.querySelector('span')?.textContent?.trim();
+      const value=card.querySelector('strong')?.textContent?.trim();
+      if(!label||!value)continue;
+      const item=document.createElement('div');item.className='report-bike-metric';
+      const a=document.createElement('span');a.textContent=label;
+      const b=document.createElement('strong');b.textContent=value;
+      item.append(a,b);metrics.appendChild(item);
+   }
+ }
+ window.addEventListener('beforeprint',updateReportBikeVisual);
+ document.getElementById('print')?.addEventListener('click',updateReportBikeVisual,{capture:true});
+ document.addEventListener('input',updateReportBikeVisual);
+ document.addEventListener('change',updateReportBikeVisual);
+ document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(updateReportBikeVisual,0)));
+ updateReportBikeVisual();
+})();
+</script><link rel="stylesheet" href="./multicam.css"><link rel="stylesheet" href="./handlebar-guide.css"><link rel="stylesheet" href="./video-converter.css"><link rel="stylesheet" href="./paiva-v524.css"><script src="./paiva-records.js" defer></script><script src="./athlete-motion.js" defer></script><script src="./multicam.js" defer></script><script src="./handlebar-guide.js" defer></script><script src="./video-converter.js" defer></script><script src="./paiva-tt-reference.js" defer></script><script src="./paiva-v524-results.js" defer></script><script src="./paiva-tt-fit.js" defer></script><script src="./paiva-attendimentos.js" defer></script><script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js', {scope:'./'}).catch(err => console.warn('Instalação offline indisponível:', err)); }); }</script></body></html>
