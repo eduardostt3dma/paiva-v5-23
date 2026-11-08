@@ -477,6 +477,21 @@
     updateAll();refreshCameras(false);
     globalThis.PAIVA_MULTICAM={maxCameras:MAX_CAMERAS,maxRecordingMs:RECORD_LIMIT_MS};
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
-  else initialize();
+  // A bancada angular é montada por outro arquivo deferido. Em computadores
+  // mais lentos ela pode não existir no primeiro DOMContentLoaded.
+  // Repetir a inicialização não duplica a estação (guarda no início de initialize).
+  function bootMultiCamera(){
+    if(document.getElementById('paiva-multi-camera'))return;
+    try{initialize();}catch(err){console.error('PAIVA: erro ao iniciar câmeras',err);}
+    if(document.getElementById('paiva-multi-camera'))return;
+    let tries=0;
+    const retry=setInterval(()=>{
+      if(document.getElementById('paiva-multi-camera')||++tries>100){clearInterval(retry);return;}
+      try{initialize();}catch(err){console.error('PAIVA: falha na estação',err);clearInterval(retry);}
+      if(document.getElementById('paiva-multi-camera'))clearInterval(retry);
+    },200);
+  }
+  window.PAIVA_BOOT_CAMERAS=bootMultiCamera;
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootMultiCamera,{once:true});
+  else bootMultiCamera();
 })();

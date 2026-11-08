@@ -846,13 +846,30 @@ syncReportLogo();
 (function(){
   function goToCameras(){
     var attempts=0;
+    window.PAIVA_BOOT_CAMERAS?.();
     function findStation(){
       var station=document.getElementById('paiva-multi-camera');
       if(station){
+        document.getElementById('paiva-camera-loading-warning')?.remove();
         station.scrollIntoView({behavior:'auto',block:'start'});
         if(location.hash!=='#paiva-multi-camera')history.replaceState(null,'','#paiva-multi-camera');
       } else if(++attempts<30){setTimeout(findStation,150);}
-      else {alert('A estação de captação não carregou. Atualize a página com Ctrl + Shift + R.');}
+      else {
+        // Não deixar o usuário preso em alerta: mostrar diagnóstico e acesso alternativo.
+        var target=document.getElementById('paiva-athlete-2d');
+        var notice=document.getElementById('paiva-camera-loading-warning');
+        if(!notice){
+          notice=document.createElement('div');notice.id='paiva-camera-loading-warning';
+          notice.setAttribute('role','alert');
+          notice.style.cssText='margin:12px 0;padding:14px;border:1px solid #728293;border-radius:8px;background:#18212b;color:#f1f5f8;font:14px/1.5 Arial,sans-serif';
+          notice.innerHTML='<strong>Estação de câmeras indisponível.</strong> O programa não conseguiu montar os dois visores. <button type="button" id="paiva-retry-cameras" style="margin:5px;padding:7px 10px">Tentar carregar novamente</button> <a href="#paiva-athlete-2d" style="color:#b8dafa">Ir para Análise Angular 2D</a>';
+          (target||document.querySelector('main')||document.body).prepend(notice);
+          notice.querySelector('#paiva-retry-cameras').addEventListener('click',function(){
+            window.PAIVA_BOOT_CAMERAS?.();setTimeout(goToCameras,700);
+          });
+        }
+        notice.scrollIntoView({block:'center'});
+      }
     }
     findStation();
   }
