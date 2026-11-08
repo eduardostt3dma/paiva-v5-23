@@ -334,34 +334,24 @@
     function drawProportions(proportions) {
       const metrics = proportions?.metrics || [];
       if (!metrics.length) return;
-      ensureSpace(205); // titulo + primeiros indicadores
+      ensureSpace(162);
       drawSectionHeading('04  Proporções corporais');
-      const gap = 10, cols = Math.min(3, metrics.length), colW = (CONTENT_W - gap * (cols - 1)) / cols;
-      for (let offset = 0; offset < metrics.length; offset += cols) {
-        const row = metrics.slice(offset, offset + cols);
-        const h = 117;
-        ensureSpace(h + 13);
-        row.forEach((metric, j) => {
-          const x = left + j * (colW + gap);
-          page.drawRectangle({ x, y: y - h, width: colW, height: h, color: C.soft, borderColor: C.line, borderWidth: 0.65 });
-          wrapText(metric.label || 'Proporção', medium, 9.1, colW - 24).slice(0, 2).forEach((part, k) =>
-            text(part, x + 12, y - 21 - k * 11, 9.1, C.text, medium));
-          const percent = Number.isFinite(metric.percent) ? metric.percent : null;
-          const pct = percent === null ? '-' : percent.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
-          text(pct, x + 12, y - 64, 22, C.text, medium);
-          page.drawRectangle({ x: x + 12, y: y - 81, width: colW - 24, height: 3, color: C.line });
-          if (percent !== null) page.drawRectangle({ x: x + 12, y: y - 81, width: (colW - 24) * Math.max(0, Math.min(100, percent)) / 100, height: 3, color: C.steelDark });
-          const caption = Number.isFinite(metric.length)
-            ? metric.length.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' cm / estatura'
-            : 'Medida não informada';
-          wrapText(caption, regular, 7.8, colW - 24).slice(0, 2).forEach((part, k) =>
-            text(part, x + 12, y - 97 - k * 10, 7.8, C.secondary));
-        });
-        y -= h + 13;
-      }
-      for (const metric of metrics) {
-        if (metric.description) drawParagraph((metric.label ? metric.label + ': ' : '') + metric.description, 8.5);
-      }
+      const chartH = 105;
+      ensureSpace(chartH + 10);
+      page.drawRectangle({ x:left, y:y-chartH, width:CONTENT_W, height:chartH, color:C.soft, borderColor:C.line, borderWidth:0.65 });
+      text('PROPORÇÕES EM RELAÇÃO À ESTATURA',left+13,y-16,7.8,C.secondary,medium);
+      const barX=left+157, barW=CONTENT_W-235;
+      metrics.slice(0,3).forEach((metric,i)=>{
+        const rowY=y-37-i*24;
+        text(metric.label||'Medida',left+13,rowY,8.4,C.text,medium);
+        page.drawRectangle({x:barX,y:rowY+1,width:barW,height:6,color:C.line});
+        const percent=Number.isFinite(metric.percent)?Math.max(0,Math.min(100,metric.percent)):null;
+        if(percent!==null)page.drawRectangle({x:barX,y:rowY+1,width:barW*percent/100,height:6,color:C.steelDark});
+        const pct=percent===null?'—':metric.percent.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+        text(pct,barX+barW+12,rowY,8.8,C.text,medium);
+      });
+      y-=chartH+9;
+      drawParagraph('Escala visual de 0 a 100% da estatura. As medidas são independentes e não devem ser somadas.',7.8);
       drawParagraph(proportions.explanation, 9);
       drawParagraph(proportions.meaning, 9);
       if (proportions.conclusion) {
