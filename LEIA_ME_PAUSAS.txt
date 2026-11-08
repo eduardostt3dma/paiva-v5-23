@@ -1,0 +1,4 @@
+PAIVA V5.83 — Pausas de análise
+Atualize index.html, athlete-2d.js, athlete-2d.css, paiva-analysis-pauses.js e sw.js.
+Abra o vídeo gravado, pause no quadro, desenhe os ângulos e clique Marcar pausa. Exporte o vídeo WebM.
+Exportação ocorre em tempo real; mantenha a aba aberta e ativa. Sem áudio.

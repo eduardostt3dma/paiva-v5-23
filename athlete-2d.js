@@ -212,7 +212,7 @@
             <input type="file" id="paiva-2d-file" accept="image/*" aria-label="Escolher foto do atleta para análise 2D" />
           </label>
           <div class="paiva-2d-tools" role="group" aria-label="Ferramenta de desenho">
-            <button type="button" data-2d-tool="full8" aria-pressed="false">BONECO COMPLETO · 8 PONTOS</button>
+            <!-- Botão duplicado removido; rastreio sem IA e código de 8 pontos preservados. -->
             <small id="paiva-2d-full8-guide" class="paiva-2d-full8-guide" hidden></small>
             <div class="paiva-2d-full8-actions" id="paiva-2d-full8-actions" hidden>
               <button type="button" id="paiva-2d-full8-reflectors">◉ Encaixar refletores</button>
