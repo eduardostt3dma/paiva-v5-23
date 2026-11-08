@@ -507,3 +507,21 @@
 
 /* Prévia das pausas: sobrepõe o vídeo sem bloquear ferramentas ao sair. */
 .paiva-2d-canvas-wrap{position:relative}.paiva-pause-preview-overlay{position:absolute;inset:0;width:100%;height:100%;z-index:30;pointer-events:none;background:#0b1015}
+
+/* PAIVA V5.83 · Área de análise prioritária · layout compacto reversível */
+#paiva-athlete-2d .paiva-2d-marking-dock {display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:0 0 6px;padding:5px 6px;background:#17232b;border:1px solid #3c505e;border-radius:8px;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools {display:flex;flex:1 1 auto;flex-flow:row wrap;gap:4px;margin:0;min-width:0;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools > button {flex:0 1 auto;width:auto;min-width:0;padding:7px 9px;border-radius:6px;font:700 10px system-ui,sans-serif;white-space:nowrap;}
+#paiva-athlete-2d .paiva-2d-compact-settings {flex:0 0 auto;min-width:0;max-width:100%;font:650 10px system-ui,sans-serif;color:#d9e5eb;}
+#paiva-athlete-2d .paiva-2d-compact-settings > summary {cursor:pointer;list-style:none;padding:7px 9px;border:1px solid #526775;border-radius:6px;white-space:nowrap;}
+#paiva-athlete-2d .paiva-2d-compact-settings > summary::-webkit-details-marker {display:none;}
+#paiva-athlete-2d .paiva-2d-compact-settings[open] {flex:1 0 100%;padding-top:5px;}
+#paiva-athlete-2d .paiva-2d-compact-settings .paiva-2d-zoom {width:100%;box-sizing:border-box;}
+#paiva-athlete-2d .paiva-2d-compact-settings .paiva-2d-width {width:100%;}
+#paiva-athlete-2d #paiva-2d-compact-toggle {padding:7px 9px;border-radius:7px;border:1px solid #6a8793;background:#24333d;color:#e4eef2;font:700 10px system-ui,sans-serif;cursor:pointer;}
+#paiva-athlete-2d .paiva-2d-workspace.paiva-2d-focus-mode {grid-template-columns:minmax(0,1fr)!important;}
+#paiva-athlete-2d .paiva-2d-workspace.paiva-2d-focus-mode > .paiva-2d-sidebar {display:none!important;}
+#paiva-athlete-2d .paiva-2d-workspace.paiva-2d-focus-mode .paiva-2d-canvas-wrap {max-height:86vh;}
+#paiva-athlete-2d .paiva-2d-manual-bar small {display:none;}
+#paiva-athlete-2d .paiva-2d-manual-bar {padding:4px 2px;}
+@media(max-width:720px){#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools > button {font-size:9px;padding:6px 5px;}#paiva-athlete-2d .paiva-2d-compact-settings {flex:1 1 100%;}}

@@ -356,6 +356,38 @@
     const markingDock=section.querySelector('.paiva-2d-marking-dock');
     for(const selector of ['.paiva-2d-tools','.paiva-2d-point-role','.paiva-2d-zoom','.paiva-2d-width'])
       markingDock.append(section.querySelector(selector));
+    // PAIVA 2D compacto: reutiliza os controles originais e seus eventos.
+    // A barra principal fica acima da imagem; os ajustes ficam recolhidos.
+    const compactView=section.querySelector('.paiva-2d-view');
+    const compactCanvas=section.querySelector('.paiva-2d-canvas-wrap');
+    const compactDock=section.querySelector('.paiva-2d-marking-dock');
+    if(compactView && compactCanvas && compactDock && !section.querySelector('.paiva-2d-compact-settings')) {
+      compactView.insertBefore(compactDock,compactCanvas);
+      const compactSettings=document.createElement('details');
+      compactSettings.className='paiva-2d-compact-settings';
+      compactSettings.innerHTML='<summary title="Abrir zoom, espessura e ajustes">⚙ Ajustes de desenho</summary>';
+      for(const selector of ['.paiva-2d-point-role','.paiva-2d-zoom','.paiva-2d-width']) {
+        const control=compactDock.querySelector(selector);
+        if(control) compactSettings.appendChild(control);
+      }
+      compactDock.appendChild(compactSettings);
+      const titleActions=section.querySelector('.paiva-2d-title-actions');
+      const sidebar=section.querySelector('.paiva-2d-sidebar');
+      const workspace=section.querySelector('.paiva-2d-workspace');
+      if(titleActions && sidebar && workspace) {
+        const toggle=document.createElement('button');
+        toggle.type='button';toggle.id='paiva-2d-compact-toggle';
+        toggle.textContent='⛶ Ampliar análise';
+        toggle.title='Ocultar ou mostrar o painel lateral, sem alterar a imagem';
+        toggle.setAttribute('aria-expanded','true');
+        toggle.addEventListener('click',()=>{
+          const expanded=workspace.classList.toggle('paiva-2d-focus-mode');
+          toggle.textContent=expanded?'▣ Mostrar painel':'⛶ Ampliar análise';
+          toggle.setAttribute('aria-expanded',String(!expanded));
+        });
+        titleActions.prepend(toggle);
+      }
+    }
     const quickDock=section.querySelector('.paiva-2d-quick-actions');
     playbackAdvanced.append(document.getElementById('paiva-2d-capture'));
     playbackAdvanced.append(document.getElementById('paiva-2d-back-video'));
