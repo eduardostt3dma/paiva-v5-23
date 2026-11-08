@@ -1,0 +1,8 @@
+PAIVA Motion Studio V5.83 - Ajustes da capa e sequencia
+
+1. Medidas reais da bicicleta agora fica depois de Entenda as medidas, no final da pagina.
+2. Contato removido apenas do cabecalho do aplicativo. PDF nao alterado.
+3. Credito DESENVOLVIDO POR EDUARDO PAIVA em maiusculas e menor.
+4. Inclui ultima atualizacao do 2D com zoom visivel.
+
+INSTALACAO: Extraia o ZIP e envie os arquivos do aplicativo para a raiz do repositorio GitHub Pages. Guarde seu backup anterior.
