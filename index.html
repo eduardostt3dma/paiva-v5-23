@@ -638,7 +638,7 @@ header.paiva-signature-v581 .paiva-credit-elegant strong{font-size:1em!important
   <a href="#fields" style="left:8.2%;width:8.5%" aria-label="Antropometria">Antropometria</a>
   <a href="#results" style="left:17.4%;width:5.0%" aria-label="Pré-fit">Pré-fit</a>
   <a href="#bikeBrand" style="left:23.1%;width:5.6%" aria-label="Quadros">Quadros</a>
-  <a href="#paiva-multi-camera" style="left:29.4%;width:3.6%" aria-label="2D · Câmeras e análise">2D</a>
+  <a href="#paiva-multi-camera" data-paiva-go-cameras="1" style="left:29.4%;width:3.6%" aria-label="2D · Câmeras e análise">2D</a>
   <a href="#paiva-multi-camera" style="left:33.7%;width:8.2%" aria-label="Motion Studio">Motion Studio</a>
   <a href="#reportResults" style="left:42.6%;width:4.3%" aria-label="PDF">PDF</a>
  </nav>
@@ -841,4 +841,29 @@ syncReportLogo();
  if(reset)reset.addEventListener('click',()=>setTimeout(sync,0));
  const share=document.getElementById('sharePDF');if(share)share.addEventListener('click',()=>{const pdfShare=document.getElementById('paiva-share-pdf');if(pdfShare){pdfShare.click();}else{document.getElementById('print')?.click();}});
 })();
-</script><link rel="stylesheet" href="./paiva-fluxo-simples.css"><script src="./paiva-fluxo-simples.js" defer></script></body></html>
+</script><link rel="stylesheet" href="./paiva-fluxo-simples.css"><script src="./paiva-fluxo-simples.js" defer></script><script>
+/* PAIVA: acesso estável à estação criada após o carregamento. */
+(function(){
+  function goToCameras(){
+    var attempts=0;
+    function findStation(){
+      var station=document.getElementById('paiva-multi-camera');
+      if(station){
+        station.scrollIntoView({behavior:'auto',block:'start'});
+        if(location.hash!=='#paiva-multi-camera')history.replaceState(null,'','#paiva-multi-camera');
+      } else if(++attempts<30){setTimeout(findStation,150);}
+      else {alert('A estação de captação não carregou. Atualize a página com Ctrl + Shift + R.');}
+    }
+    findStation();
+  }
+  document.addEventListener('click',function(event){
+    var link=event.target.closest && event.target.closest('a[data-paiva-go-cameras]');
+    if(!link)return;
+    event.preventDefault();goToCameras();
+  });
+  if(location.hash==='#paiva-multi-camera'){
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',goToCameras,{once:true});
+    else goToCameras();
+  }
+})();
+</script></body></html>

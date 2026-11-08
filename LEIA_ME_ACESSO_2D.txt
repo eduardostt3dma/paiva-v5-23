@@ -1,0 +1,8 @@
+PAIVA V5.83 - Acesso 2D corrigido
+
+Clique em 2D no menu superior: a pagina aguarda a Estacao de Captacao carregar e desloca a tela ate ela.
+Depois: 2 cameras lado a lado > Detectar webcams > Selecionar A e B > Ligar cameras > Gravar > Analisar no 2D.
+
+Aero Metrics nao foi alterado nesta correcao, para evitar interferir em funcionalidades existentes.
+
+Este ZIP e uma copia completa da versao Fluxo Simples com a correcao de navegacao.
