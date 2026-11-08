@@ -65,5 +65,16 @@ function init(){
   finally{video.pause();try{video.currentTime=oldTime;}catch(_){}if(!wasPaused)video.play().catch(()=>{});stream?.getTracks().forEach(t=>t.stop());button.disabled=false;}
  };
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+// O workspace 2D é inserido dinamicamente após o carregamento da página.
+// Aguarda sua montagem antes de adicionar os controles, sem criar duplicatas.
+function mountWhenReady(){
+ init();
+ if(document.getElementById('paiva-pause-controls'))return;
+ const observer=new MutationObserver(()=>{
+  init();
+  if(document.getElementById('paiva-pause-controls'))observer.disconnect();
+ });
+ observer.observe(document.documentElement,{childList:true,subtree:true});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountWhenReady);else mountWhenReady();
 })();
