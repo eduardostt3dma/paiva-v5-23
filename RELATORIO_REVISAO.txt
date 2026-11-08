@@ -1,0 +1,32 @@
+PAIVA MOTION STUDIO V5.83 - RELATORIO DE REVISAO
+
+BASE: ZIP do repositorio enviado pelo usuario, mais a ultima correcao
+confirmada como funcionando (quatro arquivos).
+
+VERIFICACOES
+- 38 arquivos JavaScript: sintaxe validada (Node.js).
+- 5 scripts JavaScript internos do HTML: sintaxe validada.
+- HTML: nenhum identificador estatico duplicado.
+- HTML: nenhuma referencia local ausente nos scripts, estilos ou imagens.
+- Service worker: todos os 55 recursos distintos de pre-cache presentes.
+- Menu: sete links principais presentes; destinos 2D e Motion Studio
+  encontrados depois do carregamento dos scripts em teste isolado.
+- Teste de interface desktop e mobile (em memoria): sem erros JS detectados,
+  sem segunda barra de navegacao, sem credito adicional.
+- Imagem original do cabecalho: identica, byte por byte, ao ZIP do usuario.
+- Comparacao com ZIP original: somente index.html, sw.js,
+  paiva-attendimentos.js e paiva-wind-simple.js diferem.
+
+LIMITACOES
+- A revisao nao substitui testes de uso real com camera/webcam, video MOV/MP4,
+  relatorio PDF e salvamento/restauracao de atendimentos.
+- Nao foi possivel consultar o estado atual do GitHub nesta revisao;
+  os pacotes refletem a ultima versao funcional consolidada na conversa.
+- Rotulos historicos de submodulos (como V5.62 na tela do PIN)
+  foram mantidos para nao introduzir mudancas fora do escopo.
+
+SHA256 DOS QUATRO ARQUIVOS
+index.html: 0a888e4955aa837d522adbe7c154db57b5762ed131ef8d19b9f4e758f2896602
+sw.js: 2119c1dca02e6a3d893049b1a8c6564a4b4df35e9617ab3be7b66ec5c529ccdf
+paiva-attendimentos.js: e42fba58f26e0f27bf359b68f917359a6a1d52858756939f93d45b5130c21ec0
+paiva-wind-simple.js: dd853d0f8e977d74e3855946e2bb835b55e4b65bb0a0a794e398f96913d8b829
