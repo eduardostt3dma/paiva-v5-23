@@ -366,11 +366,21 @@
       const compactSettings=document.createElement('details');
       compactSettings.className='paiva-2d-compact-settings';
       compactSettings.innerHTML='<summary title="Abrir zoom, espessura e ajustes">⚙ Ajustes de desenho</summary>';
-      for(const selector of ['.paiva-2d-point-role','.paiva-2d-zoom','.paiva-2d-width']) {
+      for(const selector of ['.paiva-2d-point-role','.paiva-2d-width']) {
         const control=compactDock.querySelector(selector);
         if(control) compactSettings.appendChild(control);
       }
       compactDock.appendChild(compactSettings);
+      // O zoom da IMAGEM é controle principal: sempre visível na barra,
+      // separado da espessura das linhas/pontos. Preserva IDs e eventos.
+      const imageZoom=compactDock.querySelector('.paiva-2d-zoom');
+      if(imageZoom){
+        imageZoom.classList.add('paiva-2d-image-zoom-quick');
+        imageZoom.title='Zoom da imagem do atleta (100% a 400%)';
+        compactDock.insertBefore(imageZoom,compactSettings);
+        const zoomLabel=imageZoom.querySelector('label');
+        if(zoomLabel)zoomLabel.setAttribute('title','Ampliação da imagem, não espessura das linhas');
+      }
       // Ícones no lugar dos rótulos: mantém os botões e listeners originais.
       const toolIcons={angle:['∠','Ângulo · arrastar'],line:['╱','Linha · arrastar'],point:['⊙','Ponto livre · rastrear'],edit:['✥','Ajustar pontos']};
       compactDock.querySelectorAll('.paiva-2d-tools > button').forEach(btn=>{
@@ -385,7 +395,7 @@
       });
       const settingsSummary=compactSettings.querySelector('summary');
       settingsSummary.textContent='⚙';
-      settingsSummary.title='Ajustes de desenho: zoom, espessura e ponto';
+      settingsSummary.title='Ajustes de desenho: espessura de linhas e tamanho dos pontos';
       settingsSummary.setAttribute('aria-label',settingsSummary.title);
       settingsSummary.setAttribute('role','button');
       settingsSummary.setAttribute('tabindex','0');
