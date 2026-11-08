@@ -1,0 +1,9 @@
+PAIVA Motion Studio V5.83 - Correcao dos botoes duplicados
+
+Se o ZIP nao abrir, baixe os quatro arquivos individualmente.
+No GitHub, abra eduardostt3dma/paiva-v5-23 e use Add file > Upload files.
+Envie os quatro arquivos mantendo exatamente seus nomes.
+Confirme em Commit changes e aguarde a publicacao.
+
+Antes de publicar, preserve uma copia do projeto atual.
+Esta atualizacao nao modifica a imagem original do cabecalho.

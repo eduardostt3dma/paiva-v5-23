@@ -164,7 +164,7 @@
     }
     // Assinatura discreta junto à identidade do aplicativo. Posicionamento
     // no fluxo do cabeçalho evita sobrepor o botão flutuante "Bloquear".
-    if(!document.getElementById('paiva-author-watermark')){
+    if(!document.querySelector('header.paiva-signature-v581') && !document.getElementById('paiva-author-watermark')){
       const watermark=document.createElement('div');
       watermark.id='paiva-author-watermark';
       watermark.setAttribute('aria-label','Idealizado e desenvolvido por Eduardo Paiva');
@@ -173,7 +173,7 @@
       (brand||document.querySelector('main > header')||document.body).append(watermark);
     }
     const footer=document.querySelector('main > footer');
-    if(footer&&!footer.querySelector('.paiva-author-credit')){
+    if(!document.querySelector('header.paiva-signature-v581') && footer&&!footer.querySelector('.paiva-author-credit')){
       const credit=document.createElement('p');
       credit.className='paiva-author-credit';
       credit.textContent='Idealizado e desenvolvido por Eduardo Paiva · PAIVA Motion Studio';

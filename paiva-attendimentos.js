@@ -88,7 +88,9 @@
       button.addEventListener('click',()=>document.querySelector(target)?.scrollIntoView({behavior:'smooth',block:'start'}));
       nav.append(button);
     }
-    document.querySelector('main > header')?.after(nav);
+    // A arte V5.83 ja tem botoes; nao inserir outra fileira de navegacao.
+    if(!document.querySelector('header.paiva-signature-v581'))
+      document.querySelector('main > header')?.after(nav);
     const panel=document.createElement('section');
     panel.className='card paiva-sessions';panel.id='paiva-attendimentos';
     panel.innerHTML=`
