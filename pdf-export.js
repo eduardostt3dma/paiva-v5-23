@@ -128,238 +128,391 @@
     };
   }
 
+  // Avaliação antropométrica V5.83: identidade somente pela logo,
+  // acabamento digital grafite e paginação automática. Sem alterar fórmulas ou medições.
   async function buildPdf(data) {
     const lib = globalThis.PDFLib;
     if (!lib?.PDFDocument) throw new Error('O gerador de PDF não carregou. Atualize o aplicativo online e tente novamente.');
 
     const pdf = await lib.PDFDocument.create();
-    pdf.setTitle('PAIVA - Relatório de Bike Fit - ' + cleanText(data.clientName));
-    pdf.setAuthor('PAIVA Bike Fit Studio');
-    pdf.setSubject('Relatório profissional de pré-fit antropométrico e registro final opcional');
+    pdf.setTitle('Avaliação de Antropometria - ' + cleanText(data.clientName));
+    pdf.setAuthor('Eduardo Paiva');
+    pdf.setSubject('Avaliação antropométrica individual, pré-fit e registro de medidas da bicicleta');
+    pdf.setCreator('Motion Studio - relatório digital');
 
-    const font = await pdf.embedFont(lib.StandardFonts.Helvetica);
-    const bold = await pdf.embedFont(lib.StandardFonts.HelveticaBold);
+    const regular = await pdf.embedFont(lib.StandardFonts.Helvetica);
+    const medium = await pdf.embedFont(lib.StandardFonts.HelveticaBold);
+    const rgb = (r, g, b) => lib.rgb(r / 255, g / 255, b / 255);
+    // Paleta de leitura digital: fundo preto-grafite em TODAS as páginas,
+    // cartões cinza-escuro e tipografia clara de alto contraste.
     const C = {
-      navy: lib.rgb(0.070, 0.115, 0.155),
-      navy2: lib.rgb(0.105, 0.165, 0.205),
-      steel: lib.rgb(0.67, 0.79, 0.85),
-      blue: lib.rgb(0.28, 0.60, 0.74),
-      white: lib.rgb(1, 1, 1),
-      text: lib.rgb(0.12, 0.20, 0.26),
-      secondary: lib.rgb(0.34, 0.42, 0.49),
-      line: lib.rgb(0.84, 0.88, 0.91),
-      tint: lib.rgb(0.955, 0.968, 0.980),
-      lightBlue: lib.rgb(0.910, 0.951, 0.967),
+      graphite: rgb(12, 15, 19),
+      charcoal: rgb(20, 25, 31),
+      text: rgb(240, 244, 247),
+      secondary: rgb(175, 188, 199),
+      muted: rgb(144, 158, 171),
+      steel: rgb(190, 202, 211),
+      steelDark: rgb(183, 194, 203),
+      line: rgb(54, 65, 75),
+      soft: rgb(24, 30, 36),
+      softBlue: rgb(28, 36, 44),
+      white: rgb(255, 255, 255),
+      accent: rgb(194, 166, 112),
+      photoMat: rgb(111, 118, 125),
     };
-    const logo = await embedImage(pdf, data.logo);
-    const bike = await embedImage(pdf, data.bikeImage);
-    let page;
-    let y;
 
+    // Remove apenas margens transparentes da imagem escolhida pelo avaliador.
+    // A logo do cabeçalho do software permanece intacta.
+    async function prepareLogo(source) {
+      if (!source || !/^data:image\/(?:png|jpeg|jpg)/i.test(source) || typeof Image === 'undefined') return source;
+      try {
+        return await new Promise(resolve => {
+          const image = new Image();
+          image.onerror = () => resolve(source);
+          image.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = image.naturalWidth;
+              canvas.height = image.naturalHeight;
+              const ctx = canvas.getContext('2d', { willReadFrequently: true });
+              if (!ctx) return resolve(source);
+              ctx.drawImage(image, 0, 0);
+              const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+              let minX = canvas.width, minY = canvas.height, maxX = -1, maxY = -1;
+              for (let py = 0; py < canvas.height; py += 1) {
+                for (let px = 0; px < canvas.width; px += 1) {
+                  if (pixels[(py * canvas.width + px) * 4 + 3] < 24) continue;
+                  if (px < minX) minX = px;
+                  if (px > maxX) maxX = px;
+                  if (py < minY) minY = py;
+                  if (py > maxY) maxY = py;
+                }
+              }
+              if (maxX < minX || maxY < minY) return resolve(source);
+              const pad = Math.max(4, Math.round(Math.max(maxX - minX, maxY - minY) * 0.025));
+              const sx = Math.max(0, minX - pad), sy = Math.max(0, minY - pad);
+              const sw = Math.min(canvas.width - sx, maxX - sx + 1 + pad);
+              const sh = Math.min(canvas.height - sy, maxY - sy + 1 + pad);
+              if (sw >= canvas.width * 0.96 && sh >= canvas.height * 0.96) return resolve(source);
+              const cropped = document.createElement('canvas');
+              cropped.width = sw; cropped.height = sh;
+              cropped.getContext('2d').drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+              resolve(cropped.toDataURL('image/png'));
+            } catch (_) { resolve(source); }
+          };
+          image.src = source;
+        });
+      } catch (_) { return source; }
+    }
+
+    const logo = await embedImage(pdf, await prepareLogo(data.logo));
+    const bike = await embedImage(pdf, data.bikeImage);
+    // A mesma arte do cabeçalho aprovado, preparada exclusivamente para o PDF,
+    // sem os botões, a versão ou os créditos de interface.
+    const reportCover = await embedImage(pdf, data.reportCover || './paiva-report-cover-v583.png');
+    const left = MARGIN, right = PAGE_W - MARGIN;
+    const bottomLimit = 79;
+    let page, y;
+    let pageCount = 0;
+
+    function text(str, x, baseline, size = 9, color = C.text, font = regular) {
+      const content = cleanText(str);
+      if (!content) return;
+      page.drawText(content, { x, y: baseline, size, color, font });
+    }
+    // Espaçamento tipográfico refinado para o título discreto da capa.
+    // Não altera fontes, dados, fórmulas ou a arte original do cabeçalho.
+    function trackedText(str, x, baseline, size, color, font, tracking) {
+      const content = cleanText(str);
+      for (const char of content) {
+        page.drawText(char, { x, y: baseline, size, color, font });
+        x += font.widthOfTextAtSize(char, size) + tracking;
+      }
+    }
+    function line(x1, yy, x2, color = C.line, thickness = 0.65) {
+      page.drawLine({ start: { x: x1, y: yy }, end: { x: x2, y: yy }, thickness, color });
+    }
+    function fittedImage(img, x, baseY, maxW, maxH) {
+      if (!img) return;
+      const scale = Math.min(maxW / img.width, maxH / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      page.drawImage(img, { x: x + (maxW - w) / 2, y: baseY + (maxH - h) / 2, width: w, height: h });
+    }
     function newPage() {
       page = pdf.addPage([PAGE_W, PAGE_H]);
-      page.drawRectangle({ x: 0, y: PAGE_H - 125, width: PAGE_W, height: 125, color: C.navy });
-      page.drawRectangle({ x: 0, y: PAGE_H - 125, width: 5, height: 125, color: C.blue });
-      page.drawRectangle({ x: 0, y: PAGE_H - 128, width: PAGE_W, height: 3, color: C.steel });
-      page.drawLine({ start: { x: 145, y: PAGE_H - 59 }, end: { x: PAGE_W - MARGIN, y: PAGE_H - 59 },
-        thickness: 0.6, color: C.steel, opacity: .40 });
-      if (logo) {
-        page.drawImage(logo, { x: MARGIN, y: PAGE_H - 106, width: 86, height: 86 });
+      // Preenche o papel inteiro, inclusive margens e rodapé, para leitura digital.
+      page.drawRectangle({ x: 0, y: 0, width: PAGE_W, height: PAGE_H, color: C.graphite });
+      pageCount += 1;
+      const first = pageCount === 1;
+      const coverH = first && reportCover ? PAGE_W * reportCover.height / reportCover.width : 0;
+      const headerH = first ? (reportCover ? coverH + 68 : 142) : 89;
+      page.drawRectangle({ x: 0, y: PAGE_H - headerH, width: PAGE_W, height: headerH, color: C.graphite });
+      if (first && reportCover) {
+        // Sem distorcer ou repetir a logo: a composição original ocupa toda a largura.
+        page.drawImage(reportCover, { x: 0, y: PAGE_H - coverH, width: PAGE_W, height: coverH });
+        // Assinatura editorial discreta: menos peso visual, mais respiro.
+        trackedText('AVALIAÇÃO DE ANTROPOMETRIA', left, PAGE_H - coverH - 19, 9.3, C.white, regular, 0.85);
+        trackedText('DOCUMENTO INDIVIDUAL', left, PAGE_H - coverH - 34, 7.0, C.steel, regular, 0.55);
+        // Assinatura pequena, inspirada na tipografia limpa do Motion Studio.
+        // Crédito profissional transferido para o rodapé em todas as páginas.
+      } else {
+        if (logo) fittedImage(logo, left, PAGE_H - (first ? 106 : 69), first ? 244 : 179, first ? 77 : 49);
+        const titleX = first ? 324 : 308;
+        text('DOCUMENTO INDIVIDUAL', titleX, PAGE_H - (first ? 47 : 34), 8, C.steel, medium);
+        text('AVALIAÇÃO DE ANTROPOMETRIA', titleX, PAGE_H - (first ? 70 : 53), first ? 10 : 9.4, C.white, medium);
+        if (first) text('DOCUMENTO INDIVIDUAL', titleX, PAGE_H - 90, 7.5, C.steel);
       }
-      const titleX = logo ? 145 : MARGIN;
-      page.drawText('PAIVA', { x: titleX, y: PAGE_H - 45, size: 26, font: bold, color: C.white });
-      page.drawText('BIKE FIT STUDIO  |  ANÁLISE BIOMECÂNICA', { x: titleX, y: PAGE_H - 75, size: 8.2, font: bold, color: C.steel });
-      page.drawText('RELATÓRIO DIGITAL PROFISSIONAL', { x: titleX, y: PAGE_H - 98, size: 10, font, color: C.white });
-      y = PAGE_H - 153;
+      page.drawRectangle({ x: 0, y: PAGE_H - headerH - 1, width: PAGE_W, height: 1, color: C.accent });
+      y = PAGE_H - headerH - (first ? 26 : 24);
     }
-
     function ensureSpace(height) {
-      if (!page || y - height < 64) newPage();
+      if (!page || y - height < bottomLimit) newPage();
     }
-
-    function sectionHeading(title) {
-      ensureSpace(48);
-      y -= 10;
-      page.drawRectangle({ x: MARGIN, y: y - 11, width: 3, height: 14, color: C.blue });
-      page.drawText(cleanText(title).toUpperCase(), { x: MARGIN + 12, y: y - 8, size: 10.5, font: bold, color: C.text });
-      page.drawLine({ start: { x: MARGIN, y: y - 18 }, end: { x: PAGE_W - MARGIN, y: y - 18 }, thickness: .8, color: C.line });
+    function drawSectionHeading(title) {
+      ensureSpace(82);
+      y -= 15;
+      page.drawRectangle({ x: left, y: y - 7, width: 2.4, height: 14, color: C.accent });
+      text(cleanText(title).toUpperCase(), left + 13, y - 3, 10.4, C.text, medium);
+      line(left, y - 16, right, C.line, 0.85);
       y -= 34;
     }
-
-    function pairRow(label, value, index) {
-      const labelWidth = 210;
-      const valueWidth = CONTENT_W - labelWidth - 22;
-      const labels = wrapText(label, font, 8.8, labelWidth);
-      const values = wrapText(value, bold, 9, valueWidth);
-      const lines = Math.max(labels.length, values.length);
-      const height = Math.max(24, lines * 12 + 10);
-      ensureSpace(height + 3);
-      if (index % 2 === 0) {
-        page.drawRectangle({ x: MARGIN, y: y - height + 3, width: CONTENT_W, height, color: C.tint });
-      }
-      for (let i = 0; i < labels.length; i++) {
-        page.drawText(labels[i], { x: MARGIN + 10, y: y - 13 - i * 12, font, size: 8.8, color: C.secondary });
-      }
-      for (let i = 0; i < values.length; i++) {
-        page.drawText(values[i], { x: MARGIN + labelWidth + 14, y: y - 13 - i * 12, font: bold, size: 9, color: C.text });
-      }
-      y -= height;
+    function drawPair(label, value) {
+      const labelLines = wrapText(label, regular, 8.9, 210);
+      const valueLines = wrapText(value, medium, 9.5, CONTENT_W - 251);
+      const count = Math.max(labelLines.length, valueLines.length);
+      const h = Math.max(32, 13 + count * 13);
+      ensureSpace(h + 2);
+      const top = y;
+      labelLines.forEach((part, i) => text(part, left + 8, top - 14 - i * 13, 8.9, C.secondary));
+      valueLines.forEach((part, i) => text(part, left + 244, top - 14 - i * 13, 9.5, C.text, medium));
+      line(left, top - h + 2, right, C.line, 0.5);
+      y -= h;
     }
-
-    function pairsSection(title, rows) {
-      sectionHeading(title);
-      if (!rows?.length) { pairRow('Informações', 'Não informado', 0); y -= 12; return; }
-      rows.forEach((item, index) => pairRow(item.label, item.value, index));
-      y -= 12;
+    function drawPairs(title, rows) {
+      if (!rows?.length) return;
+      ensureSpace(128); // evita titulo solto no fim da pagina
+      drawSectionHeading(title);
+      rows.forEach(item => drawPair(item.label || 'Medida', item.value ?? 'Não informado'));
+      y -= 8;
     }
-
-    function resultRow(item, index) {
-      const label = wrapText(item.label, bold, 9.4, 335);
-      const value = wrapText(item.value, bold, 10, 144);
-      const description = item.description ? wrapText(item.description, font, 8.4, CONTENT_W - 24) : [];
-      const headHeight = Math.max(label.length * 12, value.length * 13);
-      const height = headHeight + (description.length ? description.length * 11 + 7 : 0) + 17;
-      ensureSpace(height + 4);
-      if (index % 2 === 0) {
-        page.drawRectangle({ x: MARGIN, y: y - height + 3, width: CONTENT_W, height, color: C.tint });
+    function drawMeasurementGrid(title, rows) {
+      if (!rows?.length) return;
+      ensureSpace(160); // titulo + primeiro cartao antropometrico
+      drawSectionHeading(title);
+      const gap = 10, colW = (CONTENT_W - gap) / 2;
+      for (let i = 0; i < rows.length; i += 2) {
+        const entries = rows.slice(i, i + 2);
+        const specs = entries.map(item => {
+          const labels = wrapText(item.label || 'Medida', regular, 8.4, colW - 22);
+          const values = wrapText(item.value ?? '-', medium, 13.1, colW - 22);
+          return { labels, values, h: 27 + labels.length * 11 + values.length * 17 + 13 };
+        });
+        const h = Math.max(68, ...specs.map(item => item.h));
+        ensureSpace(h + 10);
+        entries.forEach((item, j) => {
+          const x = left + j * (colW + gap);
+          const spec = specs[j];
+          page.drawRectangle({ x, y: y - h, width: colW, height: h, color: C.soft, borderColor: C.line, borderWidth: 0.6 });
+          spec.labels.forEach((part, k) => text(part, x + 11, y - 19 - k * 11, 8.4, C.secondary));
+          const base = y - 19 - spec.labels.length * 11 - 12;
+          spec.values.forEach((part, k) => text(part, x + 11, base - k * 17, 13.1, C.text, medium));
+        });
+        y -= h + 10;
       }
-      for (let i = 0; i < label.length; i++) {
-        page.drawText(label[i], { x: MARGIN + 8, y: y - 13 - i * 12, font: bold, size: 9.4, color: C.text });
+      y -= 3;
+    }
+    function drawParagraph(value, size = 9, color = C.secondary, indent = 0) {
+      if (!value) return;
+      const parts = wrapText(value, regular, size, CONTENT_W - indent - 2);
+      for (const part of parts) {
+        ensureSpace(size + 8);
+        text(part, left + indent, y - size, size, color);
+        y -= size + 5;
       }
-      for (let i = 0; i < value.length; i++) {
-        page.drawText(value[i], { x: MARGIN + 355, y: y - 13 - i * 13, font: bold, size: 10, color: C.text });
+      y -= 6;
+    }
+    function drawProportions(proportions) {
+      const metrics = proportions?.metrics || [];
+      if (!metrics.length) return;
+      ensureSpace(205); // titulo + primeiros indicadores
+      drawSectionHeading('04  Proporções corporais');
+      const gap = 10, cols = Math.min(3, metrics.length), colW = (CONTENT_W - gap * (cols - 1)) / cols;
+      for (let offset = 0; offset < metrics.length; offset += cols) {
+        const row = metrics.slice(offset, offset + cols);
+        const h = 117;
+        ensureSpace(h + 13);
+        row.forEach((metric, j) => {
+          const x = left + j * (colW + gap);
+          page.drawRectangle({ x, y: y - h, width: colW, height: h, color: C.soft, borderColor: C.line, borderWidth: 0.65 });
+          wrapText(metric.label || 'Proporção', medium, 9.1, colW - 24).slice(0, 2).forEach((part, k) =>
+            text(part, x + 12, y - 21 - k * 11, 9.1, C.text, medium));
+          const percent = Number.isFinite(metric.percent) ? metric.percent : null;
+          const pct = percent === null ? '-' : percent.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+          text(pct, x + 12, y - 64, 22, C.text, medium);
+          page.drawRectangle({ x: x + 12, y: y - 81, width: colW - 24, height: 3, color: C.line });
+          if (percent !== null) page.drawRectangle({ x: x + 12, y: y - 81, width: (colW - 24) * Math.max(0, Math.min(100, percent)) / 100, height: 3, color: C.steelDark });
+          const caption = Number.isFinite(metric.length)
+            ? metric.length.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' cm / estatura'
+            : 'Medida não informada';
+          wrapText(caption, regular, 7.8, colW - 24).slice(0, 2).forEach((part, k) =>
+            text(part, x + 12, y - 97 - k * 10, 7.8, C.secondary));
+        });
+        y -= h + 13;
       }
-      const detailY = y - 13 - headHeight - 5;
-      for (let i = 0; i < description.length; i++) {
-        page.drawText(description[i], { x: MARGIN + 8, y: detailY - i * 11, font, size: 8.4, color: C.secondary });
+      for (const metric of metrics) {
+        if (metric.description) drawParagraph((metric.label ? metric.label + ': ' : '') + metric.description, 8.5);
       }
-      y -= height;
+      drawParagraph(proportions.explanation, 9);
+      drawParagraph(proportions.meaning, 9);
+      if (proportions.conclusion) {
+        ensureSpace(45);
+        text('LEITURA DO AVALIADOR', left, y - 10, 8.5, C.steelDark, medium);
+        y -= 19;
+        drawParagraph(proportions.conclusion, 9, C.text);
+      }
+      y -= 5;
+    }
+    function drawResult(item) {
+      const labelLines = wrapText(item.label || 'Resultado', medium, 10, 305);
+      const valueLines = wrapText(item.value || '-', medium, 12.3, 162);
+      const descLines = item.description ? wrapText(item.description, regular, 8.7, CONTENT_W - 27) : [];
+      const titleH = Math.max(labelLines.length * 13, valueLines.length * 15);
+      const h = 24 + titleH + (descLines.length ? 8 + descLines.length * 12 : 0);
+      ensureSpace(h + 9);
+      page.drawRectangle({ x: left, y: y - h, width: CONTENT_W, height: h, color: C.soft, borderColor: C.line, borderWidth: 0.55 });
+      labelLines.forEach((part, i) => text(part, left + 13, y - 19 - i * 13, 10, C.text, medium));
+      valueLines.forEach((part, i) => {
+        const width = medium.widthOfTextAtSize(cleanText(part), 12.3);
+        text(part, right - 13 - width, y - 20 - i * 15, 12.3, C.steelDark, medium);
+      });
+      const base = y - 19 - titleH - 9;
+      descLines.forEach((part, i) => text(part, left + 13, base - i * 12, 8.7, C.secondary));
+      y -= h + 9;
+    }
+    function drawBikePhoto() {
+      if (!bike) return;
+      ensureSpace(320); // titulo e foto sempre juntos
+      drawSectionHeading('06  Bicicleta e referências visuais');
+      const h = 230;
+      ensureSpace(h + 12);
+      page.drawRectangle({ x: left, y: y - h, width: CONTENT_W, height: h, color: C.photoMat, borderColor: C.line, borderWidth: 0.7 });
+      fittedImage(bike, left + 16, y - h + 13, CONTENT_W - 32, h - 26);
+      y -= h + 12;
+      const metrics = data.bikeMetrics || [];
+      if (metrics.length) {
+        // Quatro indicadores ficam em uma grade 2x2, nunca 3+1.
+        const gap = 9, cols = metrics.length === 4 ? 2 : Math.min(3, metrics.length);
+        const colW = (CONTENT_W - gap * (cols - 1)) / cols;
+        const metricHeights = [];
+        for (let k = 0; k < metrics.length; k += cols) {
+          const row = metrics.slice(k, k + cols);
+          metricHeights.push(Math.max(66, ...row.map(item => {
+            const l = wrapText(item.label, regular, 8.2, colW - 22).length;
+            const v = wrapText(item.value, medium, 12, colW - 22).length;
+            return 19 + l * 10 + 9 + v * 15 + 12;
+          })) + 10);
+        }
+        const metricsTotal = metricHeights.reduce((sum, h) => sum + h, 0);
+        if (metricsTotal < PAGE_H - 205) ensureSpace(metricsTotal);
+        for (let i = 0; i < metrics.length; i += cols) {
+          const row = metrics.slice(i, i + cols);
+          const specs = row.map(item => ({
+            labels: wrapText(item.label, regular, 8.2, colW - 22),
+            values: wrapText(item.value, medium, 12, colW - 22),
+          }));
+          const h2 = Math.max(66, ...specs.map(s => 19 + s.labels.length * 10 + 9 + s.values.length * 15 + 12));
+          ensureSpace(h2 + 10);
+          row.forEach((item, j) => {
+            const x = left + j * (colW + gap), spec = specs[j];
+            page.drawRectangle({ x, y: y - h2, width: colW, height: h2, color: C.charcoal });
+            spec.labels.forEach((part, k) => text(part, x + 11, y - 18 - k * 10, 8.2, C.steel));
+            const valueTop = y - 18 - spec.labels.length * 10 - 10;
+            spec.values.forEach((part, k) => text(part, x + 11, valueTop - k * 15, 12, C.white, medium));
+          });
+          y -= h2 + 10;
+        }
+      }
+      y -= 5;
+    }
+    function drawInterpretation(note) {
+      if (!note) return;
+      ensureSpace(130); // titulo e primeiro trecho da nota
+      drawSectionHeading('Interpretação profissional');
+      const parts = wrapText(note, regular, 9.1, CONTENT_W - 29);
+      let offset = 0;
+      while (offset < parts.length) {
+        const available = Math.max(1, Math.floor((y - bottomLimit - 34) / 14));
+        if (available < 2) { newPage(); continue; }
+        const batch = parts.slice(offset, offset + available);
+        const h = 24 + batch.length * 14;
+        ensureSpace(h + 8);
+        page.drawRectangle({ x: left, y: y - h, width: CONTENT_W, height: h, color: C.softBlue });
+        page.drawRectangle({ x: left, y: y - h, width: 3, height: h, color: C.steelDark });
+        batch.forEach((part, i) => text(part, left + 15, y - 21 - i * 14, 9.1, C.text));
+        y -= h + 10;
+        offset += batch.length;
+      }
     }
 
     newPage();
-    ensureSpace(49);
-    page.drawRectangle({ x: MARGIN, y: y - 30, width: CONTENT_W, height: 39, color: C.lightBlue });
-    const clientSummary = cleanText(data.clientName || 'Cliente');
-    page.drawText('AVALIAÇÃO INDIVIDUAL', { x: MARGIN + 12, y: y - 7, size: 8, font: bold, color: C.secondary });
-    page.drawText(clientSummary.length > 45 ? clientSummary.slice(0, 45) + '...' : clientSummary,
-      { x: MARGIN + 12, y: y - 23, size: 12.4, font: bold, color: C.text });
-    const dateText = cleanText(data.generatedAt);
-    page.drawText(dateText, { x: PAGE_W - MARGIN - 12 - font.widthOfTextAtSize(dateText, 9), y: y - 15, size: 9, font, color: C.secondary });
-    y -= 59;
-    pairsSection('01 · Identificação do cliente', data.client);
-    pairsSection('02 · Dados da bicicleta', data.bike);
-    pairsSection('03 · Medidas antropométricas', data.body);
+    // Ficha inicial do cliente - sem duplicar a palavra presente na logo.
+    const nameLines = wrapText(data.clientName || 'Cliente', medium, 17.5, CONTENT_W - 150);
+    const summaryH = Math.max(91, 57 + nameLines.length * 21);
+    ensureSpace(summaryH + 8);
+    page.drawRectangle({ x: left, y: y - summaryH, width: CONTENT_W, height: summaryH, color: C.soft });
+    page.drawRectangle({ x: left, y: y - summaryH, width: 3, height: summaryH, color: C.steelDark });
+    text('AVALIAÇÃO INDIVIDUAL', left + 17, y - 22, 8.5, C.steelDark, medium);
+    nameLines.forEach((part, i) => text(part, left + 17, y - 48 - i * 21, 17.5, C.text, medium));
+    const date = cleanText(data.generatedAt || new Date().toLocaleDateString('pt-BR'));
+    text('EMISSÃO', right - 105, y - 22, 7.8, C.muted, medium);
+    text(date, right - 105, y - 41, 10, C.text, medium);
+    y -= summaryH + 14;
 
-    if (data.proportions?.metrics?.length) {
-      ensureSpace(350);
-      sectionHeading('Suas proporções e a posição na bicicleta');
-      const gap = 10, tileWidth = (CONTENT_W - gap * 2) / 3, height = 155;
-      const decimal = n => n.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1});
-      data.proportions.metrics.forEach((metric, index) => {
-        const x = MARGIN + index * (tileWidth + gap);
-        page.drawRectangle({x, y:y-height, width:tileWidth, height, color:C.tint, borderColor:C.line, borderWidth:.7});
-        page.drawText(cleanText(metric.label), {x:x+12,y:y-22,font:bold,size:10,color:C.text});
-        page.drawText(metric.percent === null ? '-' : decimal(metric.percent)+'%', {x:x+12,y:y-57,font:bold,size:26,color:C.text});
-        const caption = metric.length === null ? 'Medida não informada ou inválida' : decimal(metric.length)+' cm / estatura';
-        wrapText(caption,font,8,tileWidth-24).forEach((line,i)=>page.drawText(line,{x:x+12,y:y-76-i*11,font,size:8,color:C.secondary}));
-        wrapText(metric.description,font,8.3,tileWidth-24).forEach((line,i)=>page.drawText(line,{x:x+12,y:y-103-i*11,font,size:8.3,color:C.secondary}));
-      });
-      y -= height + 15;
-      for (const text of [data.proportions.explanation,data.proportions.meaning]) {
-        const lines=wrapText(text,font,9,CONTENT_W-4);
-        ensureSpace(lines.length*13+12);
-        lines.forEach((line,i)=>page.drawText(line,{x:MARGIN,y:y-10-i*13,font,size:9,color:C.secondary}));
-        y-=lines.length*13+12;
-      }
-      if(data.proportions.conclusion) {
-        sectionHeading('Conclusão do avaliador');
-        for (const line of wrapText(data.proportions.conclusion,font,9,CONTENT_W-4)) {
-          ensureSpace(16);
-          page.drawText(line,{x:MARGIN,y:y-10,font,size:9,color:C.text});
-          y-=13;
-        }
-        y-=12;
-      }
-    }
+    drawPairs('01  Identificação do cliente', data.client);
+    drawPairs('02  Dados da bicicleta', data.bike);
+    drawMeasurementGrid('03  Antropometria', data.body);
+    drawProportions(data.proportions);
 
-    sectionHeading('04 · Resultados do pré-fit');
-    (data.results || []).forEach(resultRow);
-    y -= 14;
-    if (data.sizing?.rows?.length) {
-      pairsSection('04A · Método de leitura antropométrica', data.sizing.rows);
+    if (data.results?.length) {
+      ensureSpace(160);
+      drawSectionHeading('05  Resultados do pré-fit');
+      data.results.forEach(drawResult);
+      y -= 6;
     }
-    if (data.bikeProject?.rows?.length) {
-      pairsSection('04B · Projeto inicial da bicicleta', data.bikeProject.rows);
-    }
+    if (data.sizing?.rows?.length) drawPairs('05A  Leitura antropométrica', data.sizing.rows);
+    if (data.bikeProject?.rows?.length) drawPairs('05B  Projeto inicial da bicicleta', data.bikeProject.rows);
 
-    if (bike) {
-      ensureSpace(330);
-      sectionHeading('05 · Visualização da bicicleta');
-      const boxHeight = 228;
-      page.drawRectangle({ x: MARGIN, y: y - boxHeight, width: CONTENT_W, height: boxHeight,
-        color: C.tint, borderColor: C.line, borderWidth: .8 });
-      const scale = Math.min((CONTENT_W - 26) / bike.width, (boxHeight - 22) / bike.height);
-      const width = bike.width * scale;
-      const height = bike.height * scale;
-      page.drawImage(bike, { x: MARGIN + (CONTENT_W - width) / 2, y: y - boxHeight + (boxHeight - height) / 2, width, height });
-      y -= boxHeight + 14;
-      const metrics = data.bikeMetrics || [];
-      if (metrics.length) {
-        const gap = 9;
-        const columns = Math.min(3, metrics.length);
-        const tileWidth = (CONTENT_W - gap * (columns - 1)) / columns;
-        const tileHeight = 49;
-        ensureSpace(tileHeight + 7);
-        metrics.slice(0, columns).forEach((item, index) => {
-          const x = MARGIN + index * (tileWidth + gap);
-          page.drawRectangle({ x, y: y - tileHeight + 3, width: tileWidth, height: tileHeight,
-            color: C.navy2 });
-          const label = wrapText(item.label, font, 8, tileWidth - 16).slice(0, 2);
-          label.forEach((line, i) => page.drawText(line, { x: x + 9, y: y - 9 - i * 9,
-            size: 8, font, color: C.steel }));
-          const value = wrapText(item.value, bold, 10.2, tileWidth - 16).slice(0, 2);
-          value.forEach((line, i) => page.drawText(line, { x: x + 9, y: y - 31 - i * 11,
-            size: 10.2, font: bold, color: C.white }));
-        });
-        y -= tileHeight + 9;
-        metrics.slice(columns).forEach((item, index) => pairRow(item.label, item.value, index));
-      }
-      y -= 12;
-    }
-
+    drawBikePhoto();
     if (data.finalMeasurements?.length) {
-      // Nunca deixar a ficha final quebrada com uma única medida órfã
-      // na página seguinte: ela deve ser uma unidade legível para o cliente.
-      const estimatedHeight = data.finalMeasurements.reduce((total, item) => {
-        const label = wrapText(item.label, font, 8.8, 210);
-        const value = wrapText(item.value, bold, 9, CONTENT_W - 232);
-        return total + Math.max(24, Math.max(label.length, value.length) * 12 + 10) + 3;
-      }, 0) + 66;
-      if (estimatedHeight < PAGE_H - 205) ensureSpace(estimatedHeight);
-      pairsSection('06 · Medidas finais registradas pelo avaliador', data.finalMeasurements);
+      // Mantém a ficha de medidas finais agrupada sempre que couber em uma página.
+      const estimate = data.finalMeasurements.reduce((total, item) => {
+        const l = wrapText(item.label, regular, 8.9, 210).length;
+        const v = wrapText(item.value, medium, 9.5, CONTENT_W - 251).length;
+        return total + Math.max(32, 13 + Math.max(l, v) * 13);
+      }, 0) + 62;
+      if (estimate < PAGE_H - 190) ensureSpace(estimate);
+      drawPairs('07  Medidas finais registradas', data.finalMeasurements);
     }
-
-    if (data.comparison?.rows?.length) {
-      pairsSection('07 · Comparação de quadros', data.comparison.rows);
-    }
-
-    const notes = wrapText(data.note || '', font, 8.7, CONTENT_W - 20);
-    const notesHeight = notes.length * 12 + 34;
-    ensureSpace(notesHeight + 6);
-    page.drawRectangle({ x: MARGIN, y: y - notesHeight + 5, width: CONTENT_W, height: notesHeight, color: C.lightBlue, borderColor: C.line, borderWidth: 0.6 });
-    page.drawRectangle({ x: MARGIN, y: y - notesHeight + 5, width: 3, height: notesHeight, color: C.blue });
-    page.drawText('INTERPRETAÇÃO PROFISSIONAL', { x: MARGIN + 12, y: y - 12, size: 9, font: bold, color: C.text });
-    notes.forEach((line, i) => page.drawText(line, { x: MARGIN + 10, y: y - 27 - i * 12, size: 8.7, font, color: C.secondary }));
+    if (data.comparison?.rows?.length) drawPairs('08  Comparação de quadros', data.comparison.rows);
+    drawInterpretation(data.note);
 
     const pages = pdf.getPages();
     pages.forEach((p, index) => {
-      p.drawRectangle({ x: MARGIN, y: 49, width: 26, height: 2, color: C.blue });
-      p.drawLine({ start: { x: MARGIN, y: 46 }, end: { x: PAGE_W - MARGIN, y: 46 }, thickness: 0.7, color: C.line });
-      p.drawText('PAIVA  |  DOCUMENTO DIGITAL  |  ' + cleanText(data.generatedAt), { x: MARGIN, y: 31, font, size: 8, color: C.secondary });
-      const number = `Página ${index + 1} de ${pages.length}`;
-      p.drawText(number, { x: PAGE_W - MARGIN - font.widthOfTextAtSize(number, 8), y: 31, font, size: 8, color: C.secondary });
+      // Rodapé preto contínuo, independente do fundo grafite do restante da página.
+      p.drawRectangle({ x: 0, y: 0, width: PAGE_W, height: 65, color: rgb(8, 10, 13) });
+      p.drawLine({ start: { x: left, y: 59 }, end: { x: right, y: 59 }, thickness: 0.65, color: C.line });
+      const footer = 'AVALIAÇÃO ANTROPOMÉTRICA  ·  ' + cleanText(data.generatedAt || '');
+      p.drawText(footer, { x: left, y: 43, font: medium, size: 7.7, color: C.secondary });
+      p.drawText('retul@yahoo.com  ·  (48) 98846-6144', { x: left, y: 30, font: regular, size: 7.2, color: C.secondary });
+      // Crédito institucional propositalmente menor que todas as demais linhas.
+      const creditPrefix = 'Software desenvolvido por Eduardo ';
+      const creditSize = 6.1;
+      const creditSpacing = 0.18;
+      p.drawText(creditPrefix, { x: left, y: 17, font: regular, size: creditSize, color: C.steelDark, characterSpacing: creditSpacing });
+      p.drawText('Paiva', { x: left + regular.widthOfTextAtSize(creditPrefix, creditSize) + creditSpacing * creditPrefix.length, y: 17, font: regular, size: creditSize, color: rgb(239, 195, 54), characterSpacing: creditSpacing });
+      const count = String(index + 1).padStart(2, '0') + ' / ' + String(pages.length).padStart(2, '0');
+      p.drawText(count, { x: right - medium.widthOfTextAtSize(count, 8), y: 36, font: medium, size: 8, color: C.steelDark });
     });
-
     return await pdf.save({ useObjectStreams: false });
   }
 
@@ -369,7 +522,7 @@
       .replace(/[^a-zA-Z0-9 _-]/g, '')
       .trim().replace(/\s+/g, '_').slice(0, 45) || 'Cliente';
     const date = new Date().toISOString().slice(0, 10);
-    return `PAIVA_PreFit_${name}_${date}.pdf`;
+    return `Avaliacao_Antropometria_${name}_${date}.pdf`;
   }
 
   function downloadFile(file) {
@@ -417,7 +570,7 @@
         const file = new File([bytes], fileName(data.clientName), { type: 'application/pdf' });
         if (shareRequested && navigator.share && navigator.canShare?.({ files: [file] })) {
           try {
-            await navigator.share({ files: [file], title: 'Relatório PAIVA Bike Fit Studio' });
+            await navigator.share({ files: [file], title: 'Avaliação de Antropometria' });
             status.textContent = 'Relatório disponibilizado para compartilhamento.';
           } catch (shareError) {
             if (shareError?.name === 'AbortError') {
