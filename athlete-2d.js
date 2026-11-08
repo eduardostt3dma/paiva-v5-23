@@ -225,7 +225,7 @@
             <button type="button" data-2d-tool="line" aria-pressed="false">LINHA · ARRASTAR</button>
             <button type="button" data-2d-tool="point" aria-pressed="false">● PONTO LIVRE · RASTREAR</button>
             <button type="button" data-2d-tool="edit" aria-pressed="false">AJUSTAR PONTOS</button>
-            <button type="button" id="paiva-2d-track-toggle" title="Rastreio ON/OFF da marcação selecionada">Rastreio ON</button>
+            <button type="button" id="paiva-2d-track-toggle" title="Rastreio ON/OFF da marcação selecionada">◎</button>
             <button type="button" id="paiva-2d-delete-selected" title="Excluir esta marcação em todos os quadros deste vídeo" disabled>✕ Excluir</button>
             <button type="button" id="paiva-2d-photo-action" title="Foto com marcações" aria-label="Salvar foto do atleta com os ângulos">📷 Foto</button>
           </div>
@@ -374,7 +374,7 @@
       // Ícones no lugar dos rótulos: mantém os botões e listeners originais.
       const toolIcons={angle:['∠','Ângulo · arrastar'],line:['╱','Linha · arrastar'],point:['⊙','Ponto livre · rastrear'],edit:['✥','Ajustar pontos']};
       compactDock.querySelectorAll('.paiva-2d-tools > button').forEach(btn=>{
-        const type=btn.dataset.tool;
+        const type=btn.getAttribute('data-2d-tool');
         const other={ 'paiva-2d-track-toggle':['◎','Ligar ou desligar rastreio'], 'paiva-2d-delete-selected':['✕','Excluir marcação'], 'paiva-2d-photo-action':['▣','Salvar foto com marcações'] };
         const spec=toolIcons[type]||other[btn.id];
         if(!spec)return;
@@ -1158,8 +1158,9 @@
       }
       const enabled=selected?selected.trackEnabled!==false:defaultTrackEnabled;
       const button=byId('track-toggle');
-      button.textContent=`Rastreio ${enabled?'ON':'OFF'}`;
+      button.textContent='◎'; // ícone fixo; estado no título e aria-pressed
       button.setAttribute('aria-pressed',String(enabled));
+      button.setAttribute('aria-label',`Rastreio ${enabled?'ligado':'desligado'}`);
       button.title=selected
         ?`Rastreio ${enabled?'ligado':'desligado'} desta marcação. Clique para alternar.`
         :'Clique para configurar o rastreio das próximas marcações.';

@@ -1,1 +1,6 @@
-PAIVA 2D - barra de icones. Envie athlete-2d.js, athlete-2d.css e sw.js para a raiz do repositorio GitHub. Preserve o PAIVA_LIMPO.zip como backup.
+CORREÇÃO DOS ÍCONES PAIVA 2D
+
+Substitua no GitHub os 3 arquivos: athlete-2d.js, athlete-2d.css e sw.js.
+Clique Commit changes e recarregue a página com Ctrl+Shift+R.
+O erro anterior era a leitura de data-tool em vez de data-2d-tool.
+O botão de rastreio agora mostra apenas um ícone, mesmo quando muda de estado.
