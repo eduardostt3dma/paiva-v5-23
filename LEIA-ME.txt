@@ -1,0 +1,1 @@
+PAIVA V5.83 - Comparador de quadros antes das medidas reais opcionais. Envie frame-compare.js e sw.js na raiz do repositorio GitHub e confirme Commit changes. Os demais arquivos permanecem inalterados.

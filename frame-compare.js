@@ -446,6 +446,14 @@
         <p id="paiva-cmp-ai-feedback" role="status" aria-live="polite"></p>
       </div>`;
     footer.before(section);
+    // O comparador fica antes das medidas reais; estas são o último tópico.
+    const bikeFields = document.getElementById('bikeFields');
+    const realMeasures = bikeFields?.closest('section.card');
+    if (realMeasures) {
+      section.after(realMeasures);
+      realMeasures.style.marginTop = '18px';
+      realMeasures.style.marginBottom = '24px';
+    }
 
     const style = document.createElement('style');
     style.id = 'paiva-compare-style';
