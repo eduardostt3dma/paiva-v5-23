@@ -1,0 +1,7 @@
+PAIVA · DUAS WEBCAMS / AJUSTES AO VIVO
+
+Instale multicam.js, multicam.css e sw.js no GitHub.
+Mantidos 1 ou 2 visores. Resolução/FPS podem reiniciar a transmissão.
+Exposição manual e ganho dependem do suporte da webcam e do navegador.
+Ajustes não são aplicados durante a gravação.
+Teste no Chrome com câmeras reais antes de usar em atendimento.
