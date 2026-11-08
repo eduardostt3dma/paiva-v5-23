@@ -109,7 +109,29 @@
       <p id="paiva-session-status" role="status" aria-live="polite">As fichas ficam somente neste navegador. Exporte o JSON para backup.</p>
       <p class="paiva-sessions-alert">O backup JSON contém dados pessoais e não inclui fotos, vídeos nem marcações 2D. Guarde-o em local protegido. Para outro cliente, confira também a área de análise 2D.</p>`;
     anchor.after(panel);
-    const status=message=>{el('paiva-session-status').textContent=message;};
+    // Atalho discreto de salvamento junto às medidas antropométricas.
+    const anthro=document.querySelector('.layout > section.card:has(#fields)');
+    if(anthro && !el('paiva-anthro-save')) {
+      const bar=document.createElement('div');bar.className='paiva-anthro-save-bar';
+      const quick=document.createElement('button');quick.type='button';quick.id='paiva-anthro-save';
+      quick.textContent='Salvar ficha';quick.setAttribute('aria-label','Salvar medidas e ficha do cliente neste navegador');
+      const feedback=document.createElement('small');feedback.id='paiva-anthro-save-feedback';feedback.setAttribute('role','status');
+      quick.addEventListener('click',()=>{
+        const original=el('paiva-session-save');
+        if(!original){feedback.textContent='Sistema de fichas indisponível.';return;}
+        original.click();
+        feedback.textContent='Salvando ficha…';
+      });
+      bar.append(quick,feedback);
+      const note=anthro.querySelector('.note');
+      if(note)note.before(bar);else anthro.append(bar);
+      const style=document.createElement('style');style.textContent=`
+        .paiva-anthro-save-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0 6px}
+        #paiva-anthro-save{padding:8px 15px;border-radius:8px;border:1px solid #747c84;background:#20262c;color:#e8edf1;font-size:12px;font-weight:500;cursor:pointer}
+        #paiva-anthro-save:hover{background:#303942}
+        #paiva-anthro-save-feedback{font-size:10px;color:#aeb8c2}`;document.head.append(style);
+    }
+    const status=message=>{el('paiva-session-status').textContent=message;const feedback=el('paiva-anthro-save-feedback');if(feedback)feedback.textContent=message;};
     const busy=state=>{
       for(const id of ['paiva-session-save','paiva-session-new','paiva-session-open','paiva-session-export'])
         el(id).disabled=state;

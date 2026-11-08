@@ -52,12 +52,16 @@
     return box;
   }
   function initialize() {
-    const footer=document.querySelector('main > footer');if(!footer)return;
+    const anthro=document.querySelector('.layout > section.card:has(#fields)');
+    const footer=document.querySelector('main > footer');if(!anthro || !footer)return;
     const panel=document.createElement('section');panel.className='card paiva-proportions';
     panel.innerHTML='<h2>Suas proporções e a posição na bicicleta</h2><p class="paiva-proportion-intro">Prévia da informação que acompanha o relatório do cliente.</p><div id="paiva-proportions-preview"></div><label for="paiva-proportions-conclusion">Conclusão do avaliador para este atendimento</label><textarea id="paiva-proportions-conclusion" rows="4" maxlength="1500" placeholder="Registre o que observou, os ajustes realizados e o que confirmou na avaliação."></textarea><small>Texto opcional, incluído no PDF. Mantido apenas nesta página; ao iniciar outro atendimento, limpe este campo.</small>';
-    footer.before(panel);
+    anthro.after(panel);
+    // A proporção ocupa uma linha completa entre antropometria e dados da bicicleta.
+    panel.style.gridColumn='1 / -1';
     const css=document.createElement('style');css.textContent=`
-      .paiva-proportions{margin-top:18px;color:#e5e8ec}.paiva-proportions p{font-size:12px;line-height:1.65;color:#bac2ca}
+      .paiva-proportions{margin-top:0;color:#e5e8ec}.paiva-proportions p{font-size:12px;line-height:1.65;color:#bac2ca}
+      .layout > .paiva-proportions{grid-column:1 / -1;min-width:0}
       .paiva-proportion-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
       .paiva-proportion-metric{padding:11px;border:1px solid #4a525b;border-radius:10px;background:#161b21}
       .paiva-proportion-metric h3{font-size:11px;margin:0 0 6px}.paiva-proportion-metric strong{display:block;font-size:23px;letter-spacing:-.03em;color:#edf0f3}
