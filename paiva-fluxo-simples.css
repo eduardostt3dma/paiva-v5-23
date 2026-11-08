@@ -1,0 +1,7 @@
+.paiva-simple-guide{margin:9px 0 12px;padding:9px 12px;border-left:2px solid #82929e;background:rgba(110,130,145,.07);color:#d3dce2;font-size:12px;line-height:1.65}
+.paiva-simple-guide strong{font-size:11px;letter-spacing:.055em}
+.paiva-simple-guide a{color:#dceefa;text-decoration:underline;text-underline-offset:3px}
+.paiva-simple-guide small{font-size:11px;color:#b8c5ce}
+.paiva-final-measures{margin:20px 0 32px;scroll-margin-top:15px}
+.paiva-final-measures>.card{margin-top:0}
+@media print{.paiva-simple-guide{display:none!important}.paiva-final-measures{display:none!important}}
