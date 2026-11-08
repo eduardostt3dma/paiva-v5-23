@@ -525,3 +525,23 @@
 #paiva-athlete-2d .paiva-2d-manual-bar small {display:none;}
 #paiva-athlete-2d .paiva-2d-manual-bar {padding:4px 2px;}
 @media(max-width:720px){#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools > button {font-size:9px;padding:6px 5px;}#paiva-athlete-2d .paiva-2d-compact-settings {flex:1 1 100%;}}
+
+/* PAIVA 2D · barra de ícones de uma linha (2026-11-08).
+   Sem rolagem lateral e sem alterar o tamanho/rotação da imagem. */
+#paiva-athlete-2d .paiva-2d-marking-dock{display:flex!important;flex-wrap:nowrap!important;gap:3px!important;padding:3px 4px!important;min-width:0;overflow:visible;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools{display:flex!important;flex-flow:row nowrap!important;flex:0 1 auto!important;gap:3px!important;align-items:center;min-width:0;}
+#paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools > button.paiva-2d-icon-tool{display:inline-flex;align-items:center;justify-content:center;flex:0 1 32px!important;width:32px!important;min-width:23px!important;height:30px!important;padding:0!important;font-size:17px!important;line-height:1!important;white-space:nowrap;}
+#paiva-athlete-2d .paiva-2d-compact-settings{flex:0 0 auto!important;position:relative;}
+#paiva-athlete-2d .paiva-2d-compact-settings > summary{display:flex;align-items:center;justify-content:center;width:31px;height:30px;box-sizing:border-box;padding:0!important;font-size:18px;}
+#paiva-athlete-2d .paiva-2d-compact-settings[open]{flex:0 0 auto!important;padding:0!important;}
+#paiva-athlete-2d .paiva-2d-compact-settings[open] > :not(summary){position:relative;}
+#paiva-athlete-2d .paiva-2d-compact-settings[open]{z-index:40;}
+#paiva-athlete-2d .paiva-2d-compact-settings[open] .paiva-2d-point-role,
+#paiva-athlete-2d .paiva-2d-compact-settings[open] .paiva-2d-zoom,
+#paiva-athlete-2d .paiva-2d-compact-settings[open] .paiva-2d-width{min-width:180px;max-width:240px;box-sizing:border-box;}
+@media(max-width:720px){
+ #paiva-athlete-2d .paiva-2d-marking-dock{gap:2px!important;padding:3px!important;}
+ #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools{gap:2px!important;}
+ #paiva-athlete-2d .paiva-2d-marking-dock .paiva-2d-tools > button.paiva-2d-icon-tool{flex:0 1 28px!important;width:28px!important;min-width:22px!important;height:28px!important;font-size:15px!important;}
+ #paiva-athlete-2d .paiva-2d-compact-settings > summary{width:27px;height:28px;}
+}

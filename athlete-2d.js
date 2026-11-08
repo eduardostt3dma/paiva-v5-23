@@ -371,6 +371,26 @@
         if(control) compactSettings.appendChild(control);
       }
       compactDock.appendChild(compactSettings);
+      // Ícones no lugar dos rótulos: mantém os botões e listeners originais.
+      const toolIcons={angle:['∠','Ângulo · arrastar'],line:['╱','Linha · arrastar'],point:['⊙','Ponto livre · rastrear'],edit:['✥','Ajustar pontos']};
+      compactDock.querySelectorAll('.paiva-2d-tools > button').forEach(btn=>{
+        const type=btn.dataset.tool;
+        const other={ 'paiva-2d-track-toggle':['◎','Ligar ou desligar rastreio'], 'paiva-2d-delete-selected':['✕','Excluir marcação'], 'paiva-2d-photo-action':['▣','Salvar foto com marcações'] };
+        const spec=toolIcons[type]||other[btn.id];
+        if(!spec)return;
+        btn.textContent=spec[0];
+        btn.title=spec[1];
+        btn.setAttribute('aria-label',spec[1]);
+        btn.classList.add('paiva-2d-icon-tool');
+      });
+      const settingsSummary=compactSettings.querySelector('summary');
+      settingsSummary.textContent='⚙';
+      settingsSummary.title='Ajustes de desenho: zoom, espessura e ponto';
+      settingsSummary.setAttribute('aria-label',settingsSummary.title);
+      settingsSummary.setAttribute('role','button');
+      settingsSummary.setAttribute('tabindex','0');
+      settingsSummary.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();compactSettings.open=!compactSettings.open;}});
+
       const titleActions=section.querySelector('.paiva-2d-title-actions');
       const sidebar=section.querySelector('.paiva-2d-sidebar');
       const workspace=section.querySelector('.paiva-2d-workspace');

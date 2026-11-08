@@ -1,15 +1,1 @@
-PAIVA MOTION STUDIO V5.83 — ATUALIZAÇÃO FINAL DO RELATÓRIO
-
-Arquivos para enviar ao GitHub (na pasta principal):
-- pdf-export.js
-- sw.js
-- paiva-report-cover-v583.png
-
-1. Extraia este ZIP no Windows: botão direito > Extrair tudo.
-2. Acesse https://github.com/eduardostt3dma/paiva-v5-23/upload/main
-3. Envie os 3 arquivos acima, substituindo os existentes.
-4. Clique em Commit changes.
-5. Teste em https://eduardostt3dma.github.io/paiva-v5-23/
-
-A alteração final é a palavra Paiva em amarelo no rodapé, abaixo dos contatos.
-Os demais arquivos do software permanecem inalterados.
+PAIVA 2D - barra de icones. Envie athlete-2d.js, athlete-2d.css e sw.js para a raiz do repositorio GitHub. Preserve o PAIVA_LIMPO.zip como backup.
