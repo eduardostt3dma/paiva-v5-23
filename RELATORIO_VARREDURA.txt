@@ -1,0 +1,17 @@
+PAIVA MOTION STUDIO V5.83 — AUDITORIA E CONSOLIDACAO
+
+Origem: ultimo backup com PREVIA COM PAUSAS.
+Arquivos examinados: 127
+JavaScript examinados com node --check: 39
+Erros de sintaxe JavaScript: 0
+Arquivos exatamente duplicados por SHA-256: 0
+Notas historicas antigas sem referencias no codigo: 39
+Arquivos removidos da distribuicao limpa: somente as 39 notas historicas NOTAS_*.txt.
+Arquivos de imagem, fontes, bibliotecas, videos, modulos e PDF: preservados.
+Referencias locais em src/href ausentes (analise estatica): []
+Erros de sintaxe: []
+
+IMPORTANTE: Esta auditoria e estatica. Nao comprova o funcionamento de camera, video, PDF, cache ou exportacao no navegador.
+Nao foram apagados arquivos da sua maquina, GitHub nem backups antigos.
+A versao limpa nao deve ser usada para apagar arquivos antigos no GitHub automaticamente; para remover notas historicas no repositorio, faca isso separadamente.
+Para publicar, envie os arquivos da pasta principal do ZIP, nao a pasta inteira.

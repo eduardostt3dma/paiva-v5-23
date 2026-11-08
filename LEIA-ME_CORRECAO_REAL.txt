@@ -1,0 +1,33 @@
+PAIVA MOTION STUDIO V5.83 — CORRECAO REAL DA DUPLICACAO
+
+Origem: ZIP original enviado pelo usuario: paiva-v5-23-main(1).zip
+
+CAUSA CONFIRMADA
+- paiva-attendimentos.js criava a segunda fileira cinza de navegacao (id paiva-v524-nav).
+- paiva-wind-simple.js criava um segundo texto de credito (id paiva-author-watermark).
+- O ZIP anterior atualizava apenas index.html e sw.js, deixando esses scripts antigos ativos.
+
+CORRECAO
+- Os dois scripts nao criam esses elementos quando existe a arte oficial V5.83.
+- O index.html impede que copias antigas desses elementos aparecam durante a atualizacao.
+- Botoes principais e secundarios menores e mais discretos, com hotspots funcionais.
+- Botao 2D da fileira superior aponta para o modulo real de analise 2D.
+- Imagem original da capa preservada byte a byte: logo, esqueleto, bicicleta,
+  curva, frase, credito e V5.83 nao foram alterados.
+- Cache offline atualizado para renovar os arquivos.
+
+COMO INSTALAR
+1. Extraia este ZIP no Windows (botao direito > Extrair tudo).
+2. Abra https://github.com/eduardostt3dma/paiva-v5-23
+3. Clique em Add file > Upload files na raiz do repositorio.
+4. Arraste TODOS OS QUATRO arquivos: index.html, sw.js,
+   paiva-attendimentos.js e paiva-wind-simple.js.
+5. Confirme as substituicoes e clique em Commit changes.
+6. Aguarde o GitHub Pages publicar. Depois abra uma janela anonima
+   (Ctrl + Shift + N) e entre em:
+   https://eduardostt3dma.github.io/paiva-v5-23/?teste=sem-duplicacao-20261108
+7. Confira uma unica fileira de botoes, apenas um credito na capa,
+   e teste os botoes Cadastro, 2D e Motion Studio.
+
+ATENCAO: O ZIP NAO PUBLICA O SITE SOZINHO.
+Nao limpe os dados locais do navegador antes de salvar as fichas.
