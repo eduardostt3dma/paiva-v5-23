@@ -504,3 +504,6 @@
 
 /* Pausas de análise: controles compactos, sem alterar a área 2D. */
 .paiva-pause-controls{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:8px 10px;margin-top:6px;border:1px solid #39434d;border-radius:8px;background:#141a20;color:#cbd2d9;font-size:11px}.paiva-pause-label{font-size:10px;font-weight:700;letter-spacing:.08em;color:#e3e7eb}.paiva-pause-controls label{display:flex;align-items:center;gap:5px}.paiva-pause-controls button,.paiva-pause-controls select{font:inherit;color:#e4e8ec;background:#252d35;border:1px solid #4c5863;border-radius:5px;padding:5px 8px;cursor:pointer}.paiva-pause-controls button:disabled{opacity:.45;cursor:wait}#paiva-pause-status{flex-basis:100%;color:#aab5be}#paiva-pause-list{display:flex;gap:5px;flex-wrap:wrap}.paiva-pause-entry{display:flex;align-items:center;gap:4px;padding:3px 5px;border:1px solid #37424c;border-radius:5px}.paiva-pause-entry button{padding:2px 5px}
+
+/* Prévia das pausas: sobrepõe o vídeo sem bloquear ferramentas ao sair. */
+.paiva-2d-canvas-wrap{position:relative}.paiva-pause-preview-overlay{position:absolute;inset:0;width:100%;height:100%;z-index:30;pointer-events:none;background:#0b1015}

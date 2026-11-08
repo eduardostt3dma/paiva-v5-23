@@ -1,0 +1,9 @@
+PAIVA Motion Studio V5.83 — Prévia com pausas e transição suave
+
+1. Extraia o ZIP.
+2. Envie os três arquivos para a raiz do repositório GitHub.
+3. Clique em Commit changes e recarregue a página com Ctrl+Shift+R.
+4. Carregue um vídeo no 2D, marque as pausas e use Prévia com pausas.
+5. A exportação continua WebM, sem áudio, em tempo real.
+
+Importante: teste a prévia e a exportação com um vídeo curto antes de usar em atendimentos.
