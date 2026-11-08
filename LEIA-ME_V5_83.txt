@@ -1,0 +1,26 @@
+PAIVA Motion Studio V5.83 — correção pontual do cabeçalho e do cache offline
+
+O que foi corrigido:
+- O número gravado na imagem aprovada do cabeçalho agora é V5.83.
+- O cache offline utiliza os arquivos existentes paiva-v524.css e paiva-v524-results.js.
+- A chave do cache foi renovada para instalar a versão corrigida.
+- A logo, o esqueleto, a bicicleta, a onda e os controles foram preservados.
+
+ATUALIZACAO PONTUAL (ZIP menor):
+1. Extraia o ZIP.
+2. No repositório GitHub Pages, substitua os arquivos index.html, sw.js e
+   paiva-cabecalho-aprovado-v581.png na pasta onde o site está publicado.
+3. Confirme (commit) as alterações e aguarde a publicação.
+4. Abra o site, atualize com Ctrl+Shift+R e feche/reabra o aplicativo instalado.
+5. Se o app instalado ainda mostrar a versão anterior, limpe os dados/cache
+   desse site no navegador e abra novamente (isso pode apagar dados locais).
+
+BACKUP COMPLETO (ZIP maior):
+1. Extraia o ZIP.
+2. Envie o CONTEUDO da pasta paiva-v5-23-main/ para a pasta publicada
+   no GitHub Pages (não envie apenas o ZIP como um arquivo).
+3. Confirme as alterações e teste o site online e depois sem conexão.
+
+Atenção: V5.83 é a versão de publicação. Os nomes paiva-v524.css e
+paiva-v524-results.js são nomes internos legados, ainda usados pelo app.
+Não os renomeie sem também alterar as referências do HTML.
