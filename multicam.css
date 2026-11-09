@@ -103,25 +103,3 @@
   #paiva-multi-camera .paiva-multi-quality {grid-template-columns:1fr 1fr;}
 }
 @media print {#paiva-multi-camera {display:none!important;}}
-
-/* PAIVA · 1, 2 ou 4 visores; indicador de gravação inequívoco. */
-#paiva-multi-camera[data-mode="double"] #paiva-multi-pane-c,
-#paiva-multi-camera[data-mode="double"] #paiva-multi-pane-d,
-#paiva-multi-camera[data-mode="single"] #paiva-multi-pane-c,
-#paiva-multi-camera[data-mode="single"] #paiva-multi-pane-d {display:none;}
-#paiva-multi-camera[data-mode="quad"] .paiva-multi-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-#paiva-multi-camera .paiva-multi-rec{color:#ff5353!important;font-weight:900;letter-spacing:.08em;animation:paiva-rec-blink 1.2s infinite;}
-@keyframes paiva-rec-blink{50%{opacity:.35;}}
-#paiva-multi-camera .paiva-multi-pane[data-state="recording"]{border-color:#d5ac42;}
-#paiva-multi-camera .paiva-multi-pane[data-state="recording"] .paiva-multi-controls button[id*="end-"]{background:#e7c65c;color:#161b1f;border-color:#e7c65c;}
-#paiva-multi-camera .paiva-multi-finish button[id*="delete-"]{background:#26343e;color:#e3edf3;border-color:#71818c;}
-@media(max-width:740px){#paiva-multi-camera[data-mode="quad"] .paiva-multi-grid{grid-template-columns:1fr;}}
-
-/* Controles de câmera discretos, com acesso durante a visualização */
-#paiva-multi-camera .paiva-multi-camera-settings{border:1px solid #506371;border-radius:8px;margin-top:9px;padding:8px 10px;background:#14232d;}
-#paiva-multi-camera .paiva-multi-camera-settings summary{cursor:pointer;color:#e6eef3;font-size:12px;font-weight:750;}
-#paiva-multi-camera .paiva-multi-exposure-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
-#paiva-multi-camera .paiva-multi-exposure-row input{display:block;width:100%;accent-color:#e3c55c;}
-#paiva-multi-camera .paiva-multi-exposure-row output{font-size:10px;color:#d7e5ed;}
-#paiva-multi-camera .paiva-multi-camera-settings small{color:#b8c9d4;font-size:10px;}
-@media(max-width:740px){#paiva-multi-camera .paiva-multi-exposure-row{grid-template-columns:1fr;}}

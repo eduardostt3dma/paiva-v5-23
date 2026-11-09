@@ -1,0 +1,11 @@
+PAIVA Motion Studio Online — atualização experimental V5.84
+
+Base: PAIVA_BACKUP_COMPLETO_ATE_08-11-2026.zip (V5.83).
+Mudança: botão Excluir mídia na Análise 2D.
+Ação: retira foto/vídeo carregado e limpa marcações da análise atual.
+Não apaga arquivos originais nem registros históricos salvos.
+
+ATENÇÃO: pacote não testado no navegador do usuário.
+Faça backup do site atual antes de publicar.
+Para atualizar via GitHub, extraia este ZIP e envie os arquivos do conteúdo da pasta para a raiz do repositório, sem incluir a pasta que contém os arquivos.
+A atualização não é automática. Teste em janela anônima após publicar.

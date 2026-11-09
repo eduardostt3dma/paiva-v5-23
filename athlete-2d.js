@@ -250,6 +250,7 @@
           <div class="paiva-2d-actions">
             <button type="button" id="paiva-2d-undo">Desfazer</button>
             <button type="button" id="paiva-2d-clear">Limpar linhas</button>
+             <button type="button" id="paiva-2d-remove-media" title="Retirar foto ou vídeo desta análise sem apagar o arquivo original">Excluir mídia</button>
             <button type="button" id="paiva-2d-save" class="paiva-2d-save">Salvar imagem marcada</button>
           </div>
           <div class="paiva-2d-webcam">
@@ -3229,6 +3230,46 @@
       updateCameraControls();
       render();
       schedulePhotoSave();
+    });
+    // Exclui somente a mídia carregada na análise atual. Não remove arquivos locais
+    // nem registros históricos salvos pelo usuário.
+    byId('remove-media').addEventListener('click',() => {
+      if (recorder?.state === 'recording') {
+        message('Pare a gravação antes de excluir a mídia.');
+        return;
+      }
+      if (!photoLoaded && !recordedUrl && !cameraStream) {
+        message('Não há foto ou vídeo carregado para excluir.');
+        return;
+      }
+      if (!window.confirm('Retirar a foto ou o vídeo desta análise e limpar as marcações? O arquivo original não será apagado.')) return;
+      stopTracking();
+      stopStream();
+      video.pause();
+      video.srcObject = null;
+      video.removeAttribute('src');
+      video.load();
+      if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+      recordedUrl = null;
+      currentVideoFile = null;
+      photoLoaded = false;
+      stillFromVideo = false;
+      lastFrameFromVideo = false;
+      annotations = []; draft = []; angleSequence = []; full8Sequence = [];
+      activeDrag = null; activeDraw = null; selectedIndex = -1;
+      wheelAnchor = null; lastTrackedGeometry = null;
+      fineTrails.clear(); singlePointTrails.clear(); fineUncertain = []; finePeak = null;
+      byId('file').value = '';
+      byId('video-file').value = '';
+      byId('back-video').hidden = true;
+      originalCtx.clearRect(0,0,original.width,original.height);
+      resetCycleResults();
+      closeDeleteMenu();
+      updateFull8Guide();
+      showVideo(false);
+      render();
+      updateCameraControls();
+      message('Mídia retirada da análise. Arquivo original preservado.');
     });
     byId('clear').addEventListener('click',() => {
       if (annotations.length && !window.confirm('Remover todas as linhas e ângulos desta foto?'))return;
