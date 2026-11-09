@@ -1,0 +1,5 @@
+PAIVA ONLINE V5.85 — Registro Fotográfico na Antropometria
+
+Até 4 fotos JPG/PNG/WEBP com descrição opcional. Fotos incluídas no PDF gerado por pdf-export.js. Fotos mantidas somente na memória da página; não ficam salvas permanentemente e serão perdidas ao recarregar a página. Gere o PDF antes de sair.
+
+Atualização construída sobre o backup completo V5.84 com câmeras restauradas. Arquivos de webcam e logo preservados. Extraia o ZIP e envie o CONTEÚDO para a raiz do GitHub. Teste primeiro as câmeras, depois fotos e PDF. Preserve backup anterior.

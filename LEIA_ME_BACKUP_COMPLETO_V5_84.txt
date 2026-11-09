@@ -1,0 +1,13 @@
+PAIVA MOTION STUDIO ONLINE - BACKUP COMPLETO V5.84
+Montado em 09/11/2026.
+
+Base: PAIVA_BACKUP_COMPLETO_ATE_08-11-2026(1).zip
+Sobreposicao: PAIVA_ONLINE_V5_84_CORRECAO_CAMERAS.zip
+Inclui o projeto completo do backup de 08/11 e os cinco arquivos da correcao:
+index.html, athlete-2d.js, multicam.js, multicam.css, sw.js.
+A atualizacao de Excluir midia esta no athlete-2d.js.
+
+IMPORTANTE: este pacote foi montado a partir dos arquivos locais, nao e uma
+exportacao verificada do estado atual do GitHub. Nao foi testado no navegador
+apos a montagem. Guarde este ZIP como backup e nao substitua o site em
+funcionamento sem testar e conferir a versao.

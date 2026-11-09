@@ -116,6 +116,7 @@
       client: readPairs('reportClient'),
       bike: readPairs('reportBike'),
       body: readPairs('reportBody'),
+      anthroPhotos: globalThis.PAIVA_ANTHRO_PHOTOS?.getPhotos?.() || [],
       sizing,
       proportions: globalThis.PAIVA_PROPORTIONS?.getReport?.() || null,
       bikeProject: globalThis.PAIVA_BIKE_PROJECT?.getReport?.() || null,
@@ -210,6 +211,7 @@
     // A mesma arte do cabeçalho aprovado, preparada exclusivamente para o PDF,
     // sem os botões, a versão ou os créditos de interface.
     const reportCover = await embedImage(pdf, data.reportCover || './paiva-report-cover-v583.png');
+    const anthroPhotos = await Promise.all((data.anthroPhotos || []).slice(0,4).map(async (item) => ({ caption: item.caption || '', img: await embedImage(pdf,item.image) })));
     const left = MARGIN, right = PAGE_W - MARGIN;
     const bottomLimit = 79;
     let page, y;
@@ -462,6 +464,26 @@
     drawPairs('02  Dados da bicicleta', data.bike);
     drawMeasurementGrid('03  Antropometria', data.body);
     drawProportions(data.proportions);
+
+    // Registro fotográfico: até quatro imagens, duas por linha, em páginas do relatório.
+    if (anthroPhotos.some(item=>item.img)) {
+      ensureSpace(185);
+      drawSectionHeading('04A  Registro fotográfico da antropometria');
+      const items=anthroPhotos.filter(item=>item.img);
+      const gap=12, cellW=(CONTENT_W-gap)/2, photoH=166, labelH=34, rowH=photoH+labelH+15;
+      for(let i=0;i<items.length;i+=2){
+        ensureSpace(rowH+12);
+        items.slice(i,i+2).forEach((item,j)=>{
+          const x=left+j*(cellW+gap);
+          page.drawRectangle({x,y:y-rowH,width:cellW,height:rowH,color:C.soft,borderColor:C.line,borderWidth:.6});
+          fittedImage(item.img,x+8,y-photoH-8,cellW-16,photoH-10);
+          const lines=wrapText(item.caption || ('Foto '+(i+j+1)),regular,8.5,cellW-18).slice(0,2);
+          lines.forEach((part,k)=>text(part,x+9,y-photoH-22-k*11,8.5,C.text));
+        });
+        y-=rowH+12;
+      }
+    }
+
 
     if (data.results?.length) {
       ensureSpace(160);
