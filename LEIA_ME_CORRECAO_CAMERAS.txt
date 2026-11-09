@@ -1,0 +1,12 @@
+PAIVA ONLINE - CORRECAO DAS CAMERAS (V5.84)
+
+Este pacote contem SOMENTE os arquivos necessarios para corrigir a regressao observada apos a V5.84.
+- index.html: base V5.83 do backup completo de 08/11 (mantem interface original).
+- athlete-2d.js: V5.84 com botao Excluir midia.
+- multicam.js e multicam.css: backup aprovado das duas webcams.
+- sw.js: cache renovado para carregar os arquivos atualizados.
+
+COMO INSTALAR: extraia o ZIP e envie os 5 arquivos de codigo para a RAIZ do repositorio GitHub, substituindo os nomes iguais.
+O arquivo LEIA_ME pode ser enviado tambem. Nao envie o ZIP fechado.
+IMPORTANTE: correcao baseada em backups; ainda nao testada em navegador real.
+Mantenha backups e teste camera, 2 visores e botao Excluir midia apos publicar.
